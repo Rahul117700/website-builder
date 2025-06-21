@@ -1,0 +1,194 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  sites         Site[]
+  analytics     Analytics[]
+  payments      Payment[]
+}
+
+// NextAuth models
+model Account {
+  id                 String   @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([identifier, token])
+}
+
+// Template enum
+enum TemplateType {
+  general
+  restaurant
+  pharma
+}
+
+// Site model
+model Site {
+  id            String       @id @default(cuid())
+  name          String
+  description   String?
+  subdomain     String       @unique
+  customDomain  String?      @unique
+  template      TemplateType
+  logo          String?
+  favicon       String?
+  userId        String
+  googleAnalyticsId String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  // Relations
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pages         Page[]
+  bookings      Booking[]
+  analytics     Analytics[]
+}
+
+// Page model
+model Page {
+  id            String    @id @default(cuid())
+  title         String
+  slug          String
+  content       Json
+  isPublished   Boolean   @default(false)
+  siteId        String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  site          Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@unique([siteId, slug])
+}
+
+// Booking model (for restaurants)
+model Booking {
+  id            String    @id @default(cuid())
+  name          String
+  email         String
+  phone         String
+  date          DateTime
+  time          String
+  guests        Int
+  message       String?
+  status        String    @default("pending") // pending, confirmed, cancelled
+  siteId        String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  site          Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+}
+
+// Analytics model
+model Analytics {
+  id            String    @id @default(cuid())
+  pageUrl       String
+  visitorId     String?
+  browser       String?
+  os            String?
+  device        String?
+  country       String?
+  city          String?
+  referrer      String?
+  duration      Int?      // in seconds
+  siteId        String
+  userId        String?
+  createdAt     DateTime  @default(now())
+
+  // Relations
+  site          Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+// Payment model
+model Payment {
+  id            String    @id @default(cuid())
+  amount        Float
+  currency      String    @default("INR")
+  status        String    // success, failed, pending
+  paymentId     String?   // Razorpay payment ID
+  orderId       String?   // Razorpay order ID
+  receipt       String?
+  userId        String
+  planId        String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan          Plan      @relation(fields: [planId], references: [id])
+}
+
+// Subscription Plan model
+model Plan {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  price         Float
+  currency      String    @default("INR")
+  interval      String    // monthly, yearly
+  features      String[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  payments      Payment[]
+}
