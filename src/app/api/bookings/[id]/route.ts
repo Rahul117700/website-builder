@@ -76,7 +76,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { status, notes } = await req.json();
+    const { status, message } = await req.json();
 
     // Update the booking
     const updatedBooking = await prisma.booking.update({
@@ -85,7 +85,7 @@ export async function PUT(
       },
       data: {
         status,
-        notes,
+        message,
       },
     });
 

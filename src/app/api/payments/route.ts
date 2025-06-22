@@ -47,7 +47,11 @@ export async function POST(req: NextRequest) {
         amount,
         currency,
         status: 'created',
-        planId,
+        plan: {
+          connect: {
+            id: planId,
+          },
+        },
         user: {
           connect: {
             id: session.user.id,
@@ -121,24 +125,16 @@ export async function PUT(req: NextRequest) {
       });
 
       if (plan) {
-        // Calculate expiry date based on plan duration
+        // Calculate expiry date based on plan interval
         const expiryDate = new Date();
-        if (plan.duration === 'monthly') {
+        if (plan.interval === 'monthly') {
           expiryDate.setMonth(expiryDate.getMonth() + 1);
-        } else if (plan.duration === 'yearly') {
+        } else if (plan.interval === 'yearly') {
           expiryDate.setFullYear(expiryDate.getFullYear() + 1);
         }
 
-        // Update user's subscription
-        await prisma.user.update({
-          where: {
-            id: payment.userId,
-          },
-          data: {
-            planId: plan.id,
-            planExpiryDate: expiryDate,
-          },
-        });
+        // You may want to handle subscription logic here, but User model does not have planId or planExpiryDate fields.
+        // If you want to store subscription info, add those fields to the User model and migrate the database.
       }
     }
 
