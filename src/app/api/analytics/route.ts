@@ -72,26 +72,20 @@ export async function GET(req: NextRequest) {
     });
 
     // Calculate summary statistics
-    const totalPageViews = analytics.reduce(
-      (sum: number, record: any) => sum + record.pageViews,
-      0
-    );
-    const totalVisitors = analytics.reduce(
-      (sum: number, record: any) => sum + record.visitors,
-      0
-    );
+    const totalPageViews = analytics.length; // Each record represents a page view
+    const uniqueVisitors = new Set(analytics.map((record: any) => record.visitorId).filter(Boolean)).size;
 
-    // Group by page path to find popular pages
-    const pageViewsByPath: Record<string, number> = {};
+    // Group by page URL to find popular pages
+    const pageViewsByUrl: Record<string, number> = {};
     analytics.forEach((record: any) => {
-      if (record.path) {
-        pageViewsByPath[record.path] = (pageViewsByPath[record.path] || 0) + record.pageViews;
+      if (record.pageUrl) {
+        pageViewsByUrl[record.pageUrl] = (pageViewsByUrl[record.pageUrl] || 0) + 1;
       }
     });
 
     // Sort pages by views
-    const popularPages = Object.entries(pageViewsByPath)
-      .map(([path, views]) => ({ path, views }))
+    const popularPages = Object.entries(pageViewsByUrl)
+      .map(([url, views]) => ({ path: url, views }))
       .sort((a, b) => b.views - a.views)
       .slice(0, 5);
 
@@ -102,18 +96,25 @@ export async function GET(req: NextRequest) {
         acc[date] = {
           date,
           pageViews: 0,
-          visitors: 0,
+          visitors: new Set(),
         };
       }
-      acc[date].pageViews += record.pageViews;
-      acc[date].visitors += record.visitors;
+      acc[date].pageViews += 1;
+      if (record.visitorId) {
+        acc[date].visitors.add(record.visitorId);
+      }
       return acc;
     }, {});
+
+    // Convert visitors Set to count for each date
+    Object.keys(timeSeriesData).forEach(date => {
+      timeSeriesData[date].visitors = timeSeriesData[date].visitors.size;
+    });
 
     return NextResponse.json({
       summary: {
         totalPageViews,
-        totalVisitors,
+        totalVisitors: uniqueVisitors,
         popularPages,
       },
       timeSeriesData: Object.values(timeSeriesData),
@@ -131,7 +132,7 @@ export async function GET(req: NextRequest) {
 // POST /api/analytics - Record analytics data
 export async function POST(req: NextRequest) {
   try {
-    const { siteId, path, referrer, userAgent, pageViews = 1, visitors = 1 } = await req.json();
+    const { siteId, pageUrl, referrer, userAgent, visitorId, browser, os, device, country, city, duration } = await req.json();
 
     // Validate required fields
     if (!siteId) {
@@ -155,11 +156,15 @@ export async function POST(req: NextRequest) {
     // Create the analytics record
     const analytics = await prisma.analytics.create({
       data: {
-        path,
+        pageUrl,
         referrer,
-        userAgent,
-        pageViews,
-        visitors,
+        visitorId,
+        browser,
+        os,
+        device,
+        country,
+        city,
+        duration,
         site: {
           connect: {
             id: siteId,

@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
         siteId,
       },
       orderBy: {
-        bookingDate: 'desc',
+        date: 'desc',
       },
     });
 
@@ -66,13 +66,14 @@ export async function POST(req: NextRequest) {
       email,
       phone,
       bookingDate,
+      time,
       numberOfPeople,
       message,
       siteId,
     } = await req.json();
 
     // Validate required fields
-    if (!name || !email || !phone || !bookingDate || !numberOfPeople || !siteId) {
+    if (!name || !email || !phone || !bookingDate || !time || !numberOfPeople || !siteId) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -96,8 +97,9 @@ export async function POST(req: NextRequest) {
         name,
         email,
         phone,
-        bookingDate: new Date(bookingDate),
-        numberOfPeople,
+        date: new Date(bookingDate),
+        time,
+        guests: numberOfPeople,
         message,
         status: 'pending',
         site: {
