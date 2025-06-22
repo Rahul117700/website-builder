@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../../../lib/prisma';
 import { authOptions } from '../auth/[...nextauth]/route';
 import crypto from 'crypto';
 import Razorpay from 'razorpay';
-
-const prisma = new PrismaClient();
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
