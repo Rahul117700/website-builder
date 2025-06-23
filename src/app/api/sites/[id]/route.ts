@@ -76,7 +76,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, description, customDomain, googleAnalyticsId } = await req.json();
+    const { name, description, customDomain, googleAnalyticsId, template } = await req.json();
 
     // Update the site
     const updatedSite = await prisma.site.update({
@@ -88,6 +88,7 @@ export async function PUT(
         description,
         customDomain,
         googleAnalyticsId,
+        ...(template !== undefined && { template }),
       },
     });
 

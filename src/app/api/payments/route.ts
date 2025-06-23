@@ -7,8 +7,8 @@ import Razorpay from 'razorpay';
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || '',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || '',
+  key_id: process.env.RAZORPAY_KEY_ID!,
+  key_secret: process.env.RAZORPAY_KEY_SECRET!,
 });
 
 // POST /api/payments/create-order - Create a new payment order
@@ -26,6 +26,12 @@ export async function POST(req: NextRequest) {
     if (!amount || amount <= 0) {
       return NextResponse.json(
         { error: 'Valid amount is required' },
+        { status: 400 }
+      );
+    }
+    if (!planId) {
+      return NextResponse.json(
+        { error: 'Plan ID is required' },
         { status: 400 }
       );
     }
@@ -143,5 +149,25 @@ export async function PUT(req: NextRequest) {
       { error: 'Failed to verify payment' },
       { status: 500 }
     );
+  }
+}
+
+// POST /api/payments - Create a Razorpay order
+export async function POSTRazorpayOrder(req: NextRequest) {
+  try {
+    const { amount, plan } = await req.json();
+    if (!amount || !plan) {
+      return NextResponse.json({ error: 'Missing amount or plan' }, { status: 400 });
+    }
+    const order = await razorpay.orders.create({
+      amount: amount * 100, // amount in paise
+      currency: 'INR',
+      receipt: `receipt_${Date.now()}`,
+      notes: { plan },
+    });
+    return NextResponse.json({ order });
+  } catch (error) {
+    console.error('Error creating Razorpay order:', error);
+    return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
   }
 }

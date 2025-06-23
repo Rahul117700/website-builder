@@ -8,15 +8,20 @@ import {
   PencilIcon, 
   TrashIcon, 
   ChartBarIcon,
-  ArrowTopRightOnSquareIcon
+  ArrowTopRightOnSquareIcon,
+  DocumentDuplicateIcon
 } from '@heroicons/react/24/outline';
 import { Site, TemplateType } from '@/types';
+import toast from 'react-hot-toast';
 
 interface SiteCardProps {
   site: Site;
+  onEdit?: (site: Site) => void;
+  onChangeTemplate?: (site: Site) => void;
+  onDelete?: () => void;
 }
 
-export default function SiteCard({ site }: SiteCardProps) {
+export default function SiteCard({ site, onEdit, onChangeTemplate, onDelete }: SiteCardProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -51,21 +56,28 @@ export default function SiteCard({ site }: SiteCardProps) {
         });
 
         if (response.ok) {
-          router.refresh();
+          toast.success('Website deleted successfully');
+          if (onDelete) onDelete();
         } else {
-          console.error('Failed to delete site');
+          const err = await response.json();
+          toast.error(err.error || 'Failed to delete site');
         }
-      } catch (error) {
-        console.error('Error deleting site:', error);
+      } catch (error: any) {
+        toast.error(error.message || 'Error deleting site');
       } finally {
         setIsDeleting(false);
       }
     }
   };
 
+  const handleAnalytics = () => {
+    router.push(`/auth/dashboard/analytics?siteId=${site.id}`);
+  };
+
+  const BASE_URL = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
   const siteUrl = site.customDomain 
     ? `https://${site.customDomain}` 
-    : `https://${site.subdomain}.example.com`;
+    : `${BASE_URL}/s/${site.subdomain}`;
 
   return (
     <div className="card overflow-hidden flex flex-col">
@@ -88,7 +100,7 @@ export default function SiteCard({ site }: SiteCardProps) {
         <div className="mt-4 space-y-2">
           <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
             <GlobeAltIcon className="h-4 w-4 mr-1 text-gray-400 dark:text-gray-500" />
-            <span className="truncate">{site.customDomain || `${site.subdomain}.example.com`}</span>
+            <span className="truncate">{site.customDomain || `${BASE_URL}/s/${site.subdomain}`}</span>
           </div>
           <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
             <ChartBarIcon className="h-4 w-4 mr-1 text-gray-400 dark:text-gray-500" />
@@ -97,13 +109,13 @@ export default function SiteCard({ site }: SiteCardProps) {
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-2">
-          <Link
-            href={`/auth/dashboard/sites/${site.id}`}
+          <button
+            onClick={() => onEdit && onEdit(site)}
             className="btn-secondary text-sm py-1 flex items-center justify-center"
           >
             <PencilIcon className="h-4 w-4 mr-1" />
             Edit
-          </Link>
+          </button>
           <a
             href={siteUrl}
             target="_blank"
@@ -113,13 +125,26 @@ export default function SiteCard({ site }: SiteCardProps) {
             <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-1" />
             Visit
           </a>
-          <Link
-            href={`/auth/dashboard/sites/${site.id}/analytics`}
+          <button
+            onClick={handleAnalytics}
             className="btn-secondary text-sm py-1 flex items-center justify-center"
           >
             <ChartBarIcon className="h-4 w-4 mr-1" />
             Analytics
+          </button>
+          <Link
+            href={`/auth/dashboard/sites/${site.id}/pages`}
+            className="btn-secondary text-sm py-1 flex items-center justify-center"
+          >
+            <DocumentDuplicateIcon className="h-4 w-4 mr-1" />
+            Manage Pages
           </Link>
+          <button
+            onClick={() => onChangeTemplate && onChangeTemplate(site)}
+            className="btn-secondary text-sm py-1 flex items-center justify-center"
+          >
+            Change Template
+          </button>
           <button
             onClick={handleDelete}
             disabled={isDeleting}
