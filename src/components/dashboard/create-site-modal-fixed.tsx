@@ -23,6 +23,8 @@ export default function CreateSiteModal({ isOpen, onClose, onCreateSite }: Creat
   const [subdomainAvailable, setSubdomainAvailable] = useState(false);
   const [isCheckingSubdomain, setIsCheckingSubdomain] = useState(false);
 
+  const BASE_URL = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
@@ -196,7 +198,7 @@ export default function CreateSiteModal({ isOpen, onClose, onCreateSite }: Creat
                         required
                       />
                       <span className="inline-flex items-center rounded-r-md border border-l-0 border-gray-300 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 px-3 text-gray-500 dark:text-gray-400 sm:text-sm">
-                        .example.com
+                        {`${BASE_URL}/s/${subdomain || 'yoursite'}`}
                       </span>
                     </div>
                     {isCheckingSubdomain && (

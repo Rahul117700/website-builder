@@ -3,8 +3,10 @@ const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
 const slugify = require('slugify');
+const { io, userSockets } = require('../../../server');
 
 const prisma = new PrismaClient();
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
 // Middleware to authenticate user
 const auth = async (req, res, next) => {
@@ -148,7 +150,7 @@ router.post('/', auth, async (req, res) => {
         </ul>
         <h2>Contact Us</h2>
         <p>Phone: (123) 456-7890</p>
-        <p>Email: info@${subdomain.toLowerCase()}.example.com</p>
+        <p>Email: <a href={`${BASE_URL}/s/${subdomain.toLowerCase()}`}>Open your site</a></p>
       `;
     } else if (template === 'restaurant') {
       homePageContent = `
@@ -170,7 +172,7 @@ router.post('/', auth, async (req, res) => {
         <p>Add information about your business or organization here.</p>
         <h2>Contact Us</h2>
         <p>Phone: (123) 456-7890</p>
-        <p>Email: info@${subdomain.toLowerCase()}.example.com</p>
+        <p>Email: <a href={`${BASE_URL}/s/${subdomain.toLowerCase()}`}>Open your site</a></p>
       `;
     }
 
@@ -244,9 +246,10 @@ router.post('/', auth, async (req, res) => {
           <h1>Contact Us</h1>
           <p>We'd love to hear from you. Get in touch with us using the information below.</p>
           <h2>Contact Information</h2>
-          <p>Email: info@${subdomain.toLowerCase()}.example.com</p>
+          <p>Email: <a href={`${BASE_URL}/s/${subdomain.toLowerCase()}`}>Open your site</a></p>
           <p>Phone: (123) 456-7890</p>
           <p>Address: 123 Main Street, City, Country</p>
+          <p>Site URL: <a href={`${BASE_URL}/s/${subdomain.toLowerCase()}`}>{`${BASE_URL}/s/${subdomain.toLowerCase()}`}</a></p>
         `,
         published: true,
         site: {
@@ -271,7 +274,7 @@ router.post('/', auth, async (req, res) => {
  */
 router.put('/:id', auth, async (req, res) => {
   try {
-    const { name, description, customDomain, primaryColor, secondaryColor, googleAnalytics } = req.body;
+    const { name, description, customDomain, primaryColor, secondaryColor, googleAnalytics, template } = req.body;
 
     // Check if site exists and user owns it
     const existingSite = await prisma.site.findUnique({
@@ -312,9 +315,34 @@ router.put('/:id', auth, async (req, res) => {
         customDomain: customDomain !== undefined ? customDomain : existingSite.customDomain,
         primaryColor: primaryColor || existingSite.primaryColor,
         secondaryColor: secondaryColor || existingSite.secondaryColor,
-        googleAnalytics: googleAnalytics !== undefined ? googleAnalytics : existingSite.googleAnalytics
+        googleAnalytics: googleAnalytics !== undefined ? googleAnalytics : existingSite.googleAnalytics,
+        ...(template !== undefined && { template }),
       }
     });
+
+    // Real-time notifications
+    if (template && template !== existingSite.template) {
+      const notification = await prisma.notification.create({
+        data: {
+          userId: existingSite.userId,
+          type: 'template',
+          message: `Template changed to "${template}" for site "${updatedSite.name}"`,
+        }
+      });
+      const socketId = userSockets.get(existingSite.userId);
+      if (socketId) io.to(socketId).emit('notification', notification);
+    }
+    if (customDomain && customDomain !== existingSite.customDomain) {
+      const notification = await prisma.notification.create({
+        data: {
+          userId: existingSite.userId,
+          type: 'domain',
+          message: `Custom domain "${customDomain}" connected to site "${updatedSite.name}"`,
+        }
+      });
+      const socketId = userSockets.get(existingSite.userId);
+      if (socketId) io.to(socketId).emit('notification', notification);
+    }
 
     res.json(updatedSite);
   } catch (error) {

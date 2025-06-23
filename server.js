@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const { PrismaClient } = require('@prisma/client');
 const path = require('path');
+const http = require('http');
+const { Server } = require('socket.io');
 
 // Import routes
 const indexRoutes = require('./src/api/routes/index');
@@ -133,9 +135,39 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+});
+
+// UserId to socket mapping
+const userSockets = new Map();
+
+io.on('connection', (socket) => {
+  // Listen for user identification
+  socket.on('identify', (userId) => {
+    userSockets.set(userId, socket.id);
+    socket.userId = userId;
+  });
+
+  socket.on('disconnect', () => {
+    if (socket.userId) {
+      userSockets.delete(socket.userId);
+    }
+  });
+});
+
+// Export io and userSockets for use in notification logic
+module.exports.io = io;
+module.exports.userSockets = userSockets;
+
 // Start server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log('Socket.IO server running');
 });
 
 // Handle graceful shutdown

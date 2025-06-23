@@ -86,12 +86,16 @@ export async function POST(req: NextRequest) {
     });
 
     // Create default pages based on template
-    const defaultPages = getDefaultPages(template, site.id);
+    let defaultPages = getDefaultPages(template, site.id);
+    // Remove isHomePage property from each page object before createMany
     await prisma.page.createMany({
-      data: defaultPages,
+      data: defaultPages.map(({ isHomePage, ...rest }) => rest),
     });
 
-    return NextResponse.json(site, { status: 201 });
+    // Return the site with a user-accessible URL
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const siteUrl = `${BASE_URL}/s/${site.subdomain}`;
+    return NextResponse.json({ ...site, url: siteUrl }, { status: 201 });
   } catch (error) {
     console.error('Error creating site:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

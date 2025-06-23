@@ -59,7 +59,6 @@ export const authOptions: NextAuthOptions = {
     signOut: '/auth/signout',
     error: '/auth/error',
     verifyRequest: '/auth/verify-request',
-    newUser: '/dashboard',
   },
   callbacks: {
     async session({ session, token, user }) {

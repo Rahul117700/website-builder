@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
+const { io, userSockets } = require('../../../server');
 
 const prisma = new PrismaClient();
 
@@ -148,7 +149,20 @@ router.post('/', async (req, res) => {
       }
     });
 
-    // TODO: Send email notification to site owner
+    // Create a notification for the site owner
+    const notification = await prisma.notification.create({
+      data: {
+        userId: site.userId,
+        type: 'booking',
+        message: `New booking from ${name} on ${site.name}`,
+      }
+    });
+
+    // Emit real-time notification if owner is connected
+    const socketId = userSockets.get(site.userId);
+    if (socketId) {
+      io.to(socketId).emit('notification', notification);
+    }
 
     res.status(201).json(booking);
   } catch (error) {
