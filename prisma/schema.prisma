@@ -20,10 +20,14 @@ model User {
   password      String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  enabled       Boolean   @default(true)
 
   // Email preferences
   marketingEmails Boolean @default(true)
   productEmails   Boolean @default(true)
+
+  // Role for super admin
+  role           UserRole @default(USER)
 
   // Relations
   accounts      Account[]
@@ -33,6 +37,13 @@ model User {
   payments      Payment[]
   notifications Notification[]
   subscriptions Subscription[]
+  activities    Activity[]
+}
+
+// User role enum
+enum UserRole {
+  USER
+  SUPER_ADMIN
 }
 
 // NextAuth models
@@ -201,18 +212,24 @@ model Payment {
 
 // Subscription Plan model
 model Plan {
-  id            String    @id @default(cuid())
-  name          String
-  description   String?
-  price         Float
-  currency      String    @default("INR")
-  interval      String    // monthly, yearly
-  features      String[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  payments      Payment[]        @relation("PlanPayments")
-  subscriptions Subscription[]  @relation("PlanSubscriptions")
+  id                  String   @id @default(cuid())
+  name                String
+  description         String?
+  price               Float
+  currency            String   @default("INR")
+  interval            String   // monthly, yearly
+  numberOfWebsites    Int?
+  unlimitedWebsites   Boolean  @default(false)
+  supportLevel        String?  // "Basic", "Priority", "Dedicated"
+  customDomain        Boolean  @default(false)
+  advancedAnalytics   Boolean  @default(false)
+  customIntegrations  Boolean  @default(false)
+  teamManagement      Boolean  @default(false)
+  communityAccess     Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  payments            Payment[]        @relation("PlanPayments")
+  subscriptions       Subscription[]  @relation("PlanSubscriptions")
 }
 
 model Submission {
@@ -254,4 +271,28 @@ model Subscription {
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan          Plan     @relation("PlanSubscriptions", fields: [planId], references: [id])
   payments      Payment[]
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  type        String   // e.g. 'impersonate', 'user_update', 'site_delete', etc.
+  userId      String   // The admin who performed the action
+  targetId    String?  // The affected user/site/etc.
+  description String
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model FrontendContent {
+  id        String   @id @default(cuid())
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Revenue {
+  id        String   @id @default(cuid())
+  total     Float    @default(0)
+  updatedAt DateTime @updatedAt
 }

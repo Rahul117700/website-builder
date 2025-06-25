@@ -10,7 +10,6 @@ async function main() {
         price: 0,
         currency: 'INR',
         interval: 'month',
-        features: ['1 Website', 'Basic Support', 'Community Access'],
       },
       {
         name: 'Pro',
@@ -18,7 +17,6 @@ async function main() {
         price: 999,
         currency: 'INR',
         interval: 'month',
-        features: ['10 Websites', 'Priority Support', 'Custom Domain', 'Advanced Analytics'],
       },
       {
         name: 'Business',
@@ -26,10 +24,23 @@ async function main() {
         price: 2499,
         currency: 'INR',
         interval: 'month',
-        features: ['Unlimited Websites', 'Dedicated Support', 'Custom Integrations', 'Team Management'],
       },
     ],
     skipDuplicates: true,
+  });
+
+  // Create or update super admin user
+  await prisma.user.upsert({
+    where: { email: 'i.am.rahul4550@gmail.com' },
+    update: { role: 'SUPER_ADMIN' },
+    create: {
+      email: 'i.am.rahul4550@gmail.com',
+      name: 'Super Admin',
+      role: 'SUPER_ADMIN',
+      marketingEmails: false,
+      productEmails: false,
+      password: null,
+    },
   });
 }
 

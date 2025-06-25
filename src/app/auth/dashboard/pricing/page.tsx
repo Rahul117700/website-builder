@@ -116,7 +116,21 @@ export default function PricingPage() {
                 <div className="text-gray-700 dark:text-gray-200">₹{plan.price}/{plan.interval}</div>
                 <div className="text-gray-500 dark:text-gray-400 text-sm mb-2">{plan.description}</div>
                 <ul className="mb-2 text-xs text-gray-600 dark:text-gray-300 list-disc list-inside">
-                  {plan.features.map((f: string) => <li key={f}>{f}</li>)}
+                  {(() => {
+                    const features: string[] = [];
+                    if (plan.unlimitedWebsites) {
+                      features.push('Unlimited Websites');
+                    } else if (plan.numberOfWebsites) {
+                      features.push(`${plan.numberOfWebsites} Website${plan.numberOfWebsites === 1 ? '' : 's'}`);
+                    }
+                    if (plan.supportLevel) features.push(`${plan.supportLevel} Support`);
+                    if (plan.customDomain) features.push('Custom Domain');
+                    if (plan.advancedAnalytics) features.push('Advanced Analytics');
+                    if (plan.customIntegrations) features.push('Custom Integrations');
+                    if (plan.teamManagement) features.push('Team Management');
+                    if (plan.communityAccess) features.push('Community Access');
+                    return features.map(f => <li key={f}>{f}</li>);
+                  })()}
                 </ul>
                 <button className={`w-full py-2 rounded-lg font-semibold shadow ${currentPlan && currentPlan.id === plan.id ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700 text-white transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2'}`} disabled={currentPlan && currentPlan.id === plan.id} onClick={() => handleUpgrade(plan)}> {currentPlan && currentPlan.id === plan.id ? 'Current Plan' : 'Upgrade'} </button>
               </div>

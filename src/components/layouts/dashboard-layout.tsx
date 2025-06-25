@@ -21,7 +21,8 @@ import {
   SparklesIcon,
   InboxArrowDownIcon,
   BellIcon,
-  QuestionMarkCircleIcon
+  QuestionMarkCircleIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import { useTheme } from 'next-themes';
 import { WelcomeModal } from '@/components/dashboard/welcome-modal';
@@ -80,6 +81,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Settings', href: '/auth/dashboard/settings', icon: Cog6ToothIcon, current: pathname === '/auth/dashboard/settings' },
   ];
 
+  // Add Super Admin tab if user is SUPER_ADMIN
+  if (session?.user?.role === 'SUPER_ADMIN') {
+    navigation.unshift({
+      name: 'Super Admin',
+      href: '/auth/dashboard/super-admin',
+      icon: ShieldCheckIcon,
+      current: pathname === '/auth/dashboard/super-admin',
+    });
+  }
+
   const mockActivities = [
     { id: 1, type: 'site', text: 'Created new site "My Portfolio"', time: '2 min ago' },
     { id: 2, type: 'template', text: 'Applied "Agency" template to "My Portfolio"', time: '5 min ago' },
@@ -125,6 +136,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       // Optionally show error
     }
   };
+
+  const currentSub = session?.user?.subscriptions?.find((s: any) => s.status === 'active' || s.status === 'trialing') || (session?.user?.subscriptions && session?.user?.subscriptions[0]);
+  const currentPlanName = currentSub?.plan?.name || 'No Plan';
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
@@ -354,7 +368,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </button>
         </div>
         <main className="flex-1 pb-8">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-10">
+          <div className="mx-auto max-w-5xl px-[20px] py-10">
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 border border-gray-100 dark:border-slate-700">
               {children}
             </div>

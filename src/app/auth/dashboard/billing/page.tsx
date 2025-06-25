@@ -167,7 +167,21 @@ export default function BillingPage() {
                     </button>
                   </div>
                   <ul className="mt-2 text-sm text-gray-600 dark:text-gray-300 list-disc list-inside">
-                    {plan.features.map((f: string) => <li key={f}>{f}</li>)}
+                    {(() => {
+                      const features: string[] = [];
+                      if (plan.unlimitedWebsites) {
+                        features.push('Unlimited Websites');
+                      } else if (plan.numberOfWebsites) {
+                        features.push(`${plan.numberOfWebsites} Website${plan.numberOfWebsites === 1 ? '' : 's'}`);
+                      }
+                      if (plan.supportLevel) features.push(`${plan.supportLevel} Support`);
+                      if (plan.customDomain) features.push('Custom Domain');
+                      if (plan.advancedAnalytics) features.push('Advanced Analytics');
+                      if (plan.customIntegrations) features.push('Custom Integrations');
+                      if (plan.teamManagement) features.push('Team Management');
+                      if (plan.communityAccess) features.push('Community Access');
+                      return features.map(f => <li key={f}>{f}</li>);
+                    })()}
                   </ul>
                 </div>
               ))}

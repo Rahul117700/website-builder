@@ -23,11 +23,27 @@ import {
 import { useSession, signOut } from 'next-auth/react';
 import { useState ,useEffect ,useRef} from 'react';
 import gsap from "gsap";
+import React from 'react';
 
 export default function HomePage() {
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const features = [
+
+  // Dynamic frontend content state
+  const [frontendContent, setFrontendContent] = useState<any>(null);
+  useEffect(() => {
+    fetch('/api/admin/frontend-content')
+      .then(res => res.ok ? res.json() : Promise.reject('Failed'))
+      .then(data => setFrontendContent(data.data || {}))
+      .catch(() => setFrontendContent(null));
+  }, []);
+
+  // Fallbacks if no dynamic content
+  const heroTitle = frontendContent?.heroTitle || 'Everything you need to launch your \nbusiness website';
+  const heroSubtitle = frontendContent?.heroSubtitle || 'Up to 75% off — in minutes\nCutting-edge templates powered by modern tech like Three.js, VR, AR & more';
+  const heroTagline = frontendContent?.heroTagline || 'Investing in the Future of Startups';
+  const heroCTA = frontendContent?.heroCTA || 'Start now';
+  const features = frontendContent?.features || [
     {
       name: 'Multiple Templates',
       description: 'Choose from a variety of professionally designed templates for different industries.',
@@ -59,6 +75,26 @@ export default function HomePage() {
       icon: CreditCardIcon,
     },
   ];
+  const testimonials = frontendContent?.testimonials || [
+    {
+      content: 'This platform made creating a website for my restaurant so easy. I was able to set up online reservations in just a few hours!',
+      author: 'Sarah Johnson',
+      role: 'Restaurant Owner',
+      image: '/testimonials/sarah.jpg',
+    },
+    {
+      content: 'As a small pharmacy owner, I needed a professional website without the hassle. This platform delivered exactly what I needed.',
+      author: 'Dr. Michael Chen',
+      role: 'Pharmacy Owner',
+      image: '/testimonials/michael.jpg',
+    },
+    {
+      content: 'The analytics features have been invaluable for understanding my customers and improving my business.',
+      author: 'Alex Rodriguez',
+      role: 'Marketing Consultant',
+      image: '/testimonials/alex.jpg',
+    },
+  ];
 
   const templates = [
     {
@@ -83,29 +119,6 @@ export default function HomePage() {
       color: 'indigo',
     },
   ];
-
-  const testimonials = [
-    {
-      content: 'This platform made creating a website for my restaurant so easy. I was able to set up online reservations in just a few hours!',
-      author: 'Sarah Johnson',
-      role: 'Restaurant Owner',
-      image: '/testimonials/sarah.jpg',
-    },
-    {
-      content: 'As a small pharmacy owner, I needed a professional website without the hassle. This platform delivered exactly what I needed.',
-      author: 'Dr. Michael Chen',
-      role: 'Pharmacy Owner',
-      image: '/testimonials/michael.jpg',
-    },
-    {
-      content: 'The analytics features have been invaluable for understanding my customers and improving my business.',
-      author: 'Alex Rodriguez',
-      role: 'Marketing Consultant',
-      image: '/testimonials/alex.jpg',
-    },
-  ];
-
-
 
 // GSAAP
  const heroRef = useRef(null);
@@ -356,7 +369,7 @@ export default function HomePage() {
   <div className="bg-white rounded-md overflow-hidden p-2 w-36 text-center">
     <Image src="https://media.licdn.com/dms/image/v2/D5603AQEFgaWqdPsvwg/profile-displayphoto-shrink_800_800/B56ZRjy6ShHoAc-/0/1736841080391?e=1756339200&v=beta&t=t9QVyZfrVP6BAeob4L0NHMdifSZ_HFEdJucIHvnWkPA" width={140} height={140} className="rounded-md" alt="Client" />
     <p className="text-xs font-semibold mt-2 text-black leading-tight">Rahul<br />Founder</p>
-    <p className="text-[10px] text-gray-500 mt-1 italic">“Building tools for modern businesses.”</p>
+    <p className="text-[10px] text-gray-500 mt-1 italic">"Building tools for modern businesses."</p>
     <p className="text-[10px] text-green-600 mt-1 font-medium">🚀 250+ websites created</p>
   </div>
 </div>
@@ -366,11 +379,10 @@ export default function HomePage() {
     {/* Right Content */}
     <div className="max-w-xl text-left">
       <h1 ref={titleRef} className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
-      Everything you need to launch your <br/> business website <br/> 
+      {heroTitle}
       </h1>
       <p className="mt-4 text-lg text-gray-700">
-        <span className="font-medium text-purple-600">Up to 75% off</span>  — in minutes
-        Cutting-edge templates powered by modern tech like Three.js, VR, AR & more
+        {heroSubtitle}
       </p>
 
       <ul className="mt-6 space-y-2 text-gray-600">
@@ -389,13 +401,13 @@ export default function HomePage() {
       <div className="mt-6">
 
        
-        <p className="text-3xl font-extrabold text-gray-900"> 🔥 Starting from just ₹199/month <span className="text-sm font-normal">— includes website, dashboard, analytics & more</span></p>
+        <p className="text-3xl font-extrabold text-gray-900"> 🔥 {heroCTA} <span className="text-sm font-normal">— includes website, dashboard, analytics & more</span></p>
         {/* <p className="text-green-600 font-medium mt-1">+2 months free</p> */}
       </div>
 
       <div className="mt-6 flex gap-4 flex-wrap">
         <Link href="/auth/signup" className="bg-purple-600 text-white px-6 py-3 rounded-md font-semibold text-base shadow-md hover:bg-purple-700">
-          Start now
+          {heroCTA}
         </Link>
         <div className="bg-purple-100 text-purple-700 px-4 py-3 rounded-md font-mono text-sm">
           01 : 01 : 50 : 54
@@ -420,14 +432,15 @@ export default function HomePage() {
     </div>
 
     <div className="mt-16 grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-      {features.map((feature) => (
+      {features.map((feature: any, idx: number) => (
         <div
-          key={feature.name}
+          key={feature.name + idx}
           className="bg-[#f5f5ff] rounded-xl shadow-lg p-6 border border-gray-200 hover:shadow-xl transition"
         >
           <div className="flex items-start gap-4">
             <div className="bg-purple-100 p-3 rounded-lg">
-              <feature.icon className="h-6 w-6 text-purple-600" aria-hidden="true" />
+              {(feature.icon ? feature.icon : CubeIcon) &&
+                React.createElement(feature.icon ? feature.icon : CubeIcon, { className: "h-6 w-6 text-purple-600", "aria-hidden": "true" })}
             </div>
             <div>
               <h3 className="text-xl font-semibold text-gray-900">
@@ -513,7 +526,6 @@ export default function HomePage() {
 
 
 {/* Testimonials Section */}
-{/* Testimonials Section */}
 <section className="py-24 bg-white dark:bg-slate-900">
   <div className="w-full px-6 lg:px-20">
     <div className="text-left max-w-3xl mx-auto">
@@ -525,11 +537,11 @@ export default function HomePage() {
       </p>
     </div>
     <div className="mt-16 grid gap-8 md:grid-cols-3">
-      {testimonials.map((testimonial, index) => (
+      {testimonials.map((testimonial: any, index: number) => (
         <div key={index} className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-slate-700">
           <div className="flex items-center mb-4">
             <div className="h-12 w-12 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center">
-              <span className="text-gray-500 dark:text-gray-400 text-xs">{testimonial.author.charAt(0)}</span>
+              <span className="text-gray-500 dark:text-gray-400 text-xs">{testimonial.author?.charAt(0)}</span>
             </div>
             <div className="ml-4">
               <h4 className="text-lg font-medium text-gray-900 dark:text-white">{testimonial.author}</h4>
