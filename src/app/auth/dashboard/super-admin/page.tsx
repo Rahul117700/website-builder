@@ -1,0 +1,725 @@
+"use client";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import DashboardLayout from '@/components/layouts/dashboard-layout';
+import toast from 'react-hot-toast';
+
+function Badge({ children, color = "gray" }: { children: React.ReactNode; color?: string }) {
+  const colorMap: any = {
+    gray: "bg-gray-100 text-gray-800",
+    green: "bg-green-100 text-green-800",
+    red: "bg-red-100 text-red-800",
+    blue: "bg-blue-100 text-blue-800",
+    purple: "bg-purple-100 text-purple-800",
+    yellow: "bg-yellow-100 text-yellow-800",
+  };
+  return <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${colorMap[color] || colorMap.gray}`}>{children}</span>;
+}
+
+// Helper to fetch all payments
+async function fetchAllPayments() {
+  const res = await fetch('/api/admin/payments');
+  if (!res.ok) return [];
+  return await res.json();
+}
+
+// Helper to retry fetch with delay
+async function retryFetch(url: string, retries = 2, delay = 500) {
+  for (let i = 0; i < retries; i++) {
+    const res = await fetch(url);
+    if (res.ok) return res;
+    await new Promise(r => setTimeout(r, delay));
+  }
+  return await fetch(url); // final try
+}
+
+export default function SuperAdminDashboard() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [users, setUsers] = useState<any[]>([]);
+  const [sites, setSites] = useState<any[]>([]);
+  const [plans, setPlans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [modalMode, setModalMode] = useState<'add'|'edit'>("add");
+  const [userForm, setUserForm] = useState<any>({ name: '', email: '', role: 'USER', enabled: true, planId: '' });
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [saving, setSaving] = useState(false);
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [planForm, setPlanForm] = useState<any>({ name: '', price: '', duration: '', features: '', interval: 'monthly' });
+  const [planMode, setPlanMode] = useState<'add'|'edit'>('add');
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
+  const [actionError, setActionError] = useState("");
+  const [actionSuccess, setActionSuccess] = useState("");
+  const [planToDelete, setPlanToDelete] = useState<any>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalRevenue: 0,
+    mrr: 0,
+    arr: 0,
+  });
+
+  // Plan features structure
+  const defaultFeatureState = {
+    websites: '',
+    unlimitedWebsites: false,
+    support: '',
+    customDomain: false,
+    advancedAnalytics: false,
+    customIntegrations: false,
+    teamManagement: false,
+    communityAccess: false,
+  };
+  const [featureForm, setFeatureForm] = useState<any>({ ...defaultFeatureState });
+
+  // Frontend content state
+  const [frontendContent, setFrontendContent] = useState<any>(null);
+  const [frontendLoading, setFrontendLoading] = useState(false);
+  const [frontendSaving, setFrontendSaving] = useState(false);
+
+  const [planChangeLoading, setPlanChangeLoading] = useState<string | null>(null);
+
+  const fetchAll = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const [users, sites, plans, userCountRes, revenueRes] = await Promise.all([
+        fetch("/api/admin/users").then(r => r.ok ? r.json() : Promise.reject("Failed to fetch users")),
+        fetch("/api/admin/sites").then(r => r.ok ? r.json() : Promise.reject("Failed to fetch sites")),
+        fetch("/api/plans").then(r => r.ok ? r.json() : Promise.reject("Failed to fetch plans")),
+        fetch("/api/admin/users?count=1").then(r => r.ok ? r.json() : { total: 0 }),
+        fetch("/api/admin/revenue").then(r => r.ok ? r.json() : { total: 0 }),
+      ]);
+      setUsers(users);
+      setSites(sites);
+      setPlans(Array.isArray(plans) ? plans : plans.plans || []);
+      setStats({
+        totalUsers: userCountRes.total || 0,
+        totalRevenue: revenueRes.total || 0,
+        mrr: 0,
+        arr: 0,
+      });
+    } catch (err) {
+      setError(typeof err === "string" ? err : "Failed to load data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch frontend content
+  const fetchFrontendContent = async () => {
+    setFrontendLoading(true);
+    try {
+      const res = await fetch('/api/admin/frontend-content');
+      const data = await res.json();
+      setFrontendContent(data.data || {});
+    } catch (err) {
+      toast.error('Failed to load frontend content');
+    } finally {
+      setFrontendLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (status === "authenticated" && session?.user?.role === "SUPER_ADMIN") {
+      fetchAll();
+      fetchFrontendContent();
+    }
+    // eslint-disable-next-line
+  }, [status, session]);
+
+  const handleSaveUser = async () => {
+    setSaving(true);
+    setActionError("");
+    try {
+      if (!userForm.name || !userForm.email) {
+        setActionError("Name and Email are required.");
+        setSaving(false);
+        return;
+      }
+      const method = modalMode === 'add' ? 'POST' : 'PATCH';
+      const url = modalMode === 'add' ? '/api/admin/users' : `/api/admin/users/${selectedUser?.id}`;
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userForm),
+      });
+      if (!res.ok) throw new Error('Failed to save user');
+      setShowUserModal(false);
+      setUserForm({ name: '', email: '', role: 'USER', enabled: true, planId: '' });
+      setSelectedUser(null);
+      const updatedUser = await res.json();
+      if (modalMode === 'add') {
+        // Refetch all for add (to get subscriptions/plans)
+        await fetchAll();
+        toast.success('User added successfully!');
+      } else {
+        setUsers(prev => prev.map(u => u.id === selectedUser.id ? { ...u, ...userForm } : u));
+        toast.success('User updated successfully!');
+      }
+    } catch (err) {
+      setActionError('Failed to save user');
+      toast.error('Failed to save user');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleToggleUser = async (user: any) => {
+    setActionError("");
+    try {
+      const res = await fetch(`/api/admin/users/${user.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: !user.enabled }),
+      });
+      if (!res.ok) throw new Error('Failed to update user');
+      setUsers(prev => prev.map(u => u.id === user.id ? { ...u, enabled: !user.enabled } : u));
+      toast.success(user.enabled ? 'User disabled.' : 'User enabled.');
+    } catch (err) {
+      setActionError('Failed to update user');
+      toast.error('Failed to update user');
+    }
+  };
+
+  const handleChangeUserPlan = async (user: any, planId: string) => {
+    setActionError("");
+    setPlanChangeLoading(user.id);
+    try {
+      const res = await fetch(`/api/admin/users/${user.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId }),
+      });
+  
+      if (!res.ok) throw new Error('Failed to update user plan');
+      
+      // Wait a bit for backend to update
+      await new Promise(res => setTimeout(res, 500));
+  
+      // Refetch both user and subscriptions for this user, with retry
+      const [userRes] = await Promise.all([
+        retryFetch(`/api/admin/users/${user.id}`),
+        // retryFetch(`/api/admin/users/${user.id}/subscriptions`),
+      ]);
+  
+      if (!userRes.ok ) throw new Error('Failed to refetch user or subscriptions');
+  
+      const updatedUser = await userRes.json();
+      // const updatedSubs = await subsRes.json();
+  
+      setUsers(prev => prev.map(u => u.id === user.id ? updatedUser : u));
+  
+      toast.success('User plan updated.');
+      setActionSuccess('User plan updated successfully');  // Set actionSuccess state here
+    } catch (err) {
+      setActionError('Failed to update user plan');
+      toast.error('Failed to update user plan');
+    } finally {
+      setPlanChangeLoading(null);
+    }
+  };
+  
+  const handleDeleteUser = async (user: any) => {
+    setActionError("");
+    toast((t) => (
+      <span>
+        Are you sure you want to delete user <b>{user.email}</b>?<br/>
+        <button
+          className="mt-2 mr-2 px-3 py-1 bg-red-600 text-white rounded"
+          onClick={async () => {
+            toast.dismiss(t.id);
+            try {
+              const res = await fetch(`/api/admin/users/${user.id}`, { method: 'DELETE' });
+              if (!res.ok) throw new Error('Failed to delete user');
+              setUsers(prev => prev.filter(u => u.id !== user.id));
+              toast.success('User deleted.');
+            } catch (err) {
+              toast.error('Failed to delete user');
+            }
+          }}
+        >Yes, Delete</button>
+        <button
+          className="mt-2 px-3 py-1 bg-gray-200 text-gray-700 rounded"
+          onClick={() => toast.dismiss(t.id)}
+        >Cancel</button>
+      </span>
+    ), { duration: 10000 });
+  };
+
+  const openAddUser = () => {
+    setModalMode('add');
+    setUserForm({ name: '', email: '', role: 'USER', enabled: true, planId: '' });
+    setSelectedUser(null);
+    setShowUserModal(true);
+    setActionError("");
+  };
+  const openEditUser = (user: any) => {
+    const activeSub = user.subscriptions?.find((s: any) => s.status === 'active');
+    const currentPlanId = activeSub?.planId || '';
+    setModalMode('edit');
+    setUserForm({ name: user.name, email: user.email, role: user.role, enabled: user.enabled, planId: currentPlanId });
+    setSelectedUser(user);
+    setShowUserModal(true);
+    setActionError("");
+  };
+
+  const openAddPlan = () => {
+    setPlanMode('add');
+    setPlanForm({ name: '', price: '', features: '', interval: 'monthly' });
+    setFeatureForm({ ...defaultFeatureState });
+    setSelectedPlan(null);
+    setShowPlanModal(true);
+  };
+  const openEditPlan = (plan: any) => {
+    setPlanMode('edit');
+    setPlanForm({ name: plan.name, price: plan.price, features: '', interval: plan.interval || 'monthly' });
+    setFeatureForm({
+      websites: plan.unlimitedWebsites ? '' : (plan.numberOfWebsites ? String(plan.numberOfWebsites) : ''),
+      unlimitedWebsites: Boolean(plan.unlimitedWebsites),
+      support: plan.supportLevel || '',
+      customDomain: Boolean(plan.customDomain),
+      advancedAnalytics: Boolean(plan.advancedAnalytics),
+      customIntegrations: Boolean(plan.customIntegrations),
+      teamManagement: Boolean(plan.teamManagement),
+      communityAccess: Boolean(plan.communityAccess),
+    });
+    setSelectedPlan(plan);
+    setShowPlanModal(true);
+  };
+  const handleSavePlan = async () => {
+    setSaving(true);
+    setActionError("");
+    try {
+      if (!planForm.name || planForm.price === '' || planForm.price === null || planForm.price === undefined || !planForm.interval) {
+        setActionError("Name, Price, and Interval are required.");
+        setSaving(false);
+        return;
+      }
+      const method = planMode === 'add' ? 'POST' : 'PATCH';
+      const url = planMode === 'add' ? '/api/plans' : `/api/plans/${selectedPlan?.id}`;
+      const body = {
+        ...planForm,
+        numberOfWebsites: featureForm.unlimitedWebsites ? null : (featureForm.websites ? Number(featureForm.websites) : null),
+        unlimitedWebsites: Boolean(featureForm.unlimitedWebsites),
+        supportLevel: featureForm.support || null,
+        customDomain: Boolean(featureForm.customDomain),
+        advancedAnalytics: Boolean(featureForm.advancedAnalytics),
+        customIntegrations: Boolean(featureForm.customIntegrations),
+        teamManagement: Boolean(featureForm.teamManagement),
+        communityAccess: Boolean(featureForm.communityAccess),
+        interval: planForm.interval,
+      };
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error('Failed to save plan');
+      setShowPlanModal(false);
+      setPlanForm({ name: '', price: '', features: '', interval: 'monthly' });
+      setFeatureForm({ ...defaultFeatureState });
+      setSelectedPlan(null);
+      const updatedPlan = await res.json();
+      if (planMode === 'add') {
+        // Refetch all for add
+        await fetchAll();
+        toast.success('Plan added successfully!');
+      } else {
+        setPlans(prev => prev.map(p => p.id === selectedPlan.id ? { ...p, ...planForm, ...body } : p));
+        toast.success('Plan updated successfully!');
+      }
+    } catch (err) {
+      setActionError('Failed to save plan');
+      toast.error('Failed to save plan');
+    } finally {
+      setSaving(false);
+    }
+  };
+  const handleDeletePlan = (plan: any) => {
+    setPlanToDelete(plan);
+  };
+
+  const confirmDeletePlan = async () => {
+    if (!planToDelete) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/plans/${planToDelete.id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to delete plan');
+      }
+      setPlans(prev => prev.filter(p => p.id !== planToDelete.id));
+      toast.success('Plan deleted.');
+      setPlanToDelete(null);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete plan');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // Handlers for editing frontend content
+  const handleFrontendChange = (section: string, value: any) => {
+    setFrontendContent((prev: any) => ({ ...prev, [section]: value }));
+  };
+
+  const handleSaveFrontendContent = async () => {
+    setFrontendSaving(true);
+    try {
+      const res = await fetch('/api/admin/frontend-content', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(frontendContent),
+      });
+      if (!res.ok) throw new Error('Failed to save');
+      toast.success('Frontend content updated!');
+      fetchFrontendContent();
+    } catch (err) {
+      toast.error('Failed to save frontend content');
+    } finally {
+      setFrontendSaving(false);
+    }
+  };
+
+  if (status === 'loading') {
+    return (
+      <DashboardLayout>
+        <div className="py-10 text-center text-gray-500 bg-white min-h-screen w-full">Loading...</div>
+      </DashboardLayout>
+    );
+  }
+  if (status === 'authenticated' && (!session?.user || session.user.role !== 'SUPER_ADMIN')) {
+    return (
+      <DashboardLayout>
+        <div className="py-10 text-center text-red-500 bg-white min-h-screen w-full">Access Denied: You do not have permission to view this page.</div>
+      </DashboardLayout>
+    );
+  }
+
+  return (
+    <DashboardLayout>
+      {/* Super Admin Stats Summary */}
+      <div className="w-full max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 mb-8">
+        <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-blue-100 flex flex-col items-center">
+          <div className="text-3xl font-bold text-blue-700 mb-2">{stats.totalUsers}</div>
+          <div className="text-lg text-gray-700">Total Users</div>
+        </div>
+        <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-green-100 flex flex-col items-center">
+          <div className="text-3xl font-bold text-green-700 mb-2">₹{stats.totalRevenue.toLocaleString()}</div>
+          <div className="text-lg text-gray-700">Total Revenue</div>
+        </div>
+      </div>
+      <div className="w-full px-4 py-4">
+        <div className="min-h-screen w-full bg-gradient-to-br from-purple-200 via-white to-blue-100 font-sans">
+          <div className="w-full ml-auto mr-auto py-10">
+            <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-blue-500 to-green-400 mb-12 tracking-tight drop-shadow-lg text-center">Super Admin Panel</h1>
+            {loading ? (
+              <div className="text-gray-700">Loading data...</div>
+            ) : error ? (
+              <div className="text-red-600">{error}</div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div className="bg-white rounded-3xl shadow-2xl p-10 flex flex-col relative border-2 border-purple-200 hover:shadow-purple-200/50 transition-shadow duration-300">
+                  <div className="flex items-center justify-between mb-8">
+                    <h2 className="text-3xl font-bold text-purple-700 flex items-center gap-2"><span className="inline-block w-3 h-3 bg-purple-400 rounded-full animate-pulse"></span> All Users</h2>
+                    <button
+                      onClick={openAddUser}
+                      className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-bold px-6 py-2 rounded-full shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                      style={{ boxShadow: '0 4px 16px 0 rgba(139,92,246,0.10)' }}
+                      aria-label="Add User"
+                    >
+                      + Add User
+                    </button>
+                  </div>
+                  {actionError && <div className="text-red-600 mb-2">{actionError}</div>}
+                  {actionSuccess && <div className="text-green-600 mb-2">{actionSuccess}</div>}
+                  <div className="overflow-x-auto rounded-xl border border-gray-100">
+                    <table className="min-w-full bg-white rounded-xl overflow-hidden">
+                      <thead className="bg-gradient-to-r from-purple-50 to-blue-50">
+                        <tr>
+                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Name</th>
+                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Email</th>
+                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Role</th>
+                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Enabled</th>
+                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Plan</th>
+                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {users.length === 0 ? (
+                          <tr><td colSpan={6} className="text-center py-6 text-gray-700">No users found.</td></tr>
+                        ) : users.map((user: any) => {
+                          const activeSub = user.subscriptions?.find((s: any) => s.status === 'active');
+                          const currentPlanId = activeSub?.planId || '';
+                          return (
+                            <tr key={user.id} className="hover:bg-purple-50 transition-all group">
+                              <td className="px-4 py-2 border-b text-gray-900 font-medium">{user.name}</td>
+                              <td className="px-4 py-2 border-b text-gray-700">{user.email}</td>
+                              <td className="px-4 py-2 border-b">
+                                <Badge color={user.role === 'SUPER_ADMIN' ? 'purple' : 'blue'}>{user.role}</Badge>
+                              </td>
+                              <td className="px-4 py-2 border-b">
+                                <Badge color={user.enabled ? 'green' : 'red'}>{user.enabled ? 'Enabled' : 'Disabled'}</Badge>
+                                <button
+                                  className={`ml-2 w-10 h-6 rounded-full relative focus:outline-none border-2 border-gray-200 ${user.enabled ? 'bg-green-400' : 'bg-gray-300'} transition-all`}
+                                  onClick={() => handleToggleUser(user)}
+                                  aria-label="Toggle user enabled"
+                                >
+                                  <span className={`absolute left-1 top-1 w-4 h-4 rounded-full transition-transform duration-200 ${user.enabled ? 'bg-white translate-x-4' : 'bg-white translate-x-0'}`}></span>
+                                </button>
+                              </td>
+                              <td className="px-4 py-2 border-b">
+                                <span className="block mb-1 text-sm text-gray-800 font-semibold">{activeSub?.plan?.name || 'No Plan'}</span>
+                                <select
+                                  className="border rounded px-2 py-1 text-black bg-white focus:ring-2 focus:ring-purple-400"
+                                  value={currentPlanId}
+                                  onChange={e => handleChangeUserPlan(user, e.target.value)}
+                                  disabled={planChangeLoading === user.id}
+                                >
+                                  <option value="">No Plan</option>
+                                  {plans.map((plan: any) => (
+                                    <option key={plan.id} value={plan.id}>{plan.name}</option>
+                                  ))}
+                                </select>
+                              </td>
+                              <td className="px-4 py-2 border-b flex gap-2">
+                                <button onClick={() => openEditUser(user)} className="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded transition-all">Edit</button>
+                                <button onClick={() => router.push(`/auth/dashboard/super-admin/user/${user.id}`)} className="text-purple-600 hover:bg-purple-50 px-2 py-1 rounded transition-all">View</button>
+                                <button onClick={() => handleDeleteUser(user)} className="text-red-600 hover:bg-red-50 px-2 py-1 rounded transition-all">Delete</button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div className="bg-white rounded-3xl shadow-2xl p-10 flex flex-col border-2 border-blue-200 hover:shadow-blue-200/50 transition-shadow duration-300">
+                  <h2 className="text-3xl font-bold text-blue-700 mb-8 flex items-center gap-2"><span className="inline-block w-3 h-3 bg-blue-400 rounded-full animate-pulse"></span> All Sites</h2>
+                  <div className="overflow-x-auto rounded-xl border border-gray-100">
+                    <table className="min-w-full bg-white rounded-xl overflow-hidden">
+                      <thead className="bg-gradient-to-r from-blue-50 to-purple-50">
+                        <tr>
+                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Name</th>
+                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Subdomain</th>
+                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Owner</th>
+                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Domain</th>
+                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Domain Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sites.length === 0 ? (
+                          <tr><td colSpan={5} className="text-center py-6 text-gray-700">No sites found.</td></tr>
+                        ) : sites.map((site: any) => (
+                          <tr key={site.id} className="hover:bg-blue-50 transition-all group">
+                            <td className="px-4 py-2 border-b text-gray-900 font-medium">{site.name}</td>
+                            <td className="px-4 py-2 border-b text-gray-700">{site.subdomain}</td>
+                            <td className="px-4 py-2 border-b text-gray-700">{site.user?.email || '-'}</td>
+                            <td className="px-4 py-2 border-b text-gray-700">{site.customDomain || '-'}</td>
+                            <td className="px-4 py-2 border-b">
+                              {/* Domain Status logic: Connected, Not Connected, Pending DNS (future) */}
+                              {site.customDomain
+                                ? (
+                                    // Placeholder for DNS verification logic
+                                    // e.g., if (site.domainVerified) ...
+                                    <Badge color="green">Connected</Badge>
+                                  )
+                                : <Badge color="gray">Not Connected</Badge>
+                              }
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div className="bg-white rounded-3xl shadow-2xl p-10 flex flex-col border-2 border-green-200 hover:shadow-green-200/50 transition-shadow duration-300 md:col-span-2">
+                  <div className="flex items-center justify-between mb-8">
+                    <h2 className="text-3xl font-bold text-green-700 flex items-center gap-2"><span className="inline-block w-3 h-3 bg-green-400 rounded-full animate-pulse"></span> Manage Plans</h2>
+                    <button onClick={openAddPlan} className="bg-gradient-to-r from-green-400 to-blue-400 hover:from-green-500 hover:to-blue-500 text-white font-bold px-6 py-2 rounded-full shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400">+ Add Plan</button>
+                  </div>
+                  {actionError && <div className="text-red-600 mb-2">{actionError}</div>}
+                  {actionSuccess && <div className="text-green-600 mb-2">{actionSuccess}</div>}
+                  <div className="overflow-x-auto rounded-xl border border-gray-100">
+                    <table className="min-w-full bg-white rounded-xl overflow-hidden">
+                      <thead className="bg-gradient-to-r from-green-50 to-blue-50">
+                        <tr>
+                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Name</th>
+                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Price</th>
+                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Interval</th>
+                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Features</th>
+                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {plans.length === 0 ? (
+                          <tr><td colSpan={5} className="text-center py-6 text-gray-700">No plans found.</td></tr>
+                        ) : plans.map((plan: any) => {
+                          const features: string[] = [];
+                          if (plan.unlimitedWebsites) {
+                            features.push('Unlimited Websites');
+                          } else if (plan.numberOfWebsites) {
+                            features.push(`${plan.numberOfWebsites} Website${plan.numberOfWebsites === 1 ? '' : 's'}`);
+                          }
+                          if (plan.supportLevel) features.push(`${plan.supportLevel} Support`);
+                          if (plan.customDomain) features.push('Custom Domain');
+                          if (plan.advancedAnalytics) features.push('Advanced Analytics');
+                          if (plan.customIntegrations) features.push('Custom Integrations');
+                          if (plan.teamManagement) features.push('Team Management');
+                          if (plan.communityAccess) features.push('Community Access');
+                          return (
+                            <tr key={plan.id} className="hover:bg-green-50 transition-all group">
+                              <td className="px-4 py-2 border-b text-gray-900 font-medium">{plan.name}</td>
+                              <td className="px-4 py-2 border-b text-gray-700">{plan.price}</td>
+                              <td className="px-4 py-2 border-b text-gray-700 capitalize">{plan.interval}</td>
+                              <td className="px-4 py-2 border-b text-gray-700">{features.join(', ')}</td>
+                              <td className="px-4 py-2 border-b flex gap-2">
+                                <button onClick={() => openEditPlan(plan)} className="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded transition-all">Edit</button>
+                                <button onClick={() => handleDeletePlan(plan)} className="text-red-600 hover:bg-red-50 px-2 py-1 rounded transition-all">Delete</button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {showUserModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+              <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative border-2 border-purple-200 animate-fadeIn">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">{modalMode === 'add' ? 'Add User' : 'Edit User'}</h2>
+                {actionError && <div className="text-red-600 mb-2">{actionError}</div>}
+                <form onSubmit={e => { e.preventDefault(); handleSaveUser(); }}>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 mb-1">Name</label>
+                    <input type="text" className="w-full border rounded px-3 py-2 text-black placeholder-black bg-purple-50 focus:ring-2 focus:ring-purple-400" placeholder="Enter name" value={userForm.name} onChange={e => setUserForm({ ...userForm, name: e.target.value })} required />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 mb-1">Email</label>
+                    <input type="email" className="w-full border rounded px-3 py-2 text-black placeholder-black bg-purple-50 focus:ring-2 focus:ring-purple-400" placeholder="Enter email" value={userForm.email} onChange={e => setUserForm({ ...userForm, email: e.target.value })} required />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 mb-1">Role</label>
+                    <select className="w-full border rounded px-3 py-2 text-black bg-purple-50 focus:ring-2 focus:ring-purple-400" value={userForm.role} onChange={e => setUserForm({ ...userForm, role: e.target.value })}>
+                      <option value="USER">User</option>
+                      <option value="SUPER_ADMIN">Super Admin</option>
+                    </select>
+                  </div>
+                  <div className="mb-4 flex items-center gap-2">
+                    <label className="block text-gray-700 mb-1">Enabled</label>
+                    <button
+                      type="button"
+                      className={`w-12 h-6 rounded-full relative focus:outline-none border-2 border-gray-200 ${userForm.enabled ? 'bg-green-400' : 'bg-gray-300'} transition-all`}
+                      onClick={() => setUserForm({ ...userForm, enabled: !userForm.enabled })}
+                      aria-label="Toggle enabled"
+                    >
+                      <span className={`absolute left-1 top-1 w-4 h-4 rounded-full transition-transform duration-200 ${userForm.enabled ? 'bg-white translate-x-4' : 'bg-white translate-x-0'}`}></span>
+                    </button>
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 mb-1">Plan</label>
+                    <select className="w-full border rounded px-3 py-2 text-black bg-purple-50 focus:ring-2 focus:ring-purple-400" value={userForm.planId || ''} onChange={e => setUserForm({ ...userForm, planId: e.target.value })}>
+                      <option value="">No Plan</option>
+                      {plans.map((plan: any) => (
+                        <option key={plan.id} value={plan.id}>{plan.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex justify-end gap-2 mt-6">
+                    <button type="button" onClick={() => setShowUserModal(false)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Cancel</button>
+                    <button type="submit" className="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded hover:from-purple-600 hover:to-blue-600 font-bold shadow" disabled={saving}>{saving ? 'Saving...' : 'Save'}</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+          {showPlanModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+              <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative border-2 border-green-200 animate-fadeIn">
+                <h2 className="text-2xl font-bold text-black mb-4">{planMode === 'add' ? 'Add Plan' : 'Edit Plan'}</h2>
+                {actionError && <div className="text-red-600 mb-2">{actionError}</div>}
+                <form onSubmit={e => { e.preventDefault(); handleSavePlan(); }}>
+                  <div className="mb-4">
+                    <label className="block text-black mb-1">Name</label>
+                    <input type="text" className="w-full border rounded px-3 py-2 text-black placeholder-black bg-green-50 focus:ring-2 focus:ring-green-400" placeholder="Enter plan name" value={planForm.name} onChange={e => setPlanForm({ ...planForm, name: e.target.value })} required />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-black mb-1">Price</label>
+                    <input type="number" className="w-full border rounded px-3 py-2 text-black placeholder-black bg-green-50 focus:ring-2 focus:ring-green-400" placeholder="Enter price" value={planForm.price} onChange={e => setPlanForm({ ...planForm, price: e.target.value })} required />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-black mb-1">Interval</label>
+                    <select className="w-full border rounded px-3 py-2 text-black bg-green-50 focus:ring-2 focus:ring-green-400" value={planForm.interval} onChange={e => setPlanForm({ ...planForm, interval: e.target.value })} required>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-black mb-1">Number of Websites</label>
+                    <div className="flex items-center gap-2">
+                      <input type="number" min="1" className="w-24 border rounded px-3 py-2 text-black bg-green-50 focus:ring-2 focus:ring-green-400" placeholder="e.g. 1" value={featureForm.websites} onChange={e => setFeatureForm({ ...featureForm, websites: e.target.value, unlimitedWebsites: false })} disabled={featureForm.unlimitedWebsites} />
+                      <label className="flex items-center gap-1 text-black">
+                        <input type="checkbox" checked={featureForm.unlimitedWebsites} onChange={e => setFeatureForm({ ...featureForm, unlimitedWebsites: e.target.checked, websites: '' })} /> Unlimited
+                      </label>
+                    </div>
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-black mb-1">Support Level</label>
+                    <select className="w-full border rounded px-3 py-2 text-black bg-green-50 focus:ring-2 focus:ring-green-400" value={featureForm.support} onChange={e => setFeatureForm({ ...featureForm, support: e.target.value })}>
+                      <option value="">Select</option>
+                      <option value="Basic">Basic</option>
+                      <option value="Priority">Priority</option>
+                      <option value="Dedicated">Dedicated</option>
+                    </select>
+                  </div>
+                  <div className="mb-4 grid grid-cols-2 gap-2">
+                    <label className="flex items-center gap-2 text-black">
+                      <input type="checkbox" checked={featureForm.customDomain} onChange={e => setFeatureForm({ ...featureForm, customDomain: e.target.checked })} /> Custom Domain
+                    </label>
+                    <label className="flex items-center gap-2 text-black">
+                      <input type="checkbox" checked={featureForm.advancedAnalytics} onChange={e => setFeatureForm({ ...featureForm, advancedAnalytics: e.target.checked })} /> Advanced Analytics
+                    </label>
+                    <label className="flex items-center gap-2 text-black">
+                      <input type="checkbox" checked={featureForm.customIntegrations} onChange={e => setFeatureForm({ ...featureForm, customIntegrations: e.target.checked })} /> Custom Integrations
+                    </label>
+                    <label className="flex items-center gap-2 text-black">
+                      <input type="checkbox" checked={featureForm.teamManagement} onChange={e => setFeatureForm({ ...featureForm, teamManagement: e.target.checked })} /> Team Management
+                    </label>
+                    <label className="flex items-center gap-2 text-black">
+                      <input type="checkbox" checked={featureForm.communityAccess} onChange={e => setFeatureForm({ ...featureForm, communityAccess: e.target.checked })} /> Community Access
+                    </label>
+                  </div>
+                  <div className="flex justify-end gap-2 mt-6">
+                    <button type="button" onClick={() => setShowPlanModal(false)} className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300">Cancel</button>
+                    <button type="submit" className="px-4 py-2 bg-gradient-to-r from-green-400 to-blue-400 text-white rounded hover:from-green-500 hover:to-blue-500 font-bold shadow" disabled={saving}>{saving ? 'Saving...' : 'Save'}</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+          {planToDelete && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+              <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative border-2 border-red-200 animate-fadeIn">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Delete Plan</h2>
+                <div className="mb-4 text-gray-800">Are you sure you want to delete the plan <b>{planToDelete.name}</b>? This action cannot be undone.</div>
+                <div className="flex justify-end gap-2 mt-6">
+                  <button type="button" onClick={() => setPlanToDelete(null)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Cancel</button>
+                  <button type="button" onClick={confirmDeletePlan} className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-700 text-white rounded font-bold shadow" disabled={deleting}>{deleting ? 'Deleting...' : 'Delete'}</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+} 

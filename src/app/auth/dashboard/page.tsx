@@ -40,49 +40,49 @@ export default function DashboardPage() {
 
   const refreshSitesAndStats = async () => {
     setIsLoading(true);
-    try {
-      const response = await fetch('/api/sites');
-      if (response.ok) {
-        const data = await response.json();
+        try {
+          const response = await fetch('/api/sites');
+          if (response.ok) {
+            const data = await response.json();
         const sitesArr = Array.isArray(data) ? data : data.sites;
         setSites(sitesArr);
-        // Fetch stats for each site in parallel
+            // Fetch stats for each site in parallel
         const statsPromises = sitesArr.map(async (site: Site) => {
-          const [analyticsRes, bookingsRes, submissionsRes, notificationsRes] = await Promise.all([
-            fetch(`/api/analytics?siteId=${site.id}`),
-            fetch(`/api/bookings?siteId=${site.id}`),
-            fetch(`/api/submissions?siteId=${site.id}`),
+              const [analyticsRes, bookingsRes, submissionsRes, notificationsRes] = await Promise.all([
+                fetch(`/api/analytics?siteId=${site.id}`),
+                fetch(`/api/bookings?siteId=${site.id}`),
+                fetch(`/api/submissions?siteId=${site.id}`),
             fetch(`/api/notifications`),
-          ]);
-          const analytics = analyticsRes.ok ? await analyticsRes.json() : null;
-          const bookings = bookingsRes.ok ? await bookingsRes.json() : [];
-          const submissions = submissionsRes.ok ? await submissionsRes.json() : [];
-          const notifications = notificationsRes.ok ? await notificationsRes.json() : [];
-          const siteNotifications = Array.isArray(notifications)
-            ? notifications.filter((n: any) => n.read === false && n.message.includes(site.name))
-            : [];
-          return {
-            siteId: site.id,
+              ]);
+              const analytics = analyticsRes.ok ? await analyticsRes.json() : null;
+              const bookings = bookingsRes.ok ? await bookingsRes.json() : [];
+              const submissions = submissionsRes.ok ? await submissionsRes.json() : [];
+              const notifications = notificationsRes.ok ? await notificationsRes.json() : [];
+              const siteNotifications = Array.isArray(notifications)
+                ? notifications.filter((n: any) => n.read === false && n.message.includes(site.name))
+                : [];
+              return {
+                siteId: site.id,
             pageViews: analytics?.summary?.totalPageViews || 0,
-            bookings: bookings.length,
-            submissions: submissions.length,
-            unreadNotifications: siteNotifications.length,
-          };
-        });
-        const statsArr = await Promise.all(statsPromises);
-        const statsObj: Record<string, any> = {};
-        statsArr.forEach((stat) => {
-          statsObj[stat.siteId] = stat;
-        });
-        setSiteStats(statsObj);
-      } else {
-        toast.error('Failed to fetch sites');
-      }
-    } catch (error) {
-      toast.error('Error fetching sites');
-    } finally {
-      setIsLoading(false);
-    }
+                bookings: bookings.length,
+                submissions: submissions.length,
+                unreadNotifications: siteNotifications.length,
+              };
+            });
+            const statsArr = await Promise.all(statsPromises);
+            const statsObj: Record<string, any> = {};
+            statsArr.forEach((stat) => {
+              statsObj[stat.siteId] = stat;
+            });
+            setSiteStats(statsObj);
+          } else {
+            toast.error('Failed to fetch sites');
+          }
+        } catch (error) {
+          toast.error('Error fetching sites');
+        } finally {
+          setIsLoading(false);
+        }
   };
 
   useEffect(() => {

@@ -117,28 +117,50 @@ export async function PUT(req: NextRequest) {
         paymentId: razorpay_payment_id,
         updatedAt: new Date(),
       },
+      include: { user: true, plan: true },
     });
 
-    // If payment is for a subscription plan, update user's subscription
-    if (payment.planId) {
-      // Get plan details
-      const plan = await prisma.plan.findUnique({
-        where: {
-          id: payment.planId,
+    // If payment is for a subscription plan, create a new subscription for the user
+    if (payment.planId && payment.userId) {
+      // Cancel any existing active subscriptions for this user and plan
+      await prisma.subscription.updateMany({
+        where: { userId: payment.userId, planId: payment.planId, status: 'active' },
+        data: { status: 'cancelled' },
+      });
+      // Calculate subscription dates
+      const now = new Date();
+      let endDate;
+      const interval = payment.plan.interval;
+      if (interval === 'monthly' || interval === 'month') {
+        endDate = new Date(now);
+        endDate.setMonth(endDate.getMonth() + 1);
+      } else if (interval === 'yearly' || interval === 'year') {
+        endDate = new Date(now);
+        endDate.setFullYear(endDate.getFullYear() + 1);
+      } else {
+        endDate = new Date(now);
+      }
+      const renewalDate = new Date(endDate);
+      // Create new subscription
+      await prisma.subscription.create({
+        data: {
+          userId: payment.userId,
+          planId: payment.planId,
+          status: 'active',
+          startDate: now,
+          endDate,
+          renewalDate,
         },
       });
-
-      if (plan) {
-        // Calculate expiry date based on plan interval
-        const expiryDate = new Date();
-        if (plan.interval === 'monthly') {
-          expiryDate.setMonth(expiryDate.getMonth() + 1);
-        } else if (plan.interval === 'yearly') {
-          expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-        }
-
-        // You may want to handle subscription logic here, but User model does not have planId or planExpiryDate fields.
-        // If you want to store subscription info, add those fields to the User model and migrate the database.
+      // Increment Revenue table
+      const revenueRows = await prisma.revenue.findMany();
+      if (revenueRows.length === 0) {
+        await prisma.revenue.create({ data: { total: payment.amount } });
+      } else {
+        await prisma.revenue.update({
+          where: { id: revenueRows[0].id },
+          data: { total: { increment: payment.amount } },
+        });
       }
     }
 
