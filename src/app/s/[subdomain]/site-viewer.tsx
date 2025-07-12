@@ -1,7 +1,7 @@
 "use client";
-import Link from 'next/link';
-import { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { Site, Page } from '@/types/prisma';
+import { LiveProvider, LivePreview } from 'react-live';
 
 interface SiteViewerProps {
   site: Site & { pages: Page[] };
@@ -32,6 +32,29 @@ export default function SiteViewer({ site, currentSlug }: SiteViewerProps) {
     return <div className="text-center text-gray-500">No pages found for this site.</div>;
   }
 
+  // Combine custom code if available
+  if (currentPage.renderMode === 'react' && currentPage.reactCode) {
+    // Render React (JSX) code using react-live
+    return (
+      <div style={{ minHeight: '100vh', background: 'white' }}>
+        <LiveProvider code={currentPage.reactCode} noInline={false} scope={{ React: require('react') }}>
+          <ErrorBoundary>
+            <LivePreview />
+          </ErrorBoundary>
+        </LiveProvider>
+      </div>
+    );
+  } else if (currentPage.renderMode === 'html' && (currentPage.htmlCode || currentPage.cssCode || currentPage.jsCode)) {
+    const customDoc = `<!DOCTYPE html><html><head><style>${currentPage.cssCode || ''}</style></head><body>${currentPage.htmlCode || ''}<script>${currentPage.jsCode || ''}</script></body></html>`;
+    return (
+      <iframe
+        srcDoc={customDoc}
+        style={{ width: '100vw', height: '100vh', border: 'none', margin: 0, padding: 0, display: 'block' }}
+        title="Live Site Preview"
+      />
+    );
+  }
+
   return (
     <main className="min-h-screen bg-white dark:bg-slate-900 text-gray-900 dark:text-white p-8">
       <div className="max-w-2xl mx-auto">
@@ -54,5 +77,18 @@ export default function SiteViewer({ site, currentSlug }: SiteViewerProps) {
         </section>
       </div>
     </main>
+  );
+}
+
+// ErrorBoundary for JSX rendering
+function ErrorBoundary({ children }: { children: React.ReactNode }) {
+  const [error, setError] = useState<Error | null>(null);
+  if (error) {
+    return <div style={{ color: 'red', padding: 32 }}>Error rendering page: {error.message}</div>;
+  }
+  return (
+    <React.Suspense fallback={<div>Loading...</div>}>
+      {children}
+    </React.Suspense>
   );
 } 

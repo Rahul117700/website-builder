@@ -81,8 +81,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Settings', href: '/auth/dashboard/settings', icon: Cog6ToothIcon, current: pathname === '/auth/dashboard/settings' },
   ];
 
-  // Add Super Admin tab if user is SUPER_ADMIN
-  if (session?.user?.role === 'SUPER_ADMIN') {
+  // Add Super Admin tab if user is SUPER_ADMIN or has the special email
+  if (session?.user?.role === 'SUPER_ADMIN' || session?.user?.email === 'i.am.rahul4550@gmail.com') {
     navigation.unshift({
       name: 'Super Admin',
       href: '/auth/dashboard/super-admin',
@@ -368,8 +368,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </button>
         </div>
         <main className="flex-1 pb-8">
-          <div className="mx-auto max-w-5xl px-[20px] py-10">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 border border-gray-100 dark:border-slate-700">
+          <div className="px-[20px] py-10 w-full">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 border border-gray-100 dark:border-slate-700 w-full">
               {children}
             </div>
           </div>

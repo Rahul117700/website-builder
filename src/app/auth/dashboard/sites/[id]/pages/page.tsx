@@ -6,6 +6,7 @@ import DashboardLayout from "@/components/layouts/dashboard-layout";
 import AddPageModal from '@/components/dashboard/add-page-modal';
 import EditPageModal from '@/components/dashboard/edit-page-modal';
 import Link from 'next/link';
+import { CodeBracketIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 export default function SitePages() {
   const router = useRouter();
@@ -187,7 +188,18 @@ export default function SitePages() {
               <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-100 dark:divide-slate-700">
                 {pages.map(page => (
                   <tr key={page.id}>
-                    <td className="px-4 py-2 text-gray-900 dark:text-white">{page.title}</td>
+                    <td className="px-4 py-2 text-gray-900 dark:text-white flex items-center gap-2">
+                      {page.title}
+                      {page.renderMode === 'react' ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-600 text-white text-xs font-semibold">
+                          <SparklesIcon className="h-4 w-4" /> React (JSX)
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-600 text-white text-xs font-semibold">
+                          <CodeBracketIcon className="h-4 w-4" /> HTML/CSS/JS
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-2 text-gray-600 dark:text-gray-300">{page.slug}</td>
                     <td className="px-4 py-2">
                       <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${page.isPublished ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}`}>

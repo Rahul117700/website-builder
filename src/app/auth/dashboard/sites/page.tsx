@@ -34,7 +34,19 @@ export default function WebsitesPage() {
         },
       });
       if (!res.ok) throw new Error('Failed to fetch sites');
-      const data = await res.json();
+      let data = await res.json();
+      // For each site, fetch its main page and attach renderMode
+      data = await Promise.all(data.map(async (site: any) => {
+        try {
+          const pagesRes = await fetch(`/api/pages?siteId=${site.id}`);
+          if (!pagesRes.ok) return { ...site, mainPageRenderMode: undefined };
+          const pages = await pagesRes.json();
+          const mainPage = pages[0];
+          return { ...site, mainPageRenderMode: mainPage?.renderMode || 'html' };
+        } catch {
+          return { ...site, mainPageRenderMode: undefined };
+        }
+      }));
       setSites(data);
     } catch (err: any) {
       toast.error(err.message || 'Error fetching sites');
@@ -164,10 +176,11 @@ export default function WebsitesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sites.map((site) => (
+            {sites.map((site: Site) => (
               <SiteCard
                 key={site.id}
                 site={site}
+                mainPageRenderMode={site.mainPageRenderMode}
                 onEdit={(s) => {
                   setEditingSite(s);
                   setEditModalOpen(true);

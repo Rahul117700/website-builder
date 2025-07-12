@@ -34,6 +34,10 @@ export interface Page {
   siteId: string;
   createdAt: string;
   updatedAt: string;
+  htmlCode?: string;
+  cssCode?: string;
+  jsCode?: string;
+  renderMode?: string;
 }
 
 export interface Booking {

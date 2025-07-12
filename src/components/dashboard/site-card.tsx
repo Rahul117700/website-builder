@@ -9,19 +9,22 @@ import {
   TrashIcon, 
   ChartBarIcon,
   ArrowTopRightOnSquareIcon,
-  DocumentDuplicateIcon
+  DocumentDuplicateIcon,
+  CodeBracketIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 import { Site, TemplateType } from '@/types';
 import toast from 'react-hot-toast';
 
 interface SiteCardProps {
   site: Site;
+  mainPageRenderMode?: string;
   onEdit?: (site: Site) => void;
   onChangeTemplate?: (site: Site) => void;
   onDelete?: () => void;
 }
 
-export default function SiteCard({ site, onEdit, onChangeTemplate, onDelete }: SiteCardProps) {
+export default function SiteCard({ site, mainPageRenderMode, onEdit, onChangeTemplate, onDelete }: SiteCardProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -85,7 +88,18 @@ export default function SiteCard({ site, onEdit, onChangeTemplate, onDelete }: S
       <div className="p-6 flex-1 flex flex-col">
         <div className="flex items-start justify-between">
           <div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">{site.name}</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
+              {site.name}
+              {/* {mainPageRenderMode === 'react' ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-600 text-white text-xs font-semibold">
+                  <SparklesIcon className="h-4 w-4" /> React (JSX)
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-600 text-white text-xs font-semibold">
+                  <CodeBracketIcon className="h-4 w-4" /> HTML/CSS/JS
+                </span>
+              )} */}
+            </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {getTemplateLabel(site.template)} Template
             </p>
