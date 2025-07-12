@@ -24,6 +24,11 @@ export interface Page {
   siteId: string;
   createdAt: Date;
   updatedAt: Date;
+  htmlCode?: string;
+  cssCode?: string;
+  jsCode?: string;
+  renderMode?: string;
+  reactCode?: string;
 }
 
 export interface Booking {

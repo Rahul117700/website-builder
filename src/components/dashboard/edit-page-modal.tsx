@@ -8,13 +8,12 @@ interface EditPageModalProps {
   isOpen: boolean;
   onClose: () => void;
   page: Page | null;
-  onEditPage: (data: { id: string; title: string; slug: string; content: string; isPublished: boolean }) => Promise<void>;
+  onEditPage: (data: { id: string; title: string; slug: string; isPublished: boolean }) => Promise<void>;
 }
 
 export default function EditPageModal({ isOpen, onClose, page, onEditPage }: EditPageModalProps) {
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
-  const [content, setContent] = useState("");
   const [isPublished, setIsPublished] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -22,7 +21,6 @@ export default function EditPageModal({ isOpen, onClose, page, onEditPage }: Edi
     if (isOpen && page) {
       setTitle(page.title || "");
       setSlug(page.slug || "");
-      setContent(page.content || "");
       setIsPublished(!!page.isPublished);
     }
   }, [isOpen, page]);
@@ -31,7 +29,7 @@ export default function EditPageModal({ isOpen, onClose, page, onEditPage }: Edi
     e.preventDefault();
     if (!page) return;
     setIsSubmitting(true);
-    await onEditPage({ id: page.id, title, slug, content, isPublished });
+    await onEditPage({ id: page.id, title, slug, isPublished });
     setIsSubmitting(false);
     onClose();
   };
@@ -108,19 +106,6 @@ export default function EditPageModal({ isOpen, onClose, page, onEditPage }: Edi
                       onChange={e => setSlug(e.target.value.replace(/[^a-z0-9-]/g, '').toLowerCase())}
                       className="input-field mt-1"
                       placeholder="page-slug"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="content" className="label">Content</label>
-                    <textarea
-                      id="content"
-                      name="content"
-                      value={content}
-                      onChange={e => setContent(e.target.value)}
-                      className="input-field mt-1"
-                      rows={4}
-                      placeholder="Page content..."
                       required
                     />
                   </div>
