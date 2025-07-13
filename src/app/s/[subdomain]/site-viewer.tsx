@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import type { Site, Page } from '@/types/prisma';
 import { LiveProvider, LivePreview } from 'react-live';
+import { SandpackProvider, SandpackPreview, SandpackConsole } from '@codesandbox/sandpack-react';
+import Link from 'next/link';
 
 interface SiteViewerProps {
   site: Site & { pages: Page[] };
@@ -33,16 +35,26 @@ export default function SiteViewer({ site, currentSlug }: SiteViewerProps) {
   }
 
   // Combine custom code if available
-  if (currentPage.renderMode === 'react' && currentPage.reactCode) {
-    // Render React (JSX) code using react-live
+  if (currentPage.renderMode === 'react' && currentPage.reactBundle) {
+    // Render the bundled React app in an iframe
+    const html = `<!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset='UTF-8' />
+          <title>Live React Site</title>
+          <style>body { margin: 0; background: #fff; }</style>
+        </head>
+        <body>
+          <div id='root'></div>
+          <script>${currentPage.reactBundle}</script>
+        </body>
+      </html>`;
     return (
-      <div style={{ minHeight: '100vh', background: 'white' }}>
-        <LiveProvider code={currentPage.reactCode} noInline={false} scope={{ React: require('react') }}>
-          <ErrorBoundary>
-            <LivePreview />
-          </ErrorBoundary>
-        </LiveProvider>
-      </div>
+      <iframe
+        srcDoc={html}
+        style={{ width: '100vw', height: '100vh', border: 'none', margin: 0, padding: 0, display: 'block' }}
+        title="Live React Site"
+      />
     );
   } else if (currentPage.renderMode === 'html' && (currentPage.htmlCode || currentPage.cssCode || currentPage.jsCode)) {
     const customDoc = `<!DOCTYPE html><html><head><style>${currentPage.cssCode || ''}</style></head><body>${currentPage.htmlCode || ''}<script>${currentPage.jsCode || ''}</script></body></html>`;

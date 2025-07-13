@@ -135,8 +135,9 @@ model Page {
   htmlCode      String?   // User HTML code
   cssCode       String?   // User CSS code
   jsCode        String?   // User JS code
-  reactCode    String?   // User React (JSX) code
-  renderMode   String    @default("html") // 'html' or 'react'
+  reactCode     Json?     // User React (JSX) code, now supports multi-file (object with filenames as keys)
+  renderMode    String    @default("html") // 'html' or 'react'
+  reactBundle   String?   // Bundled React JS for iframe rendering
 
   // Relations
   site          Site      @relation(fields: [siteId], references: [id], onDelete: Cascade)

@@ -29,6 +29,7 @@ export interface Page {
   jsCode?: string;
   renderMode?: string;
   reactCode?: string;
+  reactBundle?: string;
 }
 
 export interface Booking {

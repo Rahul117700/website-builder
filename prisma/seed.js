@@ -51,4 +51,13 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
-  }); 
+  });
+
+async function clearReactCode() {
+  await prisma.page.updateMany({
+    data: { reactCode: null },
+  });
+  console.log('All reactCode values set to null.');
+}
+
+clearReactCode().finally(() => prisma.$disconnect()); 
