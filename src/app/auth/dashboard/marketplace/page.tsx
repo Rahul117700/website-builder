@@ -2,54 +2,40 @@
 import DashboardLayout from '@/components/layouts/dashboard-layout';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import toast, { Toaster } from 'react-hot-toast';
 
-const templates = [
-  {
-    id: 'general',
-    name: 'General Business',
-    description: 'A clean, modern template for any business or portfolio.',
-    image: '/public/images/template-general.png',
-    isPremium: false,
-  },
-  {
-    id: 'restaurant',
-    name: 'Restaurant',
-    description: 'A mouth-watering template for restaurants, cafes, and food businesses.',
-    image: '/public/images/template-restaurant.png',
-    isPremium: false,
-  },
-  {
-    id: 'pharma',
-    name: 'Pharmacy',
-    description: 'A professional template for pharmacies, clinics, and healthcare.',
-    image: '/public/images/template-pharma.png',
-    isPremium: false,
-  },
-  {
-    id: 'portfolio',
-    name: 'Portfolio',
-    description: 'A stylish template for designers, artists, and freelancers.',
-    image: '/public/images/template-portfolio.png',
-    isPremium: true,
-  },
-  {
-    id: 'agency',
-    name: 'Agency',
-    description: 'A modern template for creative agencies and startups.',
-    image: '/public/images/template-agency.png',
-    isPremium: true,
-  },
-  {
-    id: 'blog',
-    name: 'Blog',
-    description: 'A clean template for bloggers and content creators.',
-    image: '/public/images/template-blog.png',
-    isPremium: false,
-  },
-  // Add more as needed
+const DEVICE_OPTIONS = [
+  { label: 'Mobile', value: 'mobile', width: 375, height: 640 },
+  { label: 'Tablet', value: 'tablet', width: 768, height: 900 },
+  { label: 'Desktop', value: 'desktop', width: 1200, height: 900 },
+];
+
+function DeviceDropdown({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <select
+      className="rounded border px-2 py-1 text-sm bg-white text-gray-700 focus:ring-2 focus:ring-purple-300"
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      style={{ minWidth: 90 }}
+    >
+      {DEVICE_OPTIONS.map(opt => (
+        <option key={opt.value} value={opt.value}>{opt.label}</option>
+      ))}
+    </select>
+  );
+}
+
+const MODAL_DEVICE_OPTIONS = [
+  { label: 'Mobile', value: 'mobile', width: 375, height: 640 },
+  { label: 'Tablet', value: 'tablet', width: 768, height: 900 },
+  { label: 'Desktop', value: 'desktop', width: 1200, height: 900 },
 ];
 
 export default function MarketplacePage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [templates, setTemplates] = useState<any[]>([]);
   const [previewTpl, setPreviewTpl] = useState<any | null>(null);
   const [useTpl, setUseTpl] = useState<any | null>(null);
   const [selectedSite, setSelectedSite] = useState('');
@@ -59,8 +45,21 @@ export default function MarketplacePage() {
   const [sitesLoading, setSitesLoading] = useState(false);
   const [sitesError, setSitesError] = useState<string | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
+  // Per-card device state
+  const [cardDevices, setCardDevices] = useState<{ [id: string]: string }>({});
   // Placeholder: Assume user is not premium
   const isPremiumUser = false;
+  const [modalDevice, setModalDevice] = useState('desktop');
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
+  const [buyingId, setBuyingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoadingTemplates(true);
+    fetch('/api/templates/super-admin')
+      .then(res => res.json())
+      .then(setTemplates)
+      .finally(() => setLoadingTemplates(false));
+  }, []);
 
   // Fetch real sites when the Use Template modal opens
   useEffect(() => {
@@ -79,6 +78,15 @@ export default function MarketplacePage() {
         .finally(() => setSitesLoading(false));
     }
   }, [useTpl]);
+
+  useEffect(() => {
+    if (!searchParams) return;
+    const templateId = searchParams.get('template');
+    if (templateId) {
+      const tpl = templates.find(t => t.id === templateId);
+      if (tpl) setUseTpl(tpl);
+    }
+  }, [searchParams]);
 
   async function handleUseTemplate() {
     if (!selectedSite || !useTpl) return;
@@ -116,6 +124,105 @@ export default function MarketplacePage() {
     }
   }
 
+  const handleDeviceChange = (id: string, device: string) => {
+    setCardDevices(prev => ({ ...prev, [id]: device }));
+  };
+
+  const handleBuyTemplate = async (tpl: any) => {
+    try {
+      if (tpl.price === 0) {
+        // Directly add to user's My Templates (call backend endpoint)
+        const res = await fetch('/api/templates/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: tpl.name,
+            category: tpl.category,
+            description: tpl.description,
+            html: tpl.html,
+            css: tpl.css,
+            js: tpl.js,
+            preview: tpl.preview,
+          }),
+        });
+        let data = null;
+        try {
+          data = await res.json();
+        } catch {
+          data = null;
+        }
+        if (res.ok && data) {
+          toast.success('Template added to My Templates!');
+          // Optionally refresh user's templates here if you have a callback
+        } else {
+          toast.error((data && data.error) || 'Error');
+        }
+        return;
+      }
+      setBuyingId(tpl.id);
+      // Step 1: Create payment order for template
+      const res = await fetch('/api/payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: tpl.price, templateId: tpl.id }),
+      });
+      const data = await res.json();
+      if (!data.id) { toast.error(data.error || 'Error'); setBuyingId(null); return; }
+      // Load Razorpay script if needed
+      if (!window.Razorpay) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.onload = resolve;
+          script.onerror = reject;
+          document.body.appendChild(script);
+        });
+      }
+      const options = {
+        key: data.key,
+        amount: data.amount,
+        currency: data.currency,
+        name: tpl.name,
+        description: tpl.description,
+        image: tpl.preview,
+        order_id: data.id,
+        handler: async function (response: any) {
+          // Step 2: Verify payment
+          const verifyRes = await fetch('/api/payments', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              paymentId: data.paymentId,
+            }),
+          });
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            toast.success('Template purchased!');
+          } else {
+            toast.error(verifyData.error || 'Payment failed');
+          }
+          setBuyingId(null);
+        },
+        prefill: {},
+        theme: { color: '#7c3aed' },
+        modal: {
+          ondismiss: function () {
+            setBuyingId(null);
+          }
+        },
+      };
+      // @ts-ignore
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err: any) {
+      toast.error(err.message || 'Payment failed');
+      setBuyingId(null);
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="mb-6">
@@ -124,41 +231,118 @@ export default function MarketplacePage() {
           Browse and use beautiful website templates for your business.
         </p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {templates.map((tpl) => (
-          <div key={tpl.id} className="bg-white dark:bg-slate-800 rounded-lg shadow p-4 flex flex-col">
-            <div className="relative h-40 w-full mb-4 rounded overflow-hidden bg-gray-100 dark:bg-slate-700">
-              <Image
-                src={tpl.image}
-                alt={tpl.name}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 33vw"
-                priority={tpl.id === 'general'}
-              />
-            </div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">{tpl.name}</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 flex-1">{tpl.description}</p>
-            <div className="flex gap-2 mt-auto">
-              <button className="px-4 py-2 rounded bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-200 font-semibold text-sm hover:bg-gray-300 dark:hover:bg-slate-600" onClick={() => setPreviewTpl(tpl)}>Preview</button>
-              <button className="px-4 py-2 rounded bg-purple-600 text-white font-semibold text-sm shadow hover:bg-purple-700" onClick={() => setUseTpl(tpl)}>Use Template</button>
-              {tpl.isPremium && <span className="ml-2 px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-700">Premium</span>}
-            </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+        {loadingTemplates ? (
+          <div className="col-span-3 flex justify-center items-center py-20">
+            <span className="animate-spin h-8 w-8 border-4 border-purple-400 border-t-transparent rounded-full inline-block mr-2"></span>
+            <span className="text-gray-500 text-lg">Loading templates...</span>
           </div>
-        ))}
+        ) : templates.map((tpl) => {
+          // Card preview always uses fixed height, desktop width
+          const previewStyle = {
+            width: '100%',
+            height: 320,
+            border: 'none',
+            background: '#fff',
+            borderRadius: 16,
+            boxShadow: '0 2px 12px 0 rgba(80,80,120,0.08)',
+            overflow: 'hidden',
+            display: 'block',
+          };
+          return (
+            <div key={tpl.id} className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-7 flex flex-col border border-gray-100 hover:shadow-2xl transition-all mb-10 max-w-md mx-auto">
+              <div className="flex items-center justify-between mb-4">
+                <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700 tracking-wide shadow-sm">{tpl.category}</span>
+                <span className="inline-block px-2 py-0.5 rounded text-xs font-bold bg-green-100 text-green-700 ml-2">₹{tpl.price}</span>
+              </div>
+              <div className="mb-6 flex justify-center w-full">
+                {tpl.preview ? (
+                  <img
+                    src={tpl.preview}
+                    alt={tpl.name + ' preview'}
+                    className="w-full h-56 object-cover rounded-2xl border border-gray-200 bg-gray-50"
+                    style={{ maxHeight: 220, minHeight: 180 }}
+                  />
+                ) : (
+                  <div className="w-full h-56 flex items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 text-gray-400 text-lg">
+                    No Preview Image
+                  </div>
+                )}
+              </div>
+              <div className="font-extrabold text-xl text-gray-900 dark:text-white leading-tight mb-2">{tpl.name}</div>
+              <div className="text-sm text-gray-500 mb-6">{tpl.description}</div>
+              <div className="flex gap-2 w-full mt-auto">
+                <button className="w-1/2 px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-bold text-base border border-gray-300 hover:bg-gray-200 transition" onClick={() => { setPreviewTpl(tpl); setModalDevice('desktop'); }}>
+                  Preview
+                </button>
+                <button
+                  className="w-1/2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 text-white font-bold text-base shadow hover:from-purple-700 hover:to-blue-600 transition flex items-center justify-center"
+                  onClick={() => handleBuyTemplate(tpl)}
+                  disabled={buyingId === tpl.id}
+                >
+                  {buyingId === tpl.id ? (
+                    <span className="flex items-center"><span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full inline-block mr-2"></span>Processing...</span>
+                  ) : 'Buy'}
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
       {/* Preview Modal */}
       {previewTpl && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-lg p-6 w-full max-w-lg">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{previewTpl.name}</h2>
-            <div className="relative w-full h-56 mb-4 rounded overflow-hidden bg-gray-100 dark:bg-slate-700">
-              <Image src={previewTpl.image} alt={previewTpl.name} fill className="object-cover" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="relative bg-gradient-to-br from-white via-slate-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-purple-900 rounded-3xl shadow-2xl p-0 w-full max-w-5xl flex flex-col items-center border border-gray-200 max-h-[98vh] overflow-hidden no-scrollbar" style={{ maxWidth: 'calc(100vw - 32px)' }}>
+            {/* Close Button */}
+            <button
+              className="absolute top-5 right-5 z-20 text-gray-400 hover:text-purple-600 dark:hover:text-purple-300 bg-gray-100 dark:bg-slate-800 rounded-full p-2 shadow-md transition duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-purple-300"
+              onClick={() => setPreviewTpl(null)}
+              aria-label="Close preview"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            {/* Header */}
+            <div className="sticky top-0 z-10 w-full flex flex-col md:flex-row items-center justify-between gap-4 px-8 pt-8 pb-4 bg-white/80 dark:bg-slate-900/80 rounded-t-3xl backdrop-blur-md border-b border-gray-100 dark:border-slate-800">
+              <div className="flex flex-col items-center md:items-start gap-1">
+                <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-0 tracking-tight">{previewTpl.name}</h2>
+                <div className="flex gap-2 items-center mt-1">
+                  <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700 tracking-wide shadow-sm">{previewTpl.category}</span>
+                  <span className="inline-block px-2 py-0.5 rounded text-xs font-bold bg-green-100 text-green-700 ml-2">₹{previewTpl.price}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 mt-4 md:mt-0">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-200 mr-2">Device:</label>
+                <select
+                  className="rounded-xl border px-3 py-2 text-sm bg-white dark:bg-slate-800 text-gray-700 dark:text-white focus:ring-2 focus:ring-purple-300 shadow-sm transition duration-200 hover:border-purple-400"
+                  value={modalDevice}
+                  onChange={e => setModalDevice(e.target.value)}
+                  style={{ minWidth: 110 }}
+                >
+                  {MODAL_DEVICE_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <p className="text-gray-700 dark:text-gray-300 mb-4">{previewTpl.description}</p>
-            <div className="flex justify-end gap-2">
-              <button className="px-4 py-2 rounded bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-200" onClick={() => setPreviewTpl(null)}>Close</button>
-              <button className="px-4 py-2 rounded bg-purple-600 text-white font-semibold shadow hover:bg-purple-700" onClick={() => { setUseTpl(previewTpl); setPreviewTpl(null); }}>Use Template</button>
+            {/* Divider */}
+            <div className="w-full h-2 bg-gradient-to-r from-purple-100 via-gray-100 to-blue-100 dark:from-purple-900 dark:via-slate-800 dark:to-blue-900 mb-2" />
+            {/* Description */}
+            <div className="w-full px-8 pb-2 text-gray-600 dark:text-gray-300 text-base text-center md:text-left">
+              {previewTpl.description}
+            </div>
+            {/* Preview */}
+            <div className="w-full flex justify-center items-center px-8 pb-8 overflow-hidden no-scrollbar" style={{ maxHeight: '75vh' }}>
+              <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-2xl flex items-center justify-center w-full transition duration-200 overflow-hidden no-scrollbar" style={{ maxWidth: MODAL_DEVICE_OPTIONS.find(opt => opt.value === modalDevice)?.width || 1200, boxShadow: '0 8px 32px 0 rgba(80,80,120,0.18)' }}>
+                <iframe
+                  srcDoc={`<!DOCTYPE html><html><head><style>${previewTpl.css || ''}</style></head><body>${previewTpl.html || ''}<script>${previewTpl.js || ''}<'+'/script></body></html>`}
+                  sandbox="allow-scripts allow-same-origin"
+                  style={{ width: MODAL_DEVICE_OPTIONS.find(opt => opt.value === modalDevice)?.width || 1200, height: MODAL_DEVICE_OPTIONS.find(opt => opt.value === modalDevice)?.height || 900, border: 'none', background: '#fff', borderRadius: 16, boxShadow: '0 2px 12px 0 rgba(80,80,120,0.08)', display: 'block', overflow: 'hidden' }}
+                  title={`Preview of ${previewTpl.name}`}
+                  className="no-scrollbar"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -202,6 +386,16 @@ export default function MarketplacePage() {
           </div>
         </div>
       )}
+      <Toaster position="top-right" />
+      <style jsx global>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </DashboardLayout>
   );
 } 

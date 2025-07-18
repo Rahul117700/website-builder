@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { amount, currency = 'INR', receipt, notes, planId } = await req.json();
+    const { amount, currency = 'INR', receipt, notes, planId, templateId } = await req.json();
 
     // Validate required fields
     if (!amount || amount <= 0) {
@@ -29,9 +29,9 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    if (!planId) {
+    if (!planId && !templateId) {
       return NextResponse.json(
-        { error: 'Plan ID is required' },
+        { error: 'Plan ID or Template ID is required' },
         { status: 400 }
       );
     }
@@ -51,16 +51,9 @@ export async function POST(req: NextRequest) {
         amount,
         currency,
         status: 'created',
-        plan: {
-          connect: {
-            id: planId,
-          },
-        },
-        user: {
-          connect: {
-            id: session.user.id,
-          },
-        },
+        planId: planId || undefined,
+        templateId: templateId || undefined,
+        userId: session.user.id,
       },
     });
 
@@ -161,6 +154,32 @@ export async function PUT(req: NextRequest) {
           where: { id: revenueRows[0].id },
           data: { total: { increment: payment.amount } },
         });
+      }
+    }
+
+    // If payment is for a template, add to PurchasedTemplate and MyTemplate
+    if (payment.templateId && payment.userId) {
+      // Check if already purchased
+      const already = await prisma.purchasedTemplate.findUnique({ where: { userId_templateId: { userId: payment.userId, templateId: payment.templateId } } });
+      if (!already) {
+        await prisma.purchasedTemplate.create({ data: { userId: payment.userId, templateId: payment.templateId } });
+        // Copy template code to MyTemplate for the user
+        const template = await prisma.template.findUnique({ where: { id: payment.templateId } });
+        if (template) {
+          await prisma.myTemplate.upsert({
+            where: { userId_templateId: { userId: payment.userId, templateId: payment.templateId } },
+            update: {},
+            create: {
+              userId: payment.userId,
+              templateId: payment.templateId,
+              name: template.name,
+              html: template.html,
+              css: template.css,
+              js: template.js,
+              reactCode: template.reactCode,
+            },
+          });
+        }
       }
     }
 

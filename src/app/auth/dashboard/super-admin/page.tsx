@@ -4,6 +4,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DashboardLayout from '@/components/layouts/dashboard-layout';
 import toast from 'react-hot-toast';
+import TemplateAdminPanel from '@/components/dashboard/template-admin-panel';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Pagination from '@mui/material/Pagination';
 
 function Badge({ children, color = "gray" }: { children: React.ReactNode; color?: string }) {
   const colorMap: any = {
@@ -82,6 +86,44 @@ export default function SuperAdminDashboard() {
   const [frontendSaving, setFrontendSaving] = useState(false);
 
   const [planChangeLoading, setPlanChangeLoading] = useState<string | null>(null);
+
+  const [activeTab, setActiveTab] = useState(0);
+
+  // Users search and pagination state
+  const [userSearch, setUserSearch] = useState('');
+  const [userPage, setUserPage] = useState(1);
+  const usersPerPage = 10;
+  const filteredUsers = users.filter(u =>
+    u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+    u.email.toLowerCase().includes(userSearch.toLowerCase())
+  );
+  const paginatedUsers = filteredUsers.slice((userPage-1)*usersPerPage, userPage*usersPerPage);
+  const userPageCount = Math.ceil(filteredUsers.length / usersPerPage);
+
+  // Sites search and pagination state
+  const [siteSearch, setSiteSearch] = useState('');
+  const [sitePage, setSitePage] = useState(1);
+  const sitesPerPage = 10;
+  const filteredSites = sites.filter(s =>
+    s.name.toLowerCase().includes(siteSearch.toLowerCase()) ||
+    (s.user?.email || '').toLowerCase().includes(siteSearch.toLowerCase()) ||
+    (s.subdomain || '').toLowerCase().includes(siteSearch.toLowerCase())
+  );
+  const paginatedSites = filteredSites.slice((sitePage-1)*sitesPerPage, sitePage*sitesPerPage);
+  const sitePageCount = Math.ceil(filteredSites.length / sitesPerPage);
+  // Plans search and pagination state
+  const [planSearch, setPlanSearch] = useState('');
+  const [planPage, setPlanPage] = useState(1);
+  const plansPerPage = 10;
+  const filteredPlans = plans.filter(p =>
+    p.name.toLowerCase().includes(planSearch.toLowerCase())
+  );
+  const paginatedPlans = filteredPlans.slice((planPage-1)*plansPerPage, planPage*plansPerPage);
+  const planPageCount = Math.ceil(filteredPlans.length / plansPerPage);
+  // Templates search and pagination state
+  const [templateSearch, setTemplateSearch] = useState('');
+  const [templatePage, setTemplatePage] = useState(1);
+  const templatesPerPage = 10;
 
   const fetchAll = async () => {
     setLoading(true);
@@ -400,33 +442,58 @@ export default function SuperAdminDashboard() {
       </DashboardLayout>
     );
   }
-
+  // Main dashboard content below
   return (
     <DashboardLayout>
       {/* Super Admin Stats Summary */}
       <div className="w-full max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 mb-8">
-        <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-blue-100 flex flex-col items-center">
-          <div className="text-3xl font-bold text-blue-700 mb-2">{stats.totalUsers}</div>
-          <div className="text-lg text-gray-700">Total Users</div>
+        {/* Total Users Card */}
+        <div className="relative bg-gradient-to-br from-blue-50 via-white to-purple-100/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-blue-200 flex flex-col items-center justify-center overflow-hidden">
+          <div className="absolute top-4 right-4 opacity-20 text-blue-400 text-6xl pointer-events-none select-none">
+            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' className='w-14 h-14'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={1.5} d='M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-6.13a4 4 0 11-8 0 4 4 0 018 0z' /></svg>
+          </div>
+          <div className="text-5xl font-extrabold text-blue-700 mb-2 drop-shadow-lg">{stats.totalUsers}</div>
+          <div className="text-lg font-semibold text-blue-800 tracking-wide mb-1">Total Users</div>
+          <div className="text-xs text-blue-400">All registered users</div>
         </div>
-        <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-green-100 flex flex-col items-center">
-          <div className="text-3xl font-bold text-green-700 mb-2">₹{stats.totalRevenue.toLocaleString()}</div>
-          <div className="text-lg text-gray-700">Total Revenue</div>
+        {/* Total Revenue Card */}
+        <div className="relative bg-gradient-to-br from-green-50 via-white to-blue-100/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-green-200 flex flex-col items-center justify-center overflow-hidden">
+          <div className="absolute top-4 right-4 opacity-20 text-green-400 text-6xl pointer-events-none select-none">
+            <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' className='w-14 h-14'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={1.5} d='M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 0V4m0 12v4m8-8h-4m-8 0H4' /></svg>
+          </div>
+          <div className="text-5xl font-extrabold text-green-700 mb-2 drop-shadow-lg">₹{stats.totalRevenue.toLocaleString()}</div>
+          <div className="text-lg font-semibold text-green-800 tracking-wide mb-1">Total Revenue</div>
+          <div className="text-xs text-green-400">All-time revenue</div>
         </div>
       </div>
-      <div className="w-full px-4 py-4">
-        <div className="min-h-screen w-full bg-gradient-to-br from-purple-200 via-white to-blue-100 font-sans">
-          <div className="w-full ml-auto mr-auto py-10">
-            <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-blue-500 to-green-400 mb-12 tracking-tight drop-shadow-lg text-center">Super Admin Panel</h1>
-            {loading ? (
-              <div className="text-gray-700">Loading data...</div>
-            ) : error ? (
-              <div className="text-red-600">{error}</div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div className="bg-white rounded-3xl shadow-2xl p-10 flex flex-col relative border-2 border-purple-200 hover:shadow-purple-200/50 transition-shadow duration-300">
+      {/* Main Panel (Tabs, etc.) */}
+      <div className="min-h-screen w-full bg-gradient-to-br from-purple-200 via-white to-blue-100 font-sans">
+        <div className="w-full ml-auto mr-auto py-10">
+          {/* <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-blue-500 to-green-400 mb-12 tracking-tight drop-shadow-lg text-center">Super Admin Panel</h1> */}
+            {/* Tab Bar */}
+            <div className="mb-8 flex justify-center">
+              <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} variant="scrollable" scrollButtons="auto" className="bg-white rounded-xl shadow border border-gray-200">
+                <Tab label="Users" />
+                <Tab label="Sites" />
+                <Tab label="Plans" />
+                <Tab label="Templates" />
+              </Tabs>
+            </div>
+            {/* Tab Panels */}
+            {activeTab === 0 && (
+              <div className="w-full">
+                {/* Users Section */}
+                <div className="w-full bg-white rounded-3xl shadow-2xl p-10 flex flex-col relative border-2 border-purple-200 hover:shadow-purple-200/50 transition-shadow duration-300">
                   <div className="flex items-center justify-between mb-8">
                     <h2 className="text-3xl font-bold text-purple-700 flex items-center gap-2"><span className="inline-block w-3 h-3 bg-purple-400 rounded-full animate-pulse"></span> All Users</h2>
+                    <input
+                      type="text"
+                      placeholder="Search users..."
+                      className="border rounded px-3 py-2 text-black bg-white focus:ring-2 focus:ring-purple-400"
+                      value={userSearch}
+                      onChange={e => { setUserSearch(e.target.value); setUserPage(1); }}
+                      style={{ minWidth: 200 }}
+                    />
                     <button
                       onClick={openAddUser}
                       className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-bold px-6 py-2 rounded-full shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
@@ -451,9 +518,9 @@ export default function SuperAdminDashboard() {
                         </tr>
                       </thead>
                       <tbody>
-                        {users.length === 0 ? (
+                        {paginatedUsers.length === 0 ? (
                           <tr><td colSpan={6} className="text-center py-6 text-gray-700">No users found.</td></tr>
-                        ) : users.map((user: any) => {
+                        ) : paginatedUsers.map((user: any) => {
                           const activeSub = user.subscriptions?.find((s: any) => s.status === 'active');
                           const currentPlanId = activeSub?.planId || '';
                           return (
@@ -498,9 +565,37 @@ export default function SuperAdminDashboard() {
                       </tbody>
                     </table>
                   </div>
+                  {userPageCount > 1 && (
+                    <div className="flex justify-center mt-4">
+                      <Pagination
+                        count={userPageCount}
+                        page={userPage}
+                        onChange={(_, v) => setUserPage(v)}
+                        color="primary"
+                        shape="rounded"
+                      />
+                    </div>
+                  )}
                 </div>
-                <div className="bg-white rounded-3xl shadow-2xl p-10 flex flex-col border-2 border-blue-200 hover:shadow-blue-200/50 transition-shadow duration-300">
-                  <h2 className="text-3xl font-bold text-blue-700 mb-8 flex items-center gap-2"><span className="inline-block w-3 h-3 bg-blue-400 rounded-full animate-pulse"></span> All Sites</h2>
+              </div>
+            )}
+            {activeTab === 1 && (
+              <div className="w-full">
+                {/* Sites Section */}
+                <div className="w-full bg-white rounded-3xl shadow-2xl p-10 flex flex-col border-2 border-blue-200 hover:shadow-blue-200/50 transition-shadow duration-300">
+                  <div className="flex items-center justify-between mb-8">
+                    <h2 className="text-3xl font-bold text-blue-700 mb-8 flex items-center gap-2"><span className="inline-block w-3 h-3 bg-blue-400 rounded-full animate-pulse"></span> All Sites</h2>
+                    <input
+                      type="text"
+                      placeholder="Search sites..."
+                      className="border rounded px-3 py-2 text-black bg-white focus:ring-2 focus:ring-blue-400"
+                      value={siteSearch}
+                      onChange={e => { setSiteSearch(e.target.value); setSitePage(1); }}
+                      style={{ minWidth: 200 }}
+                    />
+                  </div>
+                  {actionError && <div className="text-red-600 mb-2">{actionError}</div>}
+                  {actionSuccess && <div className="text-green-600 mb-2">{actionSuccess}</div>}
                   <div className="overflow-x-auto rounded-xl border border-gray-100">
                     <table className="min-w-full bg-white rounded-xl overflow-hidden">
                       <thead className="bg-gradient-to-r from-blue-50 to-purple-50">
@@ -513,9 +608,9 @@ export default function SuperAdminDashboard() {
                         </tr>
                       </thead>
                       <tbody>
-                        {sites.length === 0 ? (
+                        {paginatedSites.length === 0 ? (
                           <tr><td colSpan={5} className="text-center py-6 text-gray-700">No sites found.</td></tr>
-                        ) : sites.map((site: any) => (
+                        ) : paginatedSites.map((site: any) => (
                           <tr key={site.id} className="hover:bg-blue-50 transition-all group">
                             <td className="px-4 py-2 border-b text-gray-900 font-medium">{site.name}</td>
                             <td className="px-4 py-2 border-b text-gray-700">{site.subdomain}</td>
@@ -537,10 +632,34 @@ export default function SuperAdminDashboard() {
                       </tbody>
                     </table>
                   </div>
+                  {sitePageCount > 1 && (
+                    <div className="flex justify-center mt-4">
+                      <Pagination
+                        count={sitePageCount}
+                        page={sitePage}
+                        onChange={(_, v) => setSitePage(v)}
+                        color="primary"
+                        shape="rounded"
+                      />
+                    </div>
+                  )}
                 </div>
-                <div className="bg-white rounded-3xl shadow-2xl p-10 flex flex-col border-2 border-green-200 hover:shadow-green-200/50 transition-shadow duration-300 md:col-span-2">
+              </div>
+            )}
+            {activeTab === 2 && (
+              <div className="w-full">
+                {/* Plans Section */}
+                <div className="w-full bg-white rounded-3xl shadow-2xl p-10 flex flex-col border-2 border-green-200 hover:shadow-green-200/50 transition-shadow duration-300">
                   <div className="flex items-center justify-between mb-8">
                     <h2 className="text-3xl font-bold text-green-700 flex items-center gap-2"><span className="inline-block w-3 h-3 bg-green-400 rounded-full animate-pulse"></span> Manage Plans</h2>
+                    <input
+                      type="text"
+                      placeholder="Search plans..."
+                      className="border rounded px-3 py-2 text-black bg-white focus:ring-2 focus:ring-green-400"
+                      value={planSearch}
+                      onChange={e => { setPlanSearch(e.target.value); setPlanPage(1); }}
+                      style={{ minWidth: 200 }}
+                    />
                     <button onClick={openAddPlan} className="bg-gradient-to-r from-green-400 to-blue-400 hover:from-green-500 hover:to-blue-500 text-white font-bold px-6 py-2 rounded-full shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400">+ Add Plan</button>
                   </div>
                   {actionError && <div className="text-red-600 mb-2">{actionError}</div>}
@@ -557,9 +676,9 @@ export default function SuperAdminDashboard() {
                         </tr>
                       </thead>
                       <tbody>
-                        {plans.length === 0 ? (
+                        {paginatedPlans.length === 0 ? (
                           <tr><td colSpan={5} className="text-center py-6 text-gray-700">No plans found.</td></tr>
-                        ) : plans.map((plan: any) => {
+                        ) : paginatedPlans.map((plan: any) => {
                           const features: string[] = [];
                           if (plan.unlimitedWebsites) {
                             features.push('Unlimited Websites');
@@ -588,6 +707,33 @@ export default function SuperAdminDashboard() {
                       </tbody>
                     </table>
                   </div>
+                  {planPageCount > 1 && (
+                    <div className="flex justify-center mt-4">
+                      <Pagination
+                        count={planPageCount}
+                        page={planPage}
+                        onChange={(_, v) => setPlanPage(v)}
+                        color="primary"
+                        shape="rounded"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {activeTab === 3 && (
+              <div className="w-full">
+                {/* Templates Section */}
+                <div className="w-full bg-white rounded-3xl shadow-2xl p-10 flex flex-col border-2 border-yellow-200 hover:shadow-yellow-200/50 transition-shadow duration-300">
+                  <TemplateAdminPanel
+                    heading="Templates Marketplace Management"
+                    description="Create, edit, approve, and delete templates for the marketplace. Set price, category, section, preview, and more."
+                    search={templateSearch}
+                    setSearch={setTemplateSearch}
+                    page={templatePage}
+                    setPage={setTemplatePage}
+                    templatesPerPage={templatesPerPage}
+                  />
                 </div>
               </div>
             )}
@@ -719,7 +865,7 @@ export default function SuperAdminDashboard() {
             </div>
           )}
         </div>
-      </div>
+      
     </DashboardLayout>
   );
 } 
