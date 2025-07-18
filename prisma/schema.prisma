@@ -39,6 +39,7 @@ model User {
   subscriptions Subscription[]
   activities    Activity[]
   purchasedTemplates PurchasedTemplate[]
+  myTemplates   MyTemplate[]
 }
 
 // User role enum
@@ -207,13 +208,14 @@ model Payment {
   orderId       String?   // Razorpay order ID
   receipt       String?
   userId        String
-  planId        String
+  planId        String?
   siteId        String?   // New: optional, to allow payments not linked to a site
+  templateId    String?   // Optional: for template purchases
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   subscriptionId String?
   subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  plan          Plan      @relation("PlanPayments", fields: [planId], references: [id])
+  plan          Plan?      @relation("PlanPayments", fields: [planId], references: [id])
   site          Site?     @relation(fields: [siteId], references: [id], onDelete: Cascade)
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -310,11 +312,19 @@ model Template {
   name      String
   slug      String   @unique
   price     Float
-  code      String?  // The template code (HTML/CSS/JS or similar)
+  html      String?  // HTML code for the template
+  css       String?  // CSS code for the template
+  js        String?  // JavaScript code for the template
+  category  String?  // Category (e.g. business, restaurant, portfolio, etc.)
+  description String?
+  createdBy String   // 'super_admin' or userId
+  approved  Boolean  @default(false) // Only approved templates are shown in marketplace
+  preview   String?  // URL or base64 for preview image
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   // Relations
   purchases PurchasedTemplate[]
+  myTemplates MyTemplate[] // Add this line for the relation
 }
 
 model PurchasedTemplate {
@@ -325,5 +335,23 @@ model PurchasedTemplate {
   // Relations
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   template Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  @@unique([userId, templateId])
+}
+
+model MyTemplate {
+  id          String   @id @default(cuid())
+  userId      String
+  templateId  String
+  name        String
+  html        String?
+  css         String?
+  js          String?
+  reactCode   Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template    Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
   @@unique([userId, templateId])
 }

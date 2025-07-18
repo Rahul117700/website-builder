@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import DashboardLayout from "@/components/layouts/dashboard-layout";
 import dynamic from 'next/dynamic';
 import toast, { Toaster } from 'react-hot-toast';
-import { CodeBracketIcon, SparklesIcon, ClipboardIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { CodeBracketIcon, SparklesIcon, ClipboardIcon, PlusIcon, TrashIcon, ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Sandpack } from '@codesandbox/sandpack-react';
 import AddPageModal from '@/components/dashboard/add-page-modal';
 import EditPageModal from '@/components/dashboard/edit-page-modal';
@@ -12,6 +12,14 @@ import { useRouter } from 'next/navigation';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import TextField from '@mui/material/TextField';
 
 // Dynamically import MonacoEditor to avoid SSR issues
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), { ssr: false });
@@ -464,6 +472,60 @@ export default function ManageContentPage() {
     setMode('code');
   }, [pageId]);
 
+  // Template marketplace/user state
+  const [templateTab, setTemplateTab] = useState<'my'|'marketplace'>('my');
+  const [myTemplates, setMyTemplates] = useState<any[]>([]);
+  const [marketplaceTemplates, setMarketplaceTemplates] = useState<any[]>([]);
+  const [templateLoading, setTemplateLoading] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [saveForm, setSaveForm] = useState({ name: '', category: '', description: '', preview: '' });
+  const [myTemplatesModalOpen, setMyTemplatesModalOpen] = useState(false);
+  // Fetch templates
+  useEffect(() => {
+    if (mode === 'code') {
+      setTemplateLoading(true);
+      fetch('/api/templates/my-templates').then(res => res.json()).then(setMyTemplates);
+      fetch('/api/templates/marketplace').then(res => res.json()).then(setMarketplaceTemplates).finally(() => setTemplateLoading(false));
+    }
+  }, [mode]);
+  // Insert template code to editor
+  const handleInsertTemplate = (tpl: any) => {
+    setHtmlCode(tpl.html || '');
+    setCssCode(tpl.css || '');
+    setJsCode(tpl.js || '');
+    toast.success('Template code inserted!');
+  };
+  // Buy template (Razorpay)
+  const handleBuyTemplate = (tpl: any) => {
+    router.push(`/auth/dashboard/marketplace?template=${tpl.id}`);
+  };
+  // Save as template
+  const handleSaveTemplate = async () => {
+    setTemplateLoading(true);
+    const res = await fetch('/api/templates/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: saveForm.name,
+        category: saveForm.category,
+        description: saveForm.description,
+        html: htmlCode,
+        css: cssCode,
+        js: jsCode,
+      }),
+    });
+    if (res.ok) {
+      toast.success('Template saved!');
+      setSaveDialogOpen(false);
+      setSaveForm({ name: '', category: '', description: '', preview: '' });
+      fetch('/api/templates/my-templates').then(res => res.json()).then(setMyTemplates);
+    } else {
+      const err = await res.json();
+      toast.error(err.error || 'Error');
+    }
+    setTemplateLoading(false);
+  };
+
   return (
     <DashboardLayout>
       <Toaster position="top-right" />
@@ -647,6 +709,9 @@ export default function ManageContentPage() {
                     <DeleteIcon fontSize="small" /> Delete Page
                   </button>
                 )}
+                <Button variant="outlined" color="primary" onClick={() => window.open('/auth/dashboard/marketplace', '_blank')} startIcon={<ShoppingCartIcon className="h-5 w-5" />}>Buy Templates</Button>
+                <Button variant="outlined" color="primary" onClick={() => setMyTemplatesModalOpen(true)} startIcon={<CodeBracketIcon className="h-5 w-5" />}>My Templates</Button>
+                <Button variant="contained" color="secondary" onClick={() => setSaveDialogOpen(true)} startIcon={<PlusIcon className="h-5 w-5" />}>Save as Template</Button>
               </div>
               {/* Center: Main action buttons */}
               <div className="flex flex-wrap gap-2 items-center">
@@ -808,6 +873,8 @@ export default function ManageContentPage() {
                 </div>
               )}
             </div>
+            {/* Templates Section */}
+            {/* Removed the main templates section from here */}
             <div className="w-full">
               <div className="mb-2 flex gap-2 items-center flex-wrap text-black">
                 <button className={`px-4 py-2 rounded-t bg-gray-100 border-b-2 ${selectedTab==='html' ? 'border-blue-500 font-bold' : 'border-transparent'}`} onClick={() => setSelectedTab('html')}>HTML</button>
@@ -860,6 +927,91 @@ export default function ManageContentPage() {
       <AddPageModal isOpen={addPageOpen} onClose={() => setAddPageOpen(false)} onAddPage={handleAddPage} />
         
       <EditPageModal isOpen={editPageOpen} onClose={() => setEditPageOpen(false)} page={currentPage} onEditPage={handleEditPage} />
+
+      {/* My Templates Modal */}
+      <Dialog open={myTemplatesModalOpen} onClose={() => setMyTemplatesModalOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle className="flex items-center gap-2 text-2xl font-bold text-gray-900 dark:text-white">
+          <CodeBracketIcon className="h-7 w-7 text-purple-600" /> My Templates
+        </DialogTitle>
+        <DialogContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 py-2">
+            {myTemplates.length === 0 && <div className="text-gray-500 col-span-3 text-center py-12">No templates yet.</div>}
+            {myTemplates.map(tpl => (
+              <div key={tpl.id} className="rounded-2xl bg-white dark:bg-slate-800 shadow-lg border border-gray-200 dark:border-slate-700 flex flex-col p-4 hover:shadow-2xl transition group">
+                <div className="flex items-center gap-2 mb-2">
+                  <CodeBracketIcon className="h-5 w-5 text-purple-500" />
+                  <span className="font-bold text-lg text-gray-900 dark:text-white truncate">{tpl.name}</span>
+                </div>
+                <div className="text-xs text-blue-600 font-semibold mb-1 uppercase tracking-wide">{tpl.category}</div>
+                <div className="text-sm text-gray-700 dark:text-gray-200 mb-2 line-clamp-2">{tpl.description}</div>
+                {tpl.preview && <img src={tpl.preview} alt="preview" className="w-full h-32 object-cover rounded-lg mb-2 border border-gray-100 dark:border-slate-700" />}
+                <div className="flex-1 overflow-hidden rounded bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 mb-2" style={{minHeight: 80, maxHeight: 120}}>
+                  <iframe
+                    srcDoc={`<!DOCTYPE html><html><head><style>${tpl.css || ''}</style></head><body>${tpl.html || ''}<script>${tpl.js || ''}<'+'/script></body></html>`}
+                    sandbox="allow-scripts allow-same-origin"
+                    className="w-full h-20 sm:h-24 rounded border-none bg-white"
+                    title={`Preview of ${tpl.name}`}
+                    style={{minHeight: 80, maxHeight: 120}}
+                  />
+                </div>
+                <Button variant="contained" color="primary" fullWidth onClick={() => {
+                  setHtmlCode(tpl.html || '');
+                  setCssCode(tpl.css || '');
+                  setJsCode(tpl.js || '');
+                  setMyTemplatesModalOpen(false);
+                  toast.success('Template code applied!');
+                }} startIcon={<CodeBracketIcon className="h-5 w-5" />}>Apply</Button>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setMyTemplatesModalOpen(false)} color="secondary" variant="outlined" startIcon={<XMarkIcon className="h-5 w-5" />}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Save Template Dialog */}
+      <Dialog open={saveDialogOpen} onClose={() => setSaveDialogOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle className="flex items-center gap-2 text-2xl font-bold text-gray-900 dark:text-white">
+          <PlusIcon className="h-7 w-7 text-purple-600" /> Save as Template
+        </DialogTitle>
+        <DialogContent>
+          <div className="grid grid-cols-1 gap-4 py-2">
+            <TextField
+              label="Template Name"
+              value={saveForm.name}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveForm({ ...saveForm, name: e.target.value })}
+              fullWidth
+              variant="outlined"
+            />
+            <TextField
+              label="Category"
+              value={saveForm.category}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveForm({ ...saveForm, category: e.target.value })}
+              fullWidth
+              variant="outlined"
+            />
+            <TextField
+              label="Description"
+              value={saveForm.description}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveForm({ ...saveForm, description: e.target.value })}
+              fullWidth
+              variant="outlined"
+            />
+            <TextField
+              label="Preview URL (optional)"
+              value={saveForm.preview}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveForm({ ...saveForm, preview: e.target.value })}
+              fullWidth
+              variant="outlined"
+            />
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSaveDialogOpen(false)} color="secondary" variant="outlined">Cancel</Button>
+          <Button onClick={handleSaveTemplate} color="primary" variant="contained">Save Template</Button>
+        </DialogActions>
+      </Dialog>
     </DashboardLayout>
   );
 } 
