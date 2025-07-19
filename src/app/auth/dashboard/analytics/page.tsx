@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import * as React from 'react';
 import { Line } from 'react-chartjs-2';
+import { Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,9 +15,18 @@ import {
   Title,
   Tooltip,
   Legend,
+  ArcElement,
 } from 'chart.js';
+import { Card, CardContent, CardHeader } from '@mui/material';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import TableChartIcon from '@mui/icons-material/TableChart';
+import Skeleton from '@mui/material/Skeleton';
+import Button from '@mui/material/Button';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
 
 function Select({ value, onValueChange, options, placeholder }: { value: string; onValueChange: (v: string) => void; options: { value: string; label: string }[]; placeholder?: string }) {
   return (
@@ -46,6 +56,15 @@ export default function AnalyticsPage() {
   const [pageFilter, setPageFilter] = useState<string>('');
   const [countryFilter, setCountryFilter] = useState<string>('');
   const refreshTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [allSitesAnalytics, setAllSitesAnalytics] = useState<Record<string, any>>({});
+  const [allSitesLoading, setAllSitesLoading] = useState(false);
+  const [dateRange, setDateRange] = useState('30d');
+  const dateOptions = [
+    { label: 'Last 7 days', value: '7d' },
+    { label: 'Last 14 days', value: '14d' },
+    { label: 'Last 30 days', value: '30d' },
+    // Add custom if needed
+  ];
 
   React.useEffect(() => {
     if (status === 'unauthenticated') {
@@ -63,7 +82,7 @@ export default function AnalyticsPage() {
   }, [status]);
 
   React.useEffect(() => {
-    const siteId = searchParams.get('siteId');
+    const siteId = searchParams ? searchParams.get('siteId') : null;
     if (siteId) setSelectedSite(siteId);
   }, [searchParams]);
 
@@ -94,6 +113,28 @@ export default function AnalyticsPage() {
     window.addEventListener('site-analytics-refresh', handler);
     return () => window.removeEventListener('site-analytics-refresh', handler);
   }, [selectedSite, period]);
+
+  // Fetch analytics for all sites if none selected
+  useEffect(() => {
+    if (!selectedSite && sites.length > 0) {
+      setAllSitesLoading(true);
+      Promise.all(
+        sites.map(site =>
+          fetch(`/api/analytics?siteId=${site.id}&period=${period}`)
+            .then(res => res.ok ? res.json() : null)
+            .then(data => ({ siteId: site.id, data }))
+            .catch(() => ({ siteId: site.id, data: null }))
+        )
+      ).then(results => {
+        const analyticsMap: Record<string, any> = {};
+        results.forEach(({ siteId, data }) => {
+          analyticsMap[siteId] = data;
+        });
+        setAllSitesAnalytics(analyticsMap);
+        setAllSitesLoading(false);
+      });
+    }
+  }, [selectedSite, sites, period]);
 
   // Filtered analytics data
   const filteredRawData = useMemo(() => {
@@ -148,6 +189,41 @@ export default function AnalyticsPage() {
       )}
       {analytics && !loading && !error && (
         <div className="space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-6 flex flex-col items-center shadow">
+              <VisibilityIcon className="text-purple-600 mb-2" fontSize="large" />
+              <span className="text-3xl font-bold text-purple-700">{analytics ? analytics.summary.totalPageViews : <Skeleton width={40} />}</span>
+              <span className="text-gray-600 dark:text-gray-300 mt-1">Page Views</span>
+              {/* Trend arrow (placeholder, replace with real trend logic) */}
+              <span className="flex items-center gap-1 text-xs mt-1 text-green-600"><TrendingUpIcon fontSize="small" /> +5%</span>
+            </div>
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 flex flex-col items-center shadow">
+              <PeopleAltIcon className="text-blue-600 mb-2" fontSize="large" />
+              <span className="text-3xl font-bold text-blue-700">{analytics ? analytics.summary.totalVisitors : <Skeleton width={40} />}</span>
+              <span className="text-gray-600 dark:text-gray-300 mt-1">Unique Visitors</span>
+              <span className="flex items-center gap-1 text-xs mt-1 text-red-600"><TrendingDownIcon fontSize="small" /> -2%</span>
+            </div>
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-6 flex flex-col items-center shadow">
+              <TableChartIcon className="text-green-600 mb-2" fontSize="large" />
+              <span className="text-3xl font-bold text-green-700">{analytics ? analytics.summary.popularPages[0]?.views : <Skeleton width={40} />}</span>
+              <span className="text-gray-600 dark:text-gray-300 mt-1">Top Page Views</span>
+              <span className="flex items-center gap-1 text-xs mt-1 text-green-600"><TrendingUpIcon fontSize="small" /> +8%</span>
+            </div>
+          </div>
+          {/* Date range picker */}
+          <div className="flex gap-2 mb-4">
+            {dateOptions.map(opt => (
+              <Button
+                key={opt.value}
+                variant={dateRange === opt.value ? 'contained' : 'outlined'}
+                color="primary"
+                size="small"
+                onClick={() => setDateRange(opt.value)}
+              >
+                {opt.label}
+              </Button>
+            ))}
+          </div>
           <div className="flex flex-wrap gap-4 items-end mb-2">
             <div>
               <label className="block text-sm font-medium mb-1">Filter by Page</label>
@@ -190,7 +266,7 @@ export default function AnalyticsPage() {
               </button>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <SummaryCard
               value={filteredRawData.length}
               label="Page Views"
@@ -226,68 +302,99 @@ export default function AnalyticsPage() {
               </tbody>
             </table>
           </div>
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-semibold">Traffic Over Time <InfoTooltip text="Page views and unique visitors per day for the selected filters." /></h2>
-              <select
-                className="border rounded px-2 py-1 text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
-                value={period}
-                onChange={e => setPeriod(e.target.value)}
-              >
-                <option value="7d">Last 7 days</option>
-                <option value="30d">Last 30 days</option>
-                <option value="90d">Last 90 days</option>
-                <option value="1y">Last 1 year</option>
-              </select>
+          {/* In the main analytics section, use a two-column grid for charts */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Line Chart */}
+            <div style={{ maxHeight: 320 }}>
+              <Line
+                key={JSON.stringify(filteredTimeSeries)}
+                data={{
+                  labels: filteredTimeSeries.map((d: any) => d.date),
+                  datasets: [
+                    {
+                      label: 'Page Views',
+                      data: filteredTimeSeries.map((d: any) => d.pageViews),
+                      borderColor: 'rgb(139, 92, 246)',
+                      backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                      tension: 0.4,
+                    },
+                    {
+                      label: 'Visitors',
+                      data: filteredTimeSeries.map((d: any) => d.visitors),
+                      borderColor: 'rgb(34,197,94)',
+                      backgroundColor: 'rgba(34,197,94,0.2)',
+                      tension: 0.4,
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  plugins: {
+                    legend: { position: 'top' as const,
+                      labels: {
+                        color: '#000',
+                        font: { weight: 'bold' },
+                      }
+                    },
+                    title: { display: false },
+                  },
+                  scales: {
+                    x: {
+                      title: { display: true, text: 'Date', color: '#000', font: { weight: 'bold' } },
+                      ticks: { color: '#000' },
+                      grid: { color: 'rgba(0,0,0,0.1)' },
+                    },
+                    y: {
+                      title: { display: true, text: 'Count', color: '#000', font: { weight: 'bold' } },
+                      beginAtZero: true,
+                      ticks: { color: '#000' },
+                      grid: { color: 'rgba(0,0,0,0.1)' },
+                    },
+                  },
+                }}
+                height={240}
+              />
             </div>
-            <Line
-              key={JSON.stringify(filteredTimeSeries)}
-              data={{
-                labels: filteredTimeSeries.map((d: any) => d.date),
-                datasets: [
-                  {
-                    label: 'Page Views',
-                    data: filteredTimeSeries.map((d: any) => d.pageViews),
-                    borderColor: 'rgb(139, 92, 246)',
-                    backgroundColor: 'rgba(139, 92, 246, 0.2)',
-                    tension: 0.4,
-                  },
-                  {
-                    label: 'Visitors',
-                    data: filteredTimeSeries.map((d: any) => d.visitors),
-                    borderColor: 'rgb(34,197,94)',
-                    backgroundColor: 'rgba(34,197,94,0.2)',
-                    tension: 0.4,
-                  },
-                ],
-              }}
-              options={{
-                responsive: true,
-                plugins: {
-                  legend: { position: 'top' as const,
-                    labels: {
-                      color: '#000',
-                      font: { weight: 'bold' },
-                    }
-                  },
-                  title: { display: false },
-                },
-                scales: {
-                  x: {
-                    title: { display: true, text: 'Date', color: '#000', font: { weight: 'bold' } },
-                    ticks: { color: '#000' },
-                    grid: { color: 'rgba(0,0,0,0.1)' },
-                  },
-                  y: {
-                    title: { display: true, text: 'Count', color: '#000', font: { weight: 'bold' } },
-                    beginAtZero: true,
-                    ticks: { color: '#000' },
-                    grid: { color: 'rgba(0,0,0,0.1)' },
-                  },
-                },
-              }}
-              height={300}
-            />
+            {/* Pie Chart: Top Countries or Top Pages */}
+            <div style={{ maxHeight: 320 }}>
+              {(() => {
+                const countryLabels: string[] = analytics && analytics.rawData
+                  ? Array.from(new Set(analytics.rawData.map((r: any) => r.country).filter(Boolean))) as string[]
+                  : [];
+                const countryData = analytics && analytics.rawData
+                  ? countryLabels.map((country: string) =>
+                      analytics.rawData.filter((r: any) => r.country === country).length
+                    )
+                  : [];
+                return countryLabels.length > 0 && countryData.some(count => count > 0) ? (
+                  <Pie
+                    data={{
+                      labels: countryLabels,
+                      datasets: [
+                        {
+                          label: 'Visitors',
+                          data: countryData,
+                          backgroundColor: [
+                            '#7c3aed', '#10b981', '#f59e42', '#f43f5e', '#6366f1', '#fbbf24', '#14b8a6', '#a21caf', '#eab308', '#0ea5e9'
+                          ],
+                        },
+                      ],
+                    }}
+                    options={{
+                      responsive: true,
+                      plugins: {
+                        legend: { display: true, position: 'bottom' },
+                        title: { display: true, text: 'Top Countries' },
+                      },
+                      maintainAspectRatio: false,
+                    }}
+                    height={240}
+                  />
+                ) : (
+                  <div className="text-center py-8 text-gray-400">No country data available.</div>
+                );
+              })()}
+            </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <BreakdownTable
@@ -318,8 +425,46 @@ export default function AnalyticsPage() {
         </div>
       )}
       {!selectedSite && (
-        <div className="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-4 text-center mt-8">
-          <h2 className="text-xl font-semibold text-purple-600 mb-2">Select a site to view analytics</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {sites.map(site => (
+            <Card key={site.id} className="shadow-lg">
+              <CardHeader title={site.name} />
+              <CardContent>
+                {allSitesLoading || !allSitesAnalytics[site.id] ? (
+                  <div className="text-center py-8 text-gray-500">Loading analytics...</div>
+                ) : allSitesAnalytics[site.id]?.timeSeriesData?.length ? (
+                  <Line
+                    data={{
+                      labels: allSitesAnalytics[site.id].timeSeriesData.map((d: any) => d.date),
+                      datasets: [
+                        {
+                          label: 'Page Views',
+                          data: allSitesAnalytics[site.id].timeSeriesData.map((d: any) => d.pageViews),
+                          borderColor: '#7c3aed',
+                          backgroundColor: 'rgba(124,58,237,0.1)',
+                        },
+                        {
+                          label: 'Visitors',
+                          data: allSitesAnalytics[site.id].timeSeriesData.map((d: any) => d.visitors),
+                          borderColor: '#10b981',
+                          backgroundColor: 'rgba(16,185,129,0.1)',
+                        },
+                      ],
+                    }}
+                    options={{
+                      responsive: true,
+                      plugins: {
+                        legend: { display: true },
+                        title: { display: false },
+                      },
+                    }}
+                  />
+                ) : (
+                  <div className="text-center py-8 text-gray-400">No analytics data.</div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
         </div>
       )}
     </DashboardLayout>

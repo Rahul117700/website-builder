@@ -10,6 +10,19 @@ import EditSiteModal from '@/components/dashboard/edit-site-modal';
 import ChangeTemplateModal from '@/components/dashboard/change-template-modal';
 import { Site } from '@/types';
 import toast from 'react-hot-toast';
+import Avatar from '@mui/material/Avatar';
+import Chip from '@mui/material/Chip';
+import SearchIcon from '@mui/icons-material/Search';
+import InputAdornment from '@mui/material/InputAdornment';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import PageviewIcon from '@mui/icons-material/Pageview';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import LayersIcon from '@mui/icons-material/Layers';
 
 export default function WebsitesPage() {
   const { status, data: session } = useSession();
@@ -23,6 +36,8 @@ export default function WebsitesPage() {
   const [editingSite, setEditingSite] = useState<Site | null>(null);
   const [changeTemplateModalOpen, setChangeTemplateModalOpen] = useState(false);
   const [templateSite, setTemplateSite] = useState<Site | null>(null);
+  const [search, setSearch] = useState('');
+  const [templateFilter, setTemplateFilter] = useState('');
 
   const fetchSites = useCallback(async () => {
     setLoading(true);
@@ -35,16 +50,23 @@ export default function WebsitesPage() {
       });
       if (!res.ok) throw new Error('Failed to fetch sites');
       let data = await res.json();
-      // For each site, fetch its main page and attach renderMode
+      // For each site, fetch its main page and analytics
       data = await Promise.all(data.map(async (site: any) => {
         try {
           const pagesRes = await fetch(`/api/pages?siteId=${site.id}`);
-          if (!pagesRes.ok) return { ...site, mainPageRenderMode: undefined };
-          const pages = await pagesRes.json();
-          const mainPage = pages[0];
-          return { ...site, mainPageRenderMode: mainPage?.renderMode || 'html' };
+          const analyticsRes = await fetch(`/api/analytics?siteId=${site.id}`);
+          let mainPage, visitors = 0;
+          if (pagesRes.ok) {
+            const pages = await pagesRes.json();
+            mainPage = pages[0];
+          }
+          if (analyticsRes.ok) {
+            const analytics = await analyticsRes.json();
+            visitors = analytics?.summary?.totalVisitors || 0;
+          }
+          return { ...site, mainPageRenderMode: mainPage?.renderMode || 'html', visitors };
         } catch {
-          return { ...site, mainPageRenderMode: undefined };
+          return { ...site, mainPageRenderMode: undefined, visitors: 0 };
         }
       }));
       setSites(data);
@@ -141,60 +163,135 @@ export default function WebsitesPage() {
     fetchSites();
   };
 
+  // Filtered sites
+  const filteredSites = sites.filter(site =>
+    (!search || site.name.toLowerCase().includes(search.toLowerCase()) || (site.customDomain || '').toLowerCase().includes(search.toLowerCase())) &&
+    (!templateFilter || site.template === templateFilter)
+  );
+
   return (
     <DashboardLayout>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Your Websites</h1>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-          Manage your websites here. You can create, edit, or delete your sites.
-        </p>
-      </div>
-      <div className="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white">Websites</h2>
-          <button
-            onClick={() => setModalOpen(true)}
-            className="bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow px-5 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-          >
-            Create New Site
-          </button>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">Manage your websites here. You can create, edit, or delete your sites.</p>
+        {/* Summary */}
+        <div className="mt-4 flex flex-wrap gap-4 items-center">
+          <span className="bg-blue-50 text-blue-800 text-sm font-semibold px-4 py-2 rounded-lg">You have {sites.length} sites</span>
         </div>
-        {error && (
-          <div className="mb-4 text-red-600 dark:text-red-400 text-sm">{error}</div>
-        )}
-        {loading ? (
-          <div className="text-center py-12 bg-gray-50 dark:bg-slate-700 rounded-lg">
-            <span className="animate-spin h-6 w-6 border-4 border-purple-400 border-t-transparent rounded-full inline-block mb-2"></span>
-            <div className="text-gray-500 dark:text-gray-400">Loading websites...</div>
-          </div>
-        ) : sites.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 dark:bg-slate-700 rounded-lg">
-            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No websites yet</h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Get started by creating a new website.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sites.map((site: Site) => (
-              <SiteCard
-                key={site.id}
-                site={site}
-                mainPageRenderMode={site.mainPageRenderMode}
-                onEdit={(s) => {
-                  setEditingSite(s);
-                  setEditModalOpen(true);
-                }}
-                onChangeTemplate={(s) => {
-                  setTemplateSite(s);
-                  setChangeTemplateModalOpen(true);
-                }}
-                onDelete={handleSiteDeleted}
-              />
-            ))}
-          </div>
-        )}
       </div>
+      {/* Search and Filter */}
+      <div className="flex flex-wrap gap-4 items-center mb-6">
+        <TextField
+          variant="outlined"
+          size="small"
+          placeholder="Search sites..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+        <button
+          className="ml-auto bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow px-6 py-2 text-base"
+          onClick={() => setModalOpen(true)}
+        >
+          + Create New Site
+        </button>
+      </div>
+      {/* Site Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredSites.map(site => (
+          <div key={site.id} className="relative">
+            <div className="card overflow-hidden flex flex-col">
+              <div className="h-2 bg-blue-500" />
+              <div className="p-6 flex-1 flex flex-col">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    {/* Favicon/logo or initial */}
+                    {site.logo ? (
+                      <Avatar src={site.logo} alt={site.name} sx={{ width: 32, height: 32 }} />
+                    ) : (
+                      <Avatar sx={{ width: 32, height: 32 }}>{site.name.charAt(0).toUpperCase()}</Avatar>
+                    )}
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">{site.name}</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{site.template.charAt(0).toUpperCase() + site.template.slice(1)} Template</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4 space-y-2">
+                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                    <span className="truncate">{site.customDomain || `${window.location.origin}/s/${site.subdomain}`}</span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+                    <span>Created {new Date(site.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  {/* Last updated */}
+                  <div className="flex items-center text-xs text-gray-400">Last updated: {new Date(site.updatedAt).toLocaleDateString()}</div>
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<PageviewIcon />}
+                    href={`/auth/dashboard/sites/${site.id}/pages`}
+                    fullWidth
+                  >
+                    Manage Pages
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<BarChartIcon />}
+                    href={`/auth/dashboard/analytics?siteId=${site.id}`}
+                    fullWidth
+                  >
+                    Analytics
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<EditIcon />}
+                    onClick={() => {
+                      setEditingSite(site);
+                      setEditModalOpen(true);
+                    }}
+                    fullWidth
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<OpenInNewIcon />}
+                    href={site.customDomain ? `https://${site.customDomain}` : `${window.location.origin}/s/${site.subdomain}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    fullWidth
+                  >
+                    Visit
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    size="small"
+                    startIcon={<DeleteIcon />}
+                    onClick={() => handleSiteDeleted(site)}
+                    fullWidth
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {/* ... existing modals and logic ... */}
       <CreateSiteModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}

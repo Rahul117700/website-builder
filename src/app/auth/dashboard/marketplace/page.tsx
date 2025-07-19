@@ -52,6 +52,19 @@ export default function MarketplacePage() {
   const [modalDevice, setModalDevice] = useState('desktop');
   const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [buyingId, setBuyingId] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  // Extract unique categories from templates
+  const categories = ['All', ...Array.from(new Set(templates.map(t => t.category).filter(Boolean)))];
+
+  // Filtered templates
+  const filteredTemplates = templates.filter(tpl => {
+    const matchesSearch =
+      tpl.name.toLowerCase().includes(search.toLowerCase()) ||
+      (tpl.description && tpl.description.toLowerCase().includes(search.toLowerCase()));
+    const matchesCategory = selectedCategory === 'All' || tpl.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   useEffect(() => {
     setLoadingTemplates(true);
@@ -231,52 +244,81 @@ export default function MarketplacePage() {
           Browse and use beautiful website templates for your business.
         </p>
       </div>
+      {/* Search and Category Filter */}
+      <div className="flex flex-col md:flex-row md:items-center gap-4 mb-8">
+        <div className="relative w-full md:w-72">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
+          </span>
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search templates..."
+            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-400 focus:outline-none shadow-sm"
+          />
+        </div>
+        <select
+          value={selectedCategory}
+          onChange={e => setSelectedCategory(e.target.value)}
+          className="w-full md:w-56 px-4 py-2 rounded-lg border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-400 focus:outline-none shadow-sm"
+        >
+          {categories.map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
         {loadingTemplates ? (
           <div className="col-span-3 flex justify-center items-center py-20">
             <span className="animate-spin h-8 w-8 border-4 border-purple-400 border-t-transparent rounded-full inline-block mr-2"></span>
             <span className="text-gray-500 text-lg">Loading templates...</span>
           </div>
-        ) : templates.map((tpl) => {
-          // Card preview always uses fixed height, desktop width
-          const previewStyle = {
-            width: '100%',
-            height: 320,
-            border: 'none',
-            background: '#fff',
-            borderRadius: 16,
-            boxShadow: '0 2px 12px 0 rgba(80,80,120,0.08)',
-            overflow: 'hidden',
-            display: 'block',
-          };
+        ) : filteredTemplates.map((tpl) => {
           return (
-            <div key={tpl.id} className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-7 flex flex-col border border-gray-100 hover:shadow-2xl transition-all mb-10 max-w-md mx-auto">
-              <div className="flex items-center justify-between mb-4">
-                <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700 tracking-wide shadow-sm">{tpl.category}</span>
-                <span className="inline-block px-2 py-0.5 rounded text-xs font-bold bg-green-100 text-green-700 ml-2">₹{tpl.price}</span>
-              </div>
-              <div className="mb-6 flex justify-center w-full">
+            <div key={tpl.id} className="relative flex flex-col h-full min-h-[520px] max-w-xs mx-auto rounded-2xl shadow-lg transition-all duration-300 bg-white dark:bg-slate-800 border-2 border-purple-100 dark:border-slate-700 p-6 items-center group hover:shadow-2xl hover:border-purple-400">
+              {/* Image with overlay and badges */}
+              <div className="relative w-full h-48 mb-4 flex items-center justify-center rounded-xl overflow-hidden shadow group-hover:scale-105 transition-transform duration-300">
+                {/* Category Badge */}
+                <span className="absolute top-3 left-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg z-10">{tpl.category}</span>
+                {/* Price Tag */}
+                <span className="absolute top-3 right-3 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold shadow z-10">₹{tpl.price}</span>
                 {tpl.preview ? (
                   <img
                     src={tpl.preview}
                     alt={tpl.name + ' preview'}
-                    className="w-full h-56 object-cover rounded-2xl border border-gray-200 bg-gray-50"
-                    style={{ maxHeight: 220, minHeight: 180 }}
+                    className="w-full h-full object-cover rounded-xl group-hover:brightness-90 transition"
                   />
                 ) : (
-                  <div className="w-full h-56 flex items-center justify-center rounded-2xl border border-gray-200 bg-gray-50 text-gray-400 text-lg">
-                    No Preview Image
-                  </div>
+                  <div className="w-full h-full bg-gray-100 dark:bg-slate-700 rounded-xl flex items-center justify-center text-gray-400">No Preview Image</div>
+                )}
+                {/* Overlay icon */}
+                <span className="absolute bottom-2 right-2 bg-white/80 dark:bg-slate-900/80 rounded-full p-2 shadow-lg">
+                  <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553 2.276A2 2 0 0121 14.09V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.91a2 2 0 01.447-1.814L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8" /></svg>
+                </span>
+              </div>
+              {/* Template Name */}
+              <h3 className="text-xl font-bold mb-3 text-center w-full text-purple-700 dark:text-purple-300 truncate">{tpl.name}</h3>
+              {/* Description with fade for long text */}
+              <div className="flex-1 w-full flex items-center justify-center">
+                {tpl.description ? (
+                  <p className="text-gray-600 dark:text-gray-300 text-center max-h-24 overflow-hidden relative w-full">
+                    {tpl.description}
+                    {tpl.description.length > 120 && (
+                      <span className="absolute bottom-0 left-0 w-full h-6 bg-gradient-to-t from-white dark:from-slate-900 to-transparent"></span>
+                    )}
+                  </p>
+                ) : (
+                  <span className="italic text-gray-400 text-center w-full">No description.</span>
                 )}
               </div>
-              <div className="font-extrabold text-xl text-gray-900 dark:text-white leading-tight mb-2">{tpl.name}</div>
-              <div className="text-sm text-gray-500 mb-6">{tpl.description}</div>
-              <div className="flex gap-2 w-full mt-auto">
-                <button className="w-1/2 px-4 py-2 rounded-xl bg-gray-100 text-gray-700 font-bold text-base border border-gray-300 hover:bg-gray-200 transition" onClick={() => { setPreviewTpl(tpl); setModalDevice('desktop'); }}>
+              {/* Buttons */}
+              <div className="flex gap-2 w-full mt-6">
+                <button className="w-1/2 py-2 rounded-xl bg-gray-100 text-gray-700 font-bold text-base border border-gray-300 hover:bg-gray-200 transition group-hover:scale-105" onClick={() => { setPreviewTpl(tpl); setModalDevice('desktop'); }}>
                   Preview
                 </button>
                 <button
-                  className="w-1/2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 text-white font-bold text-base shadow hover:from-purple-700 hover:to-blue-600 transition flex items-center justify-center"
+                  className="w-1/2 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 text-white font-bold text-base shadow hover:from-purple-700 hover:to-blue-600 transition flex items-center justify-center group-hover:scale-105"
                   onClick={() => handleBuyTemplate(tpl)}
                   disabled={buyingId === tpl.id}
                 >

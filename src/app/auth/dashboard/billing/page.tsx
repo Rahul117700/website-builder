@@ -1,15 +1,9 @@
-'use client';
+"use client";
 import DashboardLayout from '@/components/layouts/dashboard-layout';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-
-declare global {
-  interface Window {
-    Razorpay?: any;
-  }
-}
 
 export default function BillingPage() {
   const { status } = useSession();
@@ -196,19 +190,19 @@ export default function BillingPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr>
-                    <th className="text-left py-2">Date</th>
-                    <th className="text-left py-2">Plan</th>
-                    <th className="text-left py-2">Amount</th>
-                    <th className="text-left py-2">Status</th>
+                    <th className="text-left py-2 text-black bg-white">Date</th>
+                    <th className="text-left py-2 text-black bg-white">Plan</th>
+                    <th className="text-left py-2 text-black bg-white">Amount</th>
+                    <th className="text-left py-2 text-black bg-white">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {payments.map(payment => (
                     <tr key={payment.id}>
-                      <td className="py-2">{new Date(payment.createdAt).toLocaleDateString()}</td>
-                      <td className="py-2">{payment.plan?.name || '-'}</td>
-                      <td className="py-2">{payment.amount === 0 ? 'Free' : `₹${payment.amount}`}</td>
-                      <td className="py-2">{payment.status}</td>
+                      <td className="py-2 text-black bg-white">{new Date(payment.createdAt).toLocaleDateString()}</td>
+                      <td className="py-2 text-black bg-white">{payment.plan?.name || '-'}</td>
+                      <td className="py-2 text-black bg-white">{payment.amount === 0 ? 'Free' : `₹${payment.amount}`}</td>
+                      <td className="py-2 text-black bg-white">{payment.status}</td>
                     </tr>
                   ))}
                 </tbody>

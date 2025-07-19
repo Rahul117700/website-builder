@@ -76,8 +76,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Marketplace', href: '/auth/dashboard/marketplace', icon: ShoppingBagIcon, current: pathname === '/auth/dashboard/marketplace' },
     { name: 'Domain', href: '/auth/dashboard/domain', icon: GlobeAltIcon, current: pathname === '/auth/dashboard/domain' },
     { name: 'Billing', href: '/auth/dashboard/billing', icon: BanknotesIcon, current: pathname === '/auth/dashboard/billing' },
-    { name: 'Pricing', href: '/auth/dashboard/pricing', icon: CreditCardIcon, current: pathname === '/auth/dashboard/pricing' },
-    { name: 'Create Template', href: '/auth/dashboard/create-template', icon: SparklesIcon, current: pathname === '/auth/dashboard/create-template' },
+    { name: 'Transactions', href: '/auth/dashboard/transactions', icon: CreditCardIcon, current: pathname === '/auth/dashboard/transactions' },
     { name: 'Settings', href: '/auth/dashboard/settings', icon: Cog6ToothIcon, current: pathname === '/auth/dashboard/settings' },
   ];
 
