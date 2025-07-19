@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import gsap from "gsap";
 
 export default function HomePage() {
   const [plans, setPlans] = useState<any[]>([]);
@@ -39,6 +40,29 @@ export default function HomePage() {
     fetchTemplates();
   }, []);
 
+  // GSAP animation effect
+  useEffect(() => {
+    if (typeof window !== 'undefined' && document.getElementById('gsap-hero-collage')) {
+      gsap.to('#c1', { y: 20, repeat: -1, yoyo: true, duration: 2, ease: 'power1.inOut' });
+      gsap.to('#r1', { x: '+=20', repeat: -1, yoyo: true, duration: 2.5, ease: 'power1.inOut' });
+      gsap.to('#p1', { rotation: 360, transformOrigin: '320 225', repeat: -1, duration: 6, ease: 'linear' });
+      gsap.to('#e1', { scaleX: 1.2, scaleY: 0.8, repeat: -1, yoyo: true, duration: 2.2, transformOrigin: '120 220', ease: 'power1.inOut' });
+    }
+  }, []);
+
+  // GSAP tech/future animation effect
+  useEffect(() => {
+    if (typeof window !== 'undefined' && document.getElementById('gsap-hero-tech')) {
+      gsap.to('#browser', { y: 10, repeat: -1, yoyo: true, duration: 2, ease: 'power1.inOut' });
+      gsap.to('#code', { y: '+=10', repeat: -1, yoyo: true, duration: 2.2, ease: 'power1.inOut' });
+      gsap.to('#gear', { rotation: 360, transformOrigin: 'center', repeat: -1, duration: 6, ease: 'linear' });
+      gsap.to('#cursor', { x: 10, y: 10, repeat: -1, yoyo: true, duration: 2.5, ease: 'power1.inOut' });
+      gsap.to('#cloud', { x: 20, repeat: -1, yoyo: true, duration: 3, ease: 'power1.inOut' });
+      gsap.to('#orbit1', { rotation: 360, transformOrigin: '200 140', repeat: -1, duration: 12, ease: 'linear' });
+      gsap.to('#orbit2', { rotation: -360, transformOrigin: '200 140', repeat: -1, duration: 16, ease: 'linear' });
+    }
+  }, []);
+
   function getPlanFeatures(plan) {
     const features = [];
     if (plan.unlimitedWebsites) features.push("Unlimited Websites");
@@ -66,6 +90,7 @@ export default function HomePage() {
               <a href="#features" className="text-gray-900 dark:text-white hover:text-purple-600 transition">Features</a>
               <a href="#templates" className="text-gray-900 dark:text-white hover:text-purple-600 transition">Templates</a>
               <a href="#pricing" className="text-gray-900 dark:text-white hover:text-purple-600 transition">Pricing</a>
+              <a href="/about" className="text-gray-900 dark:text-white hover:text-purple-600 transition">About Us</a>
             </nav>
           </div>
           {/* User/CTA Section */}
@@ -94,6 +119,7 @@ export default function HomePage() {
             <a href="#features" className="text-gray-900 dark:text-white hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>Features</a>
             <a href="#templates" className="text-gray-900 dark:text-white hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>Templates</a>
             <a href="#pricing" className="text-gray-900 dark:text-white hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
+            <a href="/about" className="text-gray-900 dark:text-white hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>About Us</a>
             <a href="/auth/dashboard" className="bg-black text-white px-8 py-3 rounded-full shadow-lg hover:bg-gray-900 transition" onClick={() => setMobileMenuOpen(false)}>Go to Dashboard</a>
             {session?.user ? (
               <div className="flex flex-col items-center gap-2">
@@ -143,7 +169,53 @@ export default function HomePage() {
           </div>
         </div>
         <div className="flex-1 flex justify-center items-center">
-          <img src="/illustration-hero.svg" alt="Website Builder Hero" className="w-full max-w-md rounded-2xl shadow-2xl border-4 border-purple-100" />
+          <svg
+            id="gsap-hero-tech"
+            width="400"
+            height="320"
+            viewBox="0 0 400 320"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full max-w-md h-80"
+          >
+            {/* Browser window */}
+            <rect id="browser" x="60" y="60" width="280" height="160" rx="18" fill="#fff" stroke="#a78bfa" strokeWidth="3" />
+            <rect x="60" y="60" width="280" height="32" rx="10" fill="#ede9fe" />
+            <circle cx="80" cy="76" r="4" fill="#f87171" />
+            <circle cx="92" cy="76" r="4" fill="#fbbf24" />
+            <circle cx="104" cy="76" r="4" fill="#34d399" />
+            {/* Code brackets */}
+            <text id="code" x="120" y="150" fontSize="48" fontWeight="bold" fill="#6366f1">{`< >`}</text>
+            {/* Gear icon */}
+            <g id="gear" transform="translate(320,200)">
+              <circle r="18" fill="#fbbf24" />
+              <g stroke="#fff" strokeWidth="2">
+                <line x1="0" y1="-18" x2="0" y2="-28" />
+                <line x1="0" y1="18" x2="0" y2="28" />
+                <line x1="-18" y1="0" x2="-28" y2="0" />
+                <line x1="18" y1="0" x2="28" y2="0" />
+                <line x1="13" y1="13" x2="20" y2="20" />
+                <line x1="-13" y1="13" x2="-20" y2="20" />
+                <line x1="13" y1="-13" x2="20" y2="-20" />
+                <line x1="-13" y1="-13" x2="-20" y2="-20" />
+              </g>
+              <circle r="6" fill="#fff" />
+            </g>
+            {/* Cursor icon */}
+            <g id="cursor" transform="translate(220,110)">
+              <polygon points="0,0 24,8 10,14 14,22 8,20 4,12" fill="#6366f1" stroke="#fff" strokeWidth="2" />
+            </g>
+            {/* Cloud icon */}
+            <g id="cloud" transform="translate(160,220)">
+              <ellipse rx="32" ry="16" fill="#a5b4fc" />
+              <ellipse rx="16" ry="12" cx="-18" cy="-6" fill="#818cf8" />
+              <ellipse rx="12" ry="10" cx="20" cy="-8" fill="#6366f1" />
+            </g>
+            {/* Glowing orbit lines */}
+            <ellipse id="orbit1" cx="200" cy="140" rx="120" ry="60" fill="none" stroke="#a78bfa" strokeWidth="2" opacity="0.3" />
+            <ellipse id="orbit2" cx="200" cy="140" rx="90" ry="30" fill="none" stroke="#fbbf24" strokeWidth="2" opacity="0.2" />
+          </svg>
+          <style>{`.gsap-hero-collage-shape { filter: drop-shadow(0 4px 24px rgba(80,0,200,0.08)); }`}</style>
         </div>
       </section>
 
@@ -489,16 +561,25 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 py-8 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-lg text-black dark:text-white">B</span>
-            <span className="text-gray-600 dark:text-gray-300">© {new Date().getFullYear()} Website Builder. All rights reserved.</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col items-center gap-6 md:gap-4 md:flex-row md:justify-between md:items-center">
+          <div className="flex flex-col items-center md:items-start gap-2">
+            <span className="font-bold text-lg text-black dark:text-white">Website Builder</span>
+            <span className="text-gray-600 dark:text-gray-300">© {new Date().getFullYear()} All rights reserved.</span>
           </div>
-          <nav className="flex gap-6 text-sm font-medium">
+          <nav className="flex flex-wrap justify-center gap-6 text-sm font-medium">
             <Link href="#features" className="hover:text-purple-600 transition">Features</Link>
             <Link href="#templates" className="hover:text-purple-600 transition">Templates</Link>
             <Link href="#pricing" className="hover:text-purple-600 transition">Pricing</Link>
+            <Link href="/about" className="hover:text-purple-600 transition">About Us</Link>
           </nav>
+          <div className="flex gap-4 justify-center">
+            <a href="https://github.com/" target="_blank" rel="noopener" className="text-gray-400 hover:text-black dark:hover:text-white transition">
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.373 0 12c0 5.303 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.84 1.237 1.84 1.237 1.07 1.834 2.809 1.304 3.495.997.108-.775.418-1.305.762-1.605-2.665-.305-5.466-1.334-5.466-5.931 0-1.31.469-2.381 1.236-3.221-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.984-.399 3.003-.404 1.019.005 2.047.138 3.006.404 2.291-1.553 3.297-1.23 3.297-1.23.653 1.653.242 2.873.119 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.803 5.624-5.475 5.921.43.371.823 1.102.823 2.222v3.293c0 .322.218.694.825.576C20.565 21.796 24 17.299 24 12c0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+            <a href="https://twitter.com/" target="_blank" rel="noopener" className="text-gray-400 hover:text-blue-500 transition">
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557a9.93 9.93 0 01-2.828.775 4.932 4.932 0 002.165-2.724c-.951.564-2.005.974-3.127 1.195a4.92 4.92 0 00-8.384 4.482C7.691 8.095 4.066 6.13 1.64 3.161c-.542.93-.856 2.01-.857 3.17 0 2.188 1.115 4.117 2.823 5.254a4.904 4.904 0 01-2.229-.616c-.054 2.281 1.581 4.415 3.949 4.89a4.936 4.936 0 01-2.224.084c.627 1.956 2.444 3.377 4.6 3.417A9.867 9.867 0 010 21.543a13.94 13.94 0 007.548 2.209c9.058 0 14.009-7.513 14.009-14.009 0-.213-.005-.425-.014-.636A10.012 10.012 0 0024 4.557z"/></svg>
+            </a>
+          </div>
         </div>
       </footer>
     </div>
