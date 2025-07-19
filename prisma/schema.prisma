@@ -40,6 +40,7 @@ model User {
   activities    Activity[]
   purchasedTemplates PurchasedTemplate[]
   myTemplates   MyTemplate[]
+  transactions  Transaction[]
 }
 
 // User role enum
@@ -354,4 +355,18 @@ model MyTemplate {
   template    Template @relation(fields: [templateId], references: [id], onDelete: Cascade)
 
   @@unique([userId, templateId])
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  type        String   // e.g., 'payment', 'refund', 'payout'
+  amount      Float
+  currency    String
+  status      String   // e.g., 'pending', 'completed', 'failed'
+  reference   String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

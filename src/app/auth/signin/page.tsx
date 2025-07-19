@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
+import { FaGoogle, FaGithub } from 'react-icons/fa';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
@@ -35,71 +36,71 @@ export default function SignInPage() {
   return (
     <>
       <Toaster position="top-right" />
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-900">
-        <div className="w-full max-w-md p-8 space-y-8 card">
-          <div>
-            <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900 dark:text-white">Sign in to your account</h2>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-2xl shadow-2xl border border-purple-100">
+          <div className="flex flex-col items-center">
+            <span className="mb-2 text-4xl font-extrabold text-purple-600">🔑</span>
+            <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900 tracking-tight">Sign in to your account</h2>
           </div>
-          <div className="flex flex-col gap-3">
+          {/* Social Sign In Buttons */}
+          <div className="flex flex-col gap-3 mt-4">
             <button
               type="button"
-              className="btn-secondary w-full flex items-center justify-center"
+              className="flex items-center justify-center gap-3 w-full py-2 rounded-lg font-semibold shadow transition-all text-white bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-red-400"
               onClick={() => signIn('google', { callbackUrl: '/' })}
             >
-              <svg className="h-5 w-5 mr-2" viewBox="0 0 48 48"><g><path d="M44.5 20H24v8.5h11.7C34.7 33.1 29.8 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c2.7 0 5.2.9 7.2 2.4l6.4-6.4C34.1 5.1 29.3 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20.1-7.6 20.1-21 0-1.4-.1-2.7-.3-4z" fill="#FFC107"/><path d="M6.3 14.7l7 5.1C15.5 16.1 19.4 13 24 13c2.7 0 5.2.9 7.2 2.4l6.4-6.4C34.1 5.1 29.3 3 24 3c-7.2 0-13.4 3.7-17.1 9.4l-.6 2.3z" fill="#FF3D00"/><path d="M24 45c5.4 0 10.3-1.8 14.1-4.9l-6.5-5.3C29.8 36 24 36 24 36c-5.8 0-10.7-2.9-13.7-7.2l-7 5.4C6.6 41.2 14.7 45 24 45z" fill="#4CAF50"/><path d="M44.5 20H24v8.5h11.7C34.7 33.1 29.8 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c2.7 0 5.2.9 7.2 2.4l6.4-6.4C34.1 5.1 29.3 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20.1-7.6 20.1-21 0-1.4-.1-2.7-.3-4z" fill="none"/></g></svg>
-              Sign in with Google
+              <FaGoogle className="w-5 h-5" /> Sign in with Google
             </button>
             <button
               type="button"
-              className="btn-secondary w-full flex items-center justify-center"
+              className="flex items-center justify-center gap-3 w-full py-2 rounded-lg font-semibold shadow transition-all text-white bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-700"
               onClick={() => signIn('github', { callbackUrl: '/' })}
             >
-              <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.373 0 12c0 5.303 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.84 1.237 1.84 1.237 1.07 1.834 2.809 1.304 3.495.997.108-.775.418-1.305.762-1.605-2.665-.305-5.466-1.334-5.466-5.931 0-1.31.469-2.381 1.236-3.221-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.984-.399 3.003-.404 1.019.005 2.047.138 3.006.404 2.291-1.553 3.297-1.23 3.297-1.23.653 1.653.242 2.873.119 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.803 5.624-5.475 5.921.43.371.823 1.102.823 2.222v3.293c0 .322.218.694.825.576C20.565 21.796 24 17.299 24 12c0-6.627-5.373-12-12-12z"/></svg>
-              Sign in with GitHub
+              <FaGithub className="w-5 h-5" /> Sign in with GitHub
             </button>
           </div>
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300 dark:border-slate-600" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white dark:bg-slate-900 px-2 text-gray-500 dark:text-gray-400">or sign in with email</span>
-            </div>
+          {/* Divider */}
+          <div className="flex items-center my-6">
+            <div className="flex-grow h-px bg-gray-200" />
+            <span className="mx-3 text-gray-400 text-sm">or sign in with email</span>
+            <div className="flex-grow h-px bg-gray-200" />
           </div>
           <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="rounded-md shadow-sm -space-y-px">
-              <div className="mb-4">
-                <label htmlFor="email" className="label">Email address</label>
+            <div className="space-y-6">
+              <div className="relative">
                 <input
                   id="email"
                   name="email"
                   type="email"
                   autoComplete="email"
                   required
-                  className="input-field"
+                  className="input-field peer placeholder-transparent focus:border-purple-500 focus:ring-2 focus:ring-purple-400"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
+                  placeholder="Email address"
                 />
+                <label htmlFor="email" className="absolute left-3 top-2 text-gray-500 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-600 bg-white px-1 pointer-events-none">Email address</label>
               </div>
-              <div>
-                <label htmlFor="password" className="label">Password</label>
+              <div className="relative">
                 <input
                   id="password"
                   name="password"
                   type="password"
                   autoComplete="current-password"
                   required
-                  className="input-field"
+                  className="input-field peer placeholder-transparent focus:border-purple-500 focus:ring-2 focus:ring-purple-400"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
+                  placeholder="Password"
                 />
+                <label htmlFor="password" className="absolute left-3 top-2 text-gray-500 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-600 bg-white px-1 pointer-events-none">Password</label>
               </div>
             </div>
             {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
             <div>
               <button
                 type="submit"
-                className="btn-primary w-full"
+                className="w-full py-2 rounded-lg font-bold shadow bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white text-lg transition focus:outline-none focus:ring-2 focus:ring-purple-400"
                 disabled={loading}
               >
                 {loading ? 'Signing in...' : 'Sign In'}

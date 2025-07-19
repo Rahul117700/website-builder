@@ -2,6 +2,9 @@
 import DashboardLayout from '@/components/layouts/dashboard-layout';
 import { useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
+import StarIcon from '@mui/icons-material/Star';
+import PublicIcon from '@mui/icons-material/Public';
+import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 
 export default function PricingPage() {
   const [plans, setPlans] = useState<any[]>([]);
@@ -109,32 +112,58 @@ export default function PricingPage() {
             <div className="mb-4 p-4 rounded-lg bg-gray-50 dark:bg-slate-700 text-gray-500 dark:text-gray-400">No active plan</div>
           )}
           <h2 className="text-lg font-medium text-gray-900 dark:text-white mt-6 mb-2">Available Plans</h2>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {plans.map(plan => (
-              <div key={plan.id} className={`p-4 border rounded-lg ${currentPlan && currentPlan.id === plan.id ? 'bg-purple-50 dark:bg-purple-900/10 border-purple-600' : 'bg-gray-50 dark:bg-slate-700 border-gray-200 dark:border-slate-700'}`}>
-                <div className="font-semibold">{plan.name}</div>
-                <div className="text-gray-700 dark:text-gray-200">₹{plan.price}/{plan.interval}</div>
-                <div className="text-gray-500 dark:text-gray-400 text-sm mb-2">{plan.description}</div>
-                <ul className="mb-2 text-xs text-gray-600 dark:text-gray-300 list-disc list-inside">
-                  {(() => {
-                    const features: string[] = [];
-                    if (plan.unlimitedWebsites) {
-                      features.push('Unlimited Websites');
-                    } else if (plan.numberOfWebsites) {
-                      features.push(`${plan.numberOfWebsites} Website${plan.numberOfWebsites === 1 ? '' : 's'}`);
-                    }
-                    if (plan.supportLevel) features.push(`${plan.supportLevel} Support`);
-                    if (plan.customDomain) features.push('Custom Domain');
-                    if (plan.advancedAnalytics) features.push('Advanced Analytics');
-                    if (plan.customIntegrations) features.push('Custom Integrations');
-                    if (plan.teamManagement) features.push('Team Management');
-                    if (plan.communityAccess) features.push('Community Access');
-                    return features.map(f => <li key={f}>{f}</li>);
-                  })()}
-                </ul>
-                <button className={`w-full py-2 rounded-lg font-semibold shadow ${currentPlan && currentPlan.id === plan.id ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700 text-white transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2'}`} disabled={currentPlan && currentPlan.id === plan.id} onClick={() => handleUpgrade(plan)}> {currentPlan && currentPlan.id === plan.id ? 'Current Plan' : 'Upgrade'} </button>
-              </div>
-            ))}
+          <div className="max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {plans.map((plan, idx) => {
+                // Icon and color per plan
+                let Icon = PublicIcon;
+                let btnColor = 'bg-purple-600 hover:bg-purple-700';
+                let iconColor = 'text-purple-600';
+                let badge = null;
+                if (plan.name.toLowerCase().includes('pro')) {
+                  Icon = StarIcon;
+                  btnColor = 'bg-orange-500 hover:bg-orange-600';
+                  iconColor = 'text-orange-500';
+                  badge = (
+                    <span className="absolute top-4 left-1/2 -translate-x-1/2 bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow">Most Popular</span>
+                  );
+                } else if (plan.name.toLowerCase().includes('business')) {
+                  Icon = BusinessCenterIcon;
+                  btnColor = 'bg-sky-600 hover:bg-sky-700';
+                  iconColor = 'text-sky-600';
+                }
+                return (
+                  <div key={plan.id} className={`relative flex flex-col h-full min-h-[480px] max-w-xs mx-auto rounded-2xl shadow-lg transition-transform duration-200 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 hover:scale-105 hover:shadow-2xl p-8 ${currentPlan && currentPlan.id === plan.id ? 'ring-2 ring-purple-500' : ''}`}> 
+                    {badge}
+                    <div className={`mb-4 text-5xl ${iconColor}`}><Icon fontSize="inherit" /></div>
+                    <div className="font-extrabold text-xl mb-1 text-center w-full">{plan.name}</div>
+                    <div className="text-4xl font-black mb-1 text-center w-full">{plan.price === 0 ? 'Free' : `₹${plan.price}`}</div>
+                    <div className="text-gray-500 dark:text-gray-400 mb-4 text-center w-full">per {plan.interval}</div>
+                    <ul className="mb-4 text-base text-gray-700 dark:text-gray-300 list-disc list-inside text-left w-full px-2">
+                      {(() => {
+                        const features: string[] = [];
+                        if (plan.unlimitedWebsites) {
+                          features.push('Unlimited Websites');
+                        } else if (plan.numberOfWebsites) {
+                          features.push(`${plan.numberOfWebsites} Website${plan.numberOfWebsites === 1 ? '' : 's'}`);
+                        }
+                        if (plan.supportLevel) features.push(`${plan.supportLevel} Support`);
+                        if (plan.customDomain) features.push('Custom Domain');
+                        if (plan.advancedAnalytics) features.push('Advanced Analytics');
+                        if (plan.customIntegrations) features.push('Custom Integrations');
+                        if (plan.teamManagement) features.push('Team Management');
+                        if (plan.communityAccess) features.push('Community Access');
+                        return features.map(f => <li key={f}>{f}</li>);
+                      })()}
+                    </ul>
+                    <div className="flex-grow" />
+                    <button className={`w-full py-3 mt-4 rounded-xl font-bold shadow transition-colors text-white text-lg ${btnColor} ${currentPlan && currentPlan.id === plan.id ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : ''}`} disabled={currentPlan && currentPlan.id === plan.id} onClick={() => handleUpgrade(plan)}>
+                      {currentPlan && currentPlan.id === plan.id ? 'Current Plan' : plan.price === 0 ? 'Get Started' : 'Choose Plan'}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
