@@ -21,14 +21,30 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// POST /api/notifications - Mark notifications as read
+// POST /api/notifications - Mark notifications as read or create test notification
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const { id, all } = await req.json();
+    
+    const body = await req.json();
+    
+    // Handle test notification creation
+    if (body.type === 'test') {
+      const notification = await prisma.notification.create({
+        data: {
+          userId: session.user.id,
+          type: 'test',
+          message: body.message,
+        },
+      });
+      return NextResponse.json(notification, { status: 201 });
+    }
+    
+    // Handle marking notifications as read
+    const { id, all } = body;
     if (all) {
       await prisma.notification.updateMany({
         where: { userId: session.user.id, read: false },

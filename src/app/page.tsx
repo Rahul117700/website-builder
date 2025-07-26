@@ -1,8 +1,9 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import PricingPlans from "@/components/PricingPlans";
 
 
 
@@ -13,29 +14,6 @@ export default function HomePage() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [templates, setTemplates] = useState<any[]>([]);
-  const [theme, setTheme] = useState('light');
-
-
-  // Theme toggle function
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.classList.toggle('dark', newTheme === 'dark');
-  };
-
-  // Initialize theme from localStorage
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    setTheme(savedTheme);
-    document.documentElement.classList.toggle('dark', savedTheme === 'dark');
-  }, []);
-
-
-
-
-  
-
 
   useEffect(() => {
     async function fetchPlans() {
@@ -82,12 +60,12 @@ export default function HomePage() {
   }
 
       return (
-      <div className="min-h-screen bg-white dark:bg-gray-900">
+      <div className="min-h-screen bg-white dark:bg-black">
       
 
 
       {/* Simple Navbar */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm">
+      <header className="bg-white dark:bg-black shadow-sm border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -101,9 +79,9 @@ export default function HomePage() {
             <nav className="hidden md:flex space-x-8">
               <a href="#features" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Features</a>
               <a href="#templates" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Templates</a>
-              <a href="#pricing" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Pricing</a>
+              <a href="#pricing" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium" onClick={(e) => { e.preventDefault(); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); }}>Pricing</a>
               <button 
-                onClick={() => router.push('/community')}
+                onClick={() => router.push('/auth/dashboard/community')}
                 className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium"
               >
                 Community
@@ -113,23 +91,6 @@ export default function HomePage() {
             
             {/* User/CTA Section */}
             <div className="flex items-center space-x-4">
-              {/* Theme Toggle Button */}
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                aria-label="Toggle theme"
-              >
-                {theme === 'light' ? (
-                  <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                )}
-              </button>
-              
               <a href="/auth/dashboard" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">Go to Dashboard</a>
               {session?.user ? (
                 <div className="flex items-center space-x-3">
@@ -138,7 +99,7 @@ export default function HomePage() {
                     <span className="text-gray-700 dark:text-gray-300 text-sm">{session.user.name || session.user.email}</span>
                   </div>
                   <button
-                    onClick={() => router.push('/auth/signout')}
+                    onClick={() => signOut({ callbackUrl: '/auth/signin' })}
                     className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                     aria-label="Sign out"
                     title="Sign out"
@@ -170,11 +131,11 @@ export default function HomePage() {
             <nav className="flex flex-col space-y-4 text-center">
               <a href="#features" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>Features</a>
               <a href="#templates" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>Templates</a>
-              <a href="#pricing" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
+              <a href="#pricing" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-base font-medium" onClick={(e) => { e.preventDefault(); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); setMobileMenuOpen(false); }}>Pricing</a>
               <button 
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  router.push('/community');
+                  router.push('/auth/dashboard/community');
                 }}
                 className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-base font-medium"
               >
@@ -189,7 +150,7 @@ export default function HomePage() {
                   <button
                     onClick={() => {
                       setMobileMenuOpen(false);
-                      router.push('/auth/signout');
+                      signOut({ callbackUrl: '/auth/signin' });
                     }}
                     className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                     aria-label="Sign out"
@@ -205,17 +166,17 @@ export default function HomePage() {
         )}
       
       {/* Enhanced Hero Section */}
-      <section className="flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto px-4 sm:px-8 py-20 gap-12 relative">
+      <section className="flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto px-4 sm:px-8 py-20 gap-12 relative bg-black dark:bg-black">
         <div className="flex-1">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-purple-100 dark:bg-purple-900/30 px-4 py-2 rounded-full mb-6">
-            <span className="w-2 h-2 bg-purple-600 rounded-full animate-pulse"></span>
-            <span className="text-sm font-medium text-purple-700 dark:text-purple-300">AI-Powered Website Builder</span>
+          <div className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-900 px-4 py-2 rounded-full mb-6">
+            <span className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">AI-Powered Website Builder</span>
           </div>
           
           <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
             Build, launch, and grow your website with{' '}
-            <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               AI-powered tools
             </span>{' '}
             and stunning templates
@@ -339,16 +300,16 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="bg-gray-50 dark:bg-slate-800 py-20">
+      <section id="features" className="bg-gray-50 dark:bg-black py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Features</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* AI-Powered Editor Card */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-6 flex flex-col items-center relative overflow-hidden group hover:shadow-2xl transition-all duration-300">
+            <div className="bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 flex flex-col items-center relative overflow-hidden group hover:shadow-2xl transition-all duration-300">
               {/* Growth Chart Background */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900/20 dark:to-purple-800/20 rounded-full -translate-y-16 translate-x-16 opacity-60 group-hover:scale-110 transition-transform duration-300"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/20 dark:to-blue-800/20 rounded-full -translate-y-16 translate-x-16 opacity-60 group-hover:scale-110 transition-transform duration-300"></div>
               
-              <span className="bg-purple-100 text-purple-600 rounded-full p-3 mb-4 relative z-10">
+              <span className="bg-blue-100 text-blue-600 rounded-full p-3 mb-4 relative z-10">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
               </span>
               
@@ -496,86 +457,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-12 text-center">Pricing</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {/* Free Plan */}
-            <div className="flex flex-col items-center bg-white rounded-2xl shadow-lg border-2 border-gray-100 p-8 min-h-[520px] transition-all duration-200 hover:shadow-2xl">
-              <div className="mb-4 text-5xl text-green-500">
-                <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-              </div>
-              <div className="text-xl font-bold text-purple-600 mb-1">Free</div>
-              <div className="text-4xl font-extrabold text-gray-900 mb-1">Free</div>
-              <div className="text-gray-500 mb-4">per month</div>
-              <ul className="mb-8 text-gray-700 text-base list-disc list-inside text-left w-full px-2 flex-1">
-                <li>1 Website</li>
-                <li>Basic Support</li>
-                <li>Custom Domain</li>
-                <li>Community Access</li>
-              </ul>
-              <div className="flex-grow" />
-              <button className="w-full py-3 rounded-xl font-bold shadow transition-colors text-white text-lg bg-green-600 hover:bg-green-700 flex items-center justify-center gap-2 mt-4">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                Get Started
-              </button>
-            </div>
-            {/* Pro Plan (Highlighted) */}
-            <div className="flex flex-col items-center bg-white rounded-2xl shadow-lg border-2 border-orange-400 p-8 min-h-[520px] transition-all duration-200 hover:shadow-2xl relative">
-              {/* Badge */}
-              <span className="absolute -top-5 left-1/2 -translate-x-1/2 bg-orange-500 text-white px-4 py-1 rounded-full text-xs font-bold shadow flex items-center gap-2">
-                Most Popular
-                <svg className="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polygon points="12,2 15,8.5 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 9,8.5" /></svg>
-              </span>
-              <div className="mb-4 text-5xl text-orange-500 mt-6">
-                <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polygon points="12,2 15,8.5 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 9,8.5" /></svg>
-              </div>
-              <div className="text-xl font-bold text-purple-600 mb-1">Pro</div>
-              <div className="text-4xl font-extrabold text-gray-900 mb-1">₹999</div>
-              <div className="text-gray-500 mb-4">per month</div>
-              <ul className="mb-8 text-gray-700 text-base list-disc list-inside text-left w-full px-2 flex-1">
-                <li>10 Websites</li>
-                <li>Priority Support</li>
-                <li>Custom Domain</li>
-                <li>Advanced Analytics</li>
-                <li>Community Access</li>
-              </ul>
-              <div className="flex-grow" />
-              <button className="w-full py-3 rounded-xl font-bold shadow transition-colors text-white text-lg bg-orange-500 hover:bg-orange-600 flex items-center justify-center gap-2 mt-4">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                Choose Plan
-              </button>
-            </div>
-            {/* Business Plan */}
-            <div className="flex flex-col items-center bg-white rounded-2xl shadow-lg border-2 border-gray-100 p-8 min-h-[520px] transition-all duration-200 hover:shadow-2xl">
-              <div className="mb-4 text-5xl text-blue-500">
-                <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" /></svg>
-              </div>
-              <div className="text-xl font-bold text-purple-600 mb-1">Business</div>
-              <div className="text-4xl font-extrabold text-gray-900 mb-1">₹2499</div>
-              <div className="text-gray-500 mb-4">per month</div>
-              <ul className="mb-8 text-gray-700 text-base list-disc list-inside text-left w-full px-2 flex-1">
-                <li>Unlimited Websites</li>
-                <li>Dedicated Support</li>
-                <li>Custom Domain</li>
-                <li>Advanced Analytics</li>
-                <li>Custom Integrations</li>
-                <li>Team Management</li>
-                <li>Community Access</li>
-              </ul>
-              <div className="flex-grow" />
-              <button className="w-full py-3 rounded-xl font-bold shadow transition-colors text-white text-lg bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2 mt-4">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                Choose Plan
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       {/* Templates Showcase */}
-      <section id="templates" className="bg-gray-50 dark:bg-slate-800 py-20">
+      <section id="templates" className="bg-gray-50 dark:bg-black py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Templates</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -583,11 +468,11 @@ export default function HomePage() {
               <div className="col-span-3 text-center text-gray-500 dark:text-gray-400">No templates available.</div>
             ) : (
               templates.map((tpl) => (
-                <div key={tpl.id} className="relative flex flex-col h-full min-h-[480px] max-w-xs mx-auto rounded-2xl shadow-lg transition-all duration-300 bg-white dark:bg-slate-900 border-2 border-purple-100 dark:border-slate-700 p-6 items-center group hover:shadow-2xl hover:border-purple-400">
+                <div key={tpl.id} className="relative flex flex-col h-full min-h-[480px] max-w-xs mx-auto rounded-2xl shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 border-2 border-gray-100 dark:border-gray-800 p-6 items-center group hover:shadow-2xl hover:border-blue-400">
                   {/* Badge */}
-                  <span className="absolute top-4 left-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg z-10">Template</span>
+                  <span className="absolute top-4 left-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg z-10">Template</span>
                   {/* Template Name */}
-                  <h3 className="text-xl font-bold mb-3 text-center w-full text-purple-700 dark:text-purple-300 truncate">{tpl.name}</h3>
+                  <h3 className="text-xl font-bold mb-3 text-center w-full text-blue-700 dark:text-blue-300 truncate">{tpl.name}</h3>
                   {/* Image with overlay */}
                   <div className="relative w-full h-48 mb-4 flex items-center justify-center rounded-xl overflow-hidden shadow group-hover:scale-105 transition-transform duration-300">
                     {tpl.preview ? (
@@ -624,7 +509,7 @@ export default function HomePage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 bg-white dark:bg-slate-900">
+      <section className="py-20 bg-white dark:bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 animate-on-scroll text-reveal">How It Works</h2>
@@ -637,7 +522,7 @@ export default function HomePage() {
                 title: "Choose a Template",
                 description: "Browse our collection of stunning, responsive templates designed for every industry",
                 icon: "🎨",
-                color: "purple"
+                color: "blue"
               },
               {
                 step: "02", 
@@ -662,7 +547,7 @@ export default function HomePage() {
               }
             ].map((item, index) => (
               <div key={index} className="relative group">
-                <div className={`bg-gradient-to-br from-${item.color}-100 to-${item.color}-200 dark:from-${item.color}-900/20 dark:to-${item.color}-800/20 rounded-2xl p-8 text-center h-full hover:shadow-xl transition-all duration-300`}>
+                <div className={`bg-gradient-to-br from-${item.color}-100 to-${item.color}-200 dark:from-gray-900 dark:to-black rounded-2xl p-8 text-center h-full hover:shadow-xl transition-all duration-300`}>
                   <div className={`text-6xl mb-4`}>{item.icon}</div>
                   <div className={`inline-flex items-center justify-center w-12 h-12 bg-${item.color}-600 text-white rounded-full text-lg font-bold mb-4`}>
                     {item.step}
@@ -684,7 +569,7 @@ export default function HomePage() {
       </section>
 
       {/* Social Proof Section */}
-      <section className="py-20 bg-gray-50 dark:bg-slate-800">
+      <section className="py-20 bg-gray-50 dark:bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Trusted by Thousands</h2>
@@ -725,7 +610,7 @@ export default function HomePage() {
                 text: "From concept to launch in under 2 hours! The analytics dashboard helps us track performance perfectly."
               }
             ].map((testimonial, index) => (
-              <div key={index} className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div key={index} className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300">
                 <div className="flex items-center mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
                     <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -748,7 +633,7 @@ export default function HomePage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-white dark:bg-slate-900">
+      <section className="py-20 bg-white dark:bg-black">
         <div className="max-w-4xl mx-auto px-4 sm:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Frequently Asked Questions</h2>
@@ -778,7 +663,7 @@ export default function HomePage() {
                 answer: "We provide 24/7 customer support via chat, email, and phone. Plus, our comprehensive knowledge base and video tutorials."
               }
             ].map((faq, index) => (
-              <div key={index} className="bg-gray-50 dark:bg-slate-800 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+              <div key={index} className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">{faq.question}</h3>
                 <p className="text-gray-600 dark:text-gray-300">{faq.answer}</p>
               </div>
@@ -787,43 +672,22 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Newsletter Signup Section */}
-      <section className="py-20 bg-gradient-to-r from-purple-600 to-blue-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
-          <h2 className="text-4xl font-bold text-white mb-4">Stay Updated</h2>
-          <p className="text-xl text-purple-100 mb-8">Get the latest tips, updates, and exclusive resources delivered to your inbox</p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <input 
-              type="email" 
-              placeholder="Enter your email address"
-              className="flex-1 px-6 py-3 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-white"
-            />
-            <button className="bg-white text-purple-600 font-bold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors duration-200">
-              Subscribe
-            </button>
-          </div>
-          
-          <p className="text-sm text-purple-200 mt-4">Join 10,000+ subscribers. Unsubscribe anytime.</p>
-        </div>
-      </section>
-
       {/* Live Demo Section */}
-      <section className="py-20 bg-gray-50 dark:bg-slate-800">
+      <section className="py-20 bg-gray-50 dark:bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">See It in Action</h2>
             <p className="text-xl text-gray-600 dark:text-gray-300">Watch how easy it is to create a stunning website</p>
           </div>
           
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden">
-            <div className="aspect-video bg-gray-200 dark:bg-slate-700 flex items-center justify-center">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl overflow-hidden">
+            <div className="aspect-video bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
               <div className="text-center">
                 <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <p className="text-gray-500 dark:text-gray-400">Demo Video Coming Soon</p>
-                <button className="mt-4 bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition-colors">
+                <button className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors">
                   Watch Demo
                 </button>
               </div>
@@ -833,7 +697,7 @@ export default function HomePage() {
       </section>
 
       {/* Team/About Section */}
-      <section className="py-20 bg-white dark:bg-slate-900">
+      <section className="py-20 bg-white dark:bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Meet Our Team</h2>
@@ -864,10 +728,10 @@ export default function HomePage() {
               <div key={index} className="text-center group">
                 <div className="relative mb-6">
                   <img src={member.image} alt={member.name} className="w-32 h-32 rounded-full mx-auto object-cover shadow-lg group-hover:scale-105 transition-transform duration-300" />
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{member.name}</h3>
-                <p className="text-purple-600 dark:text-purple-400 font-semibold mb-3">{member.role}</p>
+                <p className="text-blue-600 dark:text-blue-400 font-semibold mb-3">{member.role}</p>
                 <p className="text-gray-600 dark:text-gray-300">{member.bio}</p>
               </div>
             ))}
@@ -876,7 +740,7 @@ export default function HomePage() {
       </section>
 
       {/* Integration Showcase */}
-      <section className="py-20 bg-gray-50 dark:bg-slate-800">
+      <section className="py-20 bg-gray-50 dark:bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Integrations</h2>
@@ -894,7 +758,7 @@ export default function HomePage() {
               { name: "HubSpot", icon: "🎯", category: "CRM" },
               { name: "Notion", icon: "📝", category: "Productivity" }
             ].map((integration, index) => (
-              <div key={index} className="bg-white dark:bg-slate-900 rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300 group">
+              <div key={index} className="bg-white dark:bg-gray-900 rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300 group">
                 <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">{integration.icon}</div>
                 <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{integration.name}</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{integration.category}</p>
@@ -905,7 +769,7 @@ export default function HomePage() {
       </section>
 
       {/* Mobile App Section */}
-      <section className="py-20 bg-white dark:bg-slate-900">
+      <section className="py-20 bg-white dark:bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <div className="flex flex-col md:flex-row items-center gap-12">
             <div className="flex-1">
@@ -957,7 +821,7 @@ export default function HomePage() {
             
             <div className="flex-1 flex justify-center">
               <div className="relative">
-                <div className="w-64 h-96 bg-gray-200 dark:bg-slate-700 rounded-3xl border-8 border-gray-800 flex items-center justify-center">
+                <div className="w-64 h-96 bg-gray-200 dark:bg-gray-800 rounded-3xl border-8 border-gray-800 flex items-center justify-center">
                   <div className="text-center">
                     <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -971,33 +835,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Real-time Stats Section */}
-      <section className="py-20 bg-gradient-to-r from-purple-600 to-blue-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Live Statistics</h2>
-            <p className="text-xl text-purple-100">Real-time metrics from our platform</p>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { label: "Websites Created Today", value: "47", icon: "🌐" },
-              { label: "Active Users Online", value: "1,234", icon: "👥" },
-              { label: "Templates Downloaded", value: "892", icon: "📥" },
-              { label: "Support Tickets Resolved", value: "156", icon: "✅" }
-            ].map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-4xl mb-4">{stat.icon}</div>
-                <div className="text-3xl font-bold text-white mb-2">{stat.value}</div>
-                <div className="text-purple-200">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Performance Metrics */}
-      <section className="py-20 bg-white dark:bg-slate-900">
+      <section className="py-20 bg-white dark:bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Performance & Security</h2>
@@ -1025,10 +864,10 @@ export default function HomePage() {
                 icon: "🔒"
               }
             ].map((metric, index) => (
-              <div key={index} className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-8 text-center">
+              <div key={index} className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 text-center">
                 <div className="text-5xl mb-4">{metric.icon}</div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{metric.title}</h3>
-                <div className="text-4xl font-bold text-purple-600 mb-2">{metric.metric}</div>
+                <div className="text-4xl font-bold text-blue-600 mb-2">{metric.metric}</div>
                 <p className="text-gray-600 dark:text-gray-300">{metric.description}</p>
               </div>
             ))}
@@ -1037,7 +876,7 @@ export default function HomePage() {
       </section>
 
       {/* Trust Signals Section */}
-      <section className="py-20 bg-gray-50 dark:bg-slate-800">
+      <section className="py-20 bg-gray-50 dark:bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Why Trust Us?</h2>
@@ -1067,7 +906,7 @@ export default function HomePage() {
                 icon: "🏆"
               }
             ].map((signal, index) => (
-              <div key={index} className="bg-white dark:bg-slate-900 rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300">
+              <div key={index} className="bg-white dark:bg-gray-900 rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300">
                 <div className="text-4xl mb-4">{signal.icon}</div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">{signal.title}</h3>
                 <p className="text-gray-600 dark:text-gray-300">{signal.description}</p>
@@ -1078,7 +917,7 @@ export default function HomePage() {
       </section>
 
       {/* Community Section */}
-      <section className="py-20 bg-white dark:bg-slate-900">
+      <section className="py-20 bg-white dark:bg-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Join Our Community</h2>
@@ -1106,11 +945,11 @@ export default function HomePage() {
                 icon: "📚"
               }
             ].map((community, index) => (
-              <div key={index} className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-2xl p-8 text-center">
+              <div key={index} className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-black rounded-2xl p-8 text-center">
                 <div className="text-5xl mb-4">{community.icon}</div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{community.title}</h3>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">{community.description}</p>
-                <div className="text-2xl font-bold text-purple-600">{community.members} members</div>
+                <div className="text-2xl font-bold text-blue-600">{community.members} members</div>
               </div>
             ))}
           </div>
@@ -1152,90 +991,15 @@ export default function HomePage() {
       </div>
 
       {/* Progress Indicator */}
-      <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 dark:bg-slate-700 z-50">
-        <div className="h-full bg-gradient-to-r from-purple-600 to-blue-600 transition-all duration-300" style={{ width: '0%' }}></div>
+      <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 dark:bg-gray-800 z-50">
+        <div className="h-full bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300" style={{ width: '0%' }}></div>
       </div>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-12 text-center">Pricing</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {/* Free Plan */}
-            <div className="flex flex-col items-center bg-white rounded-2xl shadow-lg border-2 border-gray-100 p-8 min-h-[520px] transition-all duration-200 hover:shadow-2xl">
-              <div className="mb-4 text-5xl text-green-500">
-                <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-              </div>
-              <div className="text-xl font-bold text-purple-600 mb-1">Free</div>
-              <div className="text-4xl font-extrabold text-gray-900 mb-1">Free</div>
-              <div className="text-gray-500 mb-4">per month</div>
-              <ul className="mb-8 text-gray-700 text-base list-disc list-inside text-left w-full px-2 flex-1">
-                <li>1 Website</li>
-                <li>Basic Support</li>
-                <li>Custom Domain</li>
-                <li>Community Access</li>
-              </ul>
-              <div className="flex-grow" />
-              <button className="w-full py-3 rounded-xl font-bold shadow transition-colors text-white text-lg bg-green-600 hover:bg-green-700 flex items-center justify-center gap-2 mt-4">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                Get Started
-              </button>
-            </div>
-            {/* Pro Plan (Highlighted) */}
-            <div className="flex flex-col items-center bg-white rounded-2xl shadow-lg border-2 border-orange-400 p-8 min-h-[520px] transition-all duration-200 hover:shadow-2xl relative">
-              {/* Badge */}
-              <span className="absolute -top-5 left-1/2 -translate-x-1/2 bg-orange-500 text-white px-4 py-1 rounded-full text-xs font-bold shadow flex items-center gap-2">
-                Most Popular
-                <svg className="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polygon points="12,2 15,8.5 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 9,8.5" /></svg>
-              </span>
-              <div className="mb-4 text-5xl text-orange-500 mt-6">
-                <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polygon points="12,2 15,8.5 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 9,8.5" /></svg>
-              </div>
-              <div className="text-xl font-bold text-purple-600 mb-1">Pro</div>
-              <div className="text-4xl font-extrabold text-gray-900 mb-1">₹999</div>
-              <div className="text-gray-500 mb-4">per month</div>
-              <ul className="mb-8 text-gray-700 text-base list-disc list-inside text-left w-full px-2 flex-1">
-                <li>10 Websites</li>
-                <li>Priority Support</li>
-                <li>Custom Domain</li>
-                <li>Advanced Analytics</li>
-                <li>Community Access</li>
-              </ul>
-              <div className="flex-grow" />
-              <button className="w-full py-3 rounded-xl font-bold shadow transition-colors text-white text-lg bg-orange-500 hover:bg-orange-600 flex items-center justify-center gap-2 mt-4">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                Choose Plan
-              </button>
-            </div>
-            {/* Business Plan */}
-            <div className="flex flex-col items-center bg-white rounded-2xl shadow-lg border-2 border-gray-100 p-8 min-h-[520px] transition-all duration-200 hover:shadow-2xl">
-              <div className="mb-4 text-5xl text-blue-500">
-                <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" /></svg>
-              </div>
-              <div className="text-xl font-bold text-purple-600 mb-1">Business</div>
-              <div className="text-4xl font-extrabold text-gray-900 mb-1">₹2499</div>
-              <div className="text-gray-500 mb-4">per month</div>
-              <ul className="mb-8 text-gray-700 text-base list-disc list-inside text-left w-full px-2 flex-1">
-                <li>Unlimited Websites</li>
-                <li>Dedicated Support</li>
-                <li>Custom Domain</li>
-                <li>Advanced Analytics</li>
-                <li>Custom Integrations</li>
-                <li>Team Management</li>
-                <li>Community Access</li>
-              </ul>
-              <div className="flex-grow" />
-              <button className="w-full py-3 rounded-xl font-bold shadow transition-colors text-white text-lg bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2 mt-4">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                Choose Plan
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Dynamic Pricing Section */}
+      <PricingPlans />
 
       {/* Templates Showcase */}
-      <section id="templates" className="bg-gray-50 dark:bg-slate-800 py-20">
+      <section id="templates" className="bg-gray-50 dark:bg-black py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Templates</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -1243,11 +1007,11 @@ export default function HomePage() {
               <div className="col-span-3 text-center text-gray-500 dark:text-gray-400">No templates available.</div>
             ) : (
               templates.map((tpl) => (
-                <div key={tpl.id} className="relative flex flex-col h-full min-h-[480px] max-w-xs mx-auto rounded-2xl shadow-lg transition-all duration-300 bg-white dark:bg-slate-900 border-2 border-purple-100 dark:border-slate-700 p-6 items-center group hover:shadow-2xl hover:border-purple-400">
+                <div key={tpl.id} className="relative flex flex-col h-full min-h-[480px] max-w-xs mx-auto rounded-2xl shadow-lg transition-all duration-300 bg-white dark:bg-gray-900 border-2 border-gray-100 dark:border-gray-800 p-6 items-center group hover:shadow-2xl hover:border-blue-400">
                   {/* Badge */}
-                  <span className="absolute top-4 left-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg z-10">Template</span>
+                  <span className="absolute top-4 left-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg z-10">Template</span>
                   {/* Template Name */}
-                  <h3 className="text-xl font-bold mb-3 text-center w-full text-purple-700 dark:text-purple-300 truncate">{tpl.name}</h3>
+                  <h3 className="text-xl font-bold mb-3 text-center w-full text-blue-700 dark:text-blue-300 truncate">{tpl.name}</h3>
                   {/* Image with overlay */}
                   <div className="relative w-full h-48 mb-4 flex items-center justify-center rounded-xl overflow-hidden shadow group-hover:scale-105 transition-transform duration-300">
                     {tpl.preview ? (
@@ -1284,23 +1048,23 @@ export default function HomePage() {
       </section>
 
       {/* Testimonials/Stats Section */}
-      <section className="py-20 bg-gradient-to-b from-white via-gray-50 to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-purple-950">
+      <section className="py-20 bg-gradient-to-b from-white via-gray-50 to-gray-100 dark:from-black dark:via-black dark:to-gray-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-12 text-center">What Our Users Say</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
             {/* Testimonial Card 1 */}
-            <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-lg border-2 border-purple-100 dark:border-purple-900 p-8 flex flex-col items-center group hover:shadow-2xl transition-all duration-300">
+            <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-lg border-2 border-gray-100 dark:border-gray-800 p-8 flex flex-col items-center group hover:shadow-2xl transition-all duration-300">
               {/* Quote Icon */}
-              <span className="absolute -top-6 left-1/2 -translate-x-1/2 bg-purple-600 text-white rounded-full p-3 shadow-lg">
+              <span className="absolute -top-6 left-1/2 -translate-x-1/2 bg-blue-600 text-white rounded-full p-3 shadow-lg">
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 17h.01M15 17h.01M7 7h10v10a2 2 0 01-2 2H9a2 2 0 01-2-2V7z" /></svg>
               </span>
               {/* Avatar */}
-              <img src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg" alt="Priya S." className="w-16 h-16 rounded-full border-4 border-purple-200 dark:border-purple-700 mb-2 mt-4 shadow object-cover" />
+              <img src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg" alt="Priya S." className="w-16 h-16 rounded-full border-4 border-blue-200 dark:border-blue-700 mb-2 mt-4 shadow object-cover" />
               <p className="text-gray-700 dark:text-gray-300 text-center mb-4 mt-2 font-medium">"This builder made launching my business site a breeze. The templates are stunning and the dashboard is super easy to use!"</p>
-              <span className="font-bold text-purple-600 dark:text-purple-400 text-lg mt-2">Priya S.</span>
+              <span className="font-bold text-blue-600 dark:text-blue-400 text-lg mt-2">Priya S.</span>
             </div>
             {/* Testimonial Card 2 */}
-            <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-lg border-2 border-blue-100 dark:border-blue-900 p-8 flex flex-col items-center group hover:shadow-2xl transition-all duration-300">
+            <div className="relative bg-white dark:bg-gray-900 rounded-2xl shadow-lg border-2 border-gray-100 dark:border-gray-800 p-8 flex flex-col items-center group hover:shadow-2xl transition-all duration-300">
               {/* Quote Icon */}
               <span className="absolute -top-6 left-1/2 -translate-x-1/2 bg-blue-600 text-white rounded-full p-3 shadow-lg">
                 <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 17h.01M15 17h.01M7 7h10v10a2 2 0 01-2 2H9a2 2 0 01-2-2V7z" /></svg>
@@ -1312,10 +1076,10 @@ export default function HomePage() {
             </div>
           </div>
           {/* Stats Row */}
-          <div className="flex flex-col md:flex-row justify-center items-center gap-8 bg-white dark:bg-slate-900 rounded-2xl shadow p-8">
+          <div className="flex flex-col md:flex-row justify-center items-center gap-8 bg-white dark:bg-gray-900 rounded-2xl shadow p-8">
             <div className="flex flex-col items-center">
-              <span className="text-4xl font-extrabold text-purple-600 flex items-center gap-2 mb-1">
-                <svg className="w-7 h-7 text-purple-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+              <span className="text-4xl font-extrabold text-blue-600 flex items-center gap-2 mb-1">
+                <svg className="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
                 250+
               </span>
               <span className="text-gray-600 dark:text-gray-400">Websites Created</span>
@@ -1339,7 +1103,7 @@ export default function HomePage() {
       </section>
 
       {/* Developer Community Section */}
-      <section id="community" className="py-20 bg-gradient-to-b from-white via-gray-50 to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-purple-950">
+      <section id="community" className="py-20 bg-gradient-to-b from-white via-gray-50 to-gray-100 dark:from-black dark:via-black dark:to-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
@@ -1353,7 +1117,7 @@ export default function HomePage() {
           {/* Community Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
             <div className="text-center">
-              <div className="text-4xl font-bold text-purple-600 mb-2">2.5K+</div>
+              <div className="text-4xl font-bold text-blue-600 mb-2">2.5K+</div>
               <div className="text-gray-600 dark:text-gray-400">Active Developers</div>
             </div>
             <div className="text-center">
@@ -1372,9 +1136,9 @@ export default function HomePage() {
 
           {/* Community Features */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-slate-800 hover:shadow-xl transition-all duration-300">
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-6">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-800 hover:shadow-xl transition-all duration-300">
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-6">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-8a2 2 0 012-2h2" />
                 </svg>
               </div>
@@ -1383,14 +1147,14 @@ export default function HomePage() {
                 Showcase your websites, get feedback, and inspire others with your creative work.
               </p>
               <button 
-                onClick={() => router.push('/community')}
-                className="text-purple-600 hover:text-purple-700 font-semibold transition-colors"
+                onClick={() => router.push('/auth/dashboard/community')}
+                className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
               >
                 Share Project →
               </button>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-slate-800 hover:shadow-xl transition-all duration-300">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-800 hover:shadow-xl transition-all duration-300">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-6">
                 <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1401,14 +1165,14 @@ export default function HomePage() {
                 Get help from the community, share knowledge, and learn from experienced developers.
               </p>
               <button 
-                onClick={() => router.push('/community')}
+                onClick={() => router.push('/auth/dashboard/community')}
                 className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
               >
                 Ask Question →
               </button>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-slate-800 hover:shadow-xl transition-all duration-300">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-800 hover:shadow-xl transition-all duration-300">
               <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mb-6">
                 <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
@@ -1419,7 +1183,7 @@ export default function HomePage() {
                 Build relationships, find collaborators, and grow your professional network.
               </p>
               <button 
-                onClick={() => router.push('/community')}
+                onClick={() => router.push('/auth/dashboard/community')}
                 className="text-green-600 hover:text-green-700 font-semibold transition-colors"
               >
                 Join Network →
@@ -1428,19 +1192,19 @@ export default function HomePage() {
           </div>
 
           {/* Recent Discussions Preview */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-slate-800">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Recent Discussions</h3>
               <button 
-                onClick={() => router.push('/community')}
-                className="text-purple-600 hover:text-purple-700 font-semibold transition-colors"
+                onClick={() => router.push('/auth/dashboard/community')}
+                className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
               >
                 View All →
               </button>
             </div>
             
             <div className="space-y-6">
-              <div className="flex items-start space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+              <div className="flex items-start space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <img src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg" alt="User" className="w-10 h-10 rounded-full" />
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
@@ -1459,7 +1223,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="flex items-start space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+              <div className="flex items-start space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <img src="https://images.pexels.com/photos/1121796/pexels-photo-1121796.jpeg" alt="User" className="w-10 h-10 rounded-full" />
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
@@ -1478,13 +1242,13 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="flex items-start space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+              <div className="flex items-start space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg" alt="User" className="w-10 h-10 rounded-full" />
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">
                     <span className="font-semibold text-gray-900 dark:text-white">Mike Johnson</span>
                     <span className="text-sm text-gray-500">1 day ago</span>
-                    <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded-full">Tutorial</span>
+                    <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded-full">Tutorial</span>
                   </div>
                   <p className="text-gray-700 dark:text-gray-300 mb-2">
                     "Created a step-by-step guide for building e-commerce sites. Hope this helps beginners!"
@@ -1509,14 +1273,14 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button 
-                onClick={() => router.push('/community')}
-                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold px-8 py-4 rounded-full text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                onClick={() => router.push('/auth/dashboard/community')}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold px-8 py-4 rounded-full text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
                 Join Community
               </button>
               <button 
-                onClick={() => router.push('/community')}
-                className="bg-white dark:bg-slate-800 border-2 border-purple-600 text-purple-600 font-bold px-8 py-4 rounded-full text-lg shadow-lg hover:shadow-xl hover:bg-purple-50 dark:hover:bg-slate-700 transition-all duration-300 hover:scale-105"
+                onClick={() => router.push('/auth/dashboard/community')}
+                className="bg-white dark:bg-gray-900 border-2 border-blue-600 text-blue-600 font-bold px-8 py-4 rounded-full text-lg shadow-lg hover:shadow-xl hover:bg-blue-50 dark:hover:bg-gray-800 transition-all duration-300 hover:scale-105"
               >
                 Browse Discussions
               </button>
@@ -1525,21 +1289,62 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Final CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
+          <h2 className="text-4xl font-bold text-white mb-6">Ready to Build Your Website?</h2>
+          <p className="text-xl text-blue-100 mb-8">Join thousands of satisfied customers and start building your online presence today</p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              className="bg-white text-blue-600 font-bold px-8 py-4 rounded-full text-lg hover:bg-gray-100 transition-colors duration-200"
+              onClick={() => {
+                if (session?.user) router.push('/auth/dashboard');
+                else router.push('/auth/signup');
+              }}
+            >
+              Start Building Now
+            </button>
+            <Link href="#features" className="border-2 border-white text-white font-bold px-8 py-4 rounded-full text-lg hover:bg-white hover:text-blue-600 transition-colors duration-200">
+              Learn More
+            </Link>
+          </div>
+          
+          <p className="text-blue-200 mt-6">No credit card required • Free 14-day trial • Cancel anytime</p>
+        </div>
+      </section>
+
+      {/* Floating Chat Widget */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <button className="bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Progress Indicator */}
+      <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 dark:bg-gray-800 z-50">
+        <div className="h-full bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300" style={{ width: '0%' }}></div>
+      </div>
+
       {/* Footer */}
-      <footer className="bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-800 py-8 mt-auto">
+      <footer className="bg-white dark:bg-black border-t border-gray-200 dark:border-gray-800 py-8 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col items-center gap-6 md:gap-4 md:flex-row md:justify-between md:items-center">
           <div className="flex flex-col items-center md:items-start gap-2">
-            <span className="font-bold text-lg text-black dark:text-white">Website Builder</span>
-            <span className="text-gray-600 dark:text-gray-300">© {new Date().getFullYear()} All rights reserved.</span>
+            <span className="font-bold text-lg text-gray-900 dark:text-white">Website Builder</span>
+            <span className="text-gray-600 dark:text-gray-400">© {new Date().getFullYear()} All rights reserved.</span>
           </div>
           <nav className="flex flex-wrap justify-center gap-6 text-sm font-medium">
-            <Link href="#features" className="hover:text-purple-600 transition">Features</Link>
-            <Link href="#templates" className="hover:text-purple-600 transition">Templates</Link>
-            <Link href="#pricing" className="hover:text-purple-600 transition">Pricing</Link>
-            <Link href="/about" className="hover:text-purple-600 transition">About Us</Link>
+            <Link href="#features" className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition">Features</Link>
+            <Link href="#templates" className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition">Templates</Link>
+            <Link href="#pricing" className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition">Pricing</Link>
+            <Link href="/about" className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition">About Us</Link>
+            <Link href="/terms" className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition">Terms</Link>
+            <Link href="/privacy" className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition">Privacy</Link>
           </nav>
           <div className="flex gap-4 justify-center">
-            <a href="https://github.com/" target="_blank" rel="noopener" className="text-gray-400 hover:text-black dark:hover:text-white transition">
+            <a href="https://github.com/" target="_blank" rel="noopener" className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition">
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.373 0 12c0 5.303 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.84 1.237 1.84 1.237 1.07 1.834 2.809 1.304 3.495.997.108-.775.418-1.305.762-1.605-2.665-.305-5.466-1.334-5.466-5.931 0-1.31.469-2.381 1.236-3.221-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.984-.399 3.003-.404 1.019.005 2.047.138 3.006.404 2.291-1.553 3.297-1.23 3.297-1.23.653 1.653.242 2.873.119 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.803 5.624-5.475 5.921.43.371.823 1.102.823 2.222v3.293c0 .322.218.694.825.576C20.565 21.796 24 17.299 24 12c0-6.627-5.373-12-12-12z"/></svg>
             </a>
             <a href="https://twitter.com/" target="_blank" rel="noopener" className="text-gray-400 hover:text-blue-500 transition">

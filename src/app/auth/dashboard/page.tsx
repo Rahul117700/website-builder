@@ -267,7 +267,7 @@ export default function DashboardPage() {
           {(() => {
             let fastestSite: Site | null = null;
             let maxGrowth = -Infinity;
-            sites.forEach(site => {
+            sites.forEach((site: Site) => {
               const analytics = allSitesAnalytics[site.id];
               if (analytics?.timeSeriesData?.length > 1) {
                 const first = analytics.timeSeriesData[0].pageViews;
@@ -280,7 +280,7 @@ export default function DashboardPage() {
               }
             });
             return fastestSite ? (
-              <span className="text-lg font-semibold text-green-800 dark:text-green-200">{fastestSite.name} <span className="text-xs text-gray-500">(+{maxGrowth} views)</span></span>
+              <span className="text-lg font-semibold text-green-800 dark:text-green-200">{(fastestSite as Site).name} <span className="text-xs text-gray-500">(+{maxGrowth} views)</span></span>
             ) : (
               <span className="text-gray-500">No data yet.</span>
             );
@@ -293,7 +293,7 @@ export default function DashboardPage() {
             let spikeSite: Site | null = null;
             let maxSpike = -Infinity;
             let spikeDay = '';
-            sites.forEach(site => {
+            sites.forEach((site: Site) => {
               const analytics = allSitesAnalytics[site.id];
               if (analytics?.timeSeriesData?.length > 1) {
                 for (let i = 1; i < analytics.timeSeriesData.length; i++) {
@@ -307,7 +307,7 @@ export default function DashboardPage() {
               }
             });
             return spikeSite && maxSpike > 0 ? (
-              <span className="text-lg font-semibold text-blue-800 dark:text-blue-200">{spikeSite.name} <span className="text-xs text-gray-500">(+{maxSpike} views on {spikeDay})</span></span>
+              <span className="text-lg font-semibold text-blue-800 dark:text-blue-200">{(spikeSite as Site).name} <span className="text-xs text-gray-500">(+{maxSpike} views on {spikeDay})</span></span>
             ) : (
               <span className="text-gray-500">No spikes detected.</span>
             );
@@ -361,20 +361,20 @@ export default function DashboardPage() {
       <div className="grid gap-6 md:grid-cols-2">
         {/* Left column: Quick Stats + Analytics Overview */}
         <div className="flex flex-col gap-6 h-full">
-          <div className="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6">
+          <div className="bg-white dark:bg-black shadow-sm rounded-lg p-6">
             <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Quick Stats</h2>
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 dark:bg-slate-700 p-4 rounded-lg">
+              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
                 <p className="text-sm text-gray-500 dark:text-gray-400">Total Websites</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{sites?.length}</p>
               </div>
-              <div className="bg-gray-50 dark:bg-slate-700 p-4 rounded-lg">
+              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
                 <p className="text-sm text-gray-500 dark:text-gray-400">Total Visitors</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {Object.values(siteStats).reduce((sum, stat) => sum + (stat.pageViews || 0), 0)}
                 </p>
               </div>
-              <div className="bg-gray-50 dark:bg-slate-700 p-4 rounded-lg">
+              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
                 <p className="text-sm text-gray-500 dark:text-gray-400">Active Templates</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {sites?.length > 0 
@@ -383,7 +383,7 @@ export default function DashboardPage() {
                   }
                 </p>
               </div>
-              <div className="bg-gray-50 dark:bg-slate-700 p-4 rounded-lg">
+              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
                 <p className="text-sm text-gray-500 dark:text-gray-400">Custom Domains</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {sites?.filter(site => site.customDomain).length}
@@ -391,7 +391,7 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 flex-1">
+          <div className="bg-white dark:bg-black shadow-sm rounded-lg p-6 flex-1">
             <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Analytics Overview</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div className="flex flex-col items-center">
@@ -464,7 +464,7 @@ export default function DashboardPage() {
         </div>
         {/* Right column: Recent Activity + Notifications/Goal Progress */}
         <div className="flex flex-col gap-6 h-full">
-          <div className="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 mb-0">
+          <div className="bg-white dark:bg-black shadow-sm rounded-lg p-6 mb-0">
             <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Recent Activity</h2>
             <div className="space-y-4 overflow-y-auto" style={{ maxHeight: 400 }}>
               {activityFeed.length === 0 ? (
@@ -492,7 +492,7 @@ export default function DashboardPage() {
             </div>
           </div>
           {/* Notifications & Goal Progress card below Recent Activity */}
-          <div className="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 flex flex-col gap-4">
+          <div className="bg-white dark:bg-black shadow-sm rounded-lg p-6 flex flex-col gap-4">
             {/* Notifications/Alerts */}
             <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2">
               <BellIcon className="h-5 w-5 text-yellow-500" /> Notifications & Alerts

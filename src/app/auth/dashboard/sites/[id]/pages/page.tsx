@@ -78,7 +78,7 @@ export default function SitePages() {
     }
   };
 
-  const handleEditPage = async (data: { id: string; title: string; slug: string; content: string; isPublished: boolean }) => {
+  const handleEditPage = async (data: { id: string; title: string; slug: string; isPublished: boolean }) => {
     setError(null);
     try {
       const res = await fetch(`/api/pages/${data.id}`, {
@@ -87,7 +87,11 @@ export default function SitePages() {
           'Content-Type': 'application/json',
           'x-auth-token': localStorage.getItem('token') || '',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          title: data.title,
+          slug: data.slug,
+          isPublished: data.isPublished,
+        }),
       });
       if (!res.ok) {
         let msg = 'Failed to update page';
@@ -151,7 +155,7 @@ export default function SitePages() {
           Add, edit, or delete pages for your website.
         </p>
       </div>
-      <div className="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 mb-8">
+      <div className="bg-white dark:bg-black shadow-sm rounded-lg p-6 mb-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-medium text-gray-900 dark:text-white">Pages</h2>
           <button
@@ -163,12 +167,12 @@ export default function SitePages() {
         </div>
         {error && <div className="mb-4 text-red-600 dark:text-red-400 text-sm">{error}</div>}
         {loading ? (
-          <div className="text-center py-12 bg-gray-50 dark:bg-slate-700 rounded-lg">
+          <div className="text-center py-12 bg-gray-50 dark:bg-gray-900 rounded-lg">
             <span className="animate-spin h-6 w-6 border-4 border-purple-400 border-t-transparent rounded-full inline-block mb-2"></span>
             <div className="text-gray-500 dark:text-gray-400">Loading pages...</div>
           </div>
         ) : pages.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 dark:bg-slate-700 rounded-lg">
+          <div className="text-center py-12 bg-gray-50 dark:bg-gray-900 rounded-lg">
             <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No pages yet</h3>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               Get started by adding a new page.
@@ -176,7 +180,7 @@ export default function SitePages() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
               <thead>
                 <tr>
                   <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Title</th>
@@ -185,7 +189,7 @@ export default function SitePages() {
                   <th className="px-4 py-2"></th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-100 dark:divide-slate-700">
+              <tbody className="bg-white dark:bg-black divide-y divide-gray-100 dark:divide-gray-800">
                 {pages.map(page => (
                   <tr key={page.id}>
                     <td className="px-4 py-2 text-gray-900 dark:text-white flex items-center gap-2">

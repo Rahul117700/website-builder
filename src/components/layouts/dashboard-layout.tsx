@@ -13,8 +13,6 @@ import {
   CreditCardIcon, 
   Cog6ToothIcon, 
   ArrowRightOnRectangleIcon,
-  MoonIcon,
-  SunIcon,
   CubeIcon,
   ShoppingBagIcon,
   BanknotesIcon,
@@ -22,11 +20,19 @@ import {
   InboxArrowDownIcon,
   BellIcon,
   QuestionMarkCircleIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  UserGroupIcon,
+  ChatBubbleLeftIcon,
+  HeartIcon,
+  UserIcon
 } from '@heroicons/react/24/outline';
 import { useTheme } from 'next-themes';
 import { WelcomeModal } from '@/components/dashboard/welcome-modal';
 import { io as socketIOClient, Socket } from 'socket.io-client';
+import { useUserPlan } from '@/hooks/useUserPlan';
+import { getHiddenNavigationItems, canAccessPage } from '@/utils/planPermissions';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import NotificationSound from '@/components/NotificationSound';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -41,6 +47,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
+  const { userPlan, loading: planLoading } = useUserPlan();
+  const [isLoading, setIsLoading] = useState(false);
+  const [playNotificationSound, setPlayNotificationSound] = useState(false);
+  const [lastNotificationCount, setLastNotificationCount] = useState(0);
 
   // After mounting, we can access the theme
   useEffect(() => {
@@ -53,32 +63,96 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       // Fetch initial notifications
       fetch('/api/notifications')
         .then(res => res.json())
-        .then(data => setNotifications(Array.isArray(data) ? data : []));
+        .then(data => {
+          const notificationsArray = Array.isArray(data) ? data : [];
+          setNotifications(notificationsArray);
+          setLastNotificationCount(notificationsArray.length);
+        })
+        .catch(error => console.error('Error fetching notifications:', error));
+      
       // Connect to Socket.IO
-      socket = socketIOClient('http://localhost:4000'); // adjust if needed
-      socket.on('connect', () => {
-        socket!.emit('identify', session.user.id);
-      });
-      socket.on('notification', (notification) => {
-        setNotifications(prev => [notification, ...prev]);
-      });
+      try {
+        socket = socketIOClient('http://localhost:4000', {
+          transports: ['websocket', 'polling'],
+          timeout: 5000,
+        });
+        
+        socket.on('connect', () => {
+          console.log('Socket connected, identifying user:', session.user.id);
+          socket!.emit('identify', session.user.id);
+        });
+        
+        socket.on('notification', (notification) => {
+          console.log('Received real-time notification:', notification);
+          setNotifications(prev => [notification, ...prev]);
+          // Play notification sound for new notifications
+          setPlayNotificationSound(true);
+        });
+        
+        socket.on('connect_error', (error) => {
+          console.error('Socket connection error:', error);
+        });
+        
+        socket.on('disconnect', (reason) => {
+          console.log('Socket disconnected:', reason);
+        });
+      } catch (error) {
+        console.error('Error setting up Socket.IO:', error);
+      }
     }
     return () => {
-      if (socket) socket.disconnect();
+      if (socket) {
+        console.log('Disconnecting socket');
+        socket.disconnect();
+      }
     };
   }, [session?.user?.id]);
 
+  // Poll for new notifications every 10 seconds as fallback
+  useEffect(() => {
+    if (!session?.user?.id) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch('/api/notifications');
+        const data = await response.json();
+        const notificationsArray = Array.isArray(data) ? data : [];
+        
+        // Check if there are new notifications
+        if (notificationsArray.length > lastNotificationCount) {
+          const newNotifications = notificationsArray.slice(0, notificationsArray.length - lastNotificationCount);
+          console.log('Found new notifications via polling:', newNotifications);
+          
+          // Add new notifications to the beginning
+          setNotifications(prev => [...newNotifications, ...prev]);
+          setLastNotificationCount(notificationsArray.length);
+          
+          // Play sound for new notifications
+          setPlayNotificationSound(true);
+        }
+      } catch (error) {
+        console.error('Error polling notifications:', error);
+      }
+    }, 10000); // Check every 10 seconds
+
+    return () => clearInterval(pollInterval);
+  }, [session?.user?.id, lastNotificationCount]);
+
+  // Get hidden navigation items based on user's plan
+  const hiddenItems = getHiddenNavigationItems(userPlan);
+  
   const navigation = [
     { name: 'Dashboard', href: '/auth/dashboard', icon: HomeIcon, current: pathname === '/auth/dashboard' },
     { name: 'Websites', href: '/auth/dashboard/sites', icon: GlobeAltIcon, current: pathname?.startsWith('/auth/dashboard/sites') },
     { name: 'Analytics', href: '/auth/dashboard/analytics', icon: ChartBarIcon, current: pathname === '/auth/dashboard/analytics' },
     { name: 'Submissions', href: '/auth/dashboard/submissions', icon: InboxArrowDownIcon, current: pathname === '/auth/dashboard/submissions' },
     { name: 'Marketplace', href: '/auth/dashboard/marketplace', icon: ShoppingBagIcon, current: pathname === '/auth/dashboard/marketplace' },
+    { name: 'Community', href: '/auth/dashboard/community', icon: UserGroupIcon, current: pathname === '/auth/dashboard/community' },
     { name: 'Domain', href: '/auth/dashboard/domain', icon: GlobeAltIcon, current: pathname === '/auth/dashboard/domain' },
     { name: 'Billing', href: '/auth/dashboard/billing', icon: BanknotesIcon, current: pathname === '/auth/dashboard/billing' },
     { name: 'Transactions', href: '/auth/dashboard/transactions', icon: CreditCardIcon, current: pathname === '/auth/dashboard/transactions' },
     { name: 'Settings', href: '/auth/dashboard/settings', icon: Cog6ToothIcon, current: pathname === '/auth/dashboard/settings' },
-  ];
+  ].filter(item => !hiddenItems.includes(item.name));
 
   // Add Super Admin tab if user is SUPER_ADMIN or has the special email
   if (session?.user?.role === 'SUPER_ADMIN' || session?.user?.email === 'i.am.rahul4550@gmail.com') {
@@ -102,10 +176,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
-
   const unreadCount = notifications.filter(n => !n.read).length;
 
   // Mark notification as read
@@ -125,6 +195,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   // Mark all notifications as read
   const handleMarkAllAsRead = async () => {
     try {
+      setIsLoading(true);
       await fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -133,18 +204,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch (err) {
       // Optionally show error
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const currentSub = session?.user?.subscriptions?.find((s: any) => s.status === 'active' || s.status === 'trialing') || (session?.user?.subscriptions && session?.user?.subscriptions[0]);
-  const currentPlanName = currentSub?.plan?.name || 'No Plan';
+  const handleSignOut = async () => {
+    setIsLoading(true);
+    await signOut({ callbackUrl: '/auth/signin' });
+  };
+
+  const currentPlanName = userPlan?.plan?.name || 'Free';
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-black">
       {/* Notification Bell (desktop, top-right) */}
       <div className="hidden lg:block fixed top-4 right-8 z-40">
         <button
-          className="relative p-2 rounded-full bg-white dark:bg-slate-800 shadow border border-gray-200 dark:border-slate-700 hover:bg-purple-50 dark:hover:bg-slate-700"
+          className="relative p-2 rounded-full bg-white dark:bg-gray-900 shadow border border-gray-200 dark:border-gray-700 hover:bg-purple-50 dark:hover:bg-gray-800"
           onClick={() => setShowNotifications(true)}
           aria-label="Show notifications"
         >
@@ -155,20 +232,49 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Help Button (desktop, top-right) */}
       <div className="hidden lg:block fixed top-4 right-24 z-40">
         <button
-          className="relative p-2 rounded-full bg-white dark:bg-slate-800 shadow border border-gray-200 dark:border-slate-700 hover:bg-purple-50 dark:hover:bg-slate-700"
+          className="relative p-2 rounded-full bg-white dark:bg-gray-900 shadow border border-gray-200 dark:border-gray-700 hover:bg-purple-50 dark:hover:bg-gray-800"
           onClick={() => setShowWelcome(true)}
           aria-label="Show help / onboarding"
         >
           <QuestionMarkCircleIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
         </button>
       </div>
+      
+      {/* Test Notification Button (desktop, top-right) - Remove in production */}
+      {/* 
+      <div className="hidden lg:block fixed top-4 right-40 z-40">
+        <button
+          className="relative p-2 rounded-full bg-white dark:bg-slate-800 shadow border border-gray-200 dark:border-slate-700 hover:bg-purple-50 dark:hover:bg-slate-700"
+          onClick={async () => {
+            try {
+              const response = await fetch('/api/notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  type: 'test',
+                  message: 'Test notification - ' + new Date().toLocaleTimeString(),
+                }),
+              });
+              if (response.ok) {
+                console.log('Test notification created');
+              }
+            } catch (error) {
+              console.error('Error creating test notification:', error);
+            }
+          }}
+          aria-label="Test notification"
+        >
+          <span className="text-xs font-bold text-purple-600 dark:text-purple-400">🔔</span>
+        </button>
+      </div>
+      */}
       {/* Mobile sidebar */}
       <div className="lg:hidden">
         {/* Hamburger menu button (only when sidebar is closed) */}
         {!isSidebarOpen && (
           <button
             type="button"
-            className="absolute top-4 left-4 z-50 p-2 rounded-md bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md border border-gray-200 dark:border-slate-700"
+            className="absolute top-4 left-4 z-50 p-2 rounded-md bg-white dark:bg-gray-900 text-purple-600 dark:text-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md border border-gray-200 dark:border-gray-700"
             onClick={toggleSidebar}
             aria-label="Open sidebar"
           >
@@ -185,7 +291,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             />
             {/* Sidebar */}
             <div
-              className="fixed inset-y-0 left-0 flex w-full max-w-xs flex-col bg-white dark:bg-slate-800 pt-5 pb-4 transform transition ease-in-out duration-300 translate-x-0 shadow-2xl rounded-r-2xl border-r border-gray-200 dark:border-slate-700"
+              className="fixed inset-y-0 left-0 flex w-full max-w-xs flex-col bg-white dark:bg-black pt-5 pb-4 transform transition ease-in-out duration-300 translate-x-0 shadow-2xl rounded-r-2xl border-r border-gray-200 dark:border-gray-800"
             >
               <div className="absolute top-0 right-0 -mr-12 pt-2">
                 <button
@@ -210,8 +316,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       href={item.href}
                       className={`group flex items-center px-3 py-2 text-base font-semibold rounded-xl transition-all duration-150 ${
                         item.current
-                          ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 shadow-md'
-                          : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-slate-700 hover:text-purple-700 dark:hover:text-purple-300'
+                          ? 'bg-purple-100 dark:bg-gray-900 text-purple-700 dark:text-purple-300 shadow-md'
+                          : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-900 hover:text-purple-700 dark:hover:text-purple-300'
                       }`}
                     >
                       <item.icon
@@ -227,7 +333,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   ))}
                 </nav>
               </div>
-              <div className="flex-shrink-0 flex border-t border-gray-200 dark:border-slate-700 p-6 mt-4">
+              <div className="flex-shrink-0 flex border-t border-gray-200 dark:border-gray-800 p-6 mt-4">
                 <div className="flex-shrink-0 w-full group block">
                   <div className="flex items-center gap-4">
                     <div>
@@ -239,9 +345,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         />
                       ) : (
                         <div className="inline-block h-10 w-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center border border-purple-200">
-                          <span className="text-lg font-bold">
-                            {session?.user?.name?.charAt(0) || session?.user?.email?.charAt(0) || '?'}
-                          </span>
+                          <UserIcon className="h-6 w-6" />
                         </div>
                       )}
                     </div>
@@ -250,23 +354,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         {session?.user?.name || session?.user?.email || 'User'}
                       </p>
                       <button
-                        onClick={() => signOut()}
+                        onClick={handleSignOut}
+                        disabled={isLoading}
                         className="mt-1 text-xs font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 flex items-center gap-1"
                       >
-                        <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                        Sign out
+                        {isLoading ? (
+                          <>
+                            <LoadingSpinner size="sm" color="primary" />
+                            Signing out...
+                          </>
+                        ) : (
+                          <>
+                            <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                            Sign out
+                          </>
+                        )}
                       </button>
                     </div>
-                    <button
-                      onClick={toggleTheme}
-                      className="p-2 text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300"
-                    >
-                      {mounted && theme === 'dark' ? (
-                        <SunIcon className="h-5 w-5" />
-                      ) : (
-                        <MoonIcon className="h-5 w-5" />
-                      )}
-                    </button>
                   </div>
                 </div>
               </div>
@@ -277,7 +381,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Static sidebar for desktop */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex min-h-0 flex-1 flex-col border-r border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+        <div className="flex min-h-0 flex-1 flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
           <div className="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
             <div className="flex flex-shrink-0 items-center px-4">
               <Link href="/" className="text-xl font-bold text-primary-600 dark:text-primary-500">
@@ -291,8 +395,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   href={item.href}
                   className={`group flex items-center px-3 py-2 text-base font-semibold rounded-xl transition-all duration-150 ${
                     item.current
-                      ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 shadow-md'
-                      : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-slate-700 hover:text-purple-700 dark:hover:text-purple-300'
+                      ? 'bg-purple-100 dark:bg-gray-900 text-purple-700 dark:text-purple-300 shadow-md'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-900 hover:text-purple-700 dark:hover:text-purple-300'
                   }`}
                 >
                   <item.icon
@@ -308,7 +412,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               ))}
             </nav>
           </div>
-          <div className="flex flex-shrink-0 border-t border-gray-200 dark:border-slate-700 p-6 mt-4">
+          <div className="flex flex-shrink-0 border-t border-gray-200 dark:border-gray-800 p-6 mt-4">
             <div className="flex-shrink-0 w-full group block">
               <div className="flex items-center gap-4">
                 <div>
@@ -320,9 +424,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     />
                   ) : (
                     <div className="inline-block h-10 w-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center border border-purple-200">
-                      <span className="text-lg font-bold">
-                        {session?.user?.name?.charAt(0) || session?.user?.email?.charAt(0) || '?'}
-                      </span>
+                      <UserIcon className="h-6 w-6" />
                     </div>
                   )}
                 </div>
@@ -331,23 +433,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     {session?.user?.name || session?.user?.email || 'User'}
                   </p>
                   <button
-                    onClick={() => signOut()}
+                    onClick={handleSignOut}
+                    disabled={isLoading}
                     className="mt-1 text-xs font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 flex items-center gap-1"
                   >
-                    <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                    Sign out
+                    {isLoading ? (
+                      <>
+                        <LoadingSpinner size="sm" color="primary" />
+                        Signing out...
+                      </>
+                    ) : (
+                      <>
+                        <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                        Sign out
+                      </>
+                    )}
                   </button>
                 </div>
-                <button
-                  onClick={toggleTheme}
-                  className="p-2 text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300"
-                >
-                  {mounted && theme === 'dark' ? (
-                    <SunIcon className="h-5 w-5" />
-                  ) : (
-                    <MoonIcon className="h-5 w-5" />
-                  )}
-                </button>
               </div>
             </div>
           </div>
@@ -356,7 +458,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main content */}
       <div className="lg:pl-64 flex flex-col flex-1">
-        <div className="sticky top-0 z-10 bg-white dark:bg-slate-800 pl-1 pt-1 sm:pl-3 sm:pt-3 lg:hidden shadow-md rounded-b-2xl">
+        <div className="sticky top-0 z-10 bg-white dark:bg-black pl-1 pt-1 sm:pl-3 sm:pt-3 lg:hidden shadow-md rounded-b-2xl">
           <button
             type="button"
             className="-ml-0.5 -mt-0.5 inline-flex h-12 w-12 items-center justify-center rounded-md text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500"
@@ -368,7 +470,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
         <main className="flex-1 pb-8">
           <div className="px-[20px] py-10 w-full">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 border border-gray-100 dark:border-slate-700 w-full">
+            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8 border border-gray-100 dark:border-gray-800 w-full">
               {children}
             </div>
           </div>
@@ -378,7 +480,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Notification Modal */}
       {showNotifications && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-lg p-6 w-full max-w-md relative">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-md relative">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center justify-between">
               Notifications & Activity
               {notifications.length > 0 && unreadCount > 0 && (
@@ -391,13 +493,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               )}
             </h2>
             <button
-              className="absolute top-3 right-3 p-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700"
+              className="absolute top-3 right-3 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
               onClick={() => setShowNotifications(false)}
               aria-label="Close notifications"
             >
               <XMarkIcon className="h-5 w-5 text-gray-500 dark:text-gray-300" />
             </button>
-            <ul className="divide-y divide-gray-200 dark:divide-slate-700">
+            <ul className="divide-y divide-gray-200 dark:divide-gray-800">
               {notifications.length === 0 ? (
                 <li className="py-4 text-center text-gray-500 dark:text-gray-400">No notifications yet.</li>
               ) : notifications.map((activity) => (
@@ -410,6 +512,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     {activity.type === 'booking' && <CubeIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
                     {activity.type === 'submission' && <InboxArrowDownIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
                     {activity.type === 'domain' && <GlobeAltIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
+                    {activity.type === 'comment' && <ChatBubbleLeftIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
+                    {activity.type === 'like' && <HeartIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
+                    {activity.type === 'plan' && <CreditCardIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
+                    {activity.type === 'publish' && <GlobeAltIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
                   </span>
                   <div className="flex-1">
                     <div className="text-sm text-gray-900 dark:text-white flex items-center gap-2">
@@ -427,6 +533,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Welcome/Onboarding Modal (can be triggered by Help button) */}
       {showWelcome && <WelcomeModal open={showWelcome} setOpen={setShowWelcome} forceShow />}
+
+      {/* Notification Sound */}
+      <NotificationSound 
+        play={playNotificationSound} 
+        onPlay={() => setPlayNotificationSound(false)}
+      />
     </div>
   );
 }

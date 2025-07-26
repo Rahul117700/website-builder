@@ -114,7 +114,7 @@ export async function PUT(req: NextRequest) {
     });
 
     // If payment is for a subscription plan, create a new subscription for the user
-    if (payment.planId && payment.userId) {
+    if (payment.planId && payment.userId && payment.plan) {
       // Cancel any existing active subscriptions for this user and plan
       await prisma.subscription.updateMany({
         where: { userId: payment.userId, planId: payment.planId, status: 'active' },
@@ -145,6 +145,22 @@ export async function PUT(req: NextRequest) {
           renewalDate,
         },
       });
+      
+      // Create notification for plan purchase
+      try {
+        if (payment.plan) {
+          await prisma.notification.create({
+            data: {
+              userId: payment.userId,
+              type: 'plan',
+              message: `Congratulations! You've successfully upgraded to ${payment.plan.name} plan. Enjoy your new features!`,
+            },
+          });
+        }
+      } catch (error) {
+        console.error('Error creating plan purchase notification:', error);
+      }
+      
       // Increment Revenue table
       const revenueRows = await prisma.revenue.findMany();
       if (revenueRows.length === 0) {
@@ -176,9 +192,21 @@ export async function PUT(req: NextRequest) {
               html: template.html,
               css: template.css,
               js: template.js,
-              reactCode: template.reactCode,
             },
           });
+          
+          // Create notification for template purchase
+          try {
+            await prisma.notification.create({
+              data: {
+                userId: payment.userId,
+                type: 'template',
+                message: `Great! You've successfully purchased the "${template.name}" template. You can now use it in your projects!`,
+              },
+            });
+          } catch (error) {
+            console.error('Error creating template purchase notification:', error);
+          }
         }
       }
     }
@@ -193,25 +221,7 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// POST /api/payments - Create a Razorpay order
-export async function POSTRazorpayOrder(req: NextRequest) {
-  try {
-    const { amount, plan } = await req.json();
-    if (!amount || !plan) {
-      return NextResponse.json({ error: 'Missing amount or plan' }, { status: 400 });
-    }
-    const order = await razorpay.orders.create({
-      amount: amount * 100, // amount in paise
-      currency: 'INR',
-      receipt: `receipt_${Date.now()}`,
-      notes: { plan },
-    });
-    return NextResponse.json({ order });
-  } catch (error) {
-    console.error('Error creating Razorpay order:', error);
-    return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
-  }
-}
+
 
 // GET /api/payments - Get all payments for the current user
 export async function GET(req: NextRequest) {

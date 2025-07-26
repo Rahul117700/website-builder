@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import DashboardLayout from '@/components/layouts/dashboard-layout';
 import toast from 'react-hot-toast';
 import TemplateAdminPanel from '@/components/dashboard/template-admin-panel';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Pagination from '@mui/material/Pagination';
@@ -86,6 +88,10 @@ export default function SuperAdminDashboard() {
   const [frontendSaving, setFrontendSaving] = useState(false);
 
   const [planChangeLoading, setPlanChangeLoading] = useState<string | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [plansLoading, setPlansLoading] = useState(false);
+  const [paymentsLoading, setPaymentsLoading] = useState(false);
 
   const [activeTab, setActiveTab] = useState(0);
 
@@ -128,6 +134,10 @@ export default function SuperAdminDashboard() {
   const fetchAll = async () => {
     setLoading(true);
     setError("");
+    setUsersLoading(true);
+    setPlansLoading(true);
+    setStatsLoading(true);
+    
     try {
       const [users, sites, plans, userCountRes, revenueRes] = await Promise.all([
         fetch("/api/admin/users").then(r => r.ok ? r.json() : Promise.reject("Failed to fetch users")),
@@ -149,6 +159,9 @@ export default function SuperAdminDashboard() {
       setError(typeof err === "string" ? err : "Failed to load data");
     } finally {
       setLoading(false);
+      setUsersLoading(false);
+      setPlansLoading(false);
+      setStatsLoading(false);
     }
   };
 
@@ -442,37 +455,100 @@ export default function SuperAdminDashboard() {
       </DashboardLayout>
     );
   }
+
+  // Show loading skeleton while fetching initial data
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="p-6">
+          {/* Stats Loading Skeleton */}
+          <div className="w-full max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 mb-8">
+            <SkeletonLoader type="card" className="h-32" />
+            <SkeletonLoader type="card" className="h-32" />
+          </div>
+          
+          {/* Tabs Loading Skeleton */}
+          <div className="min-h-screen w-full bg-black">
+            <div className="w-full ml-auto mr-auto py-10">
+              <div className="mb-8 flex justify-center">
+                <SkeletonLoader type="button" className="w-64 h-12" />
+              </div>
+              
+              {/* Content Loading Skeleton */}
+              <div className="w-full bg-black rounded-3xl shadow-2xl p-10 border border-gray-700">
+                <div className="flex items-center justify-between mb-8">
+                  <SkeletonLoader type="text" lines={1} className="w-32" />
+                  <SkeletonLoader type="button" className="w-32" />
+                </div>
+                <SkeletonLoader type="table" lines={5} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   // Main dashboard content below
   return (
     <DashboardLayout>
       {/* Super Admin Stats Summary */}
       <div className="w-full max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 mb-8">
         {/* Total Users Card */}
-        <div className="relative bg-gradient-to-br from-blue-50 via-white to-purple-100/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-blue-200 flex flex-col items-center justify-center overflow-hidden">
+        <div className="relative bg-gradient-to-br from-gray-900 via-black to-gray-800 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-gray-700 flex flex-col items-center justify-center overflow-hidden">
           <div className="absolute top-4 right-4 opacity-20 text-blue-400 text-6xl pointer-events-none select-none">
             <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' className='w-14 h-14'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={1.5} d='M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m9-6.13a4 4 0 11-8 0 4 4 0 018 0z' /></svg>
           </div>
-          <div className="text-5xl font-extrabold text-blue-700 mb-2 drop-shadow-lg">{stats.totalUsers}</div>
-          <div className="text-lg font-semibold text-blue-800 tracking-wide mb-1">Total Users</div>
-          <div className="text-xs text-blue-400">All registered users</div>
+          {statsLoading ? (
+            <div className="text-5xl font-extrabold text-blue-400 mb-2 drop-shadow-lg">
+              <LoadingSpinner size="lg" color="primary" />
+            </div>
+          ) : (
+            <div className="text-5xl font-extrabold text-blue-400 mb-2 drop-shadow-lg">{stats.totalUsers}</div>
+          )}
+          <div className="text-lg font-semibold text-white tracking-wide mb-1">Total Users</div>
+          <div className="text-xs text-gray-400">All registered users</div>
         </div>
         {/* Total Revenue Card */}
-        <div className="relative bg-gradient-to-br from-green-50 via-white to-blue-100/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-green-200 flex flex-col items-center justify-center overflow-hidden">
+        <div className="relative bg-gradient-to-br from-gray-900 via-black to-gray-800 backdrop-blur-xl rounded-2xl shadow-2xl p-8 border border-gray-700 flex flex-col items-center justify-center overflow-hidden">
           <div className="absolute top-4 right-4 opacity-20 text-green-400 text-6xl pointer-events-none select-none">
             <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor' className='w-14 h-14'><path strokeLinecap='round' strokeLinejoin='round' strokeWidth={1.5} d='M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 0V4m0 12v4m8-8h-4m-8 0H4' /></svg>
           </div>
-          <div className="text-5xl font-extrabold text-green-700 mb-2 drop-shadow-lg">₹{stats.totalRevenue.toLocaleString()}</div>
-          <div className="text-lg font-semibold text-green-800 tracking-wide mb-1">Total Revenue</div>
-          <div className="text-xs text-green-400">All-time revenue</div>
+          {statsLoading ? (
+            <div className="text-5xl font-extrabold text-green-400 mb-2 drop-shadow-lg">
+              <LoadingSpinner size="lg" color="primary" />
+            </div>
+          ) : (
+            <div className="text-5xl font-extrabold text-green-400 mb-2 drop-shadow-lg">₹{stats.totalRevenue.toLocaleString()}</div>
+          )}
+          <div className="text-lg font-semibold text-white tracking-wide mb-1">Total Revenue</div>
+          <div className="text-xs text-gray-400">All-time revenue</div>
         </div>
       </div>
       {/* Main Panel (Tabs, etc.) */}
-      <div className="min-h-screen w-full bg-gradient-to-br from-purple-200 via-white to-blue-100 font-sans">
+      <div className="min-h-screen w-full font-sans">
         <div className="w-full ml-auto mr-auto py-10">
           {/* <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-blue-500 to-green-400 mb-12 tracking-tight drop-shadow-lg text-center">Super Admin Panel</h1> */}
             {/* Tab Bar */}
             <div className="mb-8 flex justify-center">
-              <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} variant="scrollable" scrollButtons="auto" className="bg-white rounded-xl shadow border border-gray-200">
+              <Tabs 
+                value={activeTab} 
+                onChange={(_, v) => setActiveTab(v)} 
+                variant="scrollable" 
+                scrollButtons="auto" 
+                className="bg-gray-900 rounded-xl shadow border border-gray-700"
+                sx={{
+                  '& .MuiTab-root': {
+                    color: 'white',
+                    '&.Mui-selected': {
+                      color: 'white',
+                    },
+                  },
+                  '& .MuiTabs-indicator': {
+                    backgroundColor: '#3b82f6',
+                  },
+                }}
+              >
                 <Tab label="Users" />
                 <Tab label="Sites" />
                 <Tab label="Plans" />
@@ -481,69 +557,100 @@ export default function SuperAdminDashboard() {
             </div>
             {/* Tab Panels */}
             {activeTab === 0 && (
-              <div className="w-full">
-                {/* Users Section */}
-                <div className="w-full bg-white rounded-3xl shadow-2xl p-10 flex flex-col relative border-2 border-purple-200 hover:shadow-purple-200/50 transition-shadow duration-300">
-                  <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-3xl font-bold text-purple-700 flex items-center gap-2"><span className="inline-block w-3 h-3 bg-purple-400 rounded-full animate-pulse"></span> All Users</h2>
-                    <input
-                      type="text"
-                      placeholder="Search users..."
-                      className="border rounded px-3 py-2 text-black bg-white focus:ring-2 focus:ring-purple-400"
-                      value={userSearch}
-                      onChange={e => { setUserSearch(e.target.value); setUserPage(1); }}
-                      style={{ minWidth: 200 }}
-                    />
-                    <button
-                      onClick={openAddUser}
-                      className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-bold px-6 py-2 rounded-full shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400"
-                      style={{ boxShadow: '0 4px 16px 0 rgba(139,92,246,0.10)' }}
-                      aria-label="Add User"
-                    >
-                      + Add User
-                    </button>
-                  </div>
-                  {actionError && <div className="text-red-600 mb-2">{actionError}</div>}
-                  {actionSuccess && <div className="text-green-600 mb-2">{actionSuccess}</div>}
-                  <div className="overflow-x-auto rounded-xl border border-gray-100">
-                    <table className="min-w-full bg-white rounded-xl overflow-hidden">
-                      <thead className="bg-gradient-to-r from-purple-50 to-blue-50">
-                        <tr>
-                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Name</th>
-                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Email</th>
-                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Role</th>
-                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Enabled</th>
-                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Plan</th>
-                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {paginatedUsers.length === 0 ? (
-                          <tr><td colSpan={6} className="text-center py-6 text-gray-700">No users found.</td></tr>
-                        ) : paginatedUsers.map((user: any) => {
-                          const activeSub = user.subscriptions?.find((s: any) => s.status === 'active');
-                          const currentPlanId = activeSub?.planId || '';
-                          return (
-                            <tr key={user.id} className="hover:bg-purple-50 transition-all group">
-                              <td className="px-4 py-2 border-b text-gray-900 font-medium">{user.name}</td>
-                              <td className="px-4 py-2 border-b text-gray-700">{user.email}</td>
-                              <td className="px-4 py-2 border-b">
-                                <Badge color={user.role === 'SUPER_ADMIN' ? 'purple' : 'blue'}>{user.role}</Badge>
-                              </td>
-                              <td className="px-4 py-2 border-b">
-                                <Badge color={user.enabled ? 'green' : 'red'}>{user.enabled ? 'Enabled' : 'Disabled'}</Badge>
-                                <button
-                                  className={`ml-2 w-10 h-6 rounded-full relative focus:outline-none border-2 border-gray-200 ${user.enabled ? 'bg-green-400' : 'bg-gray-300'} transition-all`}
-                                  onClick={() => handleToggleUser(user)}
-                                  aria-label="Toggle user enabled"
-                                >
-                                  <span className={`absolute left-1 top-1 w-4 h-4 rounded-full transition-transform duration-200 ${user.enabled ? 'bg-white translate-x-4' : 'bg-white translate-x-0'}`}></span>
-                                </button>
-                              </td>
-                              <td className="px-4 py-2 border-b">
-                                <span className="block mb-1 text-sm text-gray-800 font-semibold">{activeSub?.plan?.name || 'No Plan'}</span>
+              <div className="w-full bg-black rounded-3xl shadow-2xl p-10 flex flex-col relative border-2 border-gray-700 hover:shadow-gray-700/50 transition-shadow duration-300">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-3xl font-bold text-white flex items-center gap-2"><span className="inline-block w-3 h-3 bg-purple-400 rounded-full animate-pulse"></span> All Users</h2>
+                  <input
+                    type="text"
+                    placeholder="Search users..."
+                    className="border rounded px-3 py-2 text-white bg-gray-800 border-gray-600 focus:ring-2 focus:ring-purple-400 focus:border-purple-400"
+                    value={userSearch}
+                    onChange={e => { setUserSearch(e.target.value); setUserPage(1); }}
+                    style={{ minWidth: 200 }}
+                  />
+                  <button
+                    onClick={openAddUser}
+                    disabled={usersLoading}
+                    className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white font-bold px-6 py-2 rounded-full shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400 flex items-center gap-2"
+                    style={{ boxShadow: '0 4px 16px 0 rgba(139,92,246,0.10)' }}
+                    aria-label="Add User"
+                  >
+                    {usersLoading ? (
+                      <>
+                        <LoadingSpinner size="sm" color="white" />
+                        Loading...
+                      </>
+                    ) : (
+                      '+ Add User'
+                    )}
+                  </button>
+                </div>
+                {actionError && <div className="text-red-400 mb-2">{actionError}</div>}
+                {actionSuccess && <div className="text-green-400 mb-2">{actionSuccess}</div>}
+                <div className="overflow-x-auto rounded-xl border border-gray-700">
+                  <table className="min-w-full bg-gray-900 rounded-xl overflow-hidden">
+                    <thead className="bg-gradient-to-r from-gray-800 to-gray-700">
+                      <tr>
+                        <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Name</th>
+                        <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Email</th>
+                        <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Role</th>
+                        <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Enabled</th>
+                        <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Plan</th>
+                        <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {usersLoading ? (
+                        Array.from({ length: 5 }).map((_, i) => (
+                          <tr key={i} className="hover:bg-gray-800 transition-all">
+                            <td className="px-4 py-2 border-b border-gray-700"><SkeletonLoader type="text" lines={1} /></td>
+                            <td className="px-4 py-2 border-b border-gray-700"><SkeletonLoader type="text" lines={1} /></td>
+                            <td className="px-4 py-2 border-b border-gray-700"><SkeletonLoader type="button" /></td>
+                            <td className="px-4 py-2 border-b border-gray-700"><SkeletonLoader type="button" /></td>
+                            <td className="px-4 py-2 border-b border-gray-700"><SkeletonLoader type="text" lines={1} /></td>
+                            <td className="px-4 py-2 border-b border-gray-700"><SkeletonLoader type="button" /></td>
+                          </tr>
+                        ))
+                      ) : paginatedUsers.length === 0 ? (
+                        <tr><td colSpan={6} className="text-center py-6 text-gray-400">No users found.</td></tr>
+                      ) : paginatedUsers.map((user: any) => {
+                        const activeSub = user.subscriptions?.find((s: any) => s.status === 'active');
+                        const currentPlanId = activeSub?.planId || '';
+                        return (
+                          <tr key={user.id} className="hover:bg-gray-800 transition-all group">
+                            <td className="px-4 py-2 border-b border-gray-700 text-white font-medium">{user.name}</td>
+                            <td className="px-4 py-2 border-b border-gray-700 text-gray-300">{user.email}</td>
+                            <td className="px-4 py-2 border-b border-gray-700">
+                              <Badge color={user.role === 'SUPER_ADMIN' ? 'purple' : 'blue'}>{user.role}</Badge>
+                            </td>
+                            <td className="px-4 py-2 border-b border-gray-700">
+                              <Badge color={user.enabled ? 'green' : 'red'}>{user.enabled ? 'Enabled' : 'Disabled'}</Badge>
+                              <button
+                                className={`ml-2 w-10 h-6 rounded-full relative focus:outline-none border-2 border-gray-600 ${user.enabled ? 'bg-green-400' : 'bg-gray-600'} transition-all`}
+                                onClick={() => handleToggleUser(user)}
+                                aria-label="Toggle user enabled"
+                              >
+                                <span className={`absolute left-1 top-1 w-4 h-4 rounded-full transition-transform duration-200 ${user.enabled ? 'bg-white translate-x-4' : 'bg-white translate-x-0'}`}></span>
+                              </button>
+                            </td>
+                            <td className="px-4 py-2 border-b border-gray-700">
+                              <span className="block mb-1 text-sm text-white font-semibold">
+                                {planChangeLoading === user.id ? (
+                                  <span className="flex items-center gap-1">
+                                    <LoadingSpinner size="sm" color="primary" />
+                                    Updating...
+                                  </span>
+                                ) : (
+                                  activeSub?.plan?.name || 'No Plan'
+                                )}
+                              </span>
+                              <div className="relative">
                                 <select
-                                  className="border rounded px-2 py-1 text-black bg-white focus:ring-2 focus:ring-purple-400"
+                                  className={`border rounded px-2 py-1 text-white bg-gray-800 border-gray-600 focus:ring-2 focus:ring-purple-400 focus:border-purple-400 pr-8 transition-colors ${
+                                    planChangeLoading === user.id 
+                                      ? 'bg-gray-700 cursor-not-allowed' 
+                                      : 'bg-gray-800'
+                                  }`}
                                   value={currentPlanId}
                                   onChange={e => handleChangeUserPlan(user, e.target.value)}
                                   disabled={planChangeLoading === user.id}
@@ -553,188 +660,203 @@ export default function SuperAdminDashboard() {
                                     <option key={plan.id} value={plan.id}>{plan.name}</option>
                                   ))}
                                 </select>
-                              </td>
-                              <td className="px-4 py-2 border-b flex gap-2">
-                                <button onClick={() => openEditUser(user)} className="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded transition-all">Edit</button>
-                                <button onClick={() => router.push(`/auth/dashboard/super-admin/user/${user.id}`)} className="text-purple-600 hover:bg-purple-50 px-2 py-1 rounded transition-all">View</button>
-                                <button onClick={() => handleDeleteUser(user)} className="text-red-600 hover:bg-red-50 px-2 py-1 rounded transition-all">Delete</button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                  {userPageCount > 1 && (
-                    <div className="flex justify-center mt-4">
-                      <Pagination
-                        count={userPageCount}
-                        page={userPage}
-                        onChange={(_, v) => setUserPage(v)}
-                        color="primary"
-                        shape="rounded"
-                      />
-                    </div>
-                  )}
+                                {planChangeLoading === user.id && (
+                                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                                    <LoadingSpinner size="sm" color="primary" />
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-4 py-2 border-b border-gray-700 flex gap-2">
+                              <button 
+                                onClick={() => openEditUser(user)} 
+                                disabled={saving}
+                                className="text-blue-400 hover:bg-blue-900/20 px-2 py-1 rounded transition-all flex items-center gap-1"
+                              >
+                                {saving ? <LoadingSpinner size="sm" color="primary" /> : null}
+                                Edit
+                              </button>
+                              <button 
+                                onClick={() => router.push(`/auth/dashboard/super-admin/user/${user.id}`)} 
+                                className="text-purple-400 hover:bg-purple-900/20 px-2 py-1 rounded transition-all"
+                              >
+                                View
+                              </button>
+                              <button 
+                                onClick={() => handleDeleteUser(user)} 
+                                disabled={deleting}
+                                className="text-red-400 hover:bg-red-900/20 px-2 py-1 rounded transition-all flex items-center gap-1"
+                              >
+                                {deleting ? <LoadingSpinner size="sm" color="primary" /> : null}
+                                Delete
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
+                {userPageCount > 1 && (
+                  <div className="flex justify-center mt-4">
+                    <Pagination
+                      count={userPageCount}
+                      page={userPage}
+                      onChange={(_, v) => setUserPage(v)}
+                      color="primary"
+                      shape="rounded"
+                    />
+                  </div>
+                )}
               </div>
             )}
             {activeTab === 1 && (
-              <div className="w-full">
-                {/* Sites Section */}
-                <div className="w-full bg-white rounded-3xl shadow-2xl p-10 flex flex-col border-2 border-blue-200 hover:shadow-blue-200/50 transition-shadow duration-300">
-                  <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-3xl font-bold text-blue-700 mb-8 flex items-center gap-2"><span className="inline-block w-3 h-3 bg-blue-400 rounded-full animate-pulse"></span> All Sites</h2>
-                    <input
-                      type="text"
-                      placeholder="Search sites..."
-                      className="border rounded px-3 py-2 text-black bg-white focus:ring-2 focus:ring-blue-400"
-                      value={siteSearch}
-                      onChange={e => { setSiteSearch(e.target.value); setSitePage(1); }}
-                      style={{ minWidth: 200 }}
+              <div className="w-full bg-black rounded-3xl shadow-2xl p-10 flex flex-col border-2 border-gray-700 hover:shadow-gray-700/50 transition-shadow duration-300">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-3xl font-bold text-white mb-8 flex items-center gap-2"><span className="inline-block w-3 h-3 bg-blue-400 rounded-full animate-pulse"></span> All Sites</h2>
+                  <input
+                    type="text"
+                    placeholder="Search sites..."
+                    className="border rounded px-3 py-2 text-white bg-gray-800 border-gray-600 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                    value={siteSearch}
+                    onChange={e => { setSiteSearch(e.target.value); setSitePage(1); }}
+                    style={{ minWidth: 200 }}
+                  />
+                </div>
+                {actionError && <div className="text-red-400 mb-2">{actionError}</div>}
+                {actionSuccess && <div className="text-green-400 mb-2">{actionSuccess}</div>}
+                <div className="overflow-x-auto rounded-xl border border-gray-700">
+                  <table className="min-w-full bg-gray-900 rounded-xl overflow-hidden">
+                    <thead className="bg-gradient-to-r from-gray-800 to-gray-700">
+                      <tr>
+                        <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Name</th>
+                        <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Subdomain</th>
+                        <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Owner</th>
+                        <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Domain</th>
+                        <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Domain Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedSites.length === 0 ? (
+                        <tr><td colSpan={5} className="text-center py-6 text-gray-400">No sites found.</td></tr>
+                      ) : paginatedSites.map((site: any) => (
+                        <tr key={site.id} className="hover:bg-gray-800 transition-all group">
+                          <td className="px-4 py-2 border-b border-gray-700 text-white font-medium">{site.name}</td>
+                          <td className="px-4 py-2 border-b border-gray-700 text-gray-300">{site.subdomain}</td>
+                          <td className="px-4 py-2 border-b border-gray-700 text-gray-300">{site.user?.email || '-'}</td>
+                          <td className="px-4 py-2 border-b border-gray-700 text-gray-300">{site.customDomain || '-'}</td>
+                          <td className="px-4 py-2 border-b border-gray-700">
+                            {/* Domain Status logic: Connected, Not Connected, Pending DNS (future) */}
+                            {site.customDomain
+                              ? (
+                                  // Placeholder for DNS verification logic
+                                  // e.g., if (site.domainVerified) ...
+                                  <Badge color="green">Connected</Badge>
+                                )
+                              : <Badge color="gray">Not Connected</Badge>
+                            }
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {sitePageCount > 1 && (
+                  <div className="flex justify-center mt-4">
+                    <Pagination
+                      count={sitePageCount}
+                      page={sitePage}
+                      onChange={(_, v) => setSitePage(v)}
+                      color="primary"
+                      shape="rounded"
                     />
                   </div>
-                  {actionError && <div className="text-red-600 mb-2">{actionError}</div>}
-                  {actionSuccess && <div className="text-green-600 mb-2">{actionSuccess}</div>}
-                  <div className="overflow-x-auto rounded-xl border border-gray-100">
-                    <table className="min-w-full bg-white rounded-xl overflow-hidden">
-                      <thead className="bg-gradient-to-r from-blue-50 to-purple-50">
-                        <tr>
-                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Name</th>
-                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Subdomain</th>
-                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Owner</th>
-                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Domain</th>
-                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Domain Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {paginatedSites.length === 0 ? (
-                          <tr><td colSpan={5} className="text-center py-6 text-gray-700">No sites found.</td></tr>
-                        ) : paginatedSites.map((site: any) => (
-                          <tr key={site.id} className="hover:bg-blue-50 transition-all group">
-                            <td className="px-4 py-2 border-b text-gray-900 font-medium">{site.name}</td>
-                            <td className="px-4 py-2 border-b text-gray-700">{site.subdomain}</td>
-                            <td className="px-4 py-2 border-b text-gray-700">{site.user?.email || '-'}</td>
-                            <td className="px-4 py-2 border-b text-gray-700">{site.customDomain || '-'}</td>
-                            <td className="px-4 py-2 border-b">
-                              {/* Domain Status logic: Connected, Not Connected, Pending DNS (future) */}
-                              {site.customDomain
-                                ? (
-                                    // Placeholder for DNS verification logic
-                                    // e.g., if (site.domainVerified) ...
-                                    <Badge color="green">Connected</Badge>
-                                  )
-                                : <Badge color="gray">Not Connected</Badge>
-                              }
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  {sitePageCount > 1 && (
-                    <div className="flex justify-center mt-4">
-                      <Pagination
-                        count={sitePageCount}
-                        page={sitePage}
-                        onChange={(_, v) => setSitePage(v)}
-                        color="primary"
-                        shape="rounded"
-                      />
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
             )}
             {activeTab === 2 && (
-              <div className="w-full">
-                {/* Plans Section */}
-                <div className="w-full bg-white rounded-3xl shadow-2xl p-10 flex flex-col border-2 border-green-200 hover:shadow-green-200/50 transition-shadow duration-300">
-                  <div className="flex items-center justify-between mb-8">
-                    <h2 className="text-3xl font-bold text-green-700 flex items-center gap-2"><span className="inline-block w-3 h-3 bg-green-400 rounded-full animate-pulse"></span> Manage Plans</h2>
-                    <input
-                      type="text"
-                      placeholder="Search plans..."
-                      className="border rounded px-3 py-2 text-black bg-white focus:ring-2 focus:ring-green-400"
-                      value={planSearch}
-                      onChange={e => { setPlanSearch(e.target.value); setPlanPage(1); }}
-                      style={{ minWidth: 200 }}
-                    />
-                    <button onClick={openAddPlan} className="bg-gradient-to-r from-green-400 to-blue-400 hover:from-green-500 hover:to-blue-500 text-white font-bold px-6 py-2 rounded-full shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400">+ Add Plan</button>
-                  </div>
-                  {actionError && <div className="text-red-600 mb-2">{actionError}</div>}
-                  {actionSuccess && <div className="text-green-600 mb-2">{actionSuccess}</div>}
-                  <div className="overflow-x-auto rounded-xl border border-gray-100">
-                    <table className="min-w-full bg-white rounded-xl overflow-hidden">
-                      <thead className="bg-gradient-to-r from-green-50 to-blue-50">
-                        <tr>
-                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Name</th>
-                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Price</th>
-                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Interval</th>
-                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Features</th>
-                          <th className="px-4 py-3 border-b text-left text-gray-900 text-sm font-semibold">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {paginatedPlans.length === 0 ? (
-                          <tr><td colSpan={5} className="text-center py-6 text-gray-700">No plans found.</td></tr>
-                        ) : paginatedPlans.map((plan: any) => {
-                          const features: string[] = [];
-                          if (plan.unlimitedWebsites) {
-                            features.push('Unlimited Websites');
-                          } else if (plan.numberOfWebsites) {
-                            features.push(`${plan.numberOfWebsites} Website${plan.numberOfWebsites === 1 ? '' : 's'}`);
-                          }
-                          if (plan.supportLevel) features.push(`${plan.supportLevel} Support`);
-                          if (plan.customDomain) features.push('Custom Domain');
-                          if (plan.advancedAnalytics) features.push('Advanced Analytics');
-                          if (plan.customIntegrations) features.push('Custom Integrations');
-                          if (plan.teamManagement) features.push('Team Management');
-                          if (plan.communityAccess) features.push('Community Access');
-                          return (
-                            <tr key={plan.id} className="hover:bg-green-50 transition-all group">
-                              <td className="px-4 py-2 border-b text-gray-900 font-medium">{plan.name}</td>
-                              <td className="px-4 py-2 border-b text-gray-700">{plan.price}</td>
-                              <td className="px-4 py-2 border-b text-gray-700 capitalize">{plan.interval}</td>
-                              <td className="px-4 py-2 border-b text-gray-700">{features.join(', ')}</td>
-                              <td className="px-4 py-2 border-b flex gap-2">
-                                <button onClick={() => openEditPlan(plan)} className="text-blue-600 hover:bg-blue-50 px-2 py-1 rounded transition-all">Edit</button>
-                                <button onClick={() => handleDeletePlan(plan)} className="text-red-600 hover:bg-red-50 px-2 py-1 rounded transition-all">Delete</button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                  {planPageCount > 1 && (
-                    <div className="flex justify-center mt-4">
-                      <Pagination
-                        count={planPageCount}
-                        page={planPage}
-                        onChange={(_, v) => setPlanPage(v)}
-                        color="primary"
-                        shape="rounded"
-                      />
-                    </div>
-                  )}
+              <div className="w-full bg-black rounded-3xl shadow-2xl p-10 flex flex-col border-2 border-gray-700 hover:shadow-gray-700/50 transition-shadow duration-300">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-3xl font-bold text-white flex items-center gap-2"><span className="inline-block w-3 h-3 bg-green-400 rounded-full animate-pulse"></span> Manage Plans</h2>
+                  <input
+                    type="text"
+                    placeholder="Search plans..."
+                    className="border rounded px-3 py-2 text-white bg-gray-800 border-gray-600 focus:ring-2 focus:ring-green-400 focus:border-green-400"
+                    value={planSearch}
+                    onChange={e => { setPlanSearch(e.target.value); setPlanPage(1); }}
+                    style={{ minWidth: 200 }}
+                  />
+                  <button onClick={openAddPlan} className="bg-gradient-to-r from-green-400 to-blue-400 hover:from-green-500 hover:to-blue-500 text-white font-bold px-6 py-2 rounded-full shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400">+ Add Plan</button>
                 </div>
+                {actionError && <div className="text-red-400 mb-2">{actionError}</div>}
+                {actionSuccess && <div className="text-green-400 mb-2">{actionSuccess}</div>}
+                <div className="overflow-x-auto rounded-xl border border-gray-700">
+                  <table className="min-w-full bg-gray-900 rounded-xl overflow-hidden">
+                    <thead className="bg-gradient-to-r from-gray-800 to-gray-700">
+                      <tr>
+                        <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Name</th>
+                        <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Price</th>
+                        <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Interval</th>
+                        <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Features</th>
+                        <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paginatedPlans.length === 0 ? (
+                        <tr><td colSpan={5} className="text-center py-6 text-gray-400">No plans found.</td></tr>
+                      ) : paginatedPlans.map((plan: any) => {
+                        const features: string[] = [];
+                        if (plan.unlimitedWebsites) {
+                          features.push('Unlimited Websites');
+                        } else if (plan.numberOfWebsites) {
+                          features.push(`${plan.numberOfWebsites} Website${plan.numberOfWebsites === 1 ? '' : 's'}`);
+                        }
+                        if (plan.supportLevel) features.push(`${plan.supportLevel} Support`);
+                        if (plan.customDomain) features.push('Custom Domain');
+                        if (plan.advancedAnalytics) features.push('Advanced Analytics');
+                        if (plan.customIntegrations) features.push('Custom Integrations');
+                        if (plan.teamManagement) features.push('Team Management');
+                        if (plan.communityAccess) features.push('Community Access');
+                        return (
+                          <tr key={plan.id} className="hover:bg-gray-800 transition-all group">
+                            <td className="px-4 py-2 border-b border-gray-700 text-white font-medium">{plan.name}</td>
+                            <td className="px-4 py-2 border-b border-gray-700 text-gray-300">{plan.price}</td>
+                            <td className="px-4 py-2 border-b border-gray-700 text-gray-300 capitalize">{plan.interval}</td>
+                            <td className="px-4 py-2 border-b border-gray-700 text-gray-300">{features.join(', ')}</td>
+                            <td className="px-4 py-2 border-b border-gray-700 flex gap-2">
+                              <button onClick={() => openEditPlan(plan)} className="text-blue-400 hover:bg-blue-900/20 px-2 py-1 rounded transition-all">Edit</button>
+                              <button onClick={() => handleDeletePlan(plan)} className="text-red-400 hover:bg-red-900/20 px-2 py-1 rounded transition-all">Delete</button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                {planPageCount > 1 && (
+                  <div className="flex justify-center mt-4">
+                    <Pagination
+                      count={planPageCount}
+                      page={planPage}
+                      onChange={(_, v) => setPlanPage(v)}
+                      color="primary"
+                      shape="rounded"
+                    />
+                  </div>
+                )}
               </div>
             )}
             {activeTab === 3 && (
-              <div className="w-full">
-                {/* Templates Section */}
-                <div className="w-full bg-white rounded-3xl shadow-2xl p-10 flex flex-col border-2 border-yellow-200 hover:shadow-yellow-200/50 transition-shadow duration-300">
-                  <TemplateAdminPanel
-                    heading="Templates Marketplace Management"
-                    description="Create, edit, approve, and delete templates for the marketplace. Set price, category, section, preview, and more."
-                    search={templateSearch}
-                    setSearch={setTemplateSearch}
-                    page={templatePage}
-                    setPage={setTemplatePage}
-                    templatesPerPage={templatesPerPage}
-                  />
-                </div>
+              <div className="w-full bg-black rounded-3xl shadow-2xl p-10 flex flex-col border-2 border-gray-700 hover:shadow-gray-700/50 transition-shadow duration-300">
+                <TemplateAdminPanel
+                  heading="Templates Marketplace Management"
+                  description="Create, edit, approve, and delete templates for the marketplace. Set price, category, section, preview, and more."
+                  search={templateSearch}
+                  setSearch={setTemplateSearch}
+                  page={templatePage}
+                  setPage={setTemplatePage}
+                  templatesPerPage={templatesPerPage}
+                />
               </div>
             )}
           </div>
@@ -782,7 +904,16 @@ export default function SuperAdminDashboard() {
                   </div>
                   <div className="flex justify-end gap-2 mt-6">
                     <button type="button" onClick={() => setShowUserModal(false)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Cancel</button>
-                    <button type="submit" className="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded hover:from-purple-600 hover:to-blue-600 font-bold shadow" disabled={saving}>{saving ? 'Saving...' : 'Save'}</button>
+                    <button type="submit" className="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded hover:from-purple-600 hover:to-blue-600 font-bold shadow flex items-center gap-2" disabled={saving}>
+                      {saving ? (
+                        <>
+                          <LoadingSpinner size="sm" color="white" />
+                          Saving...
+                        </>
+                      ) : (
+                        'Save'
+                      )}
+                    </button>
                   </div>
                 </form>
               </div>
@@ -846,7 +977,16 @@ export default function SuperAdminDashboard() {
                   </div>
                   <div className="flex justify-end gap-2 mt-6">
                     <button type="button" onClick={() => setShowPlanModal(false)} className="px-4 py-2 bg-gray-200 text-black rounded hover:bg-gray-300">Cancel</button>
-                    <button type="submit" className="px-4 py-2 bg-gradient-to-r from-green-400 to-blue-400 text-white rounded hover:from-green-500 hover:to-blue-500 font-bold shadow" disabled={saving}>{saving ? 'Saving...' : 'Save'}</button>
+                    <button type="submit" className="px-4 py-2 bg-gradient-to-r from-green-400 to-blue-400 text-white rounded hover:from-green-500 hover:to-blue-500 font-bold shadow flex items-center gap-2" disabled={saving}>
+                      {saving ? (
+                        <>
+                          <LoadingSpinner size="sm" color="white" />
+                          Saving...
+                        </>
+                      ) : (
+                        'Save'
+                      )}
+                    </button>
                   </div>
                 </form>
               </div>
@@ -859,7 +999,16 @@ export default function SuperAdminDashboard() {
                 <div className="mb-4 text-gray-800">Are you sure you want to delete the plan <b>{planToDelete.name}</b>? This action cannot be undone.</div>
                 <div className="flex justify-end gap-2 mt-6">
                   <button type="button" onClick={() => setPlanToDelete(null)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">Cancel</button>
-                  <button type="button" onClick={confirmDeletePlan} className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-700 text-white rounded font-bold shadow" disabled={deleting}>{deleting ? 'Deleting...' : 'Delete'}</button>
+                  <button type="button" onClick={confirmDeletePlan} className="px-4 py-2 bg-gradient-to-r from-red-500 to-red-700 text-white rounded font-bold shadow flex items-center gap-2" disabled={deleting}>
+                    {deleting ? (
+                      <>
+                        <LoadingSpinner size="sm" color="white" />
+                        Deleting...
+                      </>
+                    ) : (
+                      'Delete'
+                    )}
+                  </button>
                 </div>
               </div>
             </div>

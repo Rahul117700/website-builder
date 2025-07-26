@@ -38,11 +38,11 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-2xl shadow-2xl border border-purple-100">
+    <div className="min-h-screen flex items-center justify-center bg-black">
+      <div className="w-full max-w-md p-8 space-y-8 bg-gray-900 rounded-2xl shadow-2xl border border-gray-700">
         <div className="flex flex-col items-center">
-          <span className="mb-2 text-4xl font-extrabold text-purple-600">🚀</span>
-          <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Create your account</h2>
+          <span className="mb-2 text-4xl font-extrabold text-purple-400">🚀</span>
+          <h2 className="mt-2 text-center text-3xl font-extrabold text-white tracking-tight">Create your account</h2>
         </div>
         {/* Social Signup Buttons */}
         <div className="flex flex-col gap-3 mt-4">
@@ -55,7 +55,7 @@ export default function SignUpPage() {
           </button>
           <button
             type="button"
-            className="flex items-center justify-center gap-3 w-full py-2 rounded-lg font-semibold shadow transition-all text-white bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-700"
+            className="flex items-center justify-center gap-3 w-full py-2 rounded-lg font-semibold shadow transition-all text-white bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500"
             onClick={() => window.location.href = '/api/auth/signin/github'}
           >
             <FaGithub className="w-5 h-5" /> Sign up with GitHub
@@ -63,9 +63,9 @@ export default function SignUpPage() {
         </div>
         {/* Divider */}
         <div className="flex items-center my-6">
-          <div className="flex-grow h-px bg-gray-200 dark:bg-slate-700" />
+          <div className="flex-grow h-px bg-gray-600" />
           <span className="mx-3 text-gray-400 text-sm">or sign up with email</span>
-          <div className="flex-grow h-px bg-gray-200 dark:bg-slate-700" />
+          <div className="flex-grow h-px bg-gray-600" />
         </div>
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-6">
@@ -77,12 +77,12 @@ export default function SignUpPage() {
                 type="text"
                 autoComplete="name"
                 required
-                className="input-field peer placeholder-transparent focus:border-purple-500 focus:ring-2 focus:ring-purple-400"
+                className="input-field peer placeholder-transparent focus:border-purple-500 focus:ring-2 focus:ring-purple-400 bg-gray-800 text-white border-gray-600"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Name"
               />
-              <label htmlFor="name" className="absolute left-3 top-2 text-gray-500 dark:text-gray-400 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-600 dark:peer-focus:text-purple-400 bg-white dark:bg-slate-900 px-1 pointer-events-none">Name</label>
+              <label htmlFor="name" className="absolute left-3 top-2 text-gray-400 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-400 bg-gray-900 px-1 pointer-events-none">Name</label>
             </div>
             <div className="relative">
               <input
@@ -91,12 +91,12 @@ export default function SignUpPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="input-field peer placeholder-transparent focus:border-purple-500 focus:ring-2 focus:ring-purple-400"
+                className="input-field peer placeholder-transparent focus:border-purple-500 focus:ring-2 focus:ring-purple-400 bg-gray-800 text-white border-gray-600"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="Email address"
               />
-              <label htmlFor="email" className="absolute left-3 top-2 text-gray-500 dark:text-gray-400 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-600 dark:peer-focus:text-purple-400 bg-white dark:bg-slate-900 px-1 pointer-events-none">Email address</label>
+              <label htmlFor="email" className="absolute left-3 top-2 text-gray-400 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-400 bg-gray-900 px-1 pointer-events-none">Email address</label>
             </div>
             <div className="relative">
               <input
@@ -105,15 +105,15 @@ export default function SignUpPage() {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="input-field peer placeholder-transparent focus:border-purple-500 focus:ring-2 focus:ring-purple-400"
+                className="input-field peer placeholder-transparent focus:border-purple-500 focus:ring-2 focus:ring-purple-400 bg-gray-800 text-white border-gray-600"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Password"
               />
-              <label htmlFor="password" className="absolute left-3 top-2 text-gray-500 dark:text-gray-400 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-600 dark:peer-focus:text-purple-400 bg-white dark:bg-slate-900 px-1 pointer-events-none">Password</label>
+              <label htmlFor="password" className="absolute left-3 top-2 text-gray-400 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-400 bg-gray-900 px-1 pointer-events-none">Password</label>
             </div>
           </div>
-          {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
+          {error && <div className="text-red-400 text-sm mt-2">{error}</div>}
           <div>
             <button
               type="submit"
@@ -125,8 +125,8 @@ export default function SignUpPage() {
           </div>
         </form>
         <div className="flex justify-center mt-4">
-          <span className="text-sm text-gray-600 dark:text-gray-300">Already have an account?</span>
-          <Link href="/auth/signin" className="ml-2 text-sm text-primary-600 hover:underline">Sign in</Link>
+          <span className="text-sm text-gray-300">Already have an account?</span>
+          <Link href="/auth/signin" className="ml-2 text-sm text-purple-400 hover:text-purple-300 hover:underline">Sign in</Link>
         </div>
       </div>
     </div>

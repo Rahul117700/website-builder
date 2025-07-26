@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { prisma } from '../../../../lib/prisma';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 // GET /api/pages/[id] - Get a specific page (include htmlCode, cssCode, jsCode)
 export async function GET(
@@ -181,99 +181,4 @@ export async function DELETE(
   }
 }
 
-// POST /api/pages/[id]/custom-code - Save custom code for a page
-export async function POST_CUSTOM_CODE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const existingPage = await prisma.page.findUnique({
-      where: { id: params.id },
-      include: { site: true },
-    });
-    if (!existingPage) {
-      return NextResponse.json({ error: 'Page not found' }, { status: 404 });
-    }
-    if (existingPage.site.userId !== session.user.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const { customCode } = await req.json();
-    const updatedPage = await prisma.page.update({
-      where: { id: params.id },
-      data: { customCode },
-    });
-    return NextResponse.json(updatedPage);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to save custom code' }, { status: 500 });
-  }
-}
 
-// POST /api/pages/[id]/apply-template - Apply a template to a page
-export async function POST_APPLY_TEMPLATE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const existingPage = await prisma.page.findUnique({
-      where: { id: params.id },
-      include: { site: true },
-    });
-    if (!existingPage) {
-      return NextResponse.json({ error: 'Page not found' }, { status: 404 });
-    }
-    if (existingPage.site.userId !== session.user.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const { templateId } = await req.json();
-    const template = await prisma.template.findUnique({ where: { id: templateId } });
-    if (!template) {
-      return NextResponse.json({ error: 'Template not found' }, { status: 404 });
-    }
-    const updatedPage = await prisma.page.update({
-      where: { id: params.id },
-      data: { customCode: template.code },
-    });
-    return NextResponse.json(updatedPage);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to apply template' }, { status: 500 });
-  }
-}
-
-// POST /api/pages/[id]/save-code - Save htmlCode, cssCode, jsCode for a page
-export async function POST_SAVE_CODE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const existingPage = await prisma.page.findUnique({
-      where: { id: params.id },
-      include: { site: true },
-    });
-    if (!existingPage) {
-      return NextResponse.json({ error: 'Page not found' }, { status: 404 });
-    }
-    if (existingPage.site.userId !== session.user.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const { htmlCode, cssCode, jsCode } = await req.json();
-    const updatedPage = await prisma.page.update({
-      where: { id: params.id },
-      data: { htmlCode, cssCode, jsCode },
-    });
-    return NextResponse.json(updatedPage);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to save code' }, { status: 500 });
-  }
-}

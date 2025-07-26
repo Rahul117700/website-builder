@@ -36,11 +36,11 @@ export default function SignInPage() {
   return (
     <>
       <Toaster position="top-right" />
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-2xl shadow-2xl border border-purple-100">
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="w-full max-w-md p-8 space-y-8 bg-gray-900 rounded-2xl shadow-2xl border border-gray-700">
           <div className="flex flex-col items-center">
-            <span className="mb-2 text-4xl font-extrabold text-purple-600">🔑</span>
-            <h2 className="mt-2 text-center text-3xl font-extrabold text-gray-900 tracking-tight">Sign in to your account</h2>
+            <span className="mb-2 text-4xl font-extrabold text-purple-400">🔑</span>
+            <h2 className="mt-2 text-center text-3xl font-extrabold text-white tracking-tight">Sign in to your account</h2>
           </div>
           {/* Social Sign In Buttons */}
           <div className="flex flex-col gap-3 mt-4">
@@ -53,7 +53,7 @@ export default function SignInPage() {
             </button>
             <button
               type="button"
-              className="flex items-center justify-center gap-3 w-full py-2 rounded-lg font-semibold shadow transition-all text-white bg-gradient-to-r from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-700"
+              className="flex items-center justify-center gap-3 w-full py-2 rounded-lg font-semibold shadow transition-all text-white bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500"
               onClick={() => signIn('github', { callbackUrl: '/' })}
             >
               <FaGithub className="w-5 h-5" /> Sign in with GitHub
@@ -61,9 +61,9 @@ export default function SignInPage() {
           </div>
           {/* Divider */}
           <div className="flex items-center my-6">
-            <div className="flex-grow h-px bg-gray-200" />
+            <div className="flex-grow h-px bg-gray-600" />
             <span className="mx-3 text-gray-400 text-sm">or sign in with email</span>
-            <div className="flex-grow h-px bg-gray-200" />
+            <div className="flex-grow h-px bg-gray-600" />
           </div>
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-6">
@@ -74,12 +74,12 @@ export default function SignInPage() {
                   type="email"
                   autoComplete="email"
                   required
-                  className="input-field peer placeholder-transparent focus:border-purple-500 focus:ring-2 focus:ring-purple-400"
+                  className="input-field peer placeholder-transparent focus:border-purple-500 focus:ring-2 focus:ring-purple-400 bg-gray-800 text-white border-gray-600"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="Email address"
                 />
-                <label htmlFor="email" className="absolute left-3 top-2 text-gray-500 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-600 bg-white px-1 pointer-events-none">Email address</label>
+                <label htmlFor="email" className="absolute left-3 top-2 text-gray-400 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-400 bg-gray-900 px-1 pointer-events-none">Email address</label>
               </div>
               <div className="relative">
                 <input
@@ -88,15 +88,15 @@ export default function SignInPage() {
                   type="password"
                   autoComplete="current-password"
                   required
-                  className="input-field peer placeholder-transparent focus:border-purple-500 focus:ring-2 focus:ring-purple-400"
+                  className="input-field peer placeholder-transparent focus:border-purple-500 focus:ring-2 focus:ring-purple-400 bg-gray-800 text-white border-gray-600"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="Password"
                 />
-                <label htmlFor="password" className="absolute left-3 top-2 text-gray-500 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-600 bg-white px-1 pointer-events-none">Password</label>
+                <label htmlFor="password" className="absolute left-3 top-2 text-gray-400 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-400 bg-gray-900 px-1 pointer-events-none">Password</label>
               </div>
             </div>
-            {error && <div className="text-red-600 text-sm mt-2">{error}</div>}
+            {error && <div className="text-red-400 text-sm mt-2">{error}</div>}
             <div>
               <button
                 type="submit"
@@ -108,8 +108,8 @@ export default function SignInPage() {
             </div>
           </form>
           <div className="flex justify-between mt-4">
-            <Link href="/auth/forgot-password" className="text-sm text-primary-600 hover:underline">Forgot password?</Link>
-            <Link href="/auth/signup" className="text-sm text-primary-600 hover:underline">Sign up</Link>
+            <Link href="/auth/forgot-password" className="text-sm text-purple-400 hover:text-purple-300 hover:underline">Forgot password?</Link>
+            <Link href="/auth/signup" className="text-sm text-purple-400 hover:text-purple-300 hover:underline">Sign up</Link>
           </div>
         </div>
       </div>

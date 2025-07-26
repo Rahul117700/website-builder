@@ -20,6 +20,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
+import { formTemplates } from '@/utils/formTemplates';
 
 // Dynamically import MonacoEditor to avoid SSR issues
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), { ssr: false });
@@ -56,6 +57,7 @@ export default function ManageContentPage() {
   const [addPageOpen, setAddPageOpen] = useState(false);
   const [editPageOpen, setEditPageOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<any>(null);
+  const [addFormModalOpen, setAddFormModalOpen] = useState(false);
 
   // Default starter code for React (JSX) mode
   const defaultJsxCode = `<div style={{ padding: 32, textAlign: 'center' }}>
@@ -495,6 +497,19 @@ export default function ManageContentPage() {
     setJsCode(tpl.js || '');
     toast.success('Template code inserted!');
   };
+  // Insert form into HTML code
+  const handleInsertForm = (formType: 'contact' | 'signup' | 'login') => {
+    const formHTML = formTemplates[formType](siteId);
+    
+    // Insert the form HTML into the current HTML code
+    const currentHTML = htmlCode;
+    const newHTML = currentHTML + '\n\n' + formHTML;
+    setHtmlCode(newHTML);
+    
+    setAddFormModalOpen(false);
+    toast.success(`${formType.charAt(0).toUpperCase() + formType.slice(1)} form added to your page!`);
+  };
+
   // Buy template (Razorpay)
   const handleBuyTemplate = (tpl: any) => {
     router.push(`/auth/dashboard/marketplace?template=${tpl.id}`);
@@ -530,7 +545,7 @@ export default function ManageContentPage() {
     <DashboardLayout>
       <Toaster position="top-right" />
       <div className="mb-6">
-        <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-blue-500 to-green-400 mb-2 tracking-tight drop-shadow-lg">Manage Page Content</h1>
+        <h1 className="text-3xl font-extrabold text-white mb-2 tracking-tight drop-shadow-lg">Manage Page Content</h1>
         <p className="mt-1 text-base text-gray-600 dark:text-gray-300 font-medium">
           Choose how you want to build this page.
         </p>
@@ -545,7 +560,7 @@ export default function ManageContentPage() {
           </a>
         )}
       </div>
-      <div className="bg-white dark:bg-slate-800 shadow-xl rounded-3xl p-8 sm:p-10 mb-8 w-full border-2 border-purple-100">
+      <div className="bg-white dark:bg-black shadow-xl rounded-3xl p-8 sm:p-10 mb-8 w-full border-2 border-purple-100 dark:border-gray-800">
         {!mode && (
           <div className="flex flex-col md:flex-row gap-8 justify-center items-center">
             {/* Use Existing Template Card */}
@@ -591,7 +606,7 @@ export default function ManageContentPage() {
         {(mode === 'code' || mode === 'jsx') && (
           <div className="mb-6 flex flex-col items-start w-full">
           
-            <label className="font-semibold text-black mb-2 flex items-center gap-3">
+            <label className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
               Choose what to render on your live site:
               {currentRenderMode === 'html' ? (
                 <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-purple-600 text-white text-xs font-semibold">
@@ -662,15 +677,15 @@ export default function ManageContentPage() {
               <span className="ml-4 text-lg font-semibold text-purple-600">Loading editor...</span>
             </div>
           ) : (
-          <div className="flex flex-col gap-6 w-full bg-white">
+          <div className="flex flex-col gap-6 w-full bg-white dark:bg-black">
             
             {/* --- Top controls: all in a single row above AI Code Assistant --- */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6 w-full">
               {/* Left: Page switcher, Add/Edit/Publish/Unpublish */}
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-semibold text-sm text-black">Page:</span>
+                <span className="font-semibold text-sm text-gray-900 dark:text-white">Page:</span>
                 <select
-                  className="border rounded px-2 py-1 text-sm text-black bg-white"
+                  className="border rounded px-2 py-1 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800"
                   value={pageId}
                   onChange={e => {
                     router.push(`/auth/dashboard/sites/${siteId}/pages/${e.target.value}/content`);
@@ -681,13 +696,13 @@ export default function ManageContentPage() {
                   ))}
                 </select>
                 <button
-                  className="px-3 py-1 rounded border border-gray-300 bg-white text-black font-semibold hover:bg-gray-100 transition flex items-center gap-1"
+                  className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center gap-1"
                   onClick={() => setAddPageOpen(true)}
                 >
                   <AddIcon fontSize="small" /> <PlusIcon className="h-4 w-4" /> Add New Page
                 </button>
                 <button
-                  className="px-3 py-1 rounded border border-gray-300 bg-white text-black font-semibold hover:bg-gray-100 transition flex items-center gap-1"
+                  className="px-3 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center gap-1"
                   onClick={() => setEditPageOpen(true)}
                   disabled={!currentPage}
                 >
@@ -695,7 +710,7 @@ export default function ManageContentPage() {
                 </button>
                 {currentPage && (
                   <button
-                    className={`px-3 py-1 rounded border font-semibold transition flex items-center gap-1 ${currentPage.isPublished ? 'border-green-600 bg-green-50 text-green-700 hover:bg-green-100' : 'border-yellow-600 bg-yellow-50 text-yellow-700 hover:bg-yellow-100'}`}
+                    className={`px-3 py-1 rounded border font-semibold transition flex items-center gap-1 ${currentPage.isPublished ? 'border-green-600 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30' : 'border-yellow-600 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/30'}`}
                     onClick={handleTogglePublish}
                   >
                     {currentPage.isPublished ? 'Unpublish' : 'Publish'}
@@ -703,7 +718,7 @@ export default function ManageContentPage() {
                 )}
                 {currentPage && (
                   <button
-                    className="px-3 py-1 rounded border border-red-500 bg-white text-red-600 font-semibold hover:bg-red-50 transition flex items-center gap-1"
+                    className="px-3 py-1 rounded border border-red-500 bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 font-semibold hover:bg-red-50 dark:hover:bg-red-900/20 transition flex items-center gap-1"
                     onClick={handleDeletePage}
                   >
                     <DeleteIcon fontSize="small" /> Delete Page
@@ -711,17 +726,18 @@ export default function ManageContentPage() {
                 )}
                 <Button variant="outlined" color="primary" onClick={() => window.open('/auth/dashboard/marketplace', '_blank')} startIcon={<ShoppingCartIcon className="h-5 w-5" />}>Buy Templates</Button>
                 <Button variant="outlined" color="primary" onClick={() => setMyTemplatesModalOpen(true)} startIcon={<CodeBracketIcon className="h-5 w-5" />}>My Templates</Button>
+                <Button variant="outlined" color="primary" onClick={() => setAddFormModalOpen(true)} startIcon={<PlusIcon className="h-5 w-5" />}>Add Form</Button>
                 <Button variant="contained" color="secondary" onClick={() => setSaveDialogOpen(true)} startIcon={<PlusIcon className="h-5 w-5" />}>Save as Template</Button>
               </div>
               {/* Center: Main action buttons */}
               <div className="flex flex-wrap gap-2 items-center">
-                <button className="px-4 py-2 rounded border border-gray-300 bg-white text-black font-semibold hover:bg-gray-100 transition" onClick={handlePublishCode} disabled={loading}>
+                <button className="px-4 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition" onClick={handlePublishCode} disabled={loading}>
                   {loading ? 'Publishing...' : 'Save and Publish'}
                 </button>
-                <button className="px-4 py-2 rounded border border-gray-300 bg-white text-black font-semibold hover:bg-gray-100 transition" onClick={() => setMode(null)}>
+                <button className="px-4 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition" onClick={() => setMode(null)}>
                   Back
                 </button>
-                <button className="px-4 py-2 rounded border border-gray-300 bg-white text-black font-semibold hover:bg-gray-100 transition" onClick={() =>{ handlePreview();setShowPreview(v => !v);}}>
+                <button className="px-4 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition" onClick={() =>{ handlePreview();setShowPreview(v => !v);}}>
                   {showPreview ? 'Hide Preview' : 'Show Preview'}
                 </button>
                 {siteSubdomain && (
@@ -729,7 +745,7 @@ export default function ManageContentPage() {
                     href={`/s/${siteSubdomain}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-4 py-2 rounded border border-gray-300 bg-white text-black font-semibold hover:bg-gray-100 transition"
+                    className="px-4 py-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                   >
                     Open live site ↗
                   </a>
@@ -737,9 +753,9 @@ export default function ManageContentPage() {
               </div>
               {/* Right: Insert link to page */}
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm text-black">Insert link to page:</span>
+                <span className="font-semibold text-sm text-gray-900 dark:text-white">Insert link to page:</span>
                 <select
-                  className="border rounded px-2 py-1 text-sm text-black bg-white"
+                  className="border rounded px-2 py-1 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800"
                   onChange={e => {
                     const page = publishedPages.find(p => p.id === e.target.value);
                     if (page) handleInsertPageLink(page);
@@ -759,7 +775,7 @@ export default function ManageContentPage() {
             {/* --- Preview above code editor --- */}
             {showPreview && (
               <div className="flex flex-col items-center w-full max-w-full mb-8">
-                <h3 className="font-semibold mb-2" style={{color:"black"}}>Live Preview</h3>
+                <h3 className="font-semibold mb-2 text-gray-900 dark:text-white">Live Preview</h3>
                 <div className="w-full flex justify-center">
                   <div style={{ width: deviceWidths[previewMode], border: '1px solid #e5e7eb', borderRadius: 8, background: 'white', overflow: 'auto', maxWidth: '100%' }}>
                     <iframe
@@ -771,9 +787,9 @@ export default function ManageContentPage() {
                   </div>
                 </div>
                 <div className="flex gap-1 mt-2">
-                  <button className={`px-2 py-1 rounded ${previewMode==='desktop' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`} onClick={() => setPreviewMode('desktop')}>Desktop</button>
-                  <button className={`px-2 py-1 rounded ${previewMode==='tablet' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`} onClick={() => setPreviewMode('tablet')}>Tablet</button>
-                  <button className={`px-2 py-1 rounded ${previewMode==='mobile' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`} onClick={() => setPreviewMode('mobile')}>Mobile</button>
+                  <button className={`px-2 py-1 rounded ${previewMode==='desktop' ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'}`} onClick={() => setPreviewMode('desktop')}>Desktop</button>
+                  <button className={`px-2 py-1 rounded ${previewMode==='tablet' ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'}`} onClick={() => setPreviewMode('tablet')}>Tablet</button>
+                  <button className={`px-2 py-1 rounded ${previewMode==='mobile' ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'}`} onClick={() => setPreviewMode('mobile')}>Mobile</button>
                 </div>
               </div>
             )}
@@ -781,19 +797,19 @@ export default function ManageContentPage() {
 
             {/* AI Code Assistant */}
               {/* AI Code Assistant UI */}
-              <div className="w-full bg-gradient-to-br from-purple-50 via-blue-50 to-green-50 border border-purple-200 rounded-2xl p-6 mb-6 shadow-sm">
+              <div className="w-full bg-gradient-to-br from-purple-50 via-blue-50 to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border border-purple-200 dark:border-gray-700 rounded-2xl p-6 mb-6 shadow-sm">
               <div className="flex items-center mb-2">
                 <SparklesIcon className="h-6 w-6 text-purple-500 mr-2" />
-                <span className="font-bold text-lg text-purple-700">AI Code Assistant</span>
+                <span className="font-bold text-lg text-purple-700 dark:text-purple-300">AI Code Assistant</span>
               </div>
-              <p className="text-gray-600 mb-3 text-sm">Describe what you want to build and get instant code suggestions powered by AI.</p>
+              <p className="text-gray-600 dark:text-gray-300 mb-3 text-sm">Describe what you want to build and get instant code suggestions powered by AI.</p>
               <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <textarea
                   value={aiPrompt}
                   onChange={e => setAiPrompt(e.target.value)}
                   placeholder="e.g. Create a responsive navbar in React"
                   rows={2}
-                  className="flex-1 border border-purple-200 rounded-lg p-2 text-sm text-gray-900 bg-white focus:ring-2 focus:ring-purple-300 focus:outline-none transition"
+                  className="flex-1 border border-purple-200 dark:border-gray-600 rounded-lg p-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 focus:ring-2 focus:ring-purple-300 focus:outline-none transition"
                   style={{ minHeight: 44 }}
                 />
                 <button
@@ -805,38 +821,38 @@ export default function ManageContentPage() {
                 </button>
               </div>
               {aiCode && (
-                <div className="mt-4 bg-white border border-green-200 rounded-xl p-4 text-xs font-mono whitespace-pre-wrap relative shadow-sm">
+                <div className="mt-4 bg-white dark:bg-gray-800 border border-green-200 dark:border-gray-600 rounded-xl p-4 text-xs font-mono whitespace-pre-wrap relative shadow-sm">
                   {mode === 'code' && typeof aiCode === 'object' && aiCode !== null ? (
                     <>
                       <div className="mb-2">
-                        <span className="font-bold text-purple-700">HTML:</span>
+                        <span className="font-bold text-purple-700 dark:text-purple-300">HTML:</span>
                         <button
                           onClick={() => { setHtmlCode((aiCode as any).html || ''); toast.success('HTML code applied!'); }}
                           className="mb-2 ml-2 px-3 py-1 bg-purple-600 text-white rounded text-xs font-semibold hover:bg-purple-700 transition"
                         >
                           Insert to HTML
                         </button>
-                        <pre className="bg-white border rounded p-2 mt-1 overflow-x-auto text-black">{(aiCode as any).html}</pre>
+                        <pre className="bg-white dark:bg-gray-900 border rounded p-2 mt-1 overflow-x-auto text-gray-900 dark:text-white">{(aiCode as any).html}</pre>
                       </div>
                       <div className="mb-2">
-                        <span className="font-bold text-blue-700">CSS:</span>
+                        <span className="font-bold text-blue-700 dark:text-blue-300">CSS:</span>
                         <button
                           onClick={() => { setCssCode((aiCode as any).css || ''); toast.success('CSS code applied!'); }}
                           className="mb-2 ml-2 px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 transition"
                         >
                           Insert to CSS
                         </button>
-                        <pre className="bg-white border rounded p-2 mt-1 overflow-x-auto text-black">{(aiCode as any).css}</pre>
+                        <pre className="bg-white dark:bg-gray-900 border rounded p-2 mt-1 overflow-x-auto text-gray-900 dark:text-white">{(aiCode as any).css}</pre>
                       </div>
                       <div className="mb-2">
-                        <span className="font-bold text-green-700">JavaScript:</span>
+                        <span className="font-bold text-green-700 dark:text-green-300">JavaScript:</span>
                         <button
                           onClick={() => { setJsCode((aiCode as any).js || ''); toast.success('JavaScript code applied!'); }}
                           className="mb-2 ml-2 px-3 py-1 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700 transition"
                         >
                           Insert to JavaScript
                         </button>
-                        <pre className="bg-white border rounded p-2 mt-1 overflow-x-auto text-black">{(aiCode as any).js}</pre>
+                        <pre className="bg-white dark:bg-gray-900 border rounded p-2 mt-1 overflow-x-auto text-gray-900 dark:text-white">{(aiCode as any).js}</pre>
                       </div>
                       <div className="flex gap-2 mb-2">
                         <button
@@ -866,7 +882,7 @@ export default function ManageContentPage() {
                         </button>
                       </div>
                       {typeof aiCode === 'string' && (
-                        <pre className="bg-white border rounded p-2 mt-1 overflow-x-auto text-black">{aiCode}</pre>
+                        <pre className="bg-white dark:bg-gray-900 border rounded p-2 mt-1 overflow-x-auto text-gray-900 dark:text-white">{aiCode}</pre>
                       )}
                     </>
                   )}
@@ -876,10 +892,10 @@ export default function ManageContentPage() {
             {/* Templates Section */}
             {/* Removed the main templates section from here */}
             <div className="w-full">
-              <div className="mb-2 flex gap-2 items-center flex-wrap text-black">
-                <button className={`px-4 py-2 rounded-t bg-gray-100 border-b-2 ${selectedTab==='html' ? 'border-blue-500 font-bold' : 'border-transparent'}`} onClick={() => setSelectedTab('html')}>HTML</button>
-                <button className={`px-4 py-2 rounded-t bg-gray-100 border-b-2 ${selectedTab==='css' ? 'border-blue-500 font-bold' : 'border-transparent'}`} onClick={() => setSelectedTab('css')}>CSS</button>
-                <button className={`px-4 py-2 rounded-t bg-gray-100 border-b-2 ${selectedTab==='js' ? 'border-blue-500 font-bold' : 'border-transparent'}`} onClick={() => setSelectedTab('js')}>JavaScript</button>
+              <div className="mb-2 flex gap-2 items-center flex-wrap text-gray-900 dark:text-white">
+                <button className={`px-4 py-2 rounded-t bg-gray-100 dark:bg-gray-800 border-b-2 ${selectedTab==='html' ? 'border-blue-500 font-bold' : 'border-transparent'}`} onClick={() => setSelectedTab('html')}>HTML</button>
+                <button className={`px-4 py-2 rounded-t bg-gray-100 dark:bg-gray-800 border-b-2 ${selectedTab==='css' ? 'border-blue-500 font-bold' : 'border-transparent'}`} onClick={() => setSelectedTab('css')}>CSS</button>
+                <button className={`px-4 py-2 rounded-t bg-gray-100 dark:bg-gray-800 border-b-2 ${selectedTab==='js' ? 'border-blue-500 font-bold' : 'border-transparent'}`} onClick={() => setSelectedTab('js')}>JavaScript</button>
               </div>
               <div className="w-full h-80 sm:h-96 mb-4 max-w-full">
                 {selectedTab === 'html' && (
@@ -889,7 +905,7 @@ export default function ManageContentPage() {
                     language="html"
                     value={htmlCode}
                     onChange={value => setHtmlCode(value || "")}
-                    theme="vs"
+                    theme="vs-dark"
                     options={{ fontSize: 16, minimap: { enabled: false }, wordWrap: 'on' }}
                   />
                 )}
@@ -900,7 +916,7 @@ export default function ManageContentPage() {
                     language="css"
                     value={cssCode}
                     onChange={value => setCssCode(value || "")}
-                    theme="vs"
+                    theme="vs-dark"
                     options={{ fontSize: 16, minimap: { enabled: false }, wordWrap: 'on' }}
                   />
                 )}
@@ -911,7 +927,7 @@ export default function ManageContentPage() {
                     language="javascript"
                     value={jsCode}
                     onChange={value => setJsCode(value || "")}
-                    theme="vs"
+                    theme="vs-dark"
                     options={{ fontSize: 16, minimap: { enabled: false }, wordWrap: 'on' }}
                   />
                 )}
@@ -1010,6 +1026,67 @@ export default function ManageContentPage() {
         <DialogActions>
           <Button onClick={() => setSaveDialogOpen(false)} color="secondary" variant="outlined">Cancel</Button>
           <Button onClick={handleSaveTemplate} color="primary" variant="contained">Save Template</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Add Form Modal */}
+      <Dialog open={addFormModalOpen} onClose={() => setAddFormModalOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle className="flex items-center gap-2 text-2xl font-bold text-gray-900 dark:text-white">
+          <PlusIcon className="h-7 w-7 text-purple-600" /> Add Form to Page
+        </DialogTitle>
+        <DialogContent>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
+            Choose a form type to add to your page. The form will be automatically inserted into your HTML code and will collect submissions that you can view in the Submissions dashboard.
+          </p>
+          <div className="grid grid-cols-1 gap-4">
+            <button
+              onClick={() => handleInsertForm('contact')}
+              className="flex items-center gap-3 p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-left"
+            >
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Contact Form</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Collect messages, inquiries, and feedback from visitors</p>
+              </div>
+            </button>
+            
+            <button
+              onClick={() => handleInsertForm('signup')}
+              className="flex items-center gap-3 p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-left"
+            >
+              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Sign Up Form</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Collect user registrations and email signups</p>
+              </div>
+            </button>
+            
+            <button
+              onClick={() => handleInsertForm('login')}
+              className="flex items-center gap-3 p-4 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-left"
+            >
+              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Login Form</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Allow users to log in to your website</p>
+              </div>
+            </button>
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAddFormModalOpen(false)} color="secondary" variant="outlined">Cancel</Button>
         </DialogActions>
       </Dialog>
     </DashboardLayout>

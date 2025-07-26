@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { prisma } from '@/lib/prisma';
-import { authOptions } from '../../../auth/[...nextauth]/route';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { Prisma } from '@prisma/client';
 import { bundleReactFiles } from '@/utils/bundleReact';
 
@@ -51,11 +51,25 @@ export async function POST(
         htmlCode,
         cssCode,
         jsCode,
-        reactCode: reactCodeToSave as Prisma.JsonValue,
+        reactCode: reactCodeToSave || null,
         renderMode,
         reactBundle, // TODO: Ensure this field exists in your Page model
       },
     });
+
+    // Create notification for page update/publishing
+    try {
+      await prisma.notification.create({
+        data: {
+          userId: session.user.id,
+          type: 'publish',
+          message: `Your page "${existingPage.title}" has been updated successfully! Changes are now live on your website.`,
+        },
+      });
+    } catch (error) {
+      console.error('Error creating page update notification:', error);
+    }
+
     return NextResponse.json(updatedPage);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to save code' }, { status: 500 });

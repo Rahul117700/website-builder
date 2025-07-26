@@ -1,92 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]/route';
 
-// GET /api/plans - Get all available plans
 export async function GET(req: NextRequest) {
   try {
     const plans = await prisma.plan.findMany({
-      orderBy: { price: 'asc' },
+      orderBy: {
+        price: 'asc'
+      }
     });
+
     return NextResponse.json(plans);
   } catch (error) {
     console.error('Error fetching plans:', error);
     return NextResponse.json({ error: 'Failed to fetch plans' }, { status: 500 });
   }
-}
-
-// POST /api/plans - Create a new plan
-export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || session.user.role !== 'SUPER_ADMIN') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  const { name, price, description, interval, currency, numberOfWebsites, unlimitedWebsites, supportLevel, customDomain, advancedAnalytics, customIntegrations, teamManagement, communityAccess } = await req.json();
-  if (!name || !price || !interval) {
-    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-  }
-  const plan = await prisma.plan.create({
-    data: {
-      name,
-      price: Number(price),
-      interval,
-      currency: currency || 'INR',
-      description: description || '',
-      numberOfWebsites: unlimitedWebsites ? null : (numberOfWebsites ? Number(numberOfWebsites) : null),
-      unlimitedWebsites: Boolean(unlimitedWebsites),
-      supportLevel: supportLevel || null,
-      customDomain: Boolean(customDomain),
-      advancedAnalytics: Boolean(advancedAnalytics),
-      customIntegrations: Boolean(customIntegrations),
-      teamManagement: Boolean(teamManagement),
-      communityAccess: Boolean(communityAccess),
-    },
-  });
-  return NextResponse.json(plan);
-}
-
-// PATCH /api/plans - Update a plan by id (id in body)
-export async function PATCH(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || session.user.role !== 'SUPER_ADMIN') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  const { id, name, price, description, interval, currency, numberOfWebsites, unlimitedWebsites, supportLevel, customDomain, advancedAnalytics, customIntegrations, teamManagement, communityAccess } = await req.json();
-  if (!id) {
-    return NextResponse.json({ error: 'Plan id is required' }, { status: 400 });
-  }
-  const plan = await prisma.plan.update({
-    where: { id },
-    data: {
-      ...(name !== undefined && { name }),
-      ...(price !== undefined && { price: Number(price) }),
-      ...(interval !== undefined && { interval }),
-      ...(currency !== undefined && { currency }),
-      ...(description !== undefined && { description }),
-      ...(numberOfWebsites !== undefined && { numberOfWebsites: unlimitedWebsites ? null : (numberOfWebsites ? Number(numberOfWebsites) : null) }),
-      ...(unlimitedWebsites !== undefined && { unlimitedWebsites: Boolean(unlimitedWebsites) }),
-      ...(supportLevel !== undefined && { supportLevel }),
-      ...(customDomain !== undefined && { customDomain: Boolean(customDomain) }),
-      ...(advancedAnalytics !== undefined && { advancedAnalytics: Boolean(advancedAnalytics) }),
-      ...(customIntegrations !== undefined && { customIntegrations: Boolean(customIntegrations) }),
-      ...(teamManagement !== undefined && { teamManagement: Boolean(teamManagement) }),
-      ...(communityAccess !== undefined && { communityAccess: Boolean(communityAccess) }),
-    },
-  });
-  return NextResponse.json(plan);
-}
-
-// DELETE /api/plans - Delete a plan by id (id in body)
-export async function DELETE(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || session.user.role !== 'SUPER_ADMIN') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  const { id } = await req.json();
-  if (!id) {
-    return NextResponse.json({ error: 'Plan id is required' }, { status: 400 });
-  }
-  const plan = await prisma.plan.delete({ where: { id } });
-  return NextResponse.json(plan);
 } 

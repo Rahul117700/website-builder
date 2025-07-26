@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(req: NextRequest) {
@@ -43,11 +43,4 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(user);
 }
 
-export async function GET_COUNT(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || session.user.role !== 'SUPER_ADMIN') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  const count = await prisma.user.count();
-  return NextResponse.json({ total: count });
-} 
+ 
