@@ -13,29 +13,58 @@ async function requireSuperAdmin(req: NextRequest) {
   return session;
 }
 
+// Update zod schema for POST and PUT to require 'pages' as an object with required keys
+const pageCodeSchema = z.object({ html: z.string(), css: z.string(), js: z.string() });
+const pagesSchema = z.object({
+  home: pageCodeSchema,
+  about: pageCodeSchema,
+  contact: pageCodeSchema,
+  services: pageCodeSchema,
+  product: pageCodeSchema,
+});
+
 // GET /api/admin/templates - List all templates
 export async function GET(req: NextRequest) {
-  const session = await requireSuperAdmin(req);
-  if (!session.user) return session;
-  const templates = await prisma.template.findMany({ orderBy: { createdAt: 'desc' } });
-  return NextResponse.json(templates);
+  try {
+    const session = await requireSuperAdmin(req);
+    if (session instanceof NextResponse) return session;
+    if (!session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    
+    const templates = await prisma.template.findMany({ 
+      orderBy: { createdAt: 'desc' } 
+    });
+    
+    return NextResponse.json(templates);
+  } catch (error) {
+    console.error('Error fetching templates:', error);
+    return NextResponse.json({ error: 'Failed to fetch templates' }, { status: 500 });
+  }
 }
 
 // POST /api/admin/templates - Create a new template
 export async function POST(req: NextRequest) {
   const session = await requireSuperAdmin(req);
-  if (!session.user) return session;
+  if (session instanceof NextResponse) return session;
+  if (!session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await req.json();
   const schema = z.object({
     name: z.string().min(2),
-    html: z.string().optional(),
-    css: z.string().optional(),
-    js: z.string().optional(),
     category: z.string().optional(),
     description: z.string().optional(),
     preview: z.string().optional(),
     price: z.number().min(0),
+    pages: pagesSchema,
   });
+  // For backward compatibility: if html/css/js are present but pages is not, map them to 'home'
+  if (!body.pages && (body.html || body.css || body.js)) {
+    body.pages = {
+      home: { html: body.html || '', css: body.css || '', js: body.js || '' },
+      about: { html: '', css: '', js: '' },
+      contact: { html: '', css: '', js: '' },
+      services: { html: '', css: '', js: '' },
+      product: { html: '', css: '', js: '' },
+    };
+  }
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: 'Invalid data' }, { status: 400 });
   const slug = parsed.data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
@@ -53,20 +82,29 @@ export async function POST(req: NextRequest) {
 // PUT /api/admin/templates - Update a template
 export async function PUT(req: NextRequest) {
   const session = await requireSuperAdmin(req);
-  if (!session.user) return session;
+  if (session instanceof NextResponse) return session;
+  if (!session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await req.json();
   const schema = z.object({
     id: z.string(),
     name: z.string().min(2),
-    html: z.string().optional(),
-    css: z.string().optional(),
-    js: z.string().optional(),
     category: z.string().optional(),
     description: z.string().optional(),
     preview: z.string().optional(),
     price: z.number().min(0),
     approved: z.boolean().optional(),
+    pages: pagesSchema,
   });
+  // For backward compatibility: if html/css/js are present but pages is not, map them to 'home'
+  if (!body.pages && (body.html || body.css || body.js)) {
+    body.pages = {
+      home: { html: body.html || '', css: body.css || '', js: body.js || '' },
+      about: { html: '', css: '', js: '' },
+      contact: { html: '', css: '', js: '' },
+      services: { html: '', css: '', js: '' },
+      product: { html: '', css: '', js: '' },
+    };
+  }
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: 'Invalid data' }, { status: 400 });
   const template = await prisma.template.update({
@@ -76,20 +114,13 @@ export async function PUT(req: NextRequest) {
   return NextResponse.json(template);
 }
 
-// POST /api/admin/templates/approve - Approve a template
-export async function POST_APPROVE(req: NextRequest) {
-  const session = await requireSuperAdmin(req);
-  if (!session.user) return session;
-  const { templateId } = await req.json();
-  if (!templateId) return NextResponse.json({ error: 'templateId required' }, { status: 400 });
-  const template = await prisma.template.update({ where: { id: templateId }, data: { approved: true } });
-  return NextResponse.json(template);
-}
+
 
 // DELETE /api/admin/templates - Delete a template
 export async function DELETE(req: NextRequest) {
   const session = await requireSuperAdmin(req);
-  if (!session.user) return session;
+  if (session instanceof NextResponse) return session;
+  if (!session.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { id } = await req.json();
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 });
   await prisma.template.delete({ where: { id } });

@@ -316,6 +316,7 @@ model Template {
   html      String?  // HTML code for the template
   css       String?  // CSS code for the template
   js        String?  // JavaScript code for the template
+  pages     Json?    // { home: {...}, about: {...}, contact: {...}, services: {...}, product: {...} }
   category  String?  // Category (e.g. business, restaurant, portfolio, etc.)
   description String?
   createdBy String   // 'super_admin' or userId
