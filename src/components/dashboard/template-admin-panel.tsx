@@ -23,6 +23,21 @@ interface TemplateAdminPanelProps {
   templatesPerPage?: number;
 }
 
+// Add types for page code and form
+interface PageCode {
+  html: string;
+  css: string;
+  js: string;
+}
+interface TemplateForm {
+  name: string;
+  category: string;
+  price: number;
+  description: string;
+  preview: string;
+  pages: { [key: string]: PageCode };
+}
+
 // Helper to extract code blocks from markdown or plain text
 function extractCodeBlocks(aiCode: any) {
   let html = '', css = '', js = '';
@@ -47,10 +62,18 @@ function extractCodeBlocks(aiCode: any) {
 export default function TemplateAdminPanel({ heading = 'Template Management', description = 'Create, edit, approve, and delete templates for the marketplace.', search = '', setSearch, page = 1, setPage, templatesPerPage = 10 }: TemplateAdminPanelProps) {
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({
-    name: '', html: '', css: '', js: '', category: '', section: '', price: 0, description: '', preview: ''
+  const requiredPages = ['home', 'about', 'contact', 'services', 'product'];
+  const emptyPage = { html: '', css: '', js: '' };
+  const [form, setForm] = useState<TemplateForm>({
+    name: '',
+    category: '',
+    price: 0,
+    description: '',
+    preview: '',
+    pages: requiredPages.reduce((acc, page) => ({ ...acc, [page]: { html: '', css: '', js: '' } }), {})
   });
   const [editing, setEditing] = useState<any>(null);
+  const [selectedPage, setSelectedPage] = useState('home');
   const [selectedTab, setSelectedTab] = useState<'html'|'css'|'js'>('html');
   const [showPreview, setShowPreview] = useState(false);
   const [aiPrompt, setAiPrompt] = useState('');
@@ -61,10 +84,20 @@ export default function TemplateAdminPanel({ heading = 'Template Management', de
   // Fetch all templates
   const fetchTemplates = async () => {
     setLoading(true);
-    const res = await fetch('/api/admin/templates');
-    const data = await res.json();
-    setTemplates(data);
-    setLoading(false);
+    try {
+      const res = await fetch('/api/admin/templates');
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      const data = await res.json();
+      setTemplates(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error fetching templates:', error);
+      setTemplates([]);
+      toast.error('Failed to load templates');
+    } finally {
+      setLoading(false);
+    }
   };
   useEffect(() => { fetchTemplates(); }, []);
 
@@ -72,73 +105,97 @@ export default function TemplateAdminPanel({ heading = 'Template Management', de
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
-    const method = editing ? 'PUT' : 'POST';
-    const url = '/api/admin/templates' + (editing ? '' : '');
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editing ? { ...form, id: editing.id } : form),
-    });
-    if (res.ok) {
-      toast.success(editing ? 'Template updated!' : 'Template created!');
-      setForm({ name: '', html: '', css: '', js: '', category: '', section: '', price: 0, description: '', preview: '' });
-      setEditing(null);
-      fetchTemplates();
-    } else {
-      const err = await res.json();
-      toast.error(err.error || 'Error');
+    try {
+      const method = editing ? 'PUT' : 'POST';
+      const url = '/api/admin/templates';
+      const body = editing ? { ...form, id: editing.id } : form;
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        toast.success(editing ? 'Template updated!' : 'Template created!');
+        setForm({
+          name: '',
+          category: '',
+          price: 0,
+          description: '',
+          preview: '',
+          pages: requiredPages.reduce((acc, page) => ({ ...acc, [page]: { html: '', css: '', js: '' } }), {})
+        });
+        setEditing(null);
+        fetchTemplates();
+      } else {
+        const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+        toast.error(err.error || 'Error');
+      }
+    } catch (error) {
+      console.error('Error submitting template:', error);
+      toast.error('Failed to save template');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // Approve template
   const handleApprove = async (id: string) => {
     setLoading(true);
-    const res = await fetch('/api/admin/templates/approve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ templateId: id }),
-    });
-    if (res.ok) {
-      toast.success('Template approved!');
-      fetchTemplates();
-    } else {
-      toast.error('Error approving');
+    try {
+      const res = await fetch('/api/admin/templates/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ templateId: id }),
+      });
+      if (res.ok) {
+        toast.success('Template approved!');
+        fetchTemplates();
+      } else {
+        toast.error('Error approving template');
+      }
+    } catch (error) {
+      console.error('Error approving template:', error);
+      toast.error('Failed to approve template');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // Delete template
   const handleDelete = async (id: string) => {
     if (!window.confirm('Delete this template?')) return;
     setLoading(true);
-    const res = await fetch('/api/admin/templates', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    });
-    if (res.ok) {
-      toast.success('Template deleted!');
-      fetchTemplates();
-    } else {
-      toast.error('Error deleting');
+    try {
+      const res = await fetch('/api/admin/templates', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      if (res.ok) {
+        toast.success('Template deleted!');
+        fetchTemplates();
+      } else {
+        toast.error('Error deleting template');
+      }
+    } catch (error) {
+      console.error('Error deleting template:', error);
+      toast.error('Failed to delete template');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // Edit template
   const handleEdit = (tpl: any) => {
     setEditing(tpl);
+    // If tpl.pages exists, use it. Otherwise, map old fields to 'home' page for backward compatibility
     setForm({
       name: tpl.name || '',
-      html: tpl.html || '',
-      css: tpl.css || '',
-      js: tpl.js || '',
       category: tpl.category || '',
-      section: tpl.section || '',
       price: tpl.price || 0,
       description: tpl.description || '',
       preview: tpl.preview || '',
+      pages: tpl.pages || requiredPages.reduce((acc, page) => ({ ...acc, [page]: page === 'home' ? { html: tpl.html || '', css: tpl.css || '', js: tpl.js || '' } : { ...emptyPage } }), {} as { [key: string]: PageCode })
     });
   };
 
@@ -152,7 +209,8 @@ export default function TemplateAdminPanel({ heading = 'Template Management', de
   const paginatedTemplates = filteredTemplates.slice((page-1)*templatesPerPage, page*templatesPerPage);
 
   // Live preview document
-  const previewDoc = `<!DOCTYPE html><html><head><style>${form.css}</style></head><body>${form.html}<script>${form.js}</script></body></html>`;
+  const pageObj = form.pages?.[selectedPage] || { html: '', css: '', js: '' };
+  const previewDoc = `<!DOCTYPE html><html><head><style>${pageObj.css}</style></head><body>${pageObj.html}<script>${pageObj.js}</script></body></html>`;
 
   // AI Code Assistant logic
   const handleAIGenerate = async () => {
@@ -232,7 +290,7 @@ export default function TemplateAdminPanel({ heading = 'Template Management', de
             <div className="mb-4">
               <span className="font-bold text-purple-700 mr-2">HTML:</span>
               <button
-                onClick={() => { setForm(f => ({ ...f, html: codeBlocks.html })); toast.success('HTML code applied!'); }}
+                onClick={() => { setForm(f => ({ ...f, pages: { ...f.pages, [selectedPage]: { ...f.pages[selectedPage], html: codeBlocks.html } } })); toast.success('HTML code applied!'); }}
                 className="ml-2 px-3 py-1 bg-purple-600 text-white rounded text-xs font-semibold hover:bg-purple-700 transition"
               >
                 Insert to HTML
@@ -243,7 +301,7 @@ export default function TemplateAdminPanel({ heading = 'Template Management', de
             <div className="mb-4">
               <span className="font-bold text-blue-700 mr-2">CSS:</span>
               <button
-                onClick={() => { setForm(f => ({ ...f, css: codeBlocks.css })); toast.success('CSS code applied!'); }}
+                onClick={() => { setForm(f => ({ ...f, pages: { ...f.pages, [selectedPage]: { ...f.pages[selectedPage], css: codeBlocks.css } } })); toast.success('CSS code applied!'); }}
                 className="ml-2 px-3 py-1 bg-blue-600 text-white rounded text-xs font-semibold hover:bg-blue-700 transition"
               >
                 Insert to CSS
@@ -254,7 +312,7 @@ export default function TemplateAdminPanel({ heading = 'Template Management', de
             <div className="mb-4">
               <span className="font-bold text-green-700 mr-2">JavaScript:</span>
               <button
-                onClick={() => { setForm(f => ({ ...f, js: codeBlocks.js })); toast.success('JavaScript code applied!'); }}
+                onClick={() => { setForm(f => ({ ...f, pages: { ...f.pages, [selectedPage]: { ...f.pages[selectedPage], js: codeBlocks.js } } })); toast.success('JavaScript code applied!'); }}
                 className="ml-2 px-3 py-1 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700 transition"
               >
                 Insert to JavaScript
@@ -313,7 +371,11 @@ export default function TemplateAdminPanel({ heading = 'Template Management', de
                   });
                   const data = await res.json();
                   if (data.url) {
-                    setForm(f => ({ ...f, preview: data.url }));
+                    setForm(f => { 
+                      const updated = { ...f, preview: data.url };
+                      console.log('Preview image URL set to:', updated.preview); // Debug log
+                      return updated;
+                    });
                   } else {
                     alert('Image upload failed');
                   }
@@ -331,66 +393,41 @@ export default function TemplateAdminPanel({ heading = 'Template Management', de
           {/* Tabbed Monaco Editor for HTML/CSS/JS */}
           <div className="w-full">
             <div className="mb-2 flex gap-2 items-center flex-wrap text-black">
+              {requiredPages.map(page => (
+                <button type="button" key={page} className={`px-4 py-2 rounded-t bg-gray-100 border-b-2 ${selectedPage===page ? 'border-yellow-500 font-bold' : 'border-transparent'}`} onClick={() => setSelectedPage(page)}>{page.charAt(0).toUpperCase()+page.slice(1)}</button>
+              ))}
+              <span className="mx-2">|</span>
               <button type="button" className={`px-4 py-2 rounded-t bg-gray-100 border-b-2 ${selectedTab==='html' ? 'border-blue-500 font-bold' : 'border-transparent'}`} onClick={() => setSelectedTab('html')}>HTML</button>
               <button type="button" className={`px-4 py-2 rounded-t bg-gray-100 border-b-2 ${selectedTab==='css' ? 'border-blue-500 font-bold' : 'border-transparent'}`} onClick={() => setSelectedTab('css')}>CSS</button>
               <button type="button" className={`px-4 py-2 rounded-t bg-gray-100 border-b-2 ${selectedTab==='js' ? 'border-blue-500 font-bold' : 'border-transparent'}`} onClick={() => setSelectedTab('js')}>JavaScript</button>
               <button type="button" className="ml-auto px-4 py-2 rounded bg-yellow-100 text-yellow-800 font-bold hover:bg-yellow-200 transition" onClick={() => setShowPreview(v => !v)}>{showPreview ? 'Hide Preview' : 'Show Preview'}</button>
             </div>
             <div className="w-full h-80 sm:h-96 mb-4 max-w-full">
-              {selectedTab === 'html' && (
-                <MonacoEditor
-                  height="100%"
-                  defaultLanguage="html"
-                  language="html"
-                  value={form.html}
-                  onChange={value => setForm(f => ({ ...f, html: value || '' }))}
-                  theme="vs"
-                  options={{ fontSize: 16, minimap: { enabled: false }, wordWrap: 'on' }}
-                />
-              )}
-              {selectedTab === 'css' && (
-                <MonacoEditor
-                  height="100%"
-                  defaultLanguage="css"
-                  language="css"
-                  value={form.css}
-                  onChange={value => setForm(f => ({ ...f, css: value || '' }))}
-                  theme="vs"
-                  options={{ fontSize: 16, minimap: { enabled: false }, wordWrap: 'on' }}
-                />
-              )}
-              {selectedTab === 'js' && (
-                <MonacoEditor
-                  height="100%"
-                  defaultLanguage="javascript"
-                  language="javascript"
-                  value={form.js}
-                  onChange={value => setForm(f => ({ ...f, js: value || '' }))}
-                  theme="vs"
-                  options={{ fontSize: 16, minimap: { enabled: false }, wordWrap: 'on' }}
-                />
-              )}
+              <MonacoEditor
+                height="100%"
+                defaultLanguage={selectedTab}
+                language={selectedTab}
+                value={(form.pages?.[selectedPage]?.[selectedTab]) ?? ''}
+                onChange={value => setForm(f => ({ ...f, pages: { ...f.pages, [selectedPage]: { ...f.pages[selectedPage], [selectedTab]: value || '' } } }))}
+                theme="vs"
+                options={{ fontSize: 16, minimap: { enabled: false }, wordWrap: 'on' }}
+              />
             </div>
-            {/* Live Preview */}
             {showPreview && (
-              <div className="flex flex-col items-center w-full max-w-full mb-8">
-                <h3 className="font-semibold mb-2" style={{color:"black"}}>Live Preview</h3>
-                <div className="w-full flex justify-center">
-                  <div style={{ width: '100%', border: '1px solid #e5e7eb', borderRadius: 8, background: 'white', overflow: 'auto', maxWidth: '100%' }}>
-                    <iframe
-                      srcDoc={previewDoc}
-                      className="h-80 sm:h-96 border-none"
-                      title="Live Preview"
-                      style={{ width: '100%', minHeight: '400px' }}
-                    />
-                  </div>
-                </div>
+              <div className="w-full border rounded bg-gray-50 my-4" style={{ minHeight: 300 }}>
+                <iframe
+                  title="Live Preview"
+                  srcDoc={previewDoc}
+                  style={{ width: '100%', height: 400, border: 'none', background: 'white' }}
+                  sandbox="allow-scripts allow-same-origin"
+                />
               </div>
             )}
+            {/* Optionally, add a live preview for the selected page */}
           </div>
           <div className="flex gap-2 mt-2">
             <button type="submit" className="btn-primary px-5 py-2 rounded bg-yellow-400 text-black font-bold shadow hover:bg-yellow-500 transition" disabled={loading}>{editing ? 'Update' : 'Create'} Template</button>
-            {editing && <button type="button" className="btn-secondary px-5 py-2 rounded bg-gray-200 text-black font-bold shadow hover:bg-gray-300 transition" onClick={() => { setEditing(null); setForm({ name: '', html: '', css: '', js: '', category: '', section: '', price: 0, description: '', preview: '' }); }}>Cancel</button>}
+            {editing && <button type="button" className="btn-secondary px-5 py-2 rounded bg-gray-200 text-black font-bold shadow hover:bg-gray-300 transition" onClick={() => { setEditing(null); setForm({ name: '', category: '', price: 0, description: '', preview: '', pages: requiredPages.reduce((acc, page) => ({ ...acc, [page]: { html: '', css: '', js: '' } }), {}) }); }}>Cancel</button>}
           </div>
         </form>
       </div>

@@ -168,3 +168,50 @@ export async function DELETE(
     );
   }
 }
+
+// POST /api/sites/[id]/apply-template - Apply a template to a site (replace all pages)
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    // Get the site to check ownership
+    const site = await prisma.site.findUnique({ where: { id: params.id } });
+    if (!site) {
+      return NextResponse.json({ error: 'Site not found' }, { status: 404 });
+    }
+    if (site.userId !== session.user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const { templateId } = await req.json();
+    if (!templateId) {
+      return NextResponse.json({ error: 'templateId required' }, { status: 400 });
+    }
+    const template = await prisma.template.findUnique({ where: { id: templateId }, select: { pages: true } });
+    if (!template || !template.pages) {
+      return NextResponse.json({ error: 'Template or template pages not found' }, { status: 404 });
+    }
+    // Delete all existing pages for the site
+    await prisma.page.deleteMany({ where: { siteId: site.id } });
+    // Create new pages for the site from the template's pages object
+    const pageTitles: Record<string, string> = { home: 'Home', about: 'About', contact: 'Contact', services: 'Services', product: 'Product' };
+    for (const key of Object.keys(pageTitles)) {
+      const pageData = (template.pages as Record<string, { html: string; css: string; js: string }>)[key];
+      if (!pageData) continue;
+      await prisma.page.create({
+        data: {
+          siteId: site.id,
+          title: pageTitles[key],
+          slug: key,
+          content: { html: pageData.html, css: pageData.css, js: pageData.js },
+          isPublished: true,
+        },
+      });
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error applying template:', error);
+    return NextResponse.json({ error: 'Failed to apply template' }, { status: 500 });
+  }
+}

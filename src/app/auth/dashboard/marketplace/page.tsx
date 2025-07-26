@@ -110,13 +110,13 @@ export default function MarketplacePage() {
     setApplying(true);
     setSuccess(false);
     try {
-      const res = await fetch(`/api/sites/${selectedSite}`, {
-        method: 'PUT',
+      const res = await fetch(`/api/sites/${selectedSite}/apply-template`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-auth-token': localStorage.getItem('token') || '',
         },
-        body: JSON.stringify({ template: useTpl.id }),
+        body: JSON.stringify({ templateId: useTpl.id }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -129,7 +129,6 @@ export default function MarketplacePage() {
         setSelectedSite('');
       }, 1500);
     } catch (err) {
-      // Optionally show error feedback
       setSuccess(false);
       alert((err as any).message || 'Failed to apply template');
     } finally {

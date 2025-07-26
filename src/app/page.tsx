@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import gsap from "gsap";
+
+
 
 export default function HomePage() {
   const [plans, setPlans] = useState<any[]>([]);
@@ -12,6 +13,29 @@ export default function HomePage() {
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [templates, setTemplates] = useState<any[]>([]);
+  const [theme, setTheme] = useState('light');
+
+
+  // Theme toggle function
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.classList.toggle('dark', newTheme === 'dark');
+  };
+
+  // Initialize theme from localStorage
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+    document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+  }, []);
+
+
+
+
+  
+
 
   useEffect(() => {
     async function fetchPlans() {
@@ -40,31 +64,12 @@ export default function HomePage() {
     fetchTemplates();
   }, []);
 
-  // GSAP animation effect
-  useEffect(() => {
-    if (typeof window !== 'undefined' && document.getElementById('gsap-hero-collage')) {
-      gsap.to('#c1', { y: 20, repeat: -1, yoyo: true, duration: 2, ease: 'power1.inOut' });
-      gsap.to('#r1', { x: '+=20', repeat: -1, yoyo: true, duration: 2.5, ease: 'power1.inOut' });
-      gsap.to('#p1', { rotation: 360, transformOrigin: '320 225', repeat: -1, duration: 6, ease: 'linear' });
-      gsap.to('#e1', { scaleX: 1.2, scaleY: 0.8, repeat: -1, yoyo: true, duration: 2.2, transformOrigin: '120 220', ease: 'power1.inOut' });
-    }
-  }, []);
 
-  // GSAP tech/future animation effect
-  useEffect(() => {
-    if (typeof window !== 'undefined' && document.getElementById('gsap-hero-tech')) {
-      gsap.to('#browser', { y: 10, repeat: -1, yoyo: true, duration: 2, ease: 'power1.inOut' });
-      gsap.to('#code', { y: '+=10', repeat: -1, yoyo: true, duration: 2.2, ease: 'power1.inOut' });
-      gsap.to('#gear', { rotation: 360, transformOrigin: 'center', repeat: -1, duration: 6, ease: 'linear' });
-      gsap.to('#cursor', { x: 10, y: 10, repeat: -1, yoyo: true, duration: 2.5, ease: 'power1.inOut' });
-      gsap.to('#cloud', { x: 20, repeat: -1, yoyo: true, duration: 3, ease: 'power1.inOut' });
-      gsap.to('#orbit1', { rotation: 360, transformOrigin: '200 140', repeat: -1, duration: 12, ease: 'linear' });
-      gsap.to('#orbit2', { rotation: -360, transformOrigin: '200 140', repeat: -1, duration: 16, ease: 'linear' });
-    }
-  }, []);
 
-  function getPlanFeatures(plan) {
-    const features = [];
+
+
+  function getPlanFeatures(plan: any) {
+    const features: string[] = [];
     if (plan.unlimitedWebsites) features.push("Unlimited Websites");
     else if (plan.numberOfWebsites) features.push(`${plan.numberOfWebsites} Website${plan.numberOfWebsites === 1 ? '' : 's'}`);
     if (plan.supportLevel) features.push(`${plan.supportLevel} Support`);
@@ -76,146 +81,260 @@ export default function HomePage() {
     return features;
   }
 
-  return (
-    <div className="bg-white dark:bg-slate-900 min-h-screen flex flex-col">
-      {/* Modern Full-Width Navbar */}
-      <header className="sticky top-0 z-50 bg-white dark:bg-slate-900 shadow-md w-full">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 flex justify-between items-center h-16">
-          {/* Logo & Nav Links */}
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-lg text-purple-700 dark:text-white">Website Builder</span>
-            </div>
-            <nav className="hidden md:flex gap-6 text-base font-medium">
-              <a href="#features" className="text-gray-900 dark:text-white hover:text-purple-600 transition">Features</a>
-              <a href="#templates" className="text-gray-900 dark:text-white hover:text-purple-600 transition">Templates</a>
-              <a href="#pricing" className="text-gray-900 dark:text-white hover:text-purple-600 transition">Pricing</a>
-              <a href="/about" className="text-gray-900 dark:text-white hover:text-purple-600 transition">About Us</a>
-            </nav>
-          </div>
-          {/* User/CTA Section */}
-          <div className="flex items-center gap-4">
-            <a href="/auth/dashboard" className="bg-black text-white px-5 py-2 rounded-full text-base font-semibold shadow-lg hover:bg-gray-900 transition">Go to Dashboard</a>
-            {session?.user ? (
-              <div className="flex items-center gap-2 bg-gray-100 dark:bg-slate-800 px-3 py-1 rounded-full">
-                <img src={session.user.image || "/default-avatar.png"} alt="User" className="h-8 w-8 rounded-full border-2 border-purple-400 object-cover" />
-                <span className="text-gray-900 dark:text-white font-semibold">{session.user.name || session.user.email}</span>
+      return (
+      <div className="min-h-screen bg-white dark:bg-gray-900">
+      
+
+
+      {/* Simple Navbar */}
+      <header className="bg-white dark:bg-gray-800 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <span className="text-2xl font-bold text-gray-900 dark:text-white">Website Builder</span>
               </div>
-            ) : (
-              <a href="/auth/signin" className="text-black font-semibold hover:underline">Sign in</a>
-            )}
-            {/* Hamburger for mobile */}
-            <button className="md:hidden p-2 rounded hover:bg-gray-200 dark:hover:bg-slate-800 transition" onClick={() => setMobileMenuOpen(true)} aria-label="Open menu">
-              <svg className="h-7 w-7 text-gray-900 dark:text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
-            </button>
+            </div>
+            
+                        {/* Navigation */}
+            <nav className="hidden md:flex space-x-8">
+              <a href="#features" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Features</a>
+              <a href="#templates" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Templates</a>
+              <a href="#pricing" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Pricing</a>
+              <button 
+                onClick={() => router.push('/community')}
+                className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium"
+              >
+                Community
+              </button>
+              <a href="/about" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">About Us</a>
+            </nav>
+            
+            {/* User/CTA Section */}
+            <div className="flex items-center space-x-4">
+              {/* Theme Toggle Button */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                aria-label="Toggle theme"
+              >
+                {theme === 'light' ? (
+                  <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                )}
+              </button>
+              
+              <a href="/auth/dashboard" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">Go to Dashboard</a>
+              {session?.user ? (
+                <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2">
+                    <img src={session.user.image || "/default-avatar.png"} alt="User" className="h-8 w-8 rounded-full" />
+                    <span className="text-gray-700 dark:text-gray-300 text-sm">{session.user.name || session.user.email}</span>
+                  </div>
+                  <button
+                    onClick={() => router.push('/auth/signout')}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    aria-label="Sign out"
+                    title="Sign out"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <a href="/auth/signin" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm font-medium">Sign in</a>
+              )}
+              {/* Hamburger for mobile */}
+              <button className="md:hidden p-2 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600" onClick={() => setMobileMenuOpen(true)} aria-label="Open menu">
+                <svg className="h-6 w-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+              </button>
+            </div>
           </div>
         </div>
-        {/* Mobile Menu */}
+      </header>
+      
+      {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-50 bg-white dark:bg-slate-900 flex flex-col items-center justify-center gap-8 text-xl font-semibold">
-            <button className="absolute top-6 right-6 p-2 rounded hover:bg-gray-200 dark:hover:bg-slate-800 transition" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
-              <svg className="h-7 w-7 text-gray-900 dark:text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          <div className="fixed inset-0 z-50 bg-white dark:bg-gray-800 flex flex-col items-center justify-center">
+            <button className="absolute top-4 right-4 p-2 rounded-md bg-gray-100 dark:bg-gray-700" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
+              <svg className="h-6 w-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
-            <a href="#features" className="text-gray-900 dark:text-white hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>Features</a>
-            <a href="#templates" className="text-gray-900 dark:text-white hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>Templates</a>
-            <a href="#pricing" className="text-gray-900 dark:text-white hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
-            <a href="/about" className="text-gray-900 dark:text-white hover:text-purple-600 transition" onClick={() => setMobileMenuOpen(false)}>About Us</a>
-            <a href="/auth/dashboard" className="bg-black text-white px-8 py-3 rounded-full shadow-lg hover:bg-gray-900 transition" onClick={() => setMobileMenuOpen(false)}>Go to Dashboard</a>
-            {session?.user ? (
-              <div className="flex flex-col items-center gap-2">
-                <img src={session.user.image || "/default-avatar.png"} alt="User" className="h-10 w-10 rounded-full border-2 border-purple-400 object-cover" />
-                <span className="text-gray-900 dark:text-white font-semibold">{session.user.name || session.user.email}</span>
-              </div>
-            ) : (
-              <a href="/auth/signin" className="text-black font-semibold hover:underline" onClick={() => setMobileMenuOpen(false)}>Sign in</a>
-            )}
+            
+            <nav className="flex flex-col space-y-4 text-center">
+              <a href="#features" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>Features</a>
+              <a href="#templates" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>Templates</a>
+              <a href="#pricing" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
+              <button 
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  router.push('/community');
+                }}
+                className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-base font-medium"
+              >
+                Community
+              </button>
+              <a href="/about" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>About Us</a>
+              <a href="/auth/dashboard" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-base font-medium transition-colors" onClick={() => setMobileMenuOpen(false)}>Go to Dashboard</a>
+              {session?.user ? (
+                <div className="flex flex-col items-center space-y-2">
+                  <img src={session.user.image || "/default-avatar.png"} alt="User" className="h-12 w-12 rounded-full" />
+                  <span className="text-gray-700 dark:text-gray-300 text-sm">{session.user.name || session.user.email}</span>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      router.push('/auth/signout');
+                    }}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    aria-label="Sign out"
+                  >
+                    <span className="text-sm">Sign Out</span>
+                  </button>
+                </div>
+              ) : (
+                <a href="/auth/signin" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-base font-medium" onClick={() => setMobileMenuOpen(false)}>Sign in</a>
+              )}
+            </nav>
           </div>
         )}
-      </header>
-
-      {/* Hero Section */}
-      <section className="flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto px-4 sm:px-8 py-20 gap-12">
+      
+      {/* Enhanced Hero Section */}
+      <section className="flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto px-4 sm:px-8 py-20 gap-12 relative">
         <div className="flex-1">
-          <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
-            Build, launch, and grow your website with <span className="text-purple-600">AI-powered tools</span> and stunning templates
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-purple-100 dark:bg-purple-900/30 px-4 py-2 rounded-full mb-6">
+            <span className="w-2 h-2 bg-purple-600 rounded-full animate-pulse"></span>
+            <span className="text-sm font-medium text-purple-700 dark:text-purple-300">AI-Powered Website Builder</span>
+          </div>
+          
+          <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
+            Build, launch, and grow your website with{' '}
+            <span className="bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+              AI-powered tools
+            </span>{' '}
+            and stunning templates
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-xl">
+          
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl leading-relaxed">
             Create professional websites in minutes with our visual editor, AI code assistant, and a marketplace of modern, customizable templates. Manage domains, bookings, analytics, and more—all in one place.
           </p>
-          <div className="flex flex-wrap gap-4 text-lg font-semibold mb-8">
-            <span className="text-green-600">Free subdomain</span>
-            <span className="text-blue-600">Custom domain support</span>
-            <span className="text-yellow-600">Modern dashboard</span>
-            <span className="text-purple-600">AI code assistant</span>
-            <span className="text-pink-600">Template marketplace</span>
-            <span className="text-orange-600">Bookings & analytics</span>
+          
+          {/* Enhanced Feature Badges */}
+          <div className="flex flex-wrap gap-3 mb-8">
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm font-semibold">
+              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+              No Coding Required
+            </span>
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold">
+              <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+              AI-Powered Editor
+            </span>
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-semibold">
+              <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+              Instant Deployment
+            </span>
           </div>
-          <div className="flex gap-4 mb-8">
+          
+          {/* Enhanced CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-8">
             <button
-              className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-8 py-3 rounded-full text-lg shadow-lg transition"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold px-8 py-4 rounded-full text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center gap-2"
               onClick={() => {
                 if (session?.user) router.push('/auth/dashboard');
                 else router.push('/auth/signup');
               }}
             >
-              Start now
+              Start Building Now
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
             </button>
-            <Link href="#features" className="bg-white dark:bg-slate-800 border border-purple-600 text-purple-600 font-bold px-8 py-3 rounded-full text-lg shadow-lg hover:bg-purple-50 dark:hover:bg-slate-700 transition">See Features</Link>
+            <Link href="#features" className="bg-white dark:bg-slate-800 border-2 border-purple-600 text-purple-600 font-bold px-8 py-4 rounded-full text-lg shadow-lg hover:shadow-xl hover:bg-purple-50 dark:hover:bg-slate-700 transition-all duration-300 hover:scale-105">
+              See Features
+            </Link>
           </div>
-          <div className="flex items-center gap-4 mt-4">
-            <span className="text-green-600 font-bold text-lg">250+ websites created</span>
-            <span className="text-gray-400">|</span>
-            {/* Removed 30-day money-back guarantee */}
+          
+          {/* Enhanced Stats */}
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <span className="text-green-600 font-bold text-xl">250+</span>
+              <span className="text-gray-600 dark:text-gray-400 font-medium">websites created</span>
+            </div>
+            <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
+            <div className="flex items-center gap-2">
+              <span className="text-blue-600 font-bold text-xl">99.9%</span>
+              <span className="text-gray-600 dark:text-gray-400 font-medium">uptime</span>
+            </div>
+            <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
+            <div className="flex items-center gap-2">
+              <span className="text-purple-600 font-bold text-xl">24/7</span>
+              <span className="text-gray-600 dark:text-gray-400 font-medium">support</span>
+            </div>
           </div>
         </div>
+        
+        {/* Enhanced Hero Illustration */}
         <div className="flex-1 flex justify-center items-center">
-          <svg
-            id="gsap-hero-tech"
-            width="400"
-            height="320"
-            viewBox="0 0 400 320"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-full max-w-md h-80"
-          >
-            {/* Browser window */}
-            <rect id="browser" x="60" y="60" width="280" height="160" rx="18" fill="#fff" stroke="#a78bfa" strokeWidth="3" />
-            <rect x="60" y="60" width="280" height="32" rx="10" fill="#ede9fe" />
-            <circle cx="80" cy="76" r="4" fill="#f87171" />
-            <circle cx="92" cy="76" r="4" fill="#fbbf24" />
-            <circle cx="104" cy="76" r="4" fill="#34d399" />
-            {/* Code brackets */}
-            <text id="code" x="120" y="150" fontSize="48" fontWeight="bold" fill="#6366f1">{`< >`}</text>
-            {/* Gear icon */}
-            <g id="gear" transform="translate(320,200)">
-              <circle r="18" fill="#fbbf24" />
-              <g stroke="#fff" strokeWidth="2">
-                <line x1="0" y1="-18" x2="0" y2="-28" />
-                <line x1="0" y1="18" x2="0" y2="28" />
-                <line x1="-18" y1="0" x2="-28" y2="0" />
-                <line x1="18" y1="0" x2="28" y2="0" />
-                <line x1="13" y1="13" x2="20" y2="20" />
-                <line x1="-13" y1="13" x2="-20" y2="20" />
-                <line x1="13" y1="-13" x2="20" y2="-20" />
-                <line x1="-13" y1="-13" x2="-20" y2="-20" />
+          <div className="relative">
+            <svg
+              id="gsap-hero-tech"
+              width="400"
+              height="320"
+              viewBox="0 0 400 320"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-full max-w-md h-80"
+            >
+              {/* Browser window */}
+              <rect id="browser" x="60" y="60" width="280" height="160" rx="18" fill="#fff" stroke="#a78bfa" strokeWidth="3" />
+              <rect x="60" y="60" width="280" height="32" rx="10" fill="#ede9fe" />
+              <circle cx="80" cy="76" r="4" fill="#f87171" />
+              <circle cx="92" cy="76" r="4" fill="#fbbf24" />
+              <circle cx="104" cy="76" r="4" fill="#34d399" />
+              {/* Code brackets */}
+              <text id="code" x="120" y="150" fontSize="48" fontWeight="bold" fill="#6366f1">{`< >`}</text>
+              {/* Gear icon */}
+              <g id="gear" transform="translate(320,200)">
+                <circle r="18" fill="#fbbf24" />
+                <g stroke="#fff" strokeWidth="2">
+                  <line x1="0" y1="-18" x2="0" y2="-28" />
+                  <line x1="0" y1="18" x2="0" y2="28" />
+                  <line x1="-18" y1="0" x2="-28" y2="0" />
+                  <line x1="18" y1="0" x2="28" y2="0" />
+                  <line x1="13" y1="13" x2="20" y2="20" />
+                  <line x1="-13" y1="13" x2="-20" y2="20" />
+                  <line x1="13" y1="-13" x2="20" y2="-20" />
+                  <line x1="-13" y1="-13" x2="-20" y2="-20" />
+                </g>
+                <circle r="6" fill="#fff" />
               </g>
-              <circle r="6" fill="#fff" />
-            </g>
-            {/* Cursor icon */}
-            <g id="cursor" transform="translate(220,110)">
-              <polygon points="0,0 24,8 10,14 14,22 8,20 4,12" fill="#6366f1" stroke="#fff" strokeWidth="2" />
-            </g>
-            {/* Cloud icon */}
-            <g id="cloud" transform="translate(160,220)">
-              <ellipse rx="32" ry="16" fill="#a5b4fc" />
-              <ellipse rx="16" ry="12" cx="-18" cy="-6" fill="#818cf8" />
-              <ellipse rx="12" ry="10" cx="20" cy="-8" fill="#6366f1" />
-            </g>
-            {/* Glowing orbit lines */}
-            <ellipse id="orbit1" cx="200" cy="140" rx="120" ry="60" fill="none" stroke="#a78bfa" strokeWidth="2" opacity="0.3" />
-            <ellipse id="orbit2" cx="200" cy="140" rx="90" ry="30" fill="none" stroke="#fbbf24" strokeWidth="2" opacity="0.2" />
-          </svg>
-          <style>{`.gsap-hero-collage-shape { filter: drop-shadow(0 4px 24px rgba(80,0,200,0.08)); }`}</style>
+              {/* Cursor icon */}
+              <g id="cursor" transform="translate(220,110)">
+                <polygon points="0,0 24,8 10,14 14,22 8,20 4,12" fill="#6366f1" stroke="#fff" strokeWidth="2" />
+              </g>
+              {/* Cloud icon */}
+              <g id="cloud" transform="translate(100,250)">
+                <path d="M20,15 A10,10 0 0,1 30,25 A8,8 0 0,1 20,35 A10,10 0 0,1 10,25 A8,8 0 0,1 20,15 Z" fill="#93c5fd" />
+              </g>
+              {/* Orbital rings */}
+              <g id="orbit1" transform="translate(200,140)">
+                <circle r="40" fill="none" stroke="#e0e7ff" strokeWidth="2" strokeDasharray="5,5" />
+              </g>
+              <g id="orbit2" transform="translate(200,140)">
+                <circle r="60" fill="none" stroke="#fef3c7" strokeWidth="1" strokeDasharray="3,3" />
+              </g>
+            </svg>
+            
+            {/* Floating elements */}
+            <div className="absolute -top-4 -right-4 w-8 h-8 bg-purple-500 rounded-full opacity-20 animate-bounce"></div>
+            <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-blue-500 rounded-full opacity-20 animate-pulse"></div>
+          </div>
         </div>
       </section>
 
@@ -504,6 +623,666 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* How It Works Section */}
+      <section className="py-20 bg-white dark:bg-slate-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 animate-on-scroll text-reveal">How It Works</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto animate-on-scroll">Get your website up and running in just 4 simple steps</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {[
+              {
+                step: "01",
+                title: "Choose a Template",
+                description: "Browse our collection of stunning, responsive templates designed for every industry",
+                icon: "🎨",
+                color: "purple"
+              },
+              {
+                step: "02", 
+                title: "Customize with AI",
+                description: "Use our AI-powered editor to customize colors, fonts, and content instantly",
+                icon: "🤖",
+                color: "blue"
+              },
+              {
+                step: "03",
+                title: "Publish Instantly",
+                description: "Deploy your website with one click and get a free subdomain or connect your own",
+                icon: "🚀",
+                color: "green"
+              },
+              {
+                step: "04",
+                title: "Grow Your Business",
+                description: "Track analytics, manage bookings, and scale your online presence",
+                icon: "📈",
+                color: "orange"
+              }
+            ].map((item, index) => (
+              <div key={index} className="relative group">
+                <div className={`bg-gradient-to-br from-${item.color}-100 to-${item.color}-200 dark:from-${item.color}-900/20 dark:to-${item.color}-800/20 rounded-2xl p-8 text-center h-full hover:shadow-xl transition-all duration-300`}>
+                  <div className={`text-6xl mb-4`}>{item.icon}</div>
+                  <div className={`inline-flex items-center justify-center w-12 h-12 bg-${item.color}-600 text-white rounded-full text-lg font-bold mb-4`}>
+                    {item.step}
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{item.title}</h3>
+                  <p className="text-gray-600 dark:text-gray-300">{item.description}</p>
+                </div>
+                {index < 3 && (
+                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2">
+                    <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof Section */}
+      <section className="py-20 bg-gray-50 dark:bg-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Trusted by Thousands</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300">Join the community of successful businesses building their online presence</p>
+          </div>
+          
+          {/* Company Logos */}
+          <div className="flex flex-wrap justify-center items-center gap-12 mb-16 opacity-60">
+            {["Microsoft", "Google", "Amazon", "Netflix", "Spotify", "Uber"].map((company, index) => (
+              <div key={index} className="text-2xl font-bold text-gray-400 dark:text-gray-500">
+                {company}
+              </div>
+            ))}
+          </div>
+
+          {/* Enhanced Testimonials */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Sarah Johnson",
+                role: "CEO, TechStart",
+                image: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg",
+                rating: 5,
+                text: "The AI-powered editor saved us weeks of development time. Our website looks professional and loads lightning fast!"
+              },
+              {
+                name: "Michael Chen",
+                role: "Founder, DesignCo",
+                image: "https://images.pexels.com/photos/1121796/pexels-photo-1121796.jpeg", 
+                rating: 5,
+                text: "Best website builder I've ever used. The templates are stunning and the customer support is exceptional."
+              },
+              {
+                name: "Emily Rodriguez",
+                role: "Marketing Director",
+                image: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg",
+                rating: 5,
+                text: "From concept to launch in under 2 hours! The analytics dashboard helps us track performance perfectly."
+              }
+            ].map((testimonial, index) => (
+              <div key={index} className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300">
+                <div className="flex items-center mb-4">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 mb-6 italic">"{testimonial.text}"</p>
+                <div className="flex items-center">
+                  <img src={testimonial.image} alt={testimonial.name} className="w-12 h-12 rounded-full mr-4" />
+                  <div>
+                    <div className="font-semibold text-gray-900 dark:text-white">{testimonial.name}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">{testimonial.role}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 bg-white dark:bg-slate-900">
+        <div className="max-w-4xl mx-auto px-4 sm:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Frequently Asked Questions</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300">Everything you need to know about Website Builder</p>
+          </div>
+          
+          <div className="space-y-6">
+            {[
+              {
+                question: "Do I need coding knowledge to use Website Builder?",
+                answer: "No coding knowledge required! Our AI-powered editor and visual interface make it easy for anyone to create professional websites."
+              },
+              {
+                question: "Can I use my own domain name?",
+                answer: "Absolutely! You can connect your existing domain or purchase a new one through our platform. We also provide free subdomains."
+              },
+              {
+                question: "What about SEO and performance?",
+                answer: "All our templates are optimized for SEO and performance. We include built-in SEO tools and ensure fast loading times."
+              },
+              {
+                question: "Is there a free trial available?",
+                answer: "Yes! Start with our free plan and upgrade anytime. No credit card required to get started."
+              },
+              {
+                question: "What kind of support do you offer?",
+                answer: "We provide 24/7 customer support via chat, email, and phone. Plus, our comprehensive knowledge base and video tutorials."
+              }
+            ].map((faq, index) => (
+              <div key={index} className="bg-gray-50 dark:bg-slate-800 rounded-xl p-6 hover:shadow-lg transition-all duration-300">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">{faq.question}</h3>
+                <p className="text-gray-600 dark:text-gray-300">{faq.answer}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Signup Section */}
+      <section className="py-20 bg-gradient-to-r from-purple-600 to-blue-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
+          <h2 className="text-4xl font-bold text-white mb-4">Stay Updated</h2>
+          <p className="text-xl text-purple-100 mb-8">Get the latest tips, updates, and exclusive resources delivered to your inbox</p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+            <input 
+              type="email" 
+              placeholder="Enter your email address"
+              className="flex-1 px-6 py-3 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-white"
+            />
+            <button className="bg-white text-purple-600 font-bold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors duration-200">
+              Subscribe
+            </button>
+          </div>
+          
+          <p className="text-sm text-purple-200 mt-4">Join 10,000+ subscribers. Unsubscribe anytime.</p>
+        </div>
+      </section>
+
+      {/* Live Demo Section */}
+      <section className="py-20 bg-gray-50 dark:bg-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">See It in Action</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300">Watch how easy it is to create a stunning website</p>
+          </div>
+          
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden">
+            <div className="aspect-video bg-gray-200 dark:bg-slate-700 flex items-center justify-center">
+              <div className="text-center">
+                <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-gray-500 dark:text-gray-400">Demo Video Coming Soon</p>
+                <button className="mt-4 bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition-colors">
+                  Watch Demo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Team/About Section */}
+      <section className="py-20 bg-white dark:bg-slate-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Meet Our Team</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300">The passionate people behind Website Builder</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Alex Johnson",
+                role: "CEO & Founder",
+                image: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg",
+                bio: "Former Google engineer with 10+ years in web development"
+              },
+              {
+                name: "Maria Garcia",
+                role: "Head of Design",
+                image: "https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg",
+                bio: "Award-winning designer with expertise in UX/UI"
+              },
+              {
+                name: "David Kim",
+                role: "CTO",
+                image: "https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg",
+                bio: "AI specialist with deep knowledge in machine learning"
+              }
+            ].map((member, index) => (
+              <div key={index} className="text-center group">
+                <div className="relative mb-6">
+                  <img src={member.image} alt={member.name} className="w-32 h-32 rounded-full mx-auto object-cover shadow-lg group-hover:scale-105 transition-transform duration-300" />
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{member.name}</h3>
+                <p className="text-purple-600 dark:text-purple-400 font-semibold mb-3">{member.role}</p>
+                <p className="text-gray-600 dark:text-gray-300">{member.bio}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Integration Showcase */}
+      <section className="py-20 bg-gray-50 dark:bg-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Integrations</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300">Connect with your favorite tools and services</p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { name: "Stripe", icon: "💳", category: "Payments" },
+              { name: "Google Analytics", icon: "📊", category: "Analytics" },
+              { name: "Mailchimp", icon: "📧", category: "Email" },
+              { name: "Slack", icon: "💬", category: "Communication" },
+              { name: "Zapier", icon: "🔗", category: "Automation" },
+              { name: "Shopify", icon: "🛒", category: "E-commerce" },
+              { name: "HubSpot", icon: "🎯", category: "CRM" },
+              { name: "Notion", icon: "📝", category: "Productivity" }
+            ].map((integration, index) => (
+              <div key={index} className="bg-white dark:bg-slate-900 rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300 group">
+                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">{integration.icon}</div>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{integration.name}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{integration.category}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile App Section */}
+      <section className="py-20 bg-white dark:bg-slate-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1">
+              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">Manage Your Website on the Go</h2>
+              <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">Our mobile app lets you update content, check analytics, and respond to messages from anywhere.</p>
+              
+              <div className="space-y-4 mb-8">
+                <div className="flex items-center gap-4">
+                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-gray-700 dark:text-gray-300">Real-time notifications</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-gray-700 dark:text-gray-300">Offline editing capabilities</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-gray-700 dark:text-gray-300">Push notifications for bookings</span>
+                </div>
+              </div>
+              
+              <div className="flex gap-4">
+                <button className="bg-black text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors">
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                  </svg>
+                  App Store
+                </button>
+                <button className="bg-black text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:bg-gray-800 transition-colors">
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+                  </svg>
+                  Google Play
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex-1 flex justify-center">
+              <div className="relative">
+                <div className="w-64 h-96 bg-gray-200 dark:bg-slate-700 rounded-3xl border-8 border-gray-800 flex items-center justify-center">
+                  <div className="text-center">
+                    <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <p className="text-gray-500 dark:text-gray-400">Mobile App</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Real-time Stats Section */}
+      <section className="py-20 bg-gradient-to-r from-purple-600 to-blue-600">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-white mb-4">Live Statistics</h2>
+            <p className="text-xl text-purple-100">Real-time metrics from our platform</p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { label: "Websites Created Today", value: "47", icon: "🌐" },
+              { label: "Active Users Online", value: "1,234", icon: "👥" },
+              { label: "Templates Downloaded", value: "892", icon: "📥" },
+              { label: "Support Tickets Resolved", value: "156", icon: "✅" }
+            ].map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-4xl mb-4">{stat.icon}</div>
+                <div className="text-3xl font-bold text-white mb-2">{stat.value}</div>
+                <div className="text-purple-200">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Performance Metrics */}
+      <section className="py-20 bg-white dark:bg-slate-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Performance & Security</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300">Built for speed, security, and reliability</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                title: "Lightning Fast",
+                metric: "0.8s",
+                description: "Average page load time",
+                icon: "⚡"
+              },
+              {
+                title: "99.99% Uptime",
+                metric: "99.99%",
+                description: "Guaranteed reliability",
+                icon: "🛡️"
+              },
+              {
+                title: "SSL Secured",
+                metric: "100%",
+                description: "All sites protected",
+                icon: "🔒"
+              }
+            ].map((metric, index) => (
+              <div key={index} className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-8 text-center">
+                <div className="text-5xl mb-4">{metric.icon}</div>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{metric.title}</h3>
+                <div className="text-4xl font-bold text-purple-600 mb-2">{metric.metric}</div>
+                <p className="text-gray-600 dark:text-gray-300">{metric.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Trust Signals Section */}
+      <section className="py-20 bg-gray-50 dark:bg-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Why Trust Us?</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300">Your success and security are our top priorities</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {[
+              {
+                title: "30-Day Money Back",
+                description: "Not satisfied? Get a full refund within 30 days",
+                icon: "💰"
+              },
+              {
+                title: "24/7 Support",
+                description: "Round-the-clock customer support via chat, email, and phone",
+                icon: "🛟"
+              },
+              {
+                title: "GDPR Compliant",
+                description: "Your data is protected and handled according to GDPR standards",
+                icon: "🔐"
+              },
+              {
+                title: "SOC 2 Certified",
+                description: "Enterprise-grade security and compliance standards",
+                icon: "🏆"
+              }
+            ].map((signal, index) => (
+              <div key={index} className="bg-white dark:bg-slate-900 rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300">
+                <div className="text-4xl mb-4">{signal.icon}</div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">{signal.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300">{signal.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Community Section */}
+      <section className="py-20 bg-white dark:bg-slate-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Join Our Community</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300">Connect with fellow creators and get inspired</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                title: "User Showcase",
+                description: "See amazing websites created by our community",
+                members: "2,500+",
+                icon: "🎨"
+              },
+              {
+                title: "Community Forum",
+                description: "Ask questions and share tips with other users",
+                members: "15,000+",
+                icon: "💬"
+              },
+              {
+                title: "Weekly Webinars",
+                description: "Learn from experts and improve your skills",
+                members: "500+",
+                icon: "📚"
+              }
+            ].map((community, index) => (
+              <div key={index} className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-2xl p-8 text-center">
+                <div className="text-5xl mb-4">{community.icon}</div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">{community.title}</h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">{community.description}</p>
+                <div className="text-2xl font-bold text-purple-600">{community.members} members</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="py-20 bg-gradient-to-r from-purple-600 to-blue-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
+          <h2 className="text-4xl font-bold text-white mb-6">Ready to Build Your Website?</h2>
+          <p className="text-xl text-purple-100 mb-8">Join thousands of satisfied customers and start building your online presence today</p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              className="bg-white text-purple-600 font-bold px-8 py-4 rounded-full text-lg hover:bg-gray-100 transition-colors duration-200"
+              onClick={() => {
+                if (session?.user) router.push('/auth/dashboard');
+                else router.push('/auth/signup');
+              }}
+            >
+              Start Building Now
+            </button>
+            <Link href="#features" className="border-2 border-white text-white font-bold px-8 py-4 rounded-full text-lg hover:bg-white hover:text-purple-600 transition-colors duration-200">
+              Learn More
+            </Link>
+          </div>
+          
+          <p className="text-purple-200 mt-6">No credit card required • Free 14-day trial • Cancel anytime</p>
+        </div>
+      </section>
+
+      {/* Floating Chat Widget */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <button className="bg-purple-600 text-white p-4 rounded-full shadow-lg hover:bg-purple-700 transition-colors duration-200">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Progress Indicator */}
+      <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 dark:bg-slate-700 z-50">
+        <div className="h-full bg-gradient-to-r from-purple-600 to-blue-600 transition-all duration-300" style={{ width: '0%' }}></div>
+      </div>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-12 text-center">Pricing</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {/* Free Plan */}
+            <div className="flex flex-col items-center bg-white rounded-2xl shadow-lg border-2 border-gray-100 p-8 min-h-[520px] transition-all duration-200 hover:shadow-2xl">
+              <div className="mb-4 text-5xl text-green-500">
+                <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+              </div>
+              <div className="text-xl font-bold text-purple-600 mb-1">Free</div>
+              <div className="text-4xl font-extrabold text-gray-900 mb-1">Free</div>
+              <div className="text-gray-500 mb-4">per month</div>
+              <ul className="mb-8 text-gray-700 text-base list-disc list-inside text-left w-full px-2 flex-1">
+                <li>1 Website</li>
+                <li>Basic Support</li>
+                <li>Custom Domain</li>
+                <li>Community Access</li>
+              </ul>
+              <div className="flex-grow" />
+              <button className="w-full py-3 rounded-xl font-bold shadow transition-colors text-white text-lg bg-green-600 hover:bg-green-700 flex items-center justify-center gap-2 mt-4">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                Get Started
+              </button>
+            </div>
+            {/* Pro Plan (Highlighted) */}
+            <div className="flex flex-col items-center bg-white rounded-2xl shadow-lg border-2 border-orange-400 p-8 min-h-[520px] transition-all duration-200 hover:shadow-2xl relative">
+              {/* Badge */}
+              <span className="absolute -top-5 left-1/2 -translate-x-1/2 bg-orange-500 text-white px-4 py-1 rounded-full text-xs font-bold shadow flex items-center gap-2">
+                Most Popular
+                <svg className="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polygon points="12,2 15,8.5 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 9,8.5" /></svg>
+              </span>
+              <div className="mb-4 text-5xl text-orange-500 mt-6">
+                <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polygon points="12,2 15,8.5 22,9.3 17,14.1 18.2,21 12,17.8 5.8,21 7,14.1 2,9.3 9,8.5" /></svg>
+              </div>
+              <div className="text-xl font-bold text-purple-600 mb-1">Pro</div>
+              <div className="text-4xl font-extrabold text-gray-900 mb-1">₹999</div>
+              <div className="text-gray-500 mb-4">per month</div>
+              <ul className="mb-8 text-gray-700 text-base list-disc list-inside text-left w-full px-2 flex-1">
+                <li>10 Websites</li>
+                <li>Priority Support</li>
+                <li>Custom Domain</li>
+                <li>Advanced Analytics</li>
+                <li>Community Access</li>
+              </ul>
+              <div className="flex-grow" />
+              <button className="w-full py-3 rounded-xl font-bold shadow transition-colors text-white text-lg bg-orange-500 hover:bg-orange-600 flex items-center justify-center gap-2 mt-4">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                Choose Plan
+              </button>
+            </div>
+            {/* Business Plan */}
+            <div className="flex flex-col items-center bg-white rounded-2xl shadow-lg border-2 border-gray-100 p-8 min-h-[520px] transition-all duration-200 hover:shadow-2xl">
+              <div className="mb-4 text-5xl text-blue-500">
+                <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" /></svg>
+              </div>
+              <div className="text-xl font-bold text-purple-600 mb-1">Business</div>
+              <div className="text-4xl font-extrabold text-gray-900 mb-1">₹2499</div>
+              <div className="text-gray-500 mb-4">per month</div>
+              <ul className="mb-8 text-gray-700 text-base list-disc list-inside text-left w-full px-2 flex-1">
+                <li>Unlimited Websites</li>
+                <li>Dedicated Support</li>
+                <li>Custom Domain</li>
+                <li>Advanced Analytics</li>
+                <li>Custom Integrations</li>
+                <li>Team Management</li>
+                <li>Community Access</li>
+              </ul>
+              <div className="flex-grow" />
+              <button className="w-full py-3 rounded-xl font-bold shadow transition-colors text-white text-lg bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2 mt-4">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                Choose Plan
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Templates Showcase */}
+      <section id="templates" className="bg-gray-50 dark:bg-slate-800 py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">Templates</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {templates.length === 0 ? (
+              <div className="col-span-3 text-center text-gray-500 dark:text-gray-400">No templates available.</div>
+            ) : (
+              templates.map((tpl) => (
+                <div key={tpl.id} className="relative flex flex-col h-full min-h-[480px] max-w-xs mx-auto rounded-2xl shadow-lg transition-all duration-300 bg-white dark:bg-slate-900 border-2 border-purple-100 dark:border-slate-700 p-6 items-center group hover:shadow-2xl hover:border-purple-400">
+                  {/* Badge */}
+                  <span className="absolute top-4 left-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg z-10">Template</span>
+                  {/* Template Name */}
+                  <h3 className="text-xl font-bold mb-3 text-center w-full text-purple-700 dark:text-purple-300 truncate">{tpl.name}</h3>
+                  {/* Image with overlay */}
+                  <div className="relative w-full h-48 mb-4 flex items-center justify-center rounded-xl overflow-hidden shadow group-hover:scale-105 transition-transform duration-300">
+                    {tpl.preview ? (
+                      <img src={tpl.preview} alt={tpl.name} className="w-full h-full object-cover rounded-xl group-hover:brightness-90 transition" />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 dark:bg-slate-700 rounded-xl flex items-center justify-center text-gray-400">No Preview</div>
+                    )}
+                    {/* Overlay icon */}
+                    <span className="absolute bottom-2 right-2 bg-white/80 dark:bg-slate-900/80 rounded-full p-2 shadow-lg">
+                      <svg className="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10l4.553 2.276A2 2 0 0121 14.09V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.91a2 2 0 01.447-1.814L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8" /></svg>
+                    </span>
+                  </div>
+                  {/* Description with fade for long text */}
+                  <div className="flex-1 w-full">
+                    <p className="text-gray-600 dark:text-gray-300 text-center max-h-24 overflow-hidden relative">
+                      {tpl.description || <span className="italic text-gray-400">No description.</span>}
+                      {tpl.description && tpl.description.length > 120 && (
+                        <span className="absolute bottom-0 left-0 w-full h-6 bg-gradient-to-t from-white dark:from-slate-900 to-transparent"></span>
+                      )}
+                    </p>
+                  </div>
+                  {/* View Details Button */}
+                  <button
+                    className="w-full mt-6 py-2 rounded-xl font-semibold shadow transition-colors text-white bg-purple-600 hover:bg-purple-700 text-lg group-hover:scale-105"
+                    onClick={() => router.push('/auth/dashboard/marketplace')}
+                  >
+                    View Details
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials/Stats Section */}
       <section className="py-20 bg-gradient-to-b from-white via-gray-50 to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-purple-950">
         <div className="max-w-4xl mx-auto px-4 sm:px-8">
@@ -517,7 +1296,7 @@ export default function HomePage() {
               </span>
               {/* Avatar */}
               <img src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg" alt="Priya S." className="w-16 h-16 rounded-full border-4 border-purple-200 dark:border-purple-700 mb-2 mt-4 shadow object-cover" />
-              <p className="text-gray-700 dark:text-gray-300 text-center mb-4 mt-2 font-medium">“This builder made launching my business site a breeze. The templates are stunning and the dashboard is super easy to use!”</p>
+              <p className="text-gray-700 dark:text-gray-300 text-center mb-4 mt-2 font-medium">"This builder made launching my business site a breeze. The templates are stunning and the dashboard is super easy to use!"</p>
               <span className="font-bold text-purple-600 dark:text-purple-400 text-lg mt-2">Priya S.</span>
             </div>
             {/* Testimonial Card 2 */}
@@ -528,7 +1307,7 @@ export default function HomePage() {
               </span>
               {/* Avatar */}
               <img src="https://images.pexels.com/photos/1121796/pexels-photo-1121796.jpeg" alt="Amit R." className="w-16 h-16 rounded-full border-4 border-blue-200 dark:border-blue-700 mb-2 mt-4 shadow object-cover" />
-              <p className="text-gray-700 dark:text-gray-300 text-center mb-4 mt-2 font-medium">“I love the analytics and the AI code assistant. My site looks amazing and I can track everything!”</p>
+              <p className="text-gray-700 dark:text-gray-300 text-center mb-4 mt-2 font-medium">"I love the analytics and the AI code assistant. My site looks amazing and I can track everything!"</p>
               <span className="font-bold text-blue-600 dark:text-blue-400 text-lg mt-2">Amit R.</span>
             </div>
           </div>
@@ -554,6 +1333,193 @@ export default function HomePage() {
                 24/7
               </span>
               <span className="text-gray-600 dark:text-gray-400">Support</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Developer Community Section */}
+      <section id="community" className="py-20 bg-gradient-to-b from-white via-gray-50 to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-purple-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
+              Join Our Developer Community
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              Connect with fellow developers, share your projects, ask questions, and get inspired by the amazing work being built with our platform.
+            </p>
+          </div>
+
+          {/* Community Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-purple-600 mb-2">2.5K+</div>
+              <div className="text-gray-600 dark:text-gray-400">Active Developers</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-blue-600 mb-2">15K+</div>
+              <div className="text-gray-600 dark:text-gray-400">Discussions</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-green-600 mb-2">500+</div>
+              <div className="text-gray-600 dark:text-gray-400">Projects Shared</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-orange-600 mb-2">24/7</div>
+              <div className="text-gray-600 dark:text-gray-400">Support</div>
+            </div>
+          </div>
+
+          {/* Community Features */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-slate-800 hover:shadow-xl transition-all duration-300">
+              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-6">
+                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-8a2 2 0 012-2h2" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Share Your Projects</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                Showcase your websites, get feedback, and inspire others with your creative work.
+              </p>
+              <button 
+                onClick={() => router.push('/community')}
+                className="text-purple-600 hover:text-purple-700 font-semibold transition-colors"
+              >
+                Share Project →
+              </button>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-slate-800 hover:shadow-xl transition-all duration-300">
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-6">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Ask Questions</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                Get help from the community, share knowledge, and learn from experienced developers.
+              </p>
+              <button 
+                onClick={() => router.push('/community')}
+                className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+              >
+                Ask Question →
+              </button>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-slate-800 hover:shadow-xl transition-all duration-300">
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mb-6">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Connect & Network</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                Build relationships, find collaborators, and grow your professional network.
+              </p>
+              <button 
+                onClick={() => router.push('/community')}
+                className="text-green-600 hover:text-green-700 font-semibold transition-colors"
+              >
+                Join Network →
+              </button>
+            </div>
+          </div>
+
+          {/* Recent Discussions Preview */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-lg border border-gray-200 dark:border-slate-800">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Recent Discussions</h3>
+              <button 
+                onClick={() => router.push('/community')}
+                className="text-purple-600 hover:text-purple-700 font-semibold transition-colors"
+              >
+                View All →
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="flex items-start space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                <img src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg" alt="User" className="w-10 h-10 rounded-full" />
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className="font-semibold text-gray-900 dark:text-white">Sarah Chen</span>
+                    <span className="text-sm text-gray-500">2 hours ago</span>
+                    <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded-full">Question</span>
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300 mb-2">
+                    "How do you handle responsive design for complex layouts? Looking for best practices..."
+                  </p>
+                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                    <span>8 replies</span>
+                    <span>•</span>
+                    <span>24 likes</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                <img src="https://images.pexels.com/photos/1121796/pexels-photo-1121796.jpeg" alt="User" className="w-10 h-10 rounded-full" />
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className="font-semibold text-gray-900 dark:text-white">Alex Rodriguez</span>
+                    <span className="text-sm text-gray-500">5 hours ago</span>
+                    <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded-full">Showcase</span>
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300 mb-2">
+                    "Just launched my portfolio site! Used the AI builder and it turned out amazing. Check it out..."
+                  </p>
+                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                    <span>15 replies</span>
+                    <span>•</span>
+                    <span>67 likes</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4 p-4 rounded-xl bg-gray-50 dark:bg-slate-800 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
+                <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg" alt="User" className="w-10 h-10 rounded-full" />
+                <div className="flex-1">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <span className="font-semibold text-gray-900 dark:text-white">Mike Johnson</span>
+                    <span className="text-sm text-gray-500">1 day ago</span>
+                    <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded-full">Tutorial</span>
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300 mb-2">
+                    "Created a step-by-step guide for building e-commerce sites. Hope this helps beginners!"
+                  </p>
+                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                    <span>32 replies</span>
+                    <span>•</span>
+                    <span>128 likes</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="text-center mt-16">
+            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">
+              Ready to Join the Community?
+            </h3>
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+              Connect with thousands of developers, share your knowledge, and grow your skills together.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button 
+                onClick={() => router.push('/community')}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold px-8 py-4 rounded-full text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+              >
+                Join Community
+              </button>
+              <button 
+                onClick={() => router.push('/community')}
+                className="bg-white dark:bg-slate-800 border-2 border-purple-600 text-purple-600 font-bold px-8 py-4 rounded-full text-lg shadow-lg hover:shadow-xl hover:bg-purple-50 dark:hover:bg-slate-700 transition-all duration-300 hover:scale-105"
+              >
+                Browse Discussions
+              </button>
             </div>
           </div>
         </div>
