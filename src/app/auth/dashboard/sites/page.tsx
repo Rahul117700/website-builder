@@ -10,6 +10,11 @@ import EditSiteModal from '@/components/dashboard/edit-site-modal';
 import ChangeTemplateModal from '@/components/dashboard/change-template-modal';
 import { Site } from '@/types';
 import toast from 'react-hot-toast';
+import { useUserPlan } from '@/hooks/useUserPlan';
+import { canCreateWebsite, getMaxWebsites } from '@/utils/planPermissions';
+import PlanRestrictionBanner from '@/components/PlanRestrictionBanner';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import SkeletonLoader from '@/components/ui/SkeletonLoader';
 import Avatar from '@mui/material/Avatar';
 import Chip from '@mui/material/Chip';
 import SearchIcon from '@mui/icons-material/Search';
@@ -38,6 +43,7 @@ export default function WebsitesPage() {
   const [templateSite, setTemplateSite] = useState<Site | null>(null);
   const [search, setSearch] = useState('');
   const [templateFilter, setTemplateFilter] = useState('');
+  const { userPlan } = useUserPlan();
 
   const fetchSites = useCallback(async () => {
     setLoading(true);
@@ -158,7 +164,7 @@ export default function WebsitesPage() {
     }
   };
 
-  const handleSiteDeleted = () => {
+  const handleSiteDeleted = (site?: Site) => {
     toast.success('Website deleted successfully');
     fetchSites();
   };
@@ -169,14 +175,52 @@ export default function WebsitesPage() {
     (!templateFilter || site.template === templateFilter)
   );
 
+  // Check if user can create more websites
+  const canCreate = canCreateWebsite(userPlan, sites.length);
+  const maxWebsites = getMaxWebsites(userPlan);
+
+  // Show loading skeleton while fetching data
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="p-6">
+          <div className="mb-6">
+            <SkeletonLoader type="text" lines={2} className="mb-4" />
+            <SkeletonLoader type="button" className="w-32" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonLoader key={i} type="card" />
+            ))}
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Your Websites</h1>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">Manage your websites here. You can create, edit, or delete your sites.</p>
+        
+        {/* Plan Restriction Banner */}
+        {!canCreate && (
+          <PlanRestrictionBanner
+            userPlan={userPlan}
+            feature="website_limit"
+            requiredPlan="Pro"
+            currentWebsiteCount={sites.length}
+            maxWebsites={maxWebsites}
+          />
+        )}
+        
         {/* Summary */}
         <div className="mt-4 flex flex-wrap gap-4 items-center">
-          <span className="bg-blue-50 text-blue-800 text-sm font-semibold px-4 py-2 rounded-lg">You have {sites.length} sites</span>
+          <span className="bg-blue-50 text-blue-800 text-sm font-semibold px-4 py-2 rounded-lg">
+            You have {sites.length} site{sites.length !== 1 ? 's' : ''}
+            {maxWebsites > 0 && ` (${maxWebsites === -1 ? 'Unlimited' : maxWebsites} allowed)`}
+          </span>
         </div>
       </div>
       {/* Search and Filter */}
@@ -194,12 +238,52 @@ export default function WebsitesPage() {
               </InputAdornment>
             ),
           }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: '#374151', // bg-gray-700
+              color: 'white',
+              '& fieldset': {
+                borderColor: '#4B5563', // border-gray-600
+              },
+              '&:hover fieldset': {
+                borderColor: '#6B7280', // border-gray-500
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: '#8B5CF6', // border-purple-500
+              },
+            },
+            '& .MuiInputLabel-root': {
+              color: '#9CA3AF', // text-gray-400
+            },
+            '& .MuiInputLabel-root.Mui-focused': {
+              color: '#A78BFA', // text-purple-400
+            },
+            '& .MuiInputBase-input::placeholder': {
+              color: '#9CA3AF', // text-gray-400
+              opacity: 1,
+            },
+            '& .MuiInputAdornment-root .MuiSvgIcon-root': {
+              color: '#9CA3AF', // text-gray-400
+            },
+          }}
         />
         <button
-          className="ml-auto bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow px-6 py-2 text-base"
-          onClick={() => setModalOpen(true)}
+          className={`ml-auto font-semibold rounded-lg shadow px-6 py-2 text-base flex items-center gap-2 ${
+            canCreate 
+              ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+          onClick={() => canCreate && setModalOpen(true)}
+          disabled={!canCreate || creating}
         >
-          + Create New Site
+          {creating ? (
+            <>
+              <LoadingSpinner size="sm" color="white" />
+              Creating...
+            </>
+          ) : (
+            '+ Create New Site'
+          )}
         </button>
       </div>
       {/* Site Cards Grid */}

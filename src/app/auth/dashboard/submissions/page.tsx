@@ -24,18 +24,15 @@ export default function SubmissionsPage() {
       setError(null);
       try {
         // Fetch all sites for the user
-        const sitesRes = await fetch('/api/sites', {
-          headers: { 'x-auth-token': localStorage.getItem('token') || '' },
-        });
+        const sitesRes = await fetch('/api/sites');
         if (!sitesRes.ok) throw new Error('Failed to fetch sites');
         const sitesData = await sitesRes.json();
         setSites(sitesData);
+        
         // Fetch submissions for each site
         const allSubmissions: Submission[] = [];
         for (const site of sitesData) {
-          const submissionsRes = await fetch(`/api/submissions?siteId=${site.id}`, {
-            headers: { 'x-auth-token': localStorage.getItem('token') || '' },
-          });
+          const submissionsRes = await fetch(`/api/submissions?siteId=${site.id}`);
           if (!submissionsRes.ok) continue;
           const submissionsData = await submissionsRes.json();
           for (const submission of submissionsData) {
@@ -73,36 +70,58 @@ export default function SubmissionsPage() {
             <p className="text-gray-500">You have not received any form submissions yet.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
-              <thead>
-                <tr>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Form Type</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fields</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Site</th>
-                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-100 dark:divide-slate-700">
-                {submissions.map((submission) => (
-                  <tr key={submission.id}>
-                    <td className="px-4 py-2 text-gray-900 dark:text-white">{submission.formType}</td>
-                    <td className="px-4 py-2 text-gray-600 dark:text-gray-300">
-                      <div className="space-y-1">
-                        {Object.entries(submission.data).map(([key, value]) => (
-                          <div key={key}>
-                            <span className="font-semibold text-xs text-gray-700 dark:text-gray-200 mr-1">{key}:</span>
-                            <span className="text-xs text-gray-600 dark:text-gray-300">{String(value)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-4 py-2 text-gray-600 dark:text-gray-300">{submission.siteName}</td>
-                    <td className="px-4 py-2 text-gray-600 dark:text-gray-300">{new Date(submission.createdAt).toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="space-y-4">
+            {submissions.map((submission) => (
+              <div key={submission.id} className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg p-6 shadow-sm">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${
+                      submission.formType === 'contact' ? 'bg-blue-100 text-blue-600' :
+                      submission.formType === 'signup' ? 'bg-green-100 text-green-600' :
+                      submission.formType === 'login' ? 'bg-purple-100 text-purple-600' :
+                      'bg-gray-100 text-gray-600'
+                    }`}>
+                      {submission.formType === 'contact' && (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      )}
+                      {submission.formType === 'signup' && (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                      )}
+                      {submission.formType === 'login' && (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white capitalize">
+                        {submission.formType} Form Submission
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        From: {submission.siteName} • {new Date(submission.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.entries(submission.data).map(([key, value]) => (
+                    <div key={key} className="bg-gray-50 dark:bg-slate-700 rounded-lg p-3">
+                      <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                      </label>
+                      <p className="text-sm text-gray-900 dark:text-white break-words">
+                        {String(value)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

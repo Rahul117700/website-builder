@@ -11,8 +11,8 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 15, 23, 42;
-    --background-end-rgb: 30, 41, 59;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
   }
 }
 
@@ -28,7 +28,7 @@ body {
 
 @layer components {
   .card {
-    @apply bg-white dark:bg-slate-800 rounded-lg shadow-md border border-gray-200 dark:border-slate-700;
+    @apply bg-white dark:bg-black rounded-lg shadow-md border border-gray-200 dark:border-gray-800;
   }
 
   .label {
@@ -36,7 +36,7 @@ body {
   }
 
   .input-field {
-    @apply block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-white dark:bg-slate-700 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-slate-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6;
+    @apply block w-full rounded-md border-0 py-1.5 text-gray-900 dark:text-white dark:bg-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6;
   }
 
   .btn-primary {
@@ -44,7 +44,7 @@ body {
   }
 
   .btn-secondary {
-    @apply px-4 py-2 bg-white dark:bg-slate-700 text-gray-700 dark:text-gray-200 font-medium rounded-md shadow-sm border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+    @apply px-4 py-2 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 font-medium rounded-md shadow-sm border border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
   }
 
   .btn-danger {

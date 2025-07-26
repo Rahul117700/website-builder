@@ -1,8 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sanitizeInput } from '@/lib/validation';
 
 export async function POST(req: NextRequest) {
   const { prompt, mode } = await req.json();
   const apiKey = process.env.GEMINI_API_KEY;
+
+  // Validate and sanitize input
+  if (!prompt || typeof prompt !== 'string') {
+    return NextResponse.json({ error: 'Invalid prompt' }, { status: 400 });
+  }
+
+  if (prompt.length > 500) {
+    return NextResponse.json({ error: 'Prompt too long (max 500 characters)' }, { status: 400 });
+  }
+
+  const sanitizedPrompt = sanitizeInput(prompt);
 
   let systemMessage = '';
   if (mode === 'code') {
@@ -34,7 +46,7 @@ export async function POST(req: NextRequest) {
     },
     body: JSON.stringify({
       contents: [
-        { parts: [{ text: systemMessage + '\n' + prompt }] }
+        { parts: [{ text: systemMessage + '\n' + sanitizedPrompt }] }
       ]
     }),
   });

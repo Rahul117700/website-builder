@@ -1,24 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 
-// GET /api/subscription - Get current user's active subscription and plan
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
+    
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Get user's current subscription
     const subscription = await prisma.subscription.findFirst({
       where: {
         userId: session.user.id,
         status: 'active',
       },
-      include: { plan: true },
-      orderBy: { createdAt: 'desc' },
+      include: {
+        plan: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
-    return NextResponse.json({ plan: subscription?.plan || null });
+
+    // If user has no active subscription, return free plan structure
+    if (!subscription) {
+      return NextResponse.json({
+        plan: {
+          id: 'free',
+          name: 'Free',
+          price: 0,
+          numberOfWebsites: 1,
+          unlimitedWebsites: false,
+          supportLevel: 'Basic',
+          customDomain: true,
+          advancedAnalytics: false,
+          customIntegrations: false,
+          teamManagement: false,
+          communityAccess: true,
+        },
+        status: 'active',
+        startDate: new Date().toISOString(),
+        endDate: null,
+      });
+    }
+
+    // Check if subscription is expired
+    const isExpired = subscription.endDate && new Date() > subscription.endDate;
+    
+    return NextResponse.json({
+      plan: subscription.plan,
+      status: isExpired ? 'expired' : subscription.status,
+      startDate: subscription.startDate.toISOString(),
+      endDate: subscription.endDate.toISOString(),
+    });
+
   } catch (error) {
     console.error('Error fetching subscription:', error);
     return NextResponse.json({ error: 'Failed to fetch subscription' }, { status: 500 });

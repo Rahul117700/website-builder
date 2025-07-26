@@ -25,6 +25,11 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import Skeleton from '@mui/material/Skeleton';
 import Button from '@mui/material/Button';
+import { useUserPlan } from '@/hooks/useUserPlan';
+import { canAccessFeature } from '@/utils/planPermissions';
+import PlanRestrictionBanner from '@/components/PlanRestrictionBanner';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import SkeletonLoader from '@/components/ui/SkeletonLoader';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
 
@@ -59,6 +64,8 @@ export default function AnalyticsPage() {
   const [allSitesAnalytics, setAllSitesAnalytics] = useState<Record<string, any>>({});
   const [allSitesLoading, setAllSitesLoading] = useState(false);
   const [dateRange, setDateRange] = useState('30d');
+  const { userPlan } = useUserPlan();
+  
   const dateOptions = [
     { label: 'Last 7 days', value: '7d' },
     { label: 'Last 14 days', value: '14d' },
@@ -66,6 +73,10 @@ export default function AnalyticsPage() {
     // Add custom if needed
   ];
 
+  // Check if user can access analytics
+  const canAccessAnalytics = canAccessFeature(userPlan, 'canUseAnalytics');
+
+  // All useEffect hooks must be called before any conditional returns
   React.useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/');
@@ -86,6 +97,7 @@ export default function AnalyticsPage() {
     if (siteId) setSelectedSite(siteId);
   }, [searchParams]);
 
+  // Define fetchAnalytics function before hooks that use it
   const fetchAnalytics = () => {
     if (selectedSite) {
       setLoading(true);
@@ -103,6 +115,7 @@ export default function AnalyticsPage() {
     }
   };
 
+  // All remaining useEffect hooks must be called before any conditional returns
   React.useEffect(() => {
     fetchAnalytics();
     // Listen for custom event to refresh analytics after a site page is visited
@@ -158,6 +171,22 @@ export default function AnalyticsPage() {
     return Object.values(map).map(d => ({ ...d, visitors: d.visitors.size }));
   }, [filteredRawData]);
 
+  // If user can't access analytics, show restriction banner
+  if (!canAccessAnalytics) {
+    return (
+      <DashboardLayout>
+        <div className="p-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Analytics</h1>
+          <PlanRestrictionBanner
+            userPlan={userPlan}
+            feature="Analytics"
+            requiredPlan="Pro"
+          />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <div className="mb-4">
@@ -175,14 +204,25 @@ export default function AnalyticsPage() {
           placeholder="Select a site"
         />
         <button
-          className="ml-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow px-4 py-2 text-sm"
+          className="ml-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow px-4 py-2 text-sm flex items-center gap-2"
           onClick={fetchAnalytics}
+          disabled={loading}
         >
-          Refresh
+          {loading ? (
+            <>
+              <LoadingSpinner size="sm" color="white" />
+              Refreshing...
+            </>
+          ) : (
+            'Refresh'
+          )}
         </button>
       </div>
       {loading && (
-        <div className="text-center py-8 text-gray-500">Loading analytics...</div>
+        <div className="text-center py-12">
+          <LoadingSpinner size="lg" className="mx-auto mb-4" />
+          <p className="text-gray-500">Loading analytics data...</p>
+        </div>
       )}
       {error && (
         <div className="text-center py-8 text-red-500">{error}</div>
@@ -253,13 +293,13 @@ export default function AnalyticsPage() {
             </div>
             <div className="ml-auto flex gap-2">
               <button
-                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow px-4 py-2 text-sm"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow px-4 py-2 text-sm flex items-center gap-2"
                 onClick={() => downloadJSON(filteredRawData, selectedSite, period)}
               >
                 Export JSON
               </button>
               <button
-                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow px-4 py-2 text-sm"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow px-4 py-2 text-sm flex items-center gap-2"
                 onClick={() => downloadCSV(filteredRawData, selectedSite, period)}
               >
                 Export CSV

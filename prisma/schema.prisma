@@ -41,6 +41,9 @@ model User {
   purchasedTemplates PurchasedTemplate[]
   myTemplates   MyTemplate[]
   transactions  Transaction[]
+  communityPosts CommunityPost[]
+  communityComments CommunityComment[]
+  communityLikes CommunityPostLike[]
 }
 
 // User role enum
@@ -370,4 +373,60 @@ model Transaction {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// Community model for developer community posts
+model CommunityPost {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   @db.Text
+  authorId    String
+  authorName  String
+  authorEmail String
+  category    String   @default("general") // "general", "question", "showcase", "tutorial", "feedback"
+  tags        String[] @default([])
+  videoLink   String?  // For tutorial posts
+  websiteLink String?  // For showcase posts
+  likes       Int      @default(0)
+  views       Int      @default(0)
+  isPublished Boolean  @default(true)
+  isPinned    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments    CommunityComment[]
+  likes_users CommunityPostLike[]
+}
+
+// Community comments
+model CommunityComment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  authorId  String
+  postId    String
+  parentId  String?  // For nested comments
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent    CommunityComment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   CommunityComment[] @relation("CommentReplies")
+}
+
+// Community post likes
+model CommunityPostLike {
+  id     String @id @default(cuid())
+  userId String
+  postId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post   CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
 }

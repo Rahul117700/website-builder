@@ -92,6 +92,19 @@ export async function POST(req: NextRequest) {
       data: defaultPages.map(({ isHomePage, ...rest }) => rest),
     });
 
+    // Create notification for website creation
+    try {
+      await prisma.notification.create({
+        data: {
+          userId: session.user.id,
+          type: 'site',
+          message: `Your website "${name}" has been created successfully! You can now start building your pages.`,
+        },
+      });
+    } catch (error) {
+      console.error('Error creating website creation notification:', error);
+    }
+
     // Return the site with a user-accessible URL
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     const siteUrl = `${BASE_URL}/s/${site.subdomain}`;

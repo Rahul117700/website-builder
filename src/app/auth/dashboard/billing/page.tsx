@@ -5,6 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 export default function BillingPage() {
   const { status } = useSession();
   const router = useRouter();
@@ -84,7 +90,7 @@ export default function BillingPage() {
       });
       const data = await res.json();
       if (!data.id) throw new Error(data.error || 'Failed to create order');
-      if (!window.Razorpay) {
+      if (!(window as any).Razorpay) {
         await new Promise((resolve, reject) => {
           const script = document.createElement('script');
           script.src = 'https://checkout.razorpay.com/v1/checkout.js';
