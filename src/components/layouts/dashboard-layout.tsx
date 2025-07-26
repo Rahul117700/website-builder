@@ -480,8 +480,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Notification Modal */}
       {showNotifications && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-md relative">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center justify-between">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-md relative max-h-[80vh] flex flex-col">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center justify-between flex-shrink-0">
               Notifications & Activity
               {notifications.length > 0 && unreadCount > 0 && (
                 <button
@@ -493,19 +493,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               )}
             </h2>
             <button
-              className="absolute top-3 right-3 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="absolute top-3 right-3 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 flex-shrink-0"
               onClick={() => setShowNotifications(false)}
               aria-label="Close notifications"
             >
               <XMarkIcon className="h-5 w-5 text-gray-500 dark:text-gray-300" />
             </button>
-            <ul className="divide-y divide-gray-200 dark:divide-gray-800">
+            <ul className="divide-y divide-gray-200 dark:divide-gray-800 overflow-y-auto flex-1">
               {notifications.length === 0 ? (
                 <li className="py-4 text-center text-gray-500 dark:text-gray-400">No notifications yet.</li>
               ) : notifications.map((activity) => (
                 <li key={activity.id} className={`py-3 flex items-start gap-3 cursor-pointer ${!activity.read ? 'bg-purple-50 dark:bg-purple-900/20' : ''}`}
                     onClick={() => !activity.read && handleMarkAsRead(activity.id)}>
-                  <span className="inline-block h-8 w-8 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                  <span className="inline-block h-8 w-8 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center flex-shrink-0">
                     {/* Icon based on type */}
                     {activity.type === 'site' && <GlobeAltIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
                     {activity.type === 'template' && <SparklesIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
@@ -517,10 +517,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     {activity.type === 'plan' && <CreditCardIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
                     {activity.type === 'publish' && <GlobeAltIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
                   </span>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="text-sm text-gray-900 dark:text-white flex items-center gap-2">
-                      {activity.message}
-                      {!activity.read && <span className="ml-2 inline-block w-2 h-2 rounded-full bg-purple-500" />}
+                      <span className="truncate">{activity.message}</span>
+                      {!activity.read && <span className="ml-2 inline-block w-2 h-2 rounded-full bg-purple-500 flex-shrink-0" />}
                     </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">{new Date(activity.createdAt).toLocaleString()}</div>
                   </div>

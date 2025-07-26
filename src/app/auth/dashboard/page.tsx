@@ -112,9 +112,18 @@ export default function DashboardPage() {
       // Fetch current plan
       fetch('/api/subscription')
         .then(res => res.json())
-        .then(data => setCurrentPlan(data.plan || null));
+        .then(data => {
+          const plan = data.plan || null;
+          setCurrentPlan(plan);
+          
+          // Redirect to billing page if user has no plan
+          if (!plan || plan.name === 'Free' || plan.status === 'inactive') {
+            router.push('/auth/dashboard/billing');
+            toast.error('Please upgrade your plan to access the dashboard');
+          }
+        });
     }
-  }, [status]);
+  }, [status, router]);
 
   // Fetch analytics for all sites
   useEffect(() => {

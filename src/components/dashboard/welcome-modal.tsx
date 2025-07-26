@@ -8,22 +8,22 @@ const steps = [
   {
     title: "Manage Pages",
     description: "Easily add, edit, and organize your website pages with our intuitive editor.",
-    icon: <BookOpenIcon className="h-10 w-10 text-purple-600 mx-auto mb-2" />,
+    icon: <BookOpenIcon className="h-10 w-10 text-purple-400 mx-auto mb-2" />,
   },
   {
     title: "Add Bookings",
     description: "Accept and manage bookings or appointments directly from your dashboard.",
-    icon: <CalendarIcon className="h-10 w-10 text-purple-600 mx-auto mb-2" />,
+    icon: <CalendarIcon className="h-10 w-10 text-purple-400 mx-auto mb-2" />,
   },
   {
     title: "View Analytics",
     description: "Track visitors, page views, and user behavior with built-in analytics.",
-    icon: <ChartBarIcon className="h-10 w-10 text-purple-600 mx-auto mb-2" />,
+    icon: <ChartBarIcon className="h-10 w-10 text-purple-400 mx-auto mb-2" />,
   },
   {
     title: "Connect Domain",
     description: "Connect your custom domain and go live with a professional web address.",
-    icon: <GlobeAltIcon className="h-10 w-10 text-purple-600 mx-auto mb-2" />,
+    icon: <GlobeAltIcon className="h-10 w-10 text-purple-400 mx-auto mb-2" />,
   },
 ];
 
@@ -54,13 +54,13 @@ export function WelcomeModal({ open: controlledOpen, setOpen: controlledSetOpen,
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-md rounded-2xl p-6">
+      <DialogContent className="max-w-md rounded-2xl p-6 bg-gray-900 border border-gray-700">
         <DialogHeader>
-          <DialogTitle className="text-center text-2xl font-bold text-gray-900 mb-2">Welcome to Your Dashboard</DialogTitle>
-          <DialogDescription className="text-center text-gray-500 mb-4">
+          <DialogTitle className="text-center text-2xl font-bold text-white mb-2">Welcome to Your Dashboard</DialogTitle>
+          <DialogDescription className="text-center text-gray-300 mb-4">
             {steps[step].icon}
-            <span className="block text-lg font-semibold text-purple-600 mb-1">{steps[step].title}</span>
-            <span>{steps[step].description}</span>
+            <span className="block text-lg font-semibold text-purple-400 mb-1">{steps[step].title}</span>
+            <span className="text-gray-300">{steps[step].description}</span>
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex justify-center mt-4">
@@ -72,7 +72,7 @@ export function WelcomeModal({ open: controlledOpen, setOpen: controlledSetOpen,
           {steps.map((_, i) => (
             <span
               key={i}
-              className={`h-2 w-2 rounded-full ${i === step ? "bg-purple-600" : "bg-gray-300"}`}
+              className={`h-2 w-2 rounded-full ${i === step ? "bg-purple-400" : "bg-gray-600"}`}
             />
           ))}
         </div>

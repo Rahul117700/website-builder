@@ -135,6 +135,7 @@ export async function POST(req: NextRequest) {
         authorId: session.user.id,
         authorName: user.name || 'Anonymous',
         authorEmail: user.email,
+        isPublished: true, // Explicitly set to true to ensure posts are visible
       },
       include: {
         author: {

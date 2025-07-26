@@ -15,7 +15,8 @@ import {
   CalendarIcon,
   FireIcon,
   UserGroupIcon,
-  UserIcon
+  UserIcon,
+  GlobeAltIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -121,8 +122,10 @@ export default function CommunityPage() {
       const response = await fetch('/api/community/posts');
       if (response.ok) {
         const data = await response.json();
+        console.log('Fetched posts data:', data); // Debug log
         setPosts(data.posts || data); // Handle both paginated and simple response
       } else {
+        console.error('Failed to fetch posts:', response.status, response.statusText);
         toast.error('Failed to fetch posts');
       }
     } catch (error) {
@@ -393,12 +396,43 @@ export default function CommunityPage() {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 No posts found
               </h3>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 {searchQuery || selectedCategory !== 'all' 
                   ? 'Try adjusting your search or filters'
                   : 'Be the first to start a discussion!'
                 }
               </p>
+              {!searchQuery && selectedCategory === 'all' && (
+                <button
+                  onClick={async () => {
+                    try {
+                      const response = await fetch('/api/community/posts', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          title: 'Welcome to the Community!',
+                          content: 'This is a test post to get the community started. Feel free to share your thoughts, ask questions, or showcase your work!',
+                          category: 'general',
+                          tags: ['welcome', 'community'],
+                          videoLink: '',
+                          websiteLink: ''
+                        })
+                      });
+                      if (response.ok) {
+                        toast.success('Test post created!');
+                        fetchPosts();
+                      } else {
+                        toast.error('Failed to create test post');
+                      }
+                    } catch (error) {
+                      toast.error('Error creating test post');
+                    }
+                  }}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Create Test Post
+                </button>
+              )}
             </div>
           ) : (
             filteredPosts.map(post => (
@@ -475,21 +509,29 @@ export default function CommunityPage() {
                   <div className="mb-4">
                     <h4 className="text-sm font-semibold text-black mb-2">🌐 Showcase Website</h4>
                     <div className="bg-gray-50 rounded-lg p-4">
-                      <iframe
-                        src={post.websiteLink}
-                        title="Showcase Website"
-                        className="w-full h-64 rounded-lg"
-                        frameBorder="0"
-                        sandbox="allow-scripts allow-same-origin allow-forms"
-                      ></iframe>
-                      <div className="mt-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-600 mb-2">Website Preview</p>
+                          <div className="bg-white border rounded-lg p-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-4 h-4 bg-gray-300 rounded"></div>
+                              <span className="text-sm text-gray-500 truncate">{post.websiteLink}</span>
+                            </div>
+                            <div className="mt-2 h-32 bg-gray-100 rounded flex items-center justify-center">
+                              <span className="text-gray-400 text-sm">Website Preview</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-3">
                         <a
                           href={post.websiteLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-purple-600 hover:text-purple-700 text-sm font-medium"
+                          className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                         >
-                          Open in new tab →
+                          <GlobeAltIcon className="w-4 h-4" />
+                          Visit Website
                         </a>
                       </div>
                     </div>
