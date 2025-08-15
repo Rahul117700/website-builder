@@ -1,4 +1,5 @@
 "use client";
+/* eslint react/no-unescaped-entities: 0 */
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
+import type { Prisma } from '@prisma/client';
 
 export async function POST(req: NextRequest) {
   try {
@@ -134,14 +135,16 @@ export async function POST(req: NextRequest) {
     // Create MyTemplate record for the user
     try {
       console.log('Creating MyTemplate record...');
-      const myTemplateData = {
+      const myTemplateData: Prisma.MyTemplateUncheckedCreateInput = {
         userId: session.user.id,
         templateId: template.id,
         name: template.name,
-        html: template.html,
-        css: template.css,
-        js: template.js,
-        pages: template.pages, // Include pages field
+        html: template.html ?? undefined,
+        css: template.css ?? undefined,
+        js: template.js ?? undefined,
+        ...(template.pages !== null && template.pages !== undefined
+          ? { pages: (template.pages as unknown as Prisma.InputJsonValue) }
+          : {}),
       };
       console.log('MyTemplate data:', myTemplateData);
       

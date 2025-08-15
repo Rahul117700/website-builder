@@ -1,4 +1,5 @@
 'use client';
+/* eslint react/no-unescaped-entities: 0 */
 
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';

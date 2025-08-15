@@ -1,4 +1,5 @@
 "use client";
+/* eslint react/no-unescaped-entities: 0 */
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import DashboardLayout from "@/components/layouts/dashboard-layout";

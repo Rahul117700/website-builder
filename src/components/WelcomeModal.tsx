@@ -36,7 +36,7 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
               </svg>
             </div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              Let's build something amazing together!
+              Let&#39;s build something amazing together!
             </h3>
             <p className="text-gray-600 dark:text-gray-300">
               This quick tour will show you how to create your first website in just a few minutes.

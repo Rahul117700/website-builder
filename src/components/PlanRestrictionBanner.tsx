@@ -43,7 +43,7 @@ export default function PlanRestrictionBanner({
           <p className="text-gray-700 mb-4">
             {isWebsiteLimit ? (
               <>
-                You've reached your limit of <strong>{maxWebsites} website{maxWebsites > 1 ? 's' : ''}</strong> on your current <strong>{currentPlanName}</strong> plan. 
+                You&#39;ve reached your limit of <strong>{maxWebsites} website{maxWebsites > 1 ? 's' : ''}</strong> on your current <strong>{currentPlanName}</strong> plan. 
                 {currentWebsiteCount > 0 && (
                   <span> You currently have {currentWebsiteCount} website{currentWebsiteCount > 1 ? 's' : ''}.</span>
                 )}
@@ -51,7 +51,7 @@ export default function PlanRestrictionBanner({
             ) : (
               <>
                 This feature requires a <strong>{requiredPlan}</strong> plan or higher. 
-                You're currently on the <strong>{currentPlanName}</strong> plan.
+                You&#39;re currently on the <strong>{currentPlanName}</strong> plan.
               </>
             )}
           </p>

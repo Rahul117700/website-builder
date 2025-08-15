@@ -323,9 +323,9 @@ export default function FunnelPage() {
                     <div className="text-gray-400">One-time payment</div>
                   </div>
 
-                  {/* What's Included */}
+                  {/* What\'s Included */}
                   <div className="space-y-4 mb-8">
-                    <div className="text-white font-medium mb-3">What's Included:</div>
+                    <div className="text-white font-medium mb-3">What&#39;s Included:</div>
                     <div className="flex items-center gap-3 text-gray-300">
                       <CheckIcon className="h-5 w-5 text-green-400" />
                       <span>Complete website template</span>
@@ -519,8 +519,7 @@ export default function FunnelPage() {
         </div>
       )}
 
-      {/* Razorpay Script */}
-      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+      {/* Razorpay script is dynamically loaded in handlePayment to satisfy Next.js no-sync-scripts rule */}
     </>
   );
 }

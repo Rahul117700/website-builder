@@ -32,6 +32,7 @@ export default function AboutPage() {
               {session?.user ? (
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center space-x-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={session.user.image || "/default-avatar.png"} alt="User" className="h-8 w-8 rounded-full" />
                     <span className="text-gray-300 text-sm">{session.user.name || session.user.email}</span>
                   </div>

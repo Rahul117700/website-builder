@@ -102,8 +102,8 @@ export async function POST(req: NextRequest) {
       const images = JSON.parse(aiResponse.trim());
       if (Array.isArray(images)) {
         // Ensure uniqueness and filter out duplicates
-        const uniqueImages = images.filter((img, index, arr) => 
-          arr.findIndex(item => item.toLowerCase().trim() === img.toLowerCase().trim()) === index
+        const uniqueImages = (images as string[]).filter((img: string, index: number, arr: string[]) => 
+          arr.findIndex((item: string) => item.toLowerCase().trim() === img.toLowerCase().trim()) === index
         );
         
         // Generate automatic image links for each description
@@ -124,13 +124,13 @@ export async function POST(req: NextRequest) {
       }
     } catch {
       // If parsing fails, try to extract from the response
-      const imageMatch = aiResponse.match(/\[(.*?)\]/s);
+      const imageMatch = aiResponse.match(/\[([\s\S]*?)\]/);
       if (imageMatch) {
         try {
           const images = JSON.parse(imageMatch[0]);
           // Ensure uniqueness
-          const uniqueImages = images.filter((img, index, arr) => 
-            arr.findIndex(item => item.toLowerCase().trim() === img.toLowerCase().trim()) === index
+          const uniqueImages = (images as string[]).filter((img: string, index: number, arr: string[]) => 
+            arr.findIndex((item: string) => item.toLowerCase().trim() === img.toLowerCase().trim()) === index
           );
           
           // Generate automatic image links
@@ -154,8 +154,8 @@ export async function POST(req: NextRequest) {
           if (quotedImages) {
             const images = quotedImages.map((img: string) => img.replace(/"/g, ''));
             // Ensure uniqueness
-            const uniqueImages = images.filter((img, index, arr) => 
-              arr.findIndex(item => item.toLowerCase().trim() === img.toLowerCase().trim()) === index
+            const uniqueImages = (images as string[]).filter((img: string, index: number, arr: string[]) => 
+              arr.findIndex((item: string) => item.toLowerCase().trim() === img.toLowerCase().trim()) === index
             );
             
             // Generate automatic image links
