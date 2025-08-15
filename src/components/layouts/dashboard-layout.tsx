@@ -342,6 +342,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <div className="flex items-center gap-4">
                     <div>
                       {session?.user?.image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           className="inline-block h-10 w-10 rounded-full border border-purple-200"
                           src={session.user.image}

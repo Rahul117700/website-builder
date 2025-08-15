@@ -211,7 +211,7 @@ export default function PurchasedTemplatesPage() {
                   My Purchased Templates
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">
-                  View and manage all the templates you've purchased from the marketplace.
+                  View and manage all the templates you&#39;ve purchased from the marketplace.
                 </p>
               </div>
               

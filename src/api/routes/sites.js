@@ -150,7 +150,7 @@ router.post('/', auth, async (req, res) => {
         </ul>
         <h2>Contact Us</h2>
         <p>Phone: (123) 456-7890</p>
-        <p>Email: <a href={`${BASE_URL}/s/${subdomain.toLowerCase()}`}>Open your site</a></p>
+        <p>Email: <a href="${BASE_URL}/s/${subdomain.toLowerCase()}">Open your site</a></p>
       `;
     } else if (template === 'restaurant') {
       homePageContent = `
@@ -172,7 +172,7 @@ router.post('/', auth, async (req, res) => {
         <p>Add information about your business or organization here.</p>
         <h2>Contact Us</h2>
         <p>Phone: (123) 456-7890</p>
-        <p>Email: <a href={`${BASE_URL}/s/${subdomain.toLowerCase()}`}>Open your site</a></p>
+        <p>Email: <a href="${BASE_URL}/s/${subdomain.toLowerCase()}">Open your site</a></p>
       `;
     }
 
@@ -246,10 +246,10 @@ router.post('/', auth, async (req, res) => {
           <h1>Contact Us</h1>
           <p>We'd love to hear from you. Get in touch with us using the information below.</p>
           <h2>Contact Information</h2>
-          <p>Email: <a href={`${BASE_URL}/s/${subdomain.toLowerCase()}`}>Open your site</a></p>
+          <p>Email: <a href="${BASE_URL}/s/${subdomain.toLowerCase()}">Open your site</a></p>
           <p>Phone: (123) 456-7890</p>
           <p>Address: 123 Main Street, City, Country</p>
-          <p>Site URL: <a href={`${BASE_URL}/s/${subdomain.toLowerCase()}`}>{`${BASE_URL}/s/${subdomain.toLowerCase()}`}</a></p>
+          <p>Site URL: <a href="${BASE_URL}/s/${subdomain.toLowerCase()}">${BASE_URL}/s/${subdomain.toLowerCase()}</a></p>
         `,
         published: true,
         site: {

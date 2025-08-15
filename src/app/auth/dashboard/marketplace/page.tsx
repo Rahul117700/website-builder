@@ -139,7 +139,7 @@ export default function MarketplacePage() {
       const tpl = templates.find(t => t.id === templateId);
       if (tpl) setUseTpl(tpl);
     }
-  }, [searchParams]);
+  }, [searchParams, templates]);
 
   async function handleUseTemplate() {
     if (!selectedSite || !useTpl) return;
@@ -520,10 +520,11 @@ export default function MarketplacePage() {
                     {/* Template Image */}
                     <div className="relative h-48 bg-gray-100 dark:bg-gray-700">
                       {tpl.preview ? (
-                        <img
+                        <Image
                           src={tpl.preview}
                           alt={tpl.name + ' preview'}
-                          className="w-full h-full object-cover"
+                          fill
+                          className="object-cover"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">

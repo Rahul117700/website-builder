@@ -631,6 +631,7 @@ export default function WebsitesPage() {
               </div>
               {uploadingPreview && <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Uploading...</div>}
               {salePreview && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src={salePreview} alt="Preview" className="mt-2 max-h-32 rounded border border-gray-200 dark:border-gray-700" />
               )}
             </div>

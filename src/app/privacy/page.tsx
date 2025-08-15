@@ -1,4 +1,5 @@
 "use client";
+/* eslint react/no-unescaped-entities: 0 */
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import Footer from '@/components/Footer';

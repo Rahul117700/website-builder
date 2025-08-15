@@ -641,7 +641,7 @@ export default function CreateSitePage() {
                             <p>When you create this site, the system will:</p>
                             <ol className="list-decimal list-inside mt-1 space-y-1">
                               <li>Create a new website with your chosen name and subdomain</li>
-                              <li>Apply the "{selectedTemplate.name}" template to create all necessary pages</li>
+                              <li>Apply the &quot;{selectedTemplate.name}&quot; template to create all necessary pages</li>
                               <li>Set up proper navigation between pages</li>
                               <li>Make all pages ready for immediate use</li>
                             </ol>
@@ -651,7 +651,7 @@ export default function CreateSitePage() {
                                 Template Type: <span className="font-bold">{template}</span>
                                 {selectedTemplate.category && (
                                   <span className="ml-2 text-blue-600 dark:text-blue-300">
-                                    (mapped from "{selectedTemplate.category}")
+                                    (mapped from &quot;{selectedTemplate.category}&quot;)
                                   </span>
                                 )}
                               </p>
