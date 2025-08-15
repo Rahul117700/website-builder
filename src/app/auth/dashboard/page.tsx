@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layouts/dashboard-layout';
-import SiteCard from '@/components/dashboard/site-card';
+// Removed site cards from dashboard view
 import CreateSiteModal from '@/components/dashboard/create-site-modal-fixed';
-import { PlusIcon, GlobeAltIcon, PencilIcon, ChartBarIcon, DocumentDuplicateIcon, BellIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, GlobeAltIcon, PencilIcon, ChartBarIcon, DocumentDuplicateIcon, BellIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { Site, CreateSiteInput } from '@/types';
 import { WelcomeModal } from '@/components/dashboard/welcome-modal';
 import toast from 'react-hot-toast';
@@ -42,6 +42,11 @@ export default function DashboardPage() {
   const [allSitesAnalytics, setAllSitesAnalytics] = useState<Record<string, any>>({});
   const [allSitesLoading, setAllSitesLoading] = useState(false);
   const [activityFeed, setActivityFeed] = useState<Array<{ type: string; site?: Site; title: string; date: string; id: string; action: string }>>([]);
+  const [showFunnelGuide, setShowFunnelGuide] = useState(true);
+  const [salesSummary, setSalesSummary] = useState<{ totalSales: number; totalEarnings: number } | null>(null);
+  const [funnelsSummary, setFunnelsSummary] = useState<{ totalVisits: number; conversions: number } | null>(null);
+  const [earningsTotal, setEarningsTotal] = useState<number>(0);
+  const [payoutAmount, setPayoutAmount] = useState<string>('');
 
   // Personalized greeting message
   const greetingMessages = [
@@ -58,6 +63,14 @@ export default function DashboardPage() {
       router.push('/auth/signin');
     }
   }, [status, router]);
+
+  // Load persisted preference for the Funnel Guide
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hidden = window.localStorage.getItem('hide-funnel-guide');
+      if (hidden === '1') setShowFunnelGuide(false);
+    }
+  }, []);
 
   const refreshSitesAndStats = async () => {
     setIsLoading(true);
@@ -116,12 +129,44 @@ export default function DashboardPage() {
           const plan = data.plan || null;
           setCurrentPlan(plan);
           
-          // Redirect to billing page if user has no plan
-          if (!plan || plan.name === 'Free' || plan.status === 'inactive') {
+          // Only redirect if user has no plan at all (not for free plan)
+          if (!plan) {
             router.push('/auth/dashboard/billing');
-            toast.error('Please upgrade your plan to access the dashboard');
+            toast.error('Please select a plan to access the dashboard');
           }
         });
+
+      // Fetch sales summary for dashboard
+      fetch('/api/sites/on-sale')
+        .then(res => (res.ok ? res.json() : []))
+        .then(async (sales) => {
+          try {
+            // Derive totals from siteSale table; also ensure earnings via template sellerEarnings if available
+            const totalSales = Array.isArray(sales) ? sales.reduce((acc: number, s: any) => acc + (s.totalSales || 0), 0) : 0;
+            const totalEarnings = Array.isArray(sales) ? sales.reduce((acc: number, s: any) => acc + (s.earnings || 0), 0) : 0;
+            setSalesSummary({ totalSales, totalEarnings });
+          } catch {
+            setSalesSummary({ totalSales: 0, totalEarnings: 0 });
+          }
+        })
+        .catch(() => setSalesSummary({ totalSales: 0, totalEarnings: 0 }));
+
+      // Fetch funnels performance summary
+      fetch('/api/funnels')
+        .then(res => (res.ok ? res.json() : []))
+        .then((funnels) => {
+          if (!Array.isArray(funnels)) { setFunnelsSummary({ totalVisits: 0, conversions: 0 }); return; }
+          const totalVisits = funnels.reduce((a: number, f: any) => a + (f.totalVisits || 0), 0);
+          const conversions = funnels.reduce((a: number, f: any) => a + (f.conversions || 0), 0);
+          setFunnelsSummary({ totalVisits, conversions });
+        })
+        .catch(() => setFunnelsSummary({ totalVisits: 0, conversions: 0 }));
+
+      // Fetch total earnings for user
+      fetch('/api/users/earnings')
+        .then(res => (res.ok ? res.json() : { total: 0 }))
+        .then(data => setEarningsTotal(data.total || 0))
+        .catch(() => setEarningsTotal(0));
     }
   }, [status, router]);
 
@@ -255,21 +300,54 @@ export default function DashboardPage() {
     <DashboardLayout>
       <WelcomeModal />
       {/* Personalized Greeting */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
         <Avatar src={session?.user?.image || undefined} alt={session?.user?.name || 'User'} sx={{ width: 56, height: 56 }} />
         <div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">Welcome, {session?.user?.name || 'User'}!</h2>
           <p className="text-sm text-gray-600 dark:text-gray-300">{greeting}</p>
         </div>
       </div>
-      {/* Site Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {sites.map(site => (
-          <SiteCard key={site.id} site={site} />
-        ))}
-      </div>
+      {/* Funnel System – Quick Guide */}
+      {showFunnelGuide && (
+        <div className="mb-6 rounded-xl border border-purple-200 dark:border-purple-900/40 bg-purple-50 dark:bg-purple-900/20 p-5">
+          <div className="flex flex-col sm:flex-row items-start gap-3">
+            <div className="mt-0.5">
+              <SparklesIcon className="h-6 w-6 text-purple-600 dark:text-purple-300" />
+            </div>
+            <div className="flex-1">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <h3 className="text-base font-bold text-purple-800 dark:text-purple-100">Funnel System – Quick Guide</h3>
+                <button
+                  onClick={() => {
+                    setShowFunnelGuide(false);
+                    if (typeof window !== 'undefined') {
+                      window.localStorage.setItem('hide-funnel-guide', '1');
+                    }
+                  }}
+                  className="text-purple-700/70 hover:text-purple-900 dark:text-purple-300/70 dark:hover:text-purple-100 text-sm"
+                  aria-label="Dismiss guide"
+                >
+                  Dismiss
+                </button>
+              </div>
+              <p className="mt-1 text-sm text-purple-900/80 dark:text-purple-100/80">Sell your templates with a simple 2‑step sales flow: landing page + Razorpay checkout.</p>
+              <ul className="mt-3 text-sm text-purple-900/80 dark:text-purple-100/80 list-disc ml-5 space-y-1">
+                <li>Create your funnel at <a className="underline font-semibold" href="/auth/dashboard/funnels">Dashboard → Funnels</a>.</li>
+                <li>Share the public link: <span className="font-mono">/f/&lt;slug&gt;</span>.</li>
+                <li>Buyers pay securely via Razorpay; purchases auto‑appear in <a className="underline font-semibold" href="/auth/dashboard/purchased-templates">Purchased Templates</a>.</li>
+                <li>Track visits and conversions in the Funnels dashboard.</li>
+              </ul>
+              <div className="mt-4 flex flex-col sm:flex-row gap-3">
+                <a href="/auth/dashboard/funnels" className="px-4 py-2 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 text-center">Create a Funnel</a>
+                <a href="/auth/dashboard/purchased-templates" className="px-4 py-2 rounded-lg bg-white text-purple-700 border border-purple-300 hover:bg-purple-100 dark:bg-transparent dark:text-purple-200 dark:border-purple-700 text-center">Purchased Templates</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Site cards removed per request */}
       {/* Trends & Insights */}
-      <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Fastest Growing Site */}
         <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg shadow flex flex-col items-start">
           <h4 className="font-bold text-green-700 mb-1">Fastest Growing Site</h4>
@@ -340,6 +418,69 @@ export default function DashboardPage() {
               <span className="text-gray-500">All sites have recent activity.</span>
             );
           })()}
+        </div>
+      </div>
+
+      {/* Business Overview */}
+      <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Sales Summary */}
+        <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg shadow flex flex-col items-start">
+          <h4 className="font-bold text-purple-700 dark:text-purple-200 mb-1">Template Sales</h4>
+          {salesSummary ? (
+            <>
+              <span className="text-lg font-semibold text-purple-800 dark:text-purple-100">{salesSummary.totalSales} sales</span>
+              <span className="text-sm text-purple-700/80 dark:text-purple-200/80">₹{(salesSummary.totalEarnings || 0).toFixed(2)} earnings</span>
+            </>
+          ) : (
+            <span className="text-gray-500">No data yet.</span>
+          )}
+        </div>
+
+        {/* Funnels Performance */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg shadow flex flex-col items-start">
+          <h4 className="font-bold text-blue-700 dark:text-blue-200 mb-1">Funnels Performance</h4>
+          {funnelsSummary ? (
+            <>
+              <span className="text-lg font-semibold text-blue-800 dark:text-blue-100">{funnelsSummary.totalVisits} visits</span>
+              <span className="text-sm text-blue-700/80 dark:text-blue-200/80">{funnelsSummary.conversions} conversions</span>
+            </>
+          ) : (
+            <span className="text-gray-500">No data yet.</span>
+          )}
+          <a href="/auth/dashboard/funnels" className="mt-3 text-sm font-semibold text-blue-700 dark:text-blue-300 underline">View Funnels</a>
+        </div>
+
+        {/* Earnings and Withdraw */}
+        <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg shadow flex flex-col items-start">
+          <h4 className="font-bold text-green-700 dark:text-green-200 mb-1">Your Income</h4>
+          <span className="text-lg font-semibold text-green-800 dark:text-green-100">₹{earningsTotal.toFixed(2)}</span>
+          <div className="mt-3 w-full flex flex-col sm:flex-row gap-2">
+            <input
+              type="number"
+              value={payoutAmount}
+              onChange={e => setPayoutAmount(e.target.value)}
+              placeholder="Withdraw amount (INR)"
+              className="w-full sm:flex-1 rounded border px-3 py-2 bg-white dark:bg-gray-900 border-green-200 dark:border-green-700 text-gray-900 dark:text-white"
+            />
+            <button
+              className="px-4 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 w-full sm:w-auto"
+              onClick={async () => {
+                const amt = parseFloat(payoutAmount);
+                if (!amt || amt <= 0) { toast.error('Enter a valid amount'); return; }
+                const res = await fetch('/api/users/payouts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: amt }) });
+                if (res.ok) {
+                  toast.success('Payout requested successfully!');
+                  setPayoutAmount('');
+                } else {
+                  const data = await res.json().catch(() => ({}));
+                  toast.error(data.error || 'Failed to request payout');
+                }
+              }}
+            >
+              Withdraw
+            </button>
+          </div>
+          <a href="/auth/dashboard/sales" className="mt-2 text-sm text-green-700 dark:text-green-300 underline">Go to Sales</a>
         </div>
       </div>
       {/* Current Plan and View My Websites Section */}

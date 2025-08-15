@@ -62,21 +62,41 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async session({ session, token, user }) {
+      console.log('=== NextAuth session callback ===');
+      console.log('Session input:', session);
+      console.log('Token input:', token);
+      console.log('User input:', user);
+      
       if (session.user && token) {
         session.user.id = token.id;
         session.user.role = token.role;
+        console.log('Session updated with user ID:', session.user.id);
+        console.log('Session updated with user role:', session.user.role);
       }
+      
+      console.log('Final session output:', session);
       return session;
     },
     async jwt({ token, user }) {
+      console.log('=== NextAuth JWT callback ===');
+      console.log('Token input:', token);
+      console.log('User input:', user);
+      
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        console.log('JWT updated with user ID:', user.id);
+        console.log('JWT updated with user role:', user.role);
       } else if (!token.role && token.id) {
+        console.log('Fetching user role from DB for token ID:', token.id);
         // Fetch user role from DB if not present (for refreshes)
         const dbUser = await prisma.user.findUnique({ where: { id: token.id } });
+        console.log('DB user found:', dbUser);
         token.role = dbUser?.role || 'USER';
+        console.log('JWT role set to:', token.role);
       }
+      
+      console.log('Final JWT output:', token);
       return token;
     },
   },

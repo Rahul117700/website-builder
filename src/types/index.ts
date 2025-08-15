@@ -23,6 +23,7 @@ export interface Site {
   googleAnalyticsId: string | null;
   createdAt: string;
   updatedAt: string;
+  onSale?: boolean;
 }
 
 export interface Page {
