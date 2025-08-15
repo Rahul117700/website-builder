@@ -43,6 +43,16 @@ export default function WebsitesPage() {
   const [templateSite, setTemplateSite] = useState<Site | null>(null);
   const [search, setSearch] = useState('');
   const [templateFilter, setTemplateFilter] = useState('');
+  const [deletingSiteId, setDeletingSiteId] = useState<string | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [siteToDelete, setSiteToDelete] = useState<Site | null>(null);
+  const [saleModalOpen, setSaleModalOpen] = useState(false);
+  const [saleSite, setSaleSite] = useState<Site | null>(null);
+  const [salePrice, setSalePrice] = useState('');
+  const [salePreview, setSalePreview] = useState<string>('');
+  const [saleDescription, setSaleDescription] = useState<string>('');
+  const [uploadingPreview, setUploadingPreview] = useState<boolean>(false);
+  const [puttingOnSale, setPuttingOnSale] = useState(false);
   const { userPlan } = useUserPlan();
 
   const fetchSites = useCallback(async () => {
@@ -56,12 +66,13 @@ export default function WebsitesPage() {
       });
       if (!res.ok) throw new Error('Failed to fetch sites');
       let data = await res.json();
-      // For each site, fetch its main page and analytics
+      // For each site, fetch its main page, analytics, and sale status
       data = await Promise.all(data.map(async (site: any) => {
         try {
           const pagesRes = await fetch(`/api/pages?siteId=${site.id}`);
           const analyticsRes = await fetch(`/api/analytics?siteId=${site.id}`);
-          let mainPage, visitors = 0;
+          const saleRes = await fetch(`/api/sites/on-sale?siteId=${site.id}`);
+          let mainPage, visitors = 0, onSale = false;
           if (pagesRes.ok) {
             const pages = await pagesRes.json();
             mainPage = pages[0];
@@ -70,9 +81,13 @@ export default function WebsitesPage() {
             const analytics = await analyticsRes.json();
             visitors = analytics?.summary?.totalVisitors || 0;
           }
-          return { ...site, mainPageRenderMode: mainPage?.renderMode || 'html', visitors };
+          if (saleRes.ok) {
+            const saleData = await saleRes.json();
+            onSale = saleData && saleData.length > 0;
+          }
+          return { ...site, mainPageRenderMode: mainPage?.renderMode || 'html', visitors, onSale };
         } catch {
-          return { ...site, mainPageRenderMode: undefined, visitors: 0 };
+          return { ...site, mainPageRenderMode: undefined, visitors: 0, onSale: false };
         }
       }));
       setSites(data);
@@ -91,6 +106,24 @@ export default function WebsitesPage() {
       fetchSites();
     }
   }, [status, router, fetchSites]);
+
+  // Handle escape key for delete modal
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && deleteModalOpen && deletingSiteId !== siteToDelete?.id) {
+        setDeleteModalOpen(false);
+        setSiteToDelete(null);
+      }
+    };
+
+    if (deleteModalOpen) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [deleteModalOpen, deletingSiteId, siteToDelete]);
 
   const handleCreateSite = async (siteData: any) => {
     setCreating(true);
@@ -167,6 +200,51 @@ export default function WebsitesPage() {
   const handleSiteDeleted = (site?: Site) => {
     toast.success('Website deleted successfully');
     fetchSites();
+  };
+
+  const handleDeleteSite = async (site: Site) => {
+    setSiteToDelete(site);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!siteToDelete) return;
+
+    if (!session?.user?.id) {
+      toast.error('You are not authenticated. Please log in again.');
+      return;
+    }
+
+    try {
+      setDeletingSiteId(siteToDelete.id);
+      console.log(`Attempting to delete site: ${siteToDelete.id} (${siteToDelete.name})`);
+      
+      const response = await fetch(`/api/sites/${siteToDelete.id}`, {
+        method: 'DELETE',
+      });
+
+      console.log(`Delete response status: ${response.status}`);
+      console.log(`Delete response headers:`, Object.fromEntries(response.headers.entries()));
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log(`Delete successful:`, result);
+        toast.success(`Website "${siteToDelete.name}" deleted successfully`);
+        // Remove the site from the local state
+        setSites(prevSites => prevSites.filter(s => s.id !== siteToDelete.id));
+      } else {
+        const errorData = await response.json();
+        console.error(`Delete failed with status ${response.status}:`, errorData);
+        toast.error(errorData.error || 'Failed to delete website');
+      }
+    } catch (error) {
+      console.error('Error deleting site:', error);
+      toast.error('Failed to delete website. Please try again.');
+    } finally {
+      setDeletingSiteId(null);
+      setDeleteModalOpen(false);
+      setSiteToDelete(null);
+    }
   };
 
   // Filtered sites
@@ -302,7 +380,24 @@ export default function WebsitesPage() {
                       <Avatar sx={{ width: 32, height: 32 }}>{site.name.charAt(0).toUpperCase()}</Avatar>
                     )}
                     <div>
-                      <h3 className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">{site.name}</h3>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                        {site.name}
+                                                 {site.onSale && (
+                           <Chip 
+                             label="On Sale" 
+                             size="small" 
+                             sx={{ 
+                               fontSize: '0.75rem', 
+                               height: '20px',
+                               backgroundColor: '#10B981',
+                               color: 'white',
+                               '& .MuiChip-label': {
+                                 color: 'white'
+                               }
+                             }} 
+                           />
+                         )}
+                      </h3>
                       <p className="text-sm text-gray-500 dark:text-gray-400">{site.template.charAt(0).toUpperCase() + site.template.slice(1)} Template</p>
                     </div>
                   </div>
@@ -359,15 +454,46 @@ export default function WebsitesPage() {
                   >
                     Visit
                   </Button>
+                                     {site.onSale ? (
+                     <Button
+                       variant="outlined"
+                       size="small"
+                       startIcon={<LayersIcon />}
+                       href="/auth/dashboard/sales"
+                       fullWidth
+                       sx={{
+                         backgroundColor: '#10B981',
+                         color: 'white',
+                         borderColor: '#10B981',
+                         '&:hover': {
+                           backgroundColor: '#059669',
+                           borderColor: '#059669'
+                         }
+                       }}
+                     >
+                       View Sales
+                     </Button>
+                   ) : (
+                     <Button
+                       variant="outlined"
+                       size="small"
+                       startIcon={<LayersIcon />}
+                       onClick={() => { setSaleSite(site); setSalePrice(''); setSaleModalOpen(true); }}
+                       fullWidth
+                     >
+                       Put on Sale
+                     </Button>
+                   )}
                   <Button
                     variant="contained"
                     color="error"
                     size="small"
                     startIcon={<DeleteIcon />}
-                    onClick={() => handleSiteDeleted(site)}
+                    onClick={() => handleDeleteSite(site)}
                     fullWidth
+                    disabled={deletingSiteId === site.id}
                   >
-                    Delete
+                    {deletingSiteId === site.id ? 'Deleting...' : 'Delete'}
                   </Button>
                 </div>
               </div>
@@ -399,6 +525,165 @@ export default function WebsitesPage() {
         site={templateSite}
         onChangeTemplate={handleChangeTemplate}
       />
+
+      {/* Delete Confirmation Modal */}
+      {deleteModalOpen && siteToDelete && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => {
+            if (deletingSiteId !== siteToDelete.id) {
+              setDeleteModalOpen(false);
+              setSiteToDelete(null);
+            }
+          }}
+        >
+          <div 
+            className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center mb-4">
+              <div className="flex-shrink-0">
+                <div className="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+                  <DeleteIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
+                </div>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                  Delete Website
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  This action cannot be undone
+                </p>
+              </div>
+            </div>
+            
+            <div className="mb-6">
+                          <p className="text-gray-700 dark:text-gray-300">
+              Are you sure you want to delete <span className="font-semibold">&quot;{siteToDelete.name}&quot;</span>?
+            </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                <strong>Subdomain:</strong> {siteToDelete.subdomain}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                This will permanently remove the website and all its pages, analytics, and other data.
+              </p>
+            </div>
+            
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setDeleteModalOpen(false);
+                  setSiteToDelete(null);
+                }}
+                disabled={deletingSiteId === siteToDelete.id}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={confirmDelete}
+                disabled={deletingSiteId === siteToDelete.id}
+                startIcon={deletingSiteId === siteToDelete.id ? <LoadingSpinner size="sm" color="white" /> : <DeleteIcon />}
+              >
+                {deletingSiteId === siteToDelete.id ? 'Deleting...' : 'Delete Website'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Put on Sale Modal */}
+      {saleModalOpen && saleSite && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 sm:p-6" onClick={() => setSaleModalOpen(false)}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md sm:max-w-lg shadow-2xl border border-gray-200 dark:border-gray-700" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Put &quot;{saleSite.name}&quot; on Sale</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Set a price and list this website as a template in the marketplace. A commission may be applied on each sale.</p>
+            <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">Price (INR)</label>
+            <input type="number" className="w-full rounded-md border px-3 py-2 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white" value={salePrice} onChange={e => setSalePrice(e.target.value)} placeholder="e.g., 999" />
+
+            {/* Preview Image */}
+            <div className="mt-4">
+              <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">Preview Image</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setUploadingPreview(true);
+                    try {
+                      const form = new FormData();
+                      form.append('image', file);
+                      const res = await fetch('/api/templates/upload-image', { method: 'POST', body: form });
+                      const data = await res.json();
+                      if (res.ok && data.url) {
+                        setSalePreview(data.url);
+                      }
+                    } finally {
+                      setUploadingPreview(false);
+                    }
+                  }}
+                  className="block w-full text-sm text-gray-700 dark:text-gray-200"
+                />
+              </div>
+              {uploadingPreview && <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Uploading...</div>}
+              {salePreview && (
+                <img src={salePreview} alt="Preview" className="mt-2 max-h-32 rounded border border-gray-200 dark:border-gray-700" />
+              )}
+            </div>
+
+            {/* Description */}
+            <div className="mt-4">
+              <label className="block text-sm text-gray-700 dark:text-gray-300 mb-1">Short Description</label>
+              <textarea
+                value={saleDescription}
+                onChange={(e) => setSaleDescription(e.target.value)}
+                placeholder="Tell buyers what this template includes, who it's for, and key features."
+                className="w-full rounded border px-3 py-2 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"
+                rows={3}
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row justify-end gap-2 mt-4">
+              <Button variant="outlined" onClick={() => setSaleModalOpen(false)} className="w-full sm:w-auto">Cancel</Button>
+              <Button 
+                variant="contained" 
+                onClick={async () => {
+                  if (!saleSite || !salePrice) return;
+                  setPuttingOnSale(true);
+                  try {
+                    const res = await fetch('/api/sites/on-sale', { 
+                      method: 'POST', 
+                      headers: { 'Content-Type': 'application/json' }, 
+                      body: JSON.stringify({ siteId: saleSite.id, price: parseFloat(salePrice), preview: salePreview, description: saleDescription }) 
+                    });
+                    const data = await res.json();
+                    if (res.ok) { 
+                      toast.success('Site listed for sale'); 
+                      setSaleModalOpen(false); 
+                      setSalePreview('');
+                      setSaleDescription('');
+                      fetchSites(); 
+                    } else { 
+                      toast.error(data.error || 'Failed to list'); 
+                    }
+                  } catch (e: any) { 
+                    toast.error(e.message || 'Failed to list'); 
+                  } finally { 
+                    setPuttingOnSale(false); 
+                  }
+                }}
+                disabled={puttingOnSale}
+                startIcon={puttingOnSale ? <LoadingSpinner size="sm" color="white" /> : undefined}
+              >
+                {puttingOnSale ? 'Putting on Sale...' : 'Put on Sale'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 } 

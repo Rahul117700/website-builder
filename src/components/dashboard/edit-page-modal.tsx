@@ -49,7 +49,7 @@ export default function EditPageModal({ isOpen, onClose, page, onEditPage }: Edi
           <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
         </Transition.Child>
         <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div className="flex min-h-full items-end sm:items-center justify-center p-4 text-center sm:p-6">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -59,7 +59,7 @@ export default function EditPageModal({ isOpen, onClose, page, onEditPage }: Edi
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white dark:bg-black px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-2xl bg-white dark:bg-black px-4 sm:px-6 pb-4 pt-5 text-left shadow-xl transition-all w-full max-w-md sm:max-w-lg">
                 <div className="absolute right-0 top-0 pr-4 pt-4 z-10">
                   <button
                     type="button"

@@ -67,36 +67,36 @@ export default function HomePage() {
       {/* Simple Navbar */}
       <header className="bg-white dark:bg-black shadow-sm border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-14 sm:h-16">
             {/* Logo */}
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <span className="text-2xl font-bold text-gray-900 dark:text-white">Website Builder</span>
+                <span className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">Website Builder</span>
               </div>
             </div>
             
-                        {/* Navigation */}
-            <nav className="hidden md:flex space-x-8">
-              <a href="#features" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Features</a>
-              <a href="#templates" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">Templates</a>
-              <a href="#pricing" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium" onClick={(e) => { e.preventDefault(); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); }}>Pricing</a>
+            {/* Navigation */}
+            <nav className="hidden md:flex space-x-4 lg:space-x-8">
+              <a href="#features" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium">Features</a>
+              <a href="#templates" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium">Templates</a>
+              <a href="#pricing" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium" onClick={(e) => { e.preventDefault(); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); }}>Pricing</a>
               <button 
                 onClick={() => router.push('/auth/dashboard/community')}
-                className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium"
+                className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium"
               >
                 Community
               </button>
-              <a href="/about" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">About Us</a>
+              <a href="/about" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium">About Us</a>
             </nav>
             
             {/* User/CTA Section */}
-            <div className="flex items-center space-x-4">
-              <a href="/auth/dashboard" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">Go to Dashboard</a>
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <a href="/auth/dashboard" className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors">Go to Dashboard</a>
               {session?.user ? (
-                <div className="flex items-center space-x-3">
+                <div className="hidden sm:flex items-center space-x-3">
                   <div className="flex items-center space-x-2">
-                    <img src={session.user.image || "/default-avatar.png"} alt="User" className="h-8 w-8 rounded-full" />
-                    <span className="text-gray-700 dark:text-gray-300 text-sm">{session.user.name || session.user.email}</span>
+                    <img src={session.user.image || "/default-avatar.png"} alt="User" className="h-6 w-6 sm:h-8 sm:w-8 rounded-full" />
+                    <span className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm">{session.user.name || session.user.email}</span>
                   </div>
                   <button
                     onClick={() => signOut({ callbackUrl: '/auth/signin' })}
@@ -104,17 +104,17 @@ export default function HomePage() {
                     aria-label="Sign out"
                     title="Sign out"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
                   </button>
                 </div>
               ) : (
-                <a href="/auth/signin" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm font-medium">Sign in</a>
+                <a href="/auth/signin" className="hidden sm:block text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-xs sm:text-sm font-medium">Sign in</a>
               )}
               {/* Hamburger for mobile */}
-              <button className="md:hidden p-2 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600" onClick={() => setMobileMenuOpen(true)} aria-label="Open menu">
-                <svg className="h-6 w-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+              <button className="md:hidden p-1.5 sm:p-2 rounded-md bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600" onClick={() => setMobileMenuOpen(true)} aria-label="Open menu">
+                <svg className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
               </button>
             </div>
           </div>
@@ -123,30 +123,30 @@ export default function HomePage() {
       
       {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-50 bg-white dark:bg-gray-800 flex flex-col items-center justify-center">
+          <div className="fixed inset-0 z-50 bg-white dark:bg-gray-800 flex flex-col items-center justify-center px-4">
             <button className="absolute top-4 right-4 p-2 rounded-md bg-gray-100 dark:bg-gray-700" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
-              <svg className="h-6 w-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              <svg className="h-5 w-5 sm:h-6 sm:w-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             
-            <nav className="flex flex-col space-y-4 text-center">
-              <a href="#features" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>Features</a>
-              <a href="#templates" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>Templates</a>
-              <a href="#pricing" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-base font-medium" onClick={(e) => { e.preventDefault(); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); setMobileMenuOpen(false); }}>Pricing</a>
+            <nav className="flex flex-col space-y-3 sm:space-y-4 text-center w-full max-w-sm">
+              <a href="#features" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm sm:text-base font-medium" onClick={() => setMobileMenuOpen(false)}>Features</a>
+              <a href="#templates" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm sm:text-base font-medium" onClick={() => setMobileMenuOpen(false)}>Templates</a>
+              <a href="#pricing" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm sm:text-base font-medium" onClick={(e) => { e.preventDefault(); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); setMobileMenuOpen(false); }}>Pricing</a>
               <button 
                 onClick={() => {
                   setMobileMenuOpen(false);
                   router.push('/auth/dashboard/community');
                 }}
-                className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-base font-medium"
+                className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm sm:text-base font-medium"
               >
                 Community
               </button>
-              <a href="/about" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-base font-medium" onClick={() => setMobileMenuOpen(false)}>About Us</a>
-              <a href="/auth/dashboard" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-base font-medium transition-colors" onClick={() => setMobileMenuOpen(false)}>Go to Dashboard</a>
+              <a href="/about" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm sm:text-base font-medium" onClick={() => setMobileMenuOpen(false)}>About Us</a>
+              <a href="/auth/dashboard" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm sm:text-base font-medium transition-colors" onClick={() => setMobileMenuOpen(false)}>Go to Dashboard</a>
               {session?.user ? (
-                <div className="flex flex-col items-center space-y-2">
-                  <img src={session.user.image || "/default-avatar.png"} alt="User" className="h-12 w-12 rounded-full" />
-                  <span className="text-gray-700 dark:text-gray-300 text-sm">{session.user.name || session.user.email}</span>
+                <div className="flex flex-col items-center space-y-2 mt-4">
+                  <img src={session.user.image || "/default-avatar.png"} alt="User" className="h-10 w-10 sm:h-12 sm:w-12 rounded-full" />
+                  <span className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm">{session.user.name || session.user.email}</span>
                   <button
                     onClick={() => {
                       setMobileMenuOpen(false);
@@ -155,26 +155,26 @@ export default function HomePage() {
                     className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                     aria-label="Sign out"
                   >
-                    <span className="text-sm">Sign Out</span>
+                    <span className="text-xs sm:text-sm">Sign Out</span>
                   </button>
                 </div>
               ) : (
-                <a href="/auth/signin" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-base font-medium" onClick={() => setMobileMenuOpen(false)}>Sign in</a>
+                <a href="/auth/signin" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm sm:text-base font-medium" onClick={() => setMobileMenuOpen(false)}>Sign in</a>
               )}
             </nav>
           </div>
         )}
       
       {/* Enhanced Hero Section */}
-      <section className="flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto px-4 sm:px-8 py-20 gap-12 relative bg-black dark:bg-black">
-        <div className="flex-1">
+      <section className="flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto px-4 sm:px-8 py-12 sm:py-16 md:py-20 gap-8 sm:gap-12 relative bg-black dark:bg-black">
+        <div className="flex-1 w-full">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-900 px-4 py-2 rounded-full mb-6">
-            <span className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></span>
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">AI-Powered Website Builder</span>
+          <div className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-900 px-3 sm:px-4 py-2 rounded-full mb-4 sm:mb-6">
+            <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-blue-600 rounded-full animate-pulse"></span>
+            <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">AI-Powered Website Builder</span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white mb-6 leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold text-gray-900 dark:text-white mb-4 sm:mb-6 leading-tight">
             Build, launch, and grow your website with{' '}
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               AI-powered tools
@@ -182,67 +182,67 @@ export default function HomePage() {
             and stunning templates
           </h1>
           
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-6 sm:mb-8 max-w-2xl leading-relaxed">
             Create professional websites in minutes with our visual editor, AI code assistant, and a marketplace of modern, customizable templates. Manage domains, bookings, analytics, and more—all in one place.
           </p>
           
           {/* Enhanced Feature Badges */}
-          <div className="flex flex-wrap gap-3 mb-8">
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm font-semibold">
-              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+          <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
+            <span className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs sm:text-sm font-semibold">
+              <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-green-500 rounded-full"></span>
               No Coding Required
             </span>
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold">
-              <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+            <span className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-xs sm:text-sm font-semibold">
+              <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-blue-500 rounded-full"></span>
               AI-Powered Editor
             </span>
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-semibold">
-              <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+            <span className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs sm:text-sm font-semibold">
+              <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-purple-500 rounded-full"></span>
               Instant Deployment
             </span>
           </div>
           
           {/* Enhanced CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
             <button
-              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold px-8 py-4 rounded-full text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center gap-2"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base md:text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
               onClick={() => {
                 if (session?.user) router.push('/auth/dashboard');
                 else router.push('/auth/signup');
               }}
             >
               Start Building Now
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </button>
-            <Link href="#features" className="bg-white dark:bg-slate-800 border-2 border-purple-600 text-purple-600 font-bold px-8 py-4 rounded-full text-lg shadow-lg hover:shadow-xl hover:bg-purple-50 dark:hover:bg-slate-700 transition-all duration-300 hover:scale-105">
+            <Link href="#features" className="bg-white dark:bg-slate-800 border-2 border-purple-600 text-purple-600 font-bold px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-base md:text-lg shadow-lg hover:shadow-xl hover:bg-purple-50 dark:hover:bg-slate-700 transition-all duration-300 hover:scale-105 flex items-center justify-center">
               See Features
             </Link>
           </div>
           
           {/* Enhanced Stats */}
-          <div className="flex items-center gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
             <div className="flex items-center gap-2">
-              <span className="text-green-600 font-bold text-xl">250+</span>
-              <span className="text-gray-600 dark:text-gray-400 font-medium">websites created</span>
+              <span className="text-green-600 font-bold text-lg sm:text-xl">250+</span>
+              <span className="text-gray-600 dark:text-gray-400 font-medium text-sm sm:text-base">websites created</span>
             </div>
-            <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
+            <div className="hidden sm:block w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
             <div className="flex items-center gap-2">
-              <span className="text-blue-600 font-bold text-xl">99.9%</span>
-              <span className="text-gray-600 dark:text-gray-400 font-medium">uptime</span>
+              <span className="text-blue-600 font-bold text-lg sm:text-xl">99.9%</span>
+              <span className="text-gray-600 dark:text-gray-400 font-medium text-sm sm:text-base">uptime</span>
             </div>
-            <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
+            <div className="hidden sm:block w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
             <div className="flex items-center gap-2">
-              <span className="text-purple-600 font-bold text-xl">24/7</span>
-              <span className="text-gray-600 dark:text-gray-400 font-medium">support</span>
+              <span className="text-purple-600 font-bold text-lg sm:text-xl">24/7</span>
+              <span className="text-gray-600 dark:text-gray-400 font-medium text-sm sm:text-base">support</span>
             </div>
           </div>
         </div>
         
         {/* Enhanced Hero Illustration */}
-        <div className="flex-1 flex justify-center items-center">
-          <div className="relative">
+        <div className="flex-1 flex justify-center items-center w-full">
+          <div className="relative w-full max-w-sm sm:max-w-md">
             <svg
               id="gsap-hero-tech"
               width="400"
@@ -250,7 +250,7 @@ export default function HomePage() {
               viewBox="0 0 400 320"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="w-full max-w-md h-80"
+              className="w-full h-64 sm:h-80"
             >
               {/* Browser window */}
               <rect id="browser" x="60" y="60" width="280" height="160" rx="18" fill="#fff" stroke="#a78bfa" strokeWidth="3" />
@@ -696,45 +696,82 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Team/About Section */}
-      <section className="py-20 bg-white dark:bg-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Meet Our Team</h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300">The passionate people behind Website Builder</p>
-          </div>
+      {/* Built By Section */}
+      <section className="py-12 sm:py-20 bg-black dark:bg-black" style={{ background: 'rgba(0, 0, 0, 0.95)', backdropFilter: 'blur(20px)' }}>
+        <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6 sm:mb-8">Built With ❤️ By</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Alex Johnson",
-                role: "CEO & Founder",
-                image: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg",
-                bio: "Former Google engineer with 10+ years in web development"
-              },
-              {
-                name: "Maria Garcia",
-                role: "Head of Design",
-                image: "https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg",
-                bio: "Award-winning designer with expertise in UX/UI"
-              },
-              {
-                name: "David Kim",
-                role: "CTO",
-                image: "https://images.pexels.com/photos/2379005/pexels-photo-2379005.jpeg",
-                bio: "AI specialist with deep knowledge in machine learning"
-              }
-            ].map((member, index) => (
-              <div key={index} className="text-center group">
-                <div className="relative mb-6">
-                  <img src={member.image} alt={member.name} className="w-32 h-32 rounded-full mx-auto object-cover shadow-lg group-hover:scale-105 transition-transform duration-300" />
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+          <div className="flex flex-col items-center space-y-4 sm:space-y-6">
+            {/* Developer Profile */}
+            <div className="flex flex-col items-center space-y-3 sm:space-y-4">
+              <div className="relative">
+                <img 
+                  src="https://media.licdn.com/dms/image/v2/D5603AQEFgaWqdPsvwg/profile-displayphoto-shrink_800_800/B56ZRjy6ShHoAc-/0/1736841080391?e=1756944000&v=beta&t=BWLmkd39CjXEWOqSReP74VVk0mgTPs2ndNxDtCskEvI" 
+                  alt="Rahul Kumar" 
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-blue-600 shadow-lg"
+                  onError={(e) => {
+                    // Fallback to a default avatar if LinkedIn image fails to load
+                    e.currentTarget.src = "https://via.placeholder.com/96x96/4a90e2/ffffff?text=RK";
+                  }}
+                />
+                <div className="absolute -bottom-2 -right-2 bg-green-500 rounded-full p-1">
+                  <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{member.name}</h3>
-                <p className="text-blue-600 dark:text-blue-400 font-semibold mb-3">{member.role}</p>
-                <p className="text-gray-600 dark:text-gray-300">{member.bio}</p>
               </div>
-            ))}
+              
+              <div className="text-center px-2">
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Rahul Kumar</h3>
+                <p className="text-base sm:text-lg text-gray-300 mb-3 sm:mb-4">Full Stack Developer & Website Builder</p>
+                <p className="text-sm sm:text-base text-gray-400 max-w-2xl leading-relaxed">
+                  Passionate about creating innovative web solutions and helping businesses establish their online presence. 
+                  This platform was built with modern technologies and a focus on user experience.
+                </p>
+              </div>
+            </div>
+            
+            {/* Social Links */}
+            <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 mt-6 sm:mt-8">
+              <a 
+                href="https://www.linkedin.com/in/rahul-kumar-374608222/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full hover:bg-blue-700 transition-colors duration-200 shadow-lg hover:shadow-xl w-full sm:w-auto"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                </svg>
+                <span className="text-sm sm:text-base">Connect on LinkedIn</span>
+              </a>
+              
+              <a 
+                href="https://github.com/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center justify-center space-x-2 bg-gray-900 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-full hover:bg-gray-800 transition-colors duration-200 shadow-lg hover:shadow-xl w-full sm:w-auto"
+              >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0C5.37 0 0 5.373 0 12c0 5.303 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.84 1.237 1.84 1.237 1.07 1.834 2.809 1.304 3.495.997.108-.775.418-1.305.762-1.605-2.665-.305-5.466-1.334-5.466-5.931 0-1.31.469-2.381 1.236-3.221-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.984-.399 3.003-.404 1.019.005 2.047.138 3.006.404 2.291-1.553 3.297-1.23 3.297-1.23.653 1.653.242 2.873.119 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.803 5.624-5.475 5.921.43.371.823 1.102.823 2.222v3.293c0 .322.218.694.825.576C20.565 21.796 24 17.299 24 12c0-6.627-5.373-12-12-12z"/>
+                </svg>
+                <span className="text-sm sm:text-base">View GitHub</span>
+              </a>
+            </div>
+            
+            {/* Skills/Tech Stack */}
+            <div className="mt-6 sm:mt-8 w-full">
+              <h4 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Technologies Used</h4>
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-3 px-2">
+                {['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Three.js', 'Node.js', 'Prisma', 'PostgreSQL'].map((tech) => (
+                  <span 
+                    key={tech}
+                    className="px-2 sm:px-3 py-1 bg-blue-900 text-blue-200 rounded-full text-xs sm:text-sm font-medium"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -1327,6 +1364,8 @@ export default function HomePage() {
       <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 dark:bg-gray-800 z-50">
         <div className="h-full bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300" style={{ width: '0%' }}></div>
       </div>
+
+
 
       {/* Footer */}
       <footer className="bg-white dark:bg-black border-t border-gray-200 dark:border-gray-800 py-8 mt-auto">

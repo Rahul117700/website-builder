@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Site, TemplateType } from '@/types';
 import toast from 'react-hot-toast';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 
 interface SiteCardProps {
   site: Site;
@@ -90,6 +91,11 @@ export default function SiteCard({ site, mainPageRenderMode, onEdit, onChangeTem
           <div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white flex items-center gap-2">
               {site.name}
+              {(site as any).onSale && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-600 text-white text-xs font-semibold">
+                  <LocalOfferIcon sx={{ fontSize: 14 }} /> On Sale
+                </span>
+              )}
               {/* {mainPageRenderMode === 'react' ? (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-600 text-white text-xs font-semibold">
                   <SparklesIcon className="h-4 w-4" /> React (JSX)
@@ -153,6 +159,31 @@ export default function SiteCard({ site, mainPageRenderMode, onEdit, onChangeTem
             <DocumentDuplicateIcon className="h-4 w-4 mr-1" />
             Manage Pages
           </Link>
+          {(site as any).onSale ? (
+            <button
+              onClick={async () => {
+                try {
+                  const res = await fetch('/api/sites/on-sale', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ siteId: site.id })
+                  });
+                  if (res.ok) {
+                    toast.success('Listing removed');
+                    if (onEdit) onEdit(site);
+                  } else {
+                    const data = await res.json();
+                    toast.error(data.error || 'Failed to remove listing');
+                  }
+                } catch (e: any) {
+                  toast.error(e.message || 'Failed to remove listing');
+                }
+              }}
+              className="btn-secondary text-sm py-1 flex items-center justify-center"
+            >
+              Remove from Sale
+            </button>
+          ) : null}
           <button
             onClick={() => onChangeTemplate && onChangeTemplate(site)}
             className="btn-secondary text-sm py-1 flex items-center justify-center"

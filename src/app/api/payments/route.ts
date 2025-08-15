@@ -77,10 +77,13 @@ export async function POST(req: NextRequest) {
 // POST /api/payments/verify - Verify payment signature
 export async function PUT(req: NextRequest) {
   try {
+    console.log('=== Payment Verification API Called ===');
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, paymentId } = await req.json();
+    console.log('Received data:', { razorpay_order_id, razorpay_payment_id, razorpay_signature, paymentId });
 
     // Validate required fields
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !paymentId) {
+      console.log('Missing required fields');
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -93,12 +96,17 @@ export async function PUT(req: NextRequest) {
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest('hex');
 
+    console.log('Signature verification:', { generated_signature, razorpay_signature, matches: generated_signature === razorpay_signature });
+
     if (generated_signature !== razorpay_signature) {
+      console.log('Invalid payment signature');
       return NextResponse.json(
         { error: 'Invalid payment signature' },
         { status: 400 }
       );
     }
+
+    console.log('Signature verified successfully');
 
     // Update payment status in database
     const payment = await prisma.payment.update({
@@ -113,8 +121,17 @@ export async function PUT(req: NextRequest) {
       include: { user: true, plan: true },
     });
 
+    console.log('Payment updated:', { 
+      paymentId: payment.id, 
+      templateId: payment.templateId, 
+      userId: payment.userId,
+      amount: payment.amount,
+      status: payment.status 
+    });
+
     // If payment is for a subscription plan, create a new subscription for the user
     if (payment.planId && payment.userId && payment.plan) {
+      console.log('Processing plan payment...');
       // Cancel any existing active subscriptions for this user and plan
       await prisma.subscription.updateMany({
         where: { userId: payment.userId, planId: payment.planId, status: 'active' },
@@ -175,14 +192,30 @@ export async function PUT(req: NextRequest) {
 
     // If payment is for a template, add to PurchasedTemplate and MyTemplate
     if (payment.templateId && payment.userId) {
+      console.log('Processing template payment...');
+      console.log('Template ID:', payment.templateId);
+      console.log('User ID:', payment.userId);
+      
       // Check if already purchased
-      const already = await prisma.purchasedTemplate.findUnique({ where: { userId_templateId: { userId: payment.userId, templateId: payment.templateId } } });
+      const already = await prisma.purchasedTemplate.findUnique({ 
+        where: { userId_templateId: { userId: payment.userId, templateId: payment.templateId } } 
+      });
+      console.log('Already purchased check:', { already });
+      
       if (!already) {
-        await prisma.purchasedTemplate.create({ data: { userId: payment.userId, templateId: payment.templateId } });
+        console.log('Creating PurchasedTemplate record...');
+        const purchasedTemplate = await prisma.purchasedTemplate.create({ 
+          data: { userId: payment.userId, templateId: payment.templateId } 
+        });
+        console.log('PurchasedTemplate created:', purchasedTemplate);
+        
         // Copy template code to MyTemplate for the user
         const template = await prisma.template.findUnique({ where: { id: payment.templateId } });
+        console.log('Template found:', { templateId: template?.id, templateName: template?.name });
+        
         if (template) {
-          await prisma.myTemplate.upsert({
+          console.log('Creating MyTemplate record...');
+          const myTemplate = await prisma.myTemplate.upsert({
             where: { userId_templateId: { userId: payment.userId, templateId: payment.templateId } },
             update: {},
             create: {
@@ -192,8 +225,47 @@ export async function PUT(req: NextRequest) {
               html: template.html,
               css: template.css,
               js: template.js,
+              // Add the pages structure for the new template system
+              pages: template.pages as any,
             },
           });
+          console.log('MyTemplate created/updated:', myTemplate);
+
+          // If this template is part of a SiteSale listing, compute seller earning
+          const sale = await (prisma as any).siteSale.findFirst({ where: { templateId: template.id, status: 'active' } });
+          if (sale) {
+            // Commission rate from settings (default 7%)
+            const setting = await (prisma as any).commissionSetting.findFirst();
+            const commissionRate = setting?.rate ?? 0.07;
+            const gross = payment.amount;
+            const commissionAmount = Math.round(gross * commissionRate * 100) / 100;
+            const net = Math.max(0, Math.round((gross - commissionAmount) * 100) / 100);
+
+            await (prisma as any).sellerEarning.create({
+              data: {
+                sellerId: sale.userId,
+                templateId: template.id,
+                paymentId: payment.id,
+                grossAmount: gross,
+                commissionRate,
+                commissionAmount,
+                netAmount: net,
+              },
+            });
+
+            await (prisma as any).siteSale.update({
+              where: { id: sale.id },
+              data: { totalSales: { increment: 1 }, earnings: { increment: net } },
+            });
+
+            // Increase platform revenue by commission
+            const revenueRows = await prisma.revenue.findMany();
+            if (revenueRows.length === 0) {
+              await prisma.revenue.create({ data: { total: commissionAmount } });
+            } else {
+              await prisma.revenue.update({ where: { id: revenueRows[0].id }, data: { total: { increment: commissionAmount } } });
+            }
+          }
           
           // Create notification for template purchase
           try {
@@ -201,21 +273,29 @@ export async function PUT(req: NextRequest) {
               data: {
                 userId: payment.userId,
                 type: 'template',
-                message: `Great! You've successfully purchased the "${template.name}" template. You can now use it in your projects!`,
+                message: `Congratulations! You've successfully purchased the template "${template.name}". You can now use it to create your website.`,
               },
             });
+            console.log('Template purchase notification created');
           } catch (error) {
             console.error('Error creating template purchase notification:', error);
           }
+        } else {
+          console.error('Template not found for ID:', payment.templateId);
         }
+      } else {
+        console.log('Template already purchased, skipping creation');
       }
+    } else {
+      console.log('No template ID or user ID in payment');
     }
 
-    return NextResponse.json({ success: true, payment });
+    console.log('Payment verification completed successfully');
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error verifying payment:', error);
+    console.error('Error in payment verification:', error);
     return NextResponse.json(
-      { error: 'Failed to verify payment' },
+      { error: 'Payment verification failed' },
       { status: 500 }
     );
   }

@@ -130,33 +130,49 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Delete all related data
-    // First delete analytics
-    await prisma.analytics.deleteMany({
-      where: {
-        siteId: params.id,
-      },
-    });
+    // Delete all related data using a transaction
+    await prisma.$transaction(async (tx: any) => {
+      console.log(`Starting deletion of site ${params.id} and all related data`);
+      
+      // Delete analytics
+      const analyticsDeleted = await tx.analytics.deleteMany({
+        where: {
+          siteId: params.id,
+        },
+      });
+      console.log(`Deleted ${analyticsDeleted.count} analytics records`);
 
-    // Delete bookings
-    await prisma.booking.deleteMany({
-      where: {
-        siteId: params.id,
-      },
-    });
+      // Delete bookings
+      const bookingsDeleted = await tx.booking.deleteMany({
+        where: {
+          siteId: params.id,
+        },
+      });
+      console.log(`Deleted ${bookingsDeleted.count} booking records`);
 
-    // Delete pages
-    await prisma.page.deleteMany({
-      where: {
-        siteId: params.id,
-      },
-    });
+      // Delete pages
+      const pagesDeleted = await tx.page.deleteMany({
+        where: {
+          siteId: params.id,
+        },
+      });
+      console.log(`Deleted ${pagesDeleted.count} page records`);
 
-    // Finally delete the site
-    await prisma.site.delete({
-      where: {
-        id: params.id,
-      },
+      // Delete submissions
+      const submissionsDeleted = await tx.submission.deleteMany({
+        where: {
+          siteId: params.id,
+        },
+      });
+      console.log(`Deleted ${submissionsDeleted.count} submission records`);
+
+      // Finally delete the site
+      await tx.site.delete({
+        where: {
+          id: params.id,
+        },
+      });
+      console.log(`Successfully deleted site ${params.id}`);
     });
 
     return NextResponse.json({ success: true });
@@ -169,13 +185,14 @@ export async function DELETE(
   }
 }
 
-// POST /api/sites/[id]/apply-template - Apply a template to a site (replace all pages)
+// POST /api/sites/[id] - Handle site-level operations
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    
     // Get the site to check ownership
     const site = await prisma.site.findUnique({ where: { id: params.id } });
     if (!site) {
@@ -184,34 +201,33 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     if (site.userId !== session.user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const { templateId } = await req.json();
-    if (!templateId) {
-      return NextResponse.json({ error: 'templateId required' }, { status: 400 });
-    }
-    const template = await prisma.template.findUnique({ where: { id: templateId }, select: { pages: true } });
-    if (!template || !template.pages) {
-      return NextResponse.json({ error: 'Template or template pages not found' }, { status: 404 });
-    }
-    // Delete all existing pages for the site
-    await prisma.page.deleteMany({ where: { siteId: site.id } });
-    // Create new pages for the site from the template's pages object
-    const pageTitles: Record<string, string> = { home: 'Home', about: 'About', contact: 'Contact', services: 'Services', product: 'Product' };
-    for (const key of Object.keys(pageTitles)) {
-      const pageData = (template.pages as Record<string, { html: string; css: string; js: string }>)[key];
-      if (!pageData) continue;
-      await prisma.page.create({
+    
+    // Handle different POST operations based on the request body
+    const body = await req.json();
+    
+    if (body.action === 'update-site') {
+      // Update site information
+      const { name, description } = body;
+      const updatedSite = await prisma.site.update({
+        where: { id: site.id },
         data: {
-          siteId: site.id,
-          title: pageTitles[key],
-          slug: key,
-          content: { html: pageData.html, css: pageData.css, js: pageData.js },
-          isPublished: true,
+          name: name || site.name,
+          description: description || site.description,
+          updatedAt: new Date(),
         },
       });
+      
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Site updated successfully',
+        site: updatedSite
+      });
     }
-    return NextResponse.json({ success: true });
+    
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    
   } catch (error) {
-    console.error('Error applying template:', error);
-    return NextResponse.json({ error: 'Failed to apply template' }, { status: 500 });
+    console.error('Error in site POST operation:', error);
+    return NextResponse.json({ error: 'Failed to perform site operation' }, { status: 500 });
   }
 }

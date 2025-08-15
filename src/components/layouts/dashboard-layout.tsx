@@ -26,6 +26,7 @@ import {
   HeartIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
+import { RocketLaunchIcon } from '@heroicons/react/24/solid';
 import { useTheme } from 'next-themes';
 import { WelcomeModal } from '@/components/dashboard/welcome-modal';
 import { io as socketIOClient, Socket } from 'socket.io-client';
@@ -147,6 +148,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Analytics', href: '/auth/dashboard/analytics', icon: ChartBarIcon, current: pathname === '/auth/dashboard/analytics' },
     { name: 'Submissions', href: '/auth/dashboard/submissions', icon: InboxArrowDownIcon, current: pathname === '/auth/dashboard/submissions' },
     { name: 'Marketplace', href: '/auth/dashboard/marketplace', icon: ShoppingBagIcon, current: pathname === '/auth/dashboard/marketplace' },
+    { name: 'Sales', href: '/auth/dashboard/sales', icon: SparklesIcon, current: pathname === '/auth/dashboard/sales' },
+    { name: 'Funnels', href: '/auth/dashboard/funnels', icon: RocketLaunchIcon as any, current: pathname === '/auth/dashboard/funnels' },
+    { name: 'Purchased Templates', href: '/auth/dashboard/purchased-templates', icon: HeartIcon, current: pathname === '/auth/dashboard/purchased-templates' },
     { name: 'Community', href: '/auth/dashboard/community', icon: UserGroupIcon, current: pathname === '/auth/dashboard/community' },
     { name: 'Domain', href: '/auth/dashboard/domain', icon: GlobeAltIcon, current: pathname === '/auth/dashboard/domain' },
     { name: 'Billing', href: '/auth/dashboard/billing', icon: BanknotesIcon, current: pathname === '/auth/dashboard/billing' },
