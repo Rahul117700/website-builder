@@ -71,8 +71,18 @@ export default function SiteViewer({ site, currentSlug }: SiteViewerProps) {
         title="Live React Site"
       />
     );
-  } else if (currentPage.renderMode === 'html' && (currentPage.htmlCode || currentPage.cssCode || currentPage.jsCode)) {
-    // For HTML mode, use the flat code fields for better compatibility
+  } else if (currentPage.renderMode === 'html' && (currentPage.customCode || currentPage.htmlCode || currentPage.cssCode || currentPage.jsCode)) {
+    // For HTML mode, prefer a single customCode document if available; otherwise, compose from parts
+    if ((currentPage as any).customCode) {
+      const customDoc = String((currentPage as any).customCode);
+      return (
+        <iframe
+          srcDoc={customDoc}
+          style={{ width: '100vw', height: '100vh', border: 'none', margin: 0, padding: 0, display: 'block' }}
+          title="Live Site Preview"
+        />
+      );
+    }
     const htmlContent = currentPage.htmlCode || '';
     const cssContent = currentPage.cssCode || '';
     const jsContent = currentPage.jsCode || '';
@@ -130,10 +140,15 @@ export default function SiteViewer({ site, currentSlug }: SiteViewerProps) {
             {currentPage?.title || 'Page'}
           </h2>
           
-          {currentPage?.content && typeof currentPage.content === 'object' && currentPage.content.html ? (
+          {(currentPage as any)?.customCode ? (
             <div 
               className="prose prose-lg max-w-none dark:prose-invert"
-              dangerouslySetInnerHTML={{ __html: currentPage.content.html }}
+              dangerouslySetInnerHTML={{ __html: String((currentPage as any).customCode) }}
+            />
+          ) : (currentPage as any)?.content && typeof (currentPage as any).content === 'object' && (currentPage as any).content.html ? (
+            <div 
+              className="prose prose-lg max-w-none dark:prose-invert"
+              dangerouslySetInnerHTML={{ __html: (currentPage as any).content.html }}
             />
           ) : currentPage?.htmlCode ? (
             <div 

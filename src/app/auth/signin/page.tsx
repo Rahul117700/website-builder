@@ -79,7 +79,7 @@ export default function SignInPage() {
                   onChange={e => setEmail(e.target.value)}
                   placeholder="Email address"
                 />
-                <label htmlFor="email" className="absolute left-3 top-2 text-gray-400 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-400 bg-gray-900 px-1 pointer-events-none">Email address</label>
+                <label htmlFor="email" className="absolute left-3 top-2 text-gray-400 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-400 peer-[&:not(:placeholder-shown)]:-top-4 peer-[&:not(:placeholder-shown)]:text-xs bg-gray-900 px-1 pointer-events-none">Email address</label>
               </div>
               <div className="relative">
                 <input
@@ -93,7 +93,7 @@ export default function SignInPage() {
                   onChange={e => setPassword(e.target.value)}
                   placeholder="Password"
                 />
-                <label htmlFor="password" className="absolute left-3 top-2 text-gray-400 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-400 bg-gray-900 px-1 pointer-events-none">Password</label>
+                <label htmlFor="password" className="absolute left-3 top-2 text-gray-400 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-400 peer-[&:not(:placeholder-shown)]:-top-4 peer-[&:not(:placeholder-shown)]:text-xs bg-gray-900 px-1 pointer-events-none">Password</label>
               </div>
             </div>
             {error && <div className="text-red-400 text-sm mt-2">{error}</div>}

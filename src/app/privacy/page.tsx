@@ -34,7 +34,13 @@ export default function PrivacyPage() {
               {session?.user ? (
                 <div className="flex items-center space-x-3">
                   <div className="flex items-center space-x-2">
-                    <img src={session.user.image || "/default-avatar.png"} alt="User" className="h-8 w-8 rounded-full" />
+                    {session.user.image ? (
+                      <img src={session.user.image} alt="User" className="h-8 w-8 rounded-full" />
+                    ) : (
+                      <span className="h-8 w-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A7 7 0 0112 15a7 7 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      </span>
+                    )}
                     <span className="text-gray-300 text-sm">{session.user.name || session.user.email}</span>
                   </div>
                   <button 

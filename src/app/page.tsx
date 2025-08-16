@@ -96,7 +96,13 @@ export default function HomePage() {
               {session?.user ? (
                 <div className="hidden sm:flex items-center space-x-3">
                   <div className="flex items-center space-x-2">
-                    <img src={session.user.image || "/default-avatar.png"} alt="User" className="h-6 w-6 sm:h-8 sm:w-8 rounded-full" />
+                    {session.user.image ? (
+                      <img src={session.user.image} alt="User" className="h-6 w-6 sm:h-8 sm:w-8 rounded-full" />
+                    ) : (
+                      <span className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A7 7 0 0112 15a7 7 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      </span>
+                    )}
                     <span className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm">{session.user.name || session.user.email}</span>
                   </div>
                   <button
@@ -146,7 +152,13 @@ export default function HomePage() {
               <a href="/auth/dashboard" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm sm:text-base font-medium transition-colors" onClick={() => setMobileMenuOpen(false)}>Go to Dashboard</a>
               {session?.user ? (
                 <div className="flex flex-col items-center space-y-2 mt-4">
-                  <img src={session.user.image || "/default-avatar.png"} alt="User" className="h-10 w-10 sm:h-12 sm:w-12 rounded-full" />
+                  {session.user.image ? (
+                    <img src={session.user.image} alt="User" className="h-10 w-10 sm:h-12 sm:w-12 rounded-full" />
+                  ) : (
+                    <span className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A7 7 0 0112 15a7 7 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    </span>
+                  )}
                   <span className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm">{session.user.name || session.user.email}</span>
                   <button
                     onClick={() => {

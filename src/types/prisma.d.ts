@@ -28,6 +28,7 @@ export interface Page {
   cssCode?: string;
   jsCode?: string;
   renderMode?: string;
+  customCode?: string | null;
   reactCode?: string;
   reactBundle?: string;
 }
