@@ -6,6 +6,8 @@ const SKIP_PREFIXES = [
   '/api',
   '/static',
   '/favicon.ico',
+  '/s',
+  '/domain-viewer',
 ];
 
 export async function middleware(req: NextRequest) {
@@ -28,9 +30,12 @@ export async function middleware(req: NextRequest) {
       const data = await res.json();
       if (data?.subdomain) {
         const rest = url.pathname === '/' ? '' : url.pathname;
-        url.pathname = `/s/${data.subdomain}${rest}`;
-        // Use a redirect to ensure the browser lands on the site route explicitly
-        return NextResponse.redirect(url, 307);
+        const rewriteUrl = req.nextUrl.clone();
+        rewriteUrl.pathname = '/domain-viewer';
+        rewriteUrl.searchParams.set('sd', data.subdomain);
+        if (rest) rewriteUrl.searchParams.set('p', rest);
+        // Rewrite so the URL remains the custom domain while serving our viewer
+        return NextResponse.rewrite(rewriteUrl);
       }
     }
   } catch {
