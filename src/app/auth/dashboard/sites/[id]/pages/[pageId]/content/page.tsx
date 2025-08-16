@@ -1493,8 +1493,7 @@ export default function ManageContentPage() {
     console.log('identifiedElements length:', identifiedElements.length);
     
     if (identifiedElements.length === 0) {
-      toast.error('No clickable elements found in your HTML. Please add some buttons or links first.');
-      return;
+      toast('No clickable elements found. You can publish without navigation links.');
     }
     setLinkConfigStep('configure');
   };
@@ -1524,13 +1523,20 @@ export default function ManageContentPage() {
     const mappedElements = identifiedElements.filter(el => el.targetPageId);
     console.log('Mapped elements:', mappedElements);
 
+    // If no links are mapped, publish without modifying HTML
     if (mappedElements.length === 0) {
-      toast.error('Please configure at least one navigation link before publishing.');
+      toast.success('Publishing without navigation links. You can configure them later.');
+      setLinkConfigModalOpen(false);
+      setLinkConfigStep('identify');
+      setIdentifiedElements([]);
+      console.log('Calling handlePublishCode with original HTML (no navigation modifications)');
+      handlePublishCode(htmlCode);
       return;
     }
 
-    // Update HTML with navigation links
-    const updatedHtml = updateHtmlWithNavigationLinks(htmlCode,
+    // Update HTML with navigation links when mappings exist
+    const updatedHtml = updateHtmlWithNavigationLinks(
+      htmlCode,
       mappedElements.map(el => ({ id: el.id, targetPageId: el.targetPageId! }))
     );
 
@@ -2494,7 +2500,6 @@ export default function ManageContentPage() {
                 onClick={handleProceedToConfigure}
                 color="primary" 
                 variant="contained"
-                disabled={identifiedElements.length === 0}
                 startIcon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>}
@@ -2513,7 +2518,6 @@ export default function ManageContentPage() {
                 onClick={() => setLinkConfigStep('review')}
                 color="primary" 
                 variant="contained"
-                disabled={identifiedElements.filter(el => el.targetPageId).length === 0}
                 startIcon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>}
