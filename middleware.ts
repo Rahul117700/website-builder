@@ -29,7 +29,8 @@ export async function middleware(req: NextRequest) {
       if (data?.subdomain) {
         const rest = url.pathname === '/' ? '' : url.pathname;
         url.pathname = `/s/${data.subdomain}${rest}`;
-        return NextResponse.rewrite(url);
+        // Use a redirect to ensure the browser lands on the site route explicitly
+        return NextResponse.redirect(url, 307);
       }
     }
   } catch {
