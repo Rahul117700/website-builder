@@ -78,6 +78,19 @@ export async function PUT(
 
     const { name, description, customDomain, googleAnalyticsId, template } = await req.json();
 
+    // Normalize customDomain if provided (lowercase, strip protocol, trim dots and trailing slash)
+    const normalizedCustomDomain =
+      customDomain === null
+        ? null
+        : (typeof customDomain === 'string' && customDomain.trim().length > 0)
+          ? customDomain
+              .trim()
+              .replace(/^https?:\/\//i, '')
+              .replace(/\/$/, '')
+              .replace(/^www\./i, (m) => 'www.') // keep www. if user intends, but normalized case
+              .toLowerCase()
+          : undefined;
+
     // Update the site
     const updatedSite = await prisma.site.update({
       where: {
@@ -86,7 +99,7 @@ export async function PUT(
       data: {
         name,
         description,
-        customDomain,
+        ...(normalizedCustomDomain !== undefined && { customDomain: normalizedCustomDomain }),
         googleAnalyticsId,
         ...(template !== undefined && { template }),
       },

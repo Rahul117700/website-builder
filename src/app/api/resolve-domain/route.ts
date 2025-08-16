@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+function stripProtocol(value: string): string {
+  return value.replace(/^https?:\/\//i, '');
+}
+
 function normalizeHost(rawHost: string): string {
-  const host = rawHost.toLowerCase();
-  const withoutPort = host.replace(/:\d+$/, '');
+  const host = stripProtocol(rawHost).toLowerCase();
+  const withoutPath = host.split('/')[0] || host; // remove any path/query accidentally passed
+  const withoutPort = withoutPath.replace(/:\d+$/, '');
   return withoutPort.replace(/^www\./, '');
 }
 
@@ -16,13 +21,19 @@ export async function GET(req: NextRequest) {
 
     const host = normalizeHost(hostParam);
 
-    // Look up by custom domain (support both with and without www)
+    const variations = Array.from(new Set([
+      host,
+      `www.${host}`,
+      `http://${host}`,
+      `https://${host}`,
+      `http://www.${host}`,
+      `https://www.${host}`,
+    ]));
+
+    // Look up by custom domain with variations and case-insensitive match
     const site = await prisma.site.findFirst({
       where: {
-        OR: [
-          { customDomain: host },
-          { customDomain: `www.${host}` },
-        ],
+        OR: variations.map((v) => ({ customDomain: { equals: v, mode: 'insensitive' as const } })),
       },
       select: { subdomain: true },
     });
