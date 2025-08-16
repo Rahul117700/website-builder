@@ -13,6 +13,13 @@ interface Site {
 
 const BASE_URL = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
+function getServerIPv4(): string {
+  if (typeof window === 'undefined') return 'YOUR_SERVER_IP';
+  const host = window.location.hostname; // may be IP or domain
+  const ipv4 = host.match(/^(?:\d{1,3}\.){3}\d{1,3}$/) ? host : '';
+  return ipv4 || 'YOUR_SERVER_IP';
+}
+
 export default function DomainPage() {
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,10 +54,14 @@ export default function DomainPage() {
     if (!site.customDomain) return;
     setVerifying(site.id);
     try {
-      const res = await fetch(`https://dns.google/resolve?name=${site.customDomain}&type=CNAME`);
-      const data = await res.json();
-      const expected = `${site.subdomain}.example.com.`;
-      const isVerified = data?.Answer?.some((ans: any) => ans.data === expected);
+      const serverIP = getServerIPv4();
+      const [apexRes, wwwRes] = await Promise.all([
+        fetch(`https://dns.google/resolve?name=${site.customDomain}&type=A`).then(r => r.json()).catch(() => null),
+        fetch(`https://dns.google/resolve?name=www.${site.customDomain}&type=A`).then(r => r.json()).catch(() => null),
+      ]);
+      const hasApex = apexRes?.Answer?.some((ans: any) => ans.data === serverIP);
+      const hasWww = wwwRes?.Answer?.some((ans: any) => ans.data === serverIP);
+      const isVerified = !!(hasApex || hasWww);
       setVerifiedDomains(prev => ({ ...prev, [site.id]: !!isVerified }));
       setLastChecked(prev => ({ ...prev, [site.id]: new Date().toLocaleString() }));
     } catch {
@@ -319,39 +330,61 @@ export default function DomainPage() {
       )}
       {/* DNS Instructions */}
       {successDomain && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-lg p-6 w-full max-w-md text-center">
-            <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">DNS Setup Instructions</h2>
-            <p className="mb-4 text-gray-700 dark:text-gray-300">
-              To connect <span className="font-semibold">{successDomain}</span>, add the following DNS record at your domain provider:
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 px-4">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-xl p-5 sm:p-6 w-full max-w-lg text-left">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900 dark:text-white">DNS Setup Instructions</h2>
+            <p className="mb-4 text-gray-700 dark:text-gray-300 text-sm sm:text-base">
+              To connect <span className="font-semibold">{successDomain}</span>, add these DNS records at your domain provider:
             </p>
-            <div className="bg-gray-50 dark:bg-slate-800 rounded p-4 mb-4 text-left">
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-semibold text-gray-900 dark:text-white">Type:</span>
-                <span className="text-gray-900 dark:text-white">CNAME</span>
-                <button className="ml-2 text-xs text-purple-600 hover:underline" onClick={() => copyToClipboard('CNAME')}>Copy</button>
+            <div className="space-y-3">
+              <div className="bg-gray-50 dark:bg-slate-800 rounded-lg p-3 sm:p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                  <span className="font-semibold text-gray-900 dark:text-white">Type</span>
+                  <span className="text-gray-900 dark:text-white">A</span>
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                  <span className="font-semibold text-gray-900 dark:text-white">Host/Name</span>
+                  <code className="px-2 py-1 rounded bg-white dark:bg-slate-900 text-gray-900 dark:text-white">@</code>
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-semibold text-gray-900 dark:text-white">Value</span>
+                  <code className="px-2 py-1 rounded bg-white dark:bg-slate-900 text-gray-900 dark:text-white">{getServerIPv4()}</code>
+                  <button className="text-xs text-purple-600 hover:underline" onClick={() => copyToClipboard(getServerIPv4())}>Copy</button>
+                </div>
               </div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-semibold text-gray-900 dark:text-white">Host/Name:</span>
-                <span className="text-gray-900 dark:text-white">@ or www</span>
-                <button className="ml-2 text-xs text-purple-600 hover:underline" onClick={() => copyToClipboard('@ or www')}>Copy</button>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-gray-900 dark:text-white">Value:</span>
-                <span className="font-mono text-gray-900 dark:text-white">{`${BASE_URL}/s/${sites.find(s => s.customDomain === successDomain)?.subdomain}`}</span>
-                <button className="ml-2 text-xs text-purple-600 hover:underline" onClick={() => copyToClipboard(`${BASE_URL}/s/${sites.find(s => s.customDomain === successDomain)?.subdomain}`)}>Copy</button>
+              <div className="bg-gray-50 dark:bg-slate-800 rounded-lg p-3 sm:p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                  <span className="font-semibold text-gray-900 dark:text-white">Type</span>
+                  <span className="text-gray-900 dark:text-white">CNAME</span>
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                  <span className="font-semibold text-gray-900 dark:text-white">Host/Name</span>
+                  <code className="px-2 py-1 rounded bg-white dark:bg-slate-900 text-gray-900 dark:text-white">www</code>
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-semibold text-gray-900 dark:text-white">Value</span>
+                  <code className="px-2 py-1 rounded bg-white dark:bg-slate-900 text-gray-900 dark:text-white">@</code>
+                  <button className="text-xs text-purple-600 hover:underline" onClick={() => copyToClipboard('www -> @')}>Copy</button>
+                </div>
               </div>
             </div>
-            <p className="mb-4 text-gray-700 dark:text-gray-300 text-sm">
-              It may take up to 24 hours for DNS changes to propagate. Once set up, your domain will be connected.<br />
-              <a href={`https://www.whatsmydns.net/#CNAME/${successDomain}`} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline">Check DNS propagation</a>
+            <p className="mt-4 mb-4 text-gray-700 dark:text-gray-300 text-xs sm:text-sm">
+              DNS propagation can take 5–30 minutes (sometimes longer). After the records resolve to your server IP, your domain will be connected automatically.
+              <br />
+              Check propagation:
+              {' '}
+              <a href={`https://www.whatsmydns.net/#A/${successDomain}`} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline">A {successDomain}</a>
+              {'  ·  '}
+              <a href={`https://www.whatsmydns.net/#A/www.${successDomain}`} target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:underline">A www.{successDomain}</a>
             </p>
-            <button
-              className="px-4 py-2 rounded bg-purple-600 text-white font-semibold shadow hover:bg-purple-700"
-              onClick={() => setSuccessDomain(null)}
-            >
-              Done
-            </button>
+            <div className="flex justify-end">
+              <button
+                className="px-4 py-2 rounded-lg bg-purple-600 text-white font-semibold shadow hover:bg-purple-700"
+                onClick={() => setSuccessDomain(null)}
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
       )}
