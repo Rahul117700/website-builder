@@ -96,6 +96,7 @@ export default function SuperAdminDashboard() {
   const [activeTab, setActiveTab] = useState(5);
   const [metrics, setMetrics] = useState<any>(null);
   const [metricsLoading, setMetricsLoading] = useState<boolean>(false);
+  const [metricsError, setMetricsError] = useState<string>('');
 
   // Users search and pagination state
   const [userSearch, setUserSearch] = useState('');
@@ -171,9 +172,23 @@ export default function SuperAdminDashboard() {
   useEffect(() => {
     async function loadMetrics() {
       setMetricsLoading(true);
+      setMetricsError('');
       try {
         const res = await fetch('/api/admin/metrics?days=120');
-        if (res.ok) setMetrics(await res.json());
+        if (!res.ok) {
+          let msg = `Request failed: ${res.status}`;
+          try { const t = await res.text(); if (t) msg += ` - ${t}`; } catch {}
+          setMetricsError(msg);
+          console.error('[AdminOverview] /api/admin/metrics error:', msg);
+          return;
+        }
+        const data = await res.json();
+        if (!data || typeof data !== 'object') {
+          setMetricsError('Invalid response shape for metrics');
+          console.error('[AdminOverview] Invalid metrics payload:', data);
+          return;
+        }
+        setMetrics(data);
       } finally {
         setMetricsLoading(false);
       }
@@ -883,7 +898,7 @@ export default function SuperAdminDashboard() {
               <AdminDomainsTab />
             )}
             {activeTab === 5 && (
-              <AdminOverviewTab metrics={metrics} loading={metricsLoading} />
+              <AdminOverviewTab metrics={metrics} loading={metricsLoading} error={metricsError} />
             )}
           </div>
 
@@ -1252,7 +1267,7 @@ function AdminDomainsTab() {
   );
 }
 
-function AdminOverviewTab({ metrics, loading }: { metrics: any; loading: boolean }) {
+function AdminOverviewTab({ metrics, loading, error }: { metrics: any; loading: boolean; error?: string }) {
   // Simple chart rendered with HTML/CSS bars to avoid new deps
   const series: Array<any> = metrics?.series || [];
   const labels = series.map((d: any) => d.date);
@@ -1263,6 +1278,11 @@ function AdminOverviewTab({ metrics, loading }: { metrics: any; loading: boolean
 
   return (
     <div className="w-full bg-black rounded-3xl shadow-2xl p-10 flex flex-col border-2 border-gray-700 hover:shadow-gray-700/50 transition-shadow duration-300">
+      {error ? (
+        <div className="mb-4 p-3 rounded bg-red-900/30 border border-red-700 text-red-300 text-sm">
+          Failed to load metrics: {error}
+        </div>
+      ) : null}
       <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gray-900 rounded-xl p-4 border border-gray-700">
           <div className="text-gray-400 text-sm">Total Users</div>
