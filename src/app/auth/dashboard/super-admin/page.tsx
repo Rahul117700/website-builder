@@ -93,7 +93,9 @@ export default function SuperAdminDashboard() {
   const [plansLoading, setPlansLoading] = useState(false);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
 
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(5);
+  const [metrics, setMetrics] = useState<any>(null);
+  const [metricsLoading, setMetricsLoading] = useState<boolean>(false);
 
   // Users search and pagination state
   const [userSearch, setUserSearch] = useState('');
@@ -164,6 +166,22 @@ export default function SuperAdminDashboard() {
       setStatsLoading(false);
     }
   };
+
+  // Load metrics for graphs
+  useEffect(() => {
+    async function loadMetrics() {
+      setMetricsLoading(true);
+      try {
+        const res = await fetch('/api/admin/metrics?days=120');
+        if (res.ok) setMetrics(await res.json());
+      } finally {
+        setMetricsLoading(false);
+      }
+    }
+    if (status === 'authenticated' && session?.user?.role === 'SUPER_ADMIN') {
+      loadMetrics();
+    }
+  }, [status, session]);
 
   // Fetch frontend content
   const fetchFrontendContent = async () => {
@@ -553,6 +571,8 @@ export default function SuperAdminDashboard() {
                 <Tab label="Sites" />
                 <Tab label="Plans" />
                 <Tab label="Templates" />
+                <Tab label="Domains" />
+                <Tab label="Overview" />
               </Tabs>
             </div>
             {/* Tab Panels */}
@@ -859,6 +879,12 @@ export default function SuperAdminDashboard() {
                 />
               </div>
             )}
+            {activeTab === 4 && (
+              <AdminDomainsTab />
+            )}
+            {activeTab === 5 && (
+              <AdminOverviewTab metrics={metrics} loading={metricsLoading} />
+            )}
           </div>
 
           {showUserModal && (
@@ -1018,3 +1044,274 @@ export default function SuperAdminDashboard() {
     </DashboardLayout>
   );
 } 
+
+function AdminDomainsTab() {
+  const [rows, setRows] = useState<any[]>([]);
+  const [sites, setSites] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [form, setForm] = useState<{ siteId: string; host: string }>({ siteId: '', host: '' });
+
+  const filtered = rows.filter((r) =>
+    r.host.toLowerCase().includes(search.toLowerCase()) ||
+    r.site?.name?.toLowerCase().includes(search.toLowerCase()) ||
+    r.site?.subdomain?.toLowerCase().includes(search.toLowerCase()) ||
+    (r.ownerEmail || '').toLowerCase().includes(search.toLowerCase())
+  );
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const [domainsRes, sitesRes] = await Promise.all([
+          fetch('/api/admin/domains'),
+          fetch('/api/admin/sites'),
+        ]);
+        if (!domainsRes.ok) throw new Error('Failed to fetch domains');
+        const domains = await domainsRes.json();
+        setRows(domains);
+        if (sitesRes.ok) setSites(await sitesRes.json());
+      } catch (e: any) {
+        setError(e?.message || 'Failed to load');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  async function handleCreate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.siteId || !form.host) return;
+    setSaving(true);
+    try {
+      const res = await fetch('/api/admin/domains', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error('Failed to create');
+      const created = await res.json();
+      setRows((prev) => [{ ...created, site: sites.find((s:any)=>s.id===created.siteId) || created.site }, ...prev]);
+      setModalOpen(false);
+      setForm({ siteId: '', host: '' });
+    } catch (e:any) {
+      setError(e?.message || 'Failed to create');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleUpdate(id: string, patch: any) {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/domains/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patch),
+      });
+      if (!res.ok) throw new Error('Failed to update');
+      const updated = await res.json();
+      setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...updated } : r)));
+    } catch (e:any) {
+      setError(e?.message || 'Failed to update');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!window.confirm('Delete this domain mapping?')) return;
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/domains/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete');
+      setRows((prev) => prev.filter((r) => r.id !== id));
+    } catch (e:any) {
+      setError(e?.message || 'Failed to delete');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="w-full bg-black rounded-3xl shadow-2xl p-10 flex flex-col border-2 border-gray-700 hover:shadow-gray-700/50 transition-shadow duration-300">
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-3xl font-bold text-white flex items-center gap-2"><span className="inline-block w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></span> Domain Mappings</h2>
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="Search..."
+            className="border rounded px-3 py-2 text-white bg-gray-800 border-gray-600 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <button
+            onClick={() => setModalOpen(true)}
+            className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold px-6 py-2 rounded-full shadow-lg"
+          >
+            + Add Mapping
+          </button>
+        </div>
+      </div>
+      {error && <div className="text-red-400 mb-3">{error}</div>}
+      {loading ? (
+        <div className="text-gray-400">Loading...</div>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-gray-700">
+          <table className="min-w-full bg-gray-900 rounded-xl overflow-hidden">
+            <thead className="bg-gradient-to-r from-gray-800 to-gray-700">
+              <tr>
+                <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Domain</th>
+                <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Site</th>
+                <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Owner</th>
+                <th className="px-4 py-3 border-b border-gray-700 text-left text-white text-sm font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr><td colSpan={4} className="text-center py-6 text-gray-400">No domains found.</td></tr>
+              ) : filtered.map((r) => (
+                <tr key={r.id} className="hover:bg-gray-800 transition-all group">
+                  <td className="px-4 py-2 border-b border-gray-700 text-white font-medium">
+                    <input
+                      className="bg-transparent border border-gray-700 rounded px-2 py-1 w-full"
+                      defaultValue={r.host}
+                      onBlur={(e) => {
+                        const v = e.currentTarget.value.trim();
+                        if (v && v !== r.host) handleUpdate(r.id, { host: v });
+                      }}
+                    />
+                  </td>
+                  <td className="px-4 py-2 border-b border-gray-700 text-gray-300">
+                    <select
+                      className="bg-gray-900 border border-gray-700 rounded px-2 py-1"
+                      value={r.siteId}
+                      onChange={(e) => handleUpdate(r.id, { siteId: e.target.value })}
+                    >
+                      {sites.map((s:any) => (
+                        <option key={s.id} value={s.id}>{s.name} ({s.subdomain})</option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="px-4 py-2 border-b border-gray-700 text-gray-300">{r.ownerEmail || '-'}</td>
+                  <td className="px-4 py-2 border-b border-gray-700">
+                    <button
+                      className="text-red-400 hover:bg-red-900/20 px-2 py-1 rounded transition-all"
+                      onClick={() => handleDelete(r.id)}
+                      disabled={saving}
+                    >Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative border-2 border-yellow-200">
+            <h3 className="text-xl font-bold mb-4 text-black">Add Domain Mapping</h3>
+            <form onSubmit={handleCreate}>
+              <label className="block text-black mb-1">Domain</label>
+              <input
+                className="w-full border rounded px-3 py-2 text-black bg-yellow-50 mb-4"
+                placeholder="example.com"
+                value={form.host}
+                onChange={(e) => setForm((f) => ({ ...f, host: e.target.value }))}
+                required
+              />
+              <label className="block text-black mb-1">Site</label>
+              <select
+                className="w-full border rounded px-3 py-2 text-black bg-yellow-50 mb-4"
+                value={form.siteId}
+                onChange={(e) => setForm((f) => ({ ...f, siteId: e.target.value }))}
+                required
+              >
+                <option value="" disabled>Select site</option>
+                {sites.map((s:any) => (
+                  <option key={s.id} value={s.id}>{s.name} ({s.subdomain})</option>
+                ))}
+              </select>
+              <div className="flex justify-end gap-2">
+                <button type="button" className="px-4 py-2 bg-gray-200 text-gray-700 rounded" onClick={() => setModalOpen(false)}>Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded" disabled={saving}>
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AdminOverviewTab({ metrics, loading }: { metrics: any; loading: boolean }) {
+  // Simple chart rendered with HTML/CSS bars to avoid new deps
+  const series: Array<any> = metrics?.series || [];
+  const labels = series.map((d: any) => d.date);
+  const rev = series.map((d: any) => d.totalRevenue);
+  const users = series.map((d: any) => d.users);
+  const maxRev = Math.max(1, ...rev);
+  const maxUsers = Math.max(1, ...users);
+
+  return (
+    <div className="w-full bg-black rounded-3xl shadow-2xl p-10 flex flex-col border-2 border-gray-700 hover:shadow-gray-700/50 transition-shadow duration-300">
+      <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-gray-900 rounded-xl p-4 border border-gray-700">
+          <div className="text-gray-400 text-sm">Total Users</div>
+          <div className="text-3xl font-bold text-white">{metrics?.summary?.totalUsers ?? '—'}</div>
+        </div>
+        <div className="bg-gray-900 rounded-xl p-4 border border-gray-700">
+          <div className="text-gray-400 text-sm">Total Revenue</div>
+          <div className="text-3xl font-bold text-white">₹{metrics?.summary?.revenue?.total?.toFixed?.(2) ?? '0.00'}</div>
+          <div className="text-xs text-gray-400 mt-1">Plans: ₹{metrics?.summary?.revenue?.plans?.toFixed?.(2) ?? '0.00'} · Commission: ₹{metrics?.summary?.revenue?.templateCommission?.toFixed?.(2) ?? '0.00'}</div>
+        </div>
+        <div className="bg-gray-900 rounded-xl p-4 border border-gray-700">
+          <div className="text-gray-400 text-sm">Template Gross</div>
+          <div className="text-3xl font-bold text-white">₹{metrics?.summary?.revenue?.templateGross?.toFixed?.(2) ?? '0.00'}</div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Revenue Area-like chart */}
+        <div className="bg-gray-900 rounded-xl p-4 border border-gray-700">
+          <div className="text-white font-semibold mb-3">Revenue (last {labels.length} days)</div>
+          {loading ? (
+            <div className="text-gray-500">Loading...</div>
+          ) : (
+            <div className="h-48 flex items-end gap-1">
+              {rev.map((v: number, i: number) => (
+                <div key={labels[i]} title={`${labels[i]}: ₹${v.toFixed(2)}`} className="flex-1 bg-gradient-to-t from-purple-700 to-purple-400 rounded-t" style={{ height: `${(v / maxRev) * 100}%` }} />
+              ))}
+            </div>
+          )}
+          <div className="text-xs text-gray-500 mt-2">Plans + Template Commission (platform revenue)</div>
+        </div>
+
+        {/* New users chart */}
+        <div className="bg-gray-900 rounded-xl p-4 border border-gray-700">
+          <div className="text-white font-semibold mb-3">New Users (last {labels.length} days)</div>
+          {loading ? (
+            <div className="text-gray-500">Loading...</div>
+          ) : (
+            <div className="h-48 flex items-end gap-1">
+              {users.map((v: number, i: number) => (
+                <div key={labels[i]} title={`${labels[i]}: ${v}`} className="flex-1 bg-gradient-to-t from-green-700 to-green-400 rounded-t" style={{ height: `${(v / maxUsers) * 100}%` }} />
+              ))}
+            </div>
+          )}
+          <div className="text-xs text-gray-500 mt-2">Daily signups</div>
+        </div>
+      </div>
+
+      <div className="text-xs text-gray-500 mt-4">Range: {metrics?.range?.since} → {metrics?.range?.until}</div>
+    </div>
+  );
+}
