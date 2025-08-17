@@ -91,18 +91,32 @@ export async function PUT(
               .toLowerCase()
           : undefined;
 
-    // Update the site
-    const updatedSite = await prisma.site.update({
-      where: {
-        id: params.id,
-      },
-      data: {
-        name,
-        description,
-        ...(normalizedCustomDomain !== undefined && { customDomain: normalizedCustomDomain }),
-        googleAnalyticsId,
-        ...(template !== undefined && { template }),
-      },
+    // Update the site and synchronize Domain mappings in a transaction
+    const updatedSite = await prisma.$transaction(async (tx: any) => {
+      const site = await tx.site.update({
+        where: { id: params.id },
+        data: {
+          name,
+          description,
+          ...(normalizedCustomDomain !== undefined && { customDomain: normalizedCustomDomain }),
+          googleAnalyticsId,
+          ...(template !== undefined && { template }),
+        },
+      });
+
+      // Sync Domain table if caller provided customDomain (including null)
+      if (normalizedCustomDomain !== undefined) {
+        // Remove existing domain rows for this site
+        await tx.domain.deleteMany({ where: { siteId: site.id } });
+        // Create a new mapping when set
+        if (normalizedCustomDomain) {
+          await tx.domain.create({
+            data: { siteId: site.id, host: normalizedCustomDomain },
+          });
+        }
+      }
+
+      return site;
     });
 
     return NextResponse.json(updatedSite);

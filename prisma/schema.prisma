@@ -100,6 +100,7 @@ model Site {
   user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   siteSales         SiteSale?
   submissions       Submission[]
+  domains           Domain[]
 }
 
 model Page {
@@ -470,4 +471,15 @@ enum BookingType {
   meet
   call
   table
+}
+
+model Domain {
+  id        String   @id @default(cuid())
+  host      String   @unique
+  siteId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
 }
