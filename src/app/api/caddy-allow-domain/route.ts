@@ -29,12 +29,22 @@ export async function GET(req: NextRequest) {
       `https://www.${host}`,
     ]));
 
-    const site = await prisma.site.findFirst({
+    // Prefer new Domain table; fallback to legacy customDomain
+    const allowedByDomain = await prisma.domain.findFirst({
       where: {
-        OR: variations.map((v) => ({ customDomain: { equals: v, mode: 'insensitive' as const } })),
+        OR: variations.map((v) => ({ host: { equals: v, mode: 'insensitive' as const } })),
       },
       select: { id: true },
     });
+
+    const site =
+      allowedByDomain ||
+      (await prisma.site.findFirst({
+        where: {
+          OR: variations.map((v) => ({ customDomain: { equals: v, mode: 'insensitive' as const } })),
+        },
+        select: { id: true },
+      }));
 
     if (!site) {
       return new NextResponse('not allowed', { status: 404 });

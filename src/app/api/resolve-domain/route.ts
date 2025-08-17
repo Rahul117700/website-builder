@@ -30,13 +30,21 @@ export async function GET(req: NextRequest) {
       `https://www.${host}`,
     ]));
 
-    // Look up by custom domain with variations and case-insensitive match
-    const site = await prisma.site.findFirst({
+    // 1) Check new Domain table
+    const domainRow = await prisma.domain.findFirst({
+      where: {
+        OR: variations.map((v) => ({ host: { equals: v, mode: 'insensitive' as const } })),
+      },
+      include: { site: { select: { subdomain: true } } },
+    });
+
+    // 2) Fallback: legacy customDomain field on Site
+    const site = domainRow?.site || (await prisma.site.findFirst({
       where: {
         OR: variations.map((v) => ({ customDomain: { equals: v, mode: 'insensitive' as const } })),
       },
       select: { subdomain: true },
-    });
+    })) || null;
 
     if (!site) {
       return NextResponse.json({ ok: false }, { status: 404 });
