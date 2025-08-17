@@ -15,6 +15,7 @@ function normalizeHost(rawHost: string): string {
 export async function GET(req: NextRequest) {
   try {
     const hostParam = req.nextUrl.searchParams.get('host') || '';
+    const debug = req.nextUrl.searchParams.get('debug') === '1';
     if (!hostParam) {
       return NextResponse.json({ ok: false, error: 'Missing host' }, { status: 400 });
     }
@@ -47,10 +48,13 @@ export async function GET(req: NextRequest) {
     })) || null;
 
     if (!site) {
+      if (debug) {
+        return NextResponse.json({ ok: false, host, variations, reason: 'no-match' }, { status: 404 });
+      }
       return NextResponse.json({ ok: false }, { status: 404 });
     }
 
-    return NextResponse.json({ ok: true, subdomain: site.subdomain });
+    return NextResponse.json({ ok: true, subdomain: site.subdomain, ...(debug ? { host, variations } : {}) });
   } catch (error) {
     return NextResponse.json({ ok: false, error: 'Server error' }, { status: 500 });
   }
