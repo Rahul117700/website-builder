@@ -38,8 +38,11 @@ export async function middleware(req: NextRequest) {
         return NextResponse.rewrite(rewriteUrl);
       }
     }
-  } catch {
-    // Fall through
+  } catch (err) {
+    // Attach a header so we can see that middleware failed without breaking the request
+    const resp = NextResponse.next();
+    resp.headers.set('x-domain-rewrite-error', String(err));
+    return resp;
   }
 
   return NextResponse.next();
