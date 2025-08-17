@@ -474,8 +474,8 @@ export default function SuperAdminDashboard() {
     );
   }
 
-  // Show loading skeleton while fetching initial data
-  if (loading) {
+  // Show loading skeleton while fetching initial data (except Overview tab)
+  if (loading && activeTab !== 5) {
     return (
       <DashboardLayout>
         <div className="p-6">
