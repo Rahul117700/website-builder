@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
     }
 
     const host = normalizeHost(hostParam);
+    console.log(`[API] Resolving host: "${hostParam}" -> normalized: "${host}"`);
 
     const variations = Array.from(new Set([
       host,
@@ -31,6 +32,8 @@ export async function GET(req: NextRequest) {
       `https://www.${host}`,
     ]));
 
+    console.log(`[API] Checking variations:`, variations);
+
     // 1) Check new Domain table
     const domainRow = await prisma.domain.findFirst({
       where: {
@@ -38,6 +41,8 @@ export async function GET(req: NextRequest) {
       },
       include: { site: { select: { subdomain: true } } },
     });
+
+    console.log(`[API] Domain table result:`, domainRow);
 
     // 2) Fallback: legacy customDomain field on Site
     const site = domainRow?.site || (await prisma.site.findFirst({
@@ -47,6 +52,8 @@ export async function GET(req: NextRequest) {
       select: { subdomain: true },
     })) || null;
 
+    console.log(`[API] Site lookup result:`, site);
+
     if (!site) {
       if (debug) {
         return NextResponse.json({ ok: false, host, variations, reason: 'no-match' }, { status: 404 });
@@ -54,8 +61,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ ok: false }, { status: 404 });
     }
 
-    return NextResponse.json({ ok: true, subdomain: site.subdomain, ...(debug ? { host, variations } : {}) });
+    const result = { ok: true, subdomain: site.subdomain, ...(debug ? { host, variations } : {}) };
+    console.log(`[API] Returning result:`, result);
+    return NextResponse.json(result);
   } catch (error) {
+    console.error(`[API] Error resolving domain:`, error);
     return NextResponse.json({ ok: false, error: 'Server error' }, { status: 500 });
   }
 }
