@@ -11,6 +11,7 @@ const SKIP_PREFIXES = [
 ];
 
 export async function middleware(req: NextRequest) {
+  console.log('🔥 [Middleware] MIDDLEWARE IS RUNNING!');
   const url = req.nextUrl.clone();
   
   console.log('🚀 [Middleware] Request started');
