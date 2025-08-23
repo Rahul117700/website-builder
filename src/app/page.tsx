@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
-import { findSubdomainForHost } from '../lib/domainUtils';
+import { findSubdomainForHost } from '@/lib/domainUtils';
 import HomePageClient from './HomePageClient';
 
 export default async function HomePage() {

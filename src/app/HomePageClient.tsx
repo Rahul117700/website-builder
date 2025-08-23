@@ -1,6 +1,6 @@
 "use client";
 /* eslint react/no-unescaped-entities: 0 */
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -11,7 +11,6 @@ export default function HomePageClient() {
   const [loadingPlans, setLoadingPlans] = useState(true);
   const { data: session } = useSession();
   const router = useRouter();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [templates, setTemplates] = useState<any[]>([]);
 
   useEffect(() => {
@@ -42,19 +41,6 @@ export default function HomePageClient() {
     fetchTemplates();
   }, []);
 
-  function getPlanFeatures(plan: any) {
-    const features: string[] = [];
-    if (plan.unlimitedWebsites) features.push("Unlimited Websites");
-    else if (plan.numberOfWebsites) features.push(`${plan.numberOfWebsites} Website${plan.numberOfWebsites === 1 ? '' : 's'}`);
-    if (plan.supportLevel) features.push(`${plan.supportLevel} Support`);
-    if (plan.customDomain) features.push("Custom Domain");
-    if (plan.advancedAnalytics) features.push("Advanced Analytics");
-    if (plan.customIntegrations) features.push("Custom Integrations");
-    if (plan.teamManagement) features.push("Team Management");
-    if (plan.communityAccess) features.push("Community Access");
-    return features;
-  }
-
   return (
     <div className="min-h-screen bg-white dark:bg-black">
       {/* Simple Navbar */}
@@ -72,7 +58,7 @@ export default function HomePageClient() {
             <nav className="hidden md:flex space-x-4 lg:space-x-8">
               <a href="#features" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium">Features</a>
               <a href="#templates" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium">Templates</a>
-              <a href="#pricing" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium" onClick={(e) => { e.preventDefault(); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); }}>Pricing</a>
+              <a href="#pricing" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium">Pricing</a>
               <button 
                 onClick={() => router.push('/auth/dashboard/community')}
                 className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium"
