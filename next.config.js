@@ -48,23 +48,6 @@ const nextConfig = {
       },
     ];
   },
-  // Fully dynamic domain routing - no static redirects
-  async redirects() {
-    return [
-      // Dynamic domain resolution for ALL custom domains
-      {
-        source: '/',
-        has: [
-          {
-            type: 'host',
-            value: '(?!localhost|127\\.0\\.0\\.1|.*\\.local|.*\\.test|31\\.97\\.233\\.221).*',
-          },
-        ],
-        destination: '/api/resolve-domain-redirect',
-        permanent: false,
-      },
-    ];
-  },
   // Enable experimental features for App Router
   experimental: {
     serverActions: true,
