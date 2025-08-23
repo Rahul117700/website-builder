@@ -2,91 +2,109 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
-async function addDomain() {
+async function addDomainDynamic() {
   try {
     // Get command line arguments
     const args = process.argv.slice(2);
     
-    if (args.length < 2) {
-      console.log('❌ Usage: node add-domain-dynamic.js <domain> <subdomain>');
-      console.log('Example: node add-domain-dynamic.js example.com example');
+    if (args.length !== 2) {
+      console.log('❌ Usage: node scripts/add-domain-dynamic.js <domain> <site_name>');
+      console.log('Example: node scripts/add-domain-dynamic.js mysite.com mysite');
+      console.log('Example: node scripts/add-domain-dynamic.js example.com example');
       return;
     }
     
     const domain = args[0];
-    const subdomain = args[1];
+    const siteName = args[1];
     
-    console.log(`🔍 Adding domain: ${domain} -> subdomain: ${subdomain}`);
+    console.log(`🔧 Adding domain ${domain} to site ${siteName}...\n`);
     
-    // First, check if the site exists
+    // Find the site
     const site = await prisma.site.findFirst({
-      where: {
-        subdomain: subdomain
-      }
+      where: { name: siteName }
     });
-
+    
     if (!site) {
-      console.log(`❌ Site with subdomain "${subdomain}" not found.`);
-      console.log('Available sites:');
+      console.log(`❌ Site '${siteName}' not found!`);
+      console.log('\nAvailable sites:');
       const allSites = await prisma.site.findMany({
-        select: { subdomain: true, name: true }
+        select: { name: true, subdomain: true }
       });
-      allSites.forEach(s => console.log(`  - ${s.subdomain} (${s.name})`));
+      allSites.forEach(s => console.log(`   - ${s.name} (${s.subdomain})`));
       return;
     }
-
-    console.log('✅ Found site:', {
-      id: site.id,
-      subdomain: site.subdomain,
-      name: site.name
-    });
-
+    
+    console.log(`✅ Found site: ${site.name} (${site.subdomain})`);
+    
     // Check if domain already exists
     const existingDomain = await prisma.domain.findFirst({
-      where: {
-        OR: [
-          { host: domain },
-          { host: `www.${domain}` }
-        ]
-      }
+      where: { host: domain }
     });
-
+    
     if (existingDomain) {
-      console.log('✅ Domain already exists:', existingDomain);
-      return;
+      console.log(`⚠️ Domain ${domain} already exists and is mapped to ${existingDomain.siteId}`);
+      
+      // Ask if user wants to update it
+      console.log(`Do you want to update ${domain} to point to ${site.name} site? (y/n)`);
+      // For now, just update it automatically
+      console.log('Auto-updating...');
+      
+      await prisma.domain.update({
+        where: { id: existingDomain.id },
+        data: { siteId: site.id }
+      });
+      
+      console.log(`✅ Updated ${domain} to point to ${site.name} site`);
+    } else {
+      // Create new domain mapping
+      await prisma.domain.create({
+        data: {
+          host: domain,
+          siteId: site.id
+        }
+      });
+      
+      console.log(`✅ Created new domain mapping: ${domain} → ${site.name}`);
     }
-
-    // Add the domain record
-    const domainRecord = await prisma.domain.create({
-      data: {
-        host: domain,
-        siteId: site.id
-      }
-    });
-
-    console.log('✅ Domain created successfully:', domainRecord);
-
+    
     // Also add www version
-    const wwwDomain = await prisma.domain.create({
-      data: {
-        host: `www.${domain}`,
-        siteId: site.id
-      }
+    const wwwDomain = domain.startsWith('www.') ? domain : `www.${domain}`;
+    const existingWwwDomain = await prisma.domain.findFirst({
+      where: { host: wwwDomain }
     });
-
-    console.log('✅ WWW domain created successfully:', wwwDomain);
-
-    // Also update the site's customDomain field as a backup
+    
+    if (!existingWwwDomain) {
+      await prisma.domain.create({
+        data: {
+          host: wwwDomain,
+          siteId: site.id
+        }
+      });
+      console.log(`✅ Created www version: ${wwwDomain} → ${site.name}`);
+    }
+    
+    // Update site customDomain
     await prisma.site.update({
       where: { id: site.id },
-      data: { customDomain: domain }
+      data: { customDomain: domain.replace(/^www\./, '') }
     });
-
-    console.log('✅ Updated site customDomain field');
-
-    console.log('\n🎉 Domain setup complete!');
-    console.log(`Now ${domain} and www.${domain} will redirect to /s/${subdomain}`);
-
+    
+    console.log(`✅ Updated ${site.name} site customDomain to ${domain.replace(/^www\./, '')}`);
+    
+    // Verify the result
+    console.log('\n📋 Final result:');
+    const finalDomains = await prisma.domain.findMany({
+      where: { siteId: site.id },
+      include: { site: { select: { name: true, subdomain: true } } }
+    });
+    
+    finalDomains.forEach(d => {
+      console.log(`🌐 ${d.host} → ${d.site.name} (${d.site.subdomain})`);
+    });
+    
+    console.log(`\n🎉 Domain ${domain} successfully added to ${site.name} site!`);
+    console.log(`Now when users visit ${domain}, they will be redirected to /s/${site.subdomain}`);
+    
   } catch (error) {
     console.error('❌ Error adding domain:', error);
   } finally {
@@ -94,4 +112,4 @@ async function addDomain() {
   }
 }
 
-addDomain();
+addDomainDynamic();
