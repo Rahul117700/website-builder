@@ -36,6 +36,69 @@ const nextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      // nextskillpro.com redirects
+      {
+        source: '/',
+        has: [
+          {
+            type: 'host',
+            value: 'nextskillpro.com',
+          },
+        ],
+        destination: '/s/nextskillpro',
+        permanent: false,
+      },
+      {
+        source: '/',
+        has: [
+          {
+            type: 'host',
+            value: 'www.nextskillpro.com',
+          },
+        ],
+        destination: '/s/nextskillpro',
+        permanent: false,
+      },
+      // agoda.com redirects
+      {
+        source: '/',
+        has: [
+          {
+            type: 'host',
+            value: 'agoda.com',
+          },
+        ],
+        destination: '/s/agoda',
+        permanent: false,
+      },
+      {
+        source: '/',
+        has: [
+          {
+            type: 'host',
+            value: 'www.agoda.com',
+          },
+        ],
+        destination: '/s/agoda',
+        permanent: false,
+      },
+      // Add more domains here as needed
+      // Example for a new domain:
+      // {
+      //   source: '/',
+      //   has: [
+      //     {
+      //       type: 'host',
+      //       value: 'newsite.com',
+      //     },
+      //   ],
+      //   destination: '/s/newsite',
+      //   permanent: false,
+      // },
+    ];
+  },
   images: {
     domains: ['images.pexels.com', 'localhost'],
   },
