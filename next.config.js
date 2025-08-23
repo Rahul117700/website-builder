@@ -48,62 +48,16 @@ const nextConfig = {
       },
     ];
   },
-  // Comprehensive domain routing - this will work reliably in production
+  // Fully dynamic domain routing - no static redirects
   async redirects() {
     return [
-      // nextskillpro.com redirects
+      // Dynamic domain resolution for ALL custom domains
       {
         source: '/',
         has: [
           {
             type: 'host',
-            value: 'nextskillpro.com',
-          },
-        ],
-        destination: '/s/nextskillpro',
-        permanent: false,
-      },
-      {
-        source: '/',
-        has: [
-          {
-            type: 'host',
-            value: 'www.nextskillpro.com',
-          },
-        ],
-        destination: '/s/nextskillpro',
-        permanent: false,
-      },
-      // agoda.com redirects
-      {
-        source: '/',
-        has: [
-          {
-            type: 'host',
-            value: 'agoda.com',
-          },
-        ],
-        destination: '/s/agoda',
-        permanent: false,
-      },
-      {
-        source: '/',
-        has: [
-          {
-            type: 'host',
-            value: 'www.agoda.com',
-          },
-        ],
-        destination: '/s/agoda',
-        permanent: false,
-      },
-      // Dynamic domain resolution for any other domains
-      {
-        source: '/',
-        has: [
-          {
-            type: 'host',
-            value: '(?!localhost|127\\.0\\.0\\.1|.*\\.local|.*\\.test).*',
+            value: '(?!localhost|127\\.0\\.0\\.1|.*\\.local|.*\\.test|31\\.97\\.233\\.221).*',
           },
         ],
         destination: '/api/resolve-domain-redirect',
