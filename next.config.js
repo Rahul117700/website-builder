@@ -48,47 +48,6 @@ const nextConfig = {
       },
     ];
   },
-  // Handle domain routing
-  async redirects() {
-    return [
-      // Redirect nextskillpro.com to the subdomain route
-      {
-        source: '/',
-        has: [
-          {
-            type: 'host',
-            value: 'nextskillpro.com',
-          },
-        ],
-        destination: '/s/nextskillpro',
-        permanent: false,
-      },
-      // Redirect www.nextskillpro.com to the subdomain route
-      {
-        source: '/',
-        has: [
-          {
-            type: 'host',
-            value: 'www.nextskillpro.com',
-          },
-        ],
-        destination: '/s/nextskillpro',
-        permanent: false,
-      },
-      // Handle subdomain routing (legacy)
-      {
-        source: '/',
-        has: [
-          {
-            type: 'host',
-            value: '(?<subdomain>[a-zA-Z0-9-]+)\\.yourdomain\\.com',
-          },
-        ],
-        destination: '/sites/:subdomain',
-        permanent: true,
-      },
-    ];
-  },
   // Enable experimental features for App Router
   experimental: {
     serverActions: true,

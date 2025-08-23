@@ -10,25 +10,35 @@ export async function middleware(req: NextRequest) {
   console.log('🚀 [Middleware] Request started');
   console.log('🏠 [Middleware] Host:', host);
   console.log('📍 [Middleware] URL:', url.toString());
+  console.log('🌐 [Middleware] Protocol:', url.protocol);
+  console.log('🔗 [Middleware] Full URL:', req.url);
   
   // Skip for API routes, static files, and Next.js internals
   if (url.pathname.startsWith('/api/') || 
       url.pathname.startsWith('/_next/') || 
       url.pathname.startsWith('/static/') ||
       url.pathname.includes('.')) {
+    console.log('⏭️ [Middleware] Skipping - API/static route');
     return NextResponse.next();
   }
   
   // Handle custom domain routing
   if (host && !host.includes('localhost') && !host.includes('3000')) {
+    console.log('🌍 [Middleware] Processing custom domain:', host);
+    
     // Skip if this is already a subdomain route
     if (url.pathname.startsWith('/s/')) {
+      console.log('⏭️ [Middleware] Skipping - already subdomain route');
       return NextResponse.next();
     }
     
     try {
+      console.log('🔍 [Middleware] Looking up subdomain for host:', host);
+      
       // Find the corresponding subdomain for this host
       const subdomain = await findSubdomainForHost(host);
+      
+      console.log('📋 [Middleware] Found subdomain:', subdomain);
       
       if (subdomain) {
         console.log(`🔄 [Middleware] Redirecting ${host} to /s/${subdomain}`);
@@ -39,21 +49,30 @@ export async function middleware(req: NextRequest) {
         // Preserve the original path if it's not just the root
         if (url.pathname !== '/') {
           redirectUrl.searchParams.set('page', url.pathname.substring(1));
+          console.log(`📄 [Middleware] Preserving path: ${url.pathname} -> page=${url.pathname.substring(1)}`);
         }
         
         // Preserve query parameters
         url.searchParams.forEach((value, key) => {
           redirectUrl.searchParams.set(key, value);
+          console.log(`🔗 [Middleware] Preserving query param: ${key}=${value}`);
         });
         
+        console.log(`🎯 [Middleware] Final redirect URL: ${redirectUrl.toString()}`);
+        
         return NextResponse.redirect(redirectUrl);
+      } else {
+        console.log(`❌ [Middleware] No subdomain found for host: ${host}`);
       }
     } catch (error) {
       console.error('❌ [Middleware] Error resolving domain:', error);
     }
+  } else {
+    console.log('🏠 [Middleware] Skipping - localhost or development');
   }
   
   // Continue with normal routing
+  console.log('➡️ [Middleware] Continuing with normal routing');
   return NextResponse.next();
 }
 
