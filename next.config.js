@@ -48,6 +48,69 @@ const nextConfig = {
       },
     ];
   },
+  // Comprehensive domain routing - this will work reliably in production
+  async redirects() {
+    return [
+      // nextskillpro.com redirects
+      {
+        source: '/',
+        has: [
+          {
+            type: 'host',
+            value: 'nextskillpro.com',
+          },
+        ],
+        destination: '/s/nextskillpro',
+        permanent: false,
+      },
+      {
+        source: '/',
+        has: [
+          {
+            type: 'host',
+            value: 'www.nextskillpro.com',
+          },
+        ],
+        destination: '/s/nextskillpro',
+        permanent: false,
+      },
+      // agoda.com redirects
+      {
+        source: '/',
+        has: [
+          {
+            type: 'host',
+            value: 'agoda.com',
+          },
+        ],
+        destination: '/s/agoda',
+        permanent: false,
+      },
+      {
+        source: '/',
+        has: [
+          {
+            type: 'host',
+            value: 'www.agoda.com',
+          },
+        ],
+        destination: '/s/agoda',
+        permanent: false,
+      },
+      // Dynamic domain resolution for any other domains
+      {
+        source: '/',
+        has: [
+          {
+            type: 'host',
+            value: '(?!localhost|127\\.0\\.0\\.1|.*\\.local|.*\\.test).*',
+          },
+        ],
+        destination: '/api/resolve-domain-redirect',
+        permanent: false,
+      },
+    ];
+  },
   // Enable experimental features for App Router
   experimental: {
     serverActions: true,
