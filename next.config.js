@@ -48,9 +48,34 @@ const nextConfig = {
       },
     ];
   },
-  // Handle subdomain routing
+  // Handle domain routing
   async redirects() {
     return [
+      // Redirect nextskillpro.com to the subdomain route
+      {
+        source: '/',
+        has: [
+          {
+            type: 'host',
+            value: 'nextskillpro.com',
+          },
+        ],
+        destination: '/s/nextskillpro',
+        permanent: false,
+      },
+      // Redirect www.nextskillpro.com to the subdomain route
+      {
+        source: '/',
+        has: [
+          {
+            type: 'host',
+            value: 'www.nextskillpro.com',
+          },
+        ],
+        destination: '/s/nextskillpro',
+        permanent: false,
+      },
+      // Handle subdomain routing (legacy)
       {
         source: '/',
         has: [
