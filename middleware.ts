@@ -26,9 +26,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
   
-  // Handle custom domain routing
-  if (host && !host.includes('localhost') && !host.includes('127.0.0.1') && !host.includes('31.97.233.221')) {
-    console.log('🌍 [Middleware] Processing custom domain:', host);
+  // Handle ALL domain routing dynamically from database
+  if (host) {
+    console.log('🌍 [Middleware] Processing host:', host);
     
     try {
       console.log('🔍 [Middleware] Looking up subdomain for host:', host);
@@ -66,8 +66,6 @@ export async function middleware(req: NextRequest) {
     } catch (error) {
       console.error('❌ [Middleware] Error resolving domain:', error);
     }
-  } else {
-    console.log('🏠 [Middleware] Skipping - localhost/development/server IP');
   }
   
   // Continue with normal routing
