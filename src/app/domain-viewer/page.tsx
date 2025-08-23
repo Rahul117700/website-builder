@@ -4,8 +4,8 @@ import { useSearchParams } from 'next/navigation';
 
 export default function DomainViewerPage() {
   const params = useSearchParams();
-  const subdomain = params.get('sd') || '';
-  const path = params.get('p') || '';
+  const subdomain = params?.get('sd') || '';
+  const path = params?.get('p') || '';
   const [iframeSrc, setIframeSrc] = useState<string>("");
 
   useEffect(() => {
@@ -17,7 +17,7 @@ export default function DomainViewerPage() {
     const base = `/s/${encodeURIComponent(subdomain)}`;
 
     // Preserve query string from current URL aside from sd/p using useSearchParams
-    const passthrough = new URLSearchParams(params.toString());
+    const passthrough = new URLSearchParams(params?.toString() || '');
     passthrough.delete('sd');
     passthrough.delete('p');
     if (slug && !passthrough.has('page')) {
