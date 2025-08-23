@@ -12,9 +12,12 @@ export async function GET(req: NextRequest) {
     
     console.log(`🔍 [API] Resolving domain for host: ${host}`);
     
-    // Skip localhost and development domains
-    if (host.includes('localhost') || host.includes('127.0.0.1') || host.includes('.local')) {
-      console.log('⏭️ [API] Skipping localhost/development domain');
+    // Skip localhost, development domains, and your server IP
+    if (host.includes('localhost') || 
+        host.includes('127.0.0.1') || 
+        host.includes('.local') || 
+        host.includes('31.97.233.221')) {
+      console.log('⏭️ [API] Skipping localhost/development/server IP domain');
       return NextResponse.redirect(new URL('/', req.url));
     }
     
@@ -45,6 +48,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(redirectUrl);
     } else {
       console.log(`❌ [API] No subdomain found for host: ${host}`);
+      console.log(`💡 [API] This means ${host} is not connected to any site in your database`);
       
       // If no subdomain found, redirect to main site
       return NextResponse.redirect(new URL('/', req.url));
