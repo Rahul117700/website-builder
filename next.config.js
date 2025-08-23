@@ -48,34 +48,6 @@ const nextConfig = {
       },
     ];
   },
-  // Add redirects for domain routing
-  async redirects() {
-    return [
-      // nextskillpro.com redirects
-      {
-        source: '/',
-        has: [
-          {
-            type: 'host',
-            value: 'nextskillpro.com',
-          },
-        ],
-        destination: '/s/nextskillpro',
-        permanent: false,
-      },
-      {
-        source: '/',
-        has: [
-          {
-            type: 'host',
-            value: 'www.nextskillpro.com',
-          },
-        ],
-        destination: '/s/nextskillpro',
-        permanent: false,
-      },
-    ];
-  },
   // Enable experimental features for App Router
   experimental: {
     serverActions: true,
