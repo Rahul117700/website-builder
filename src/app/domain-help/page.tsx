@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from 'react';
 import Link from 'next/link';
+import CurrencySelector from '@/components/CurrencySelector';
+import { useCurrency } from '@/components/CurrencySelector';
 
 export default function DomainHelpPage() {
   const [selectedService, setSelectedService] = useState<string | null>(null);
@@ -12,11 +14,28 @@ export default function DomainHelpPage() {
     issue: ''
   });
 
+  const { preferredCurrency, convertCurrency, formatAmount } = useCurrency();
+
+  // Base prices in USD
+  const basePrices = {
+    'domain-setup': 299,
+    'dns-help': 99,
+    'migration': 499,
+    'premium-support': 49
+  };
+
+  // Get price in user's preferred currency
+  const getPrice = (serviceId: string) => {
+    const usdPrice = basePrices[serviceId as keyof typeof basePrices] || 0;
+    const convertedPrice = convertCurrency(usdPrice, 'USD', preferredCurrency);
+    return formatAmount(convertedPrice, preferredCurrency);
+  };
+
   const services = [
     {
       id: 'domain-setup',
       title: 'Custom Domain Setup',
-      price: '$199',
+      price: getPrice('domain-setup'),
       description: 'Professional domain connection service',
       features: [
         'DNS Configuration',
@@ -30,7 +49,7 @@ export default function DomainHelpPage() {
     {
       id: 'dns-help',
       title: 'DNS Configuration Help',
-      price: '$99',
+      price: getPrice('dns-help'),
       description: 'Expert DNS setup assistance',
       features: [
         'DNS Record Setup',
@@ -43,7 +62,7 @@ export default function DomainHelpPage() {
     {
       id: 'migration',
       title: 'Domain Migration Service',
-      price: '$299',
+      price: getPrice('migration'),
       description: 'Move your domain from another provider',
       features: [
         'Full Domain Transfer',
@@ -56,7 +75,7 @@ export default function DomainHelpPage() {
     {
       id: 'premium-support',
       title: 'Premium Support Plan',
-      price: '$49/month',
+      price: `${getPrice('premium-support')}/month`,
       description: '24/7 priority technical support',
       features: [
         '24/7 Phone Support',
@@ -72,6 +91,11 @@ export default function DomainHelpPage() {
     setSelectedService(serviceId);
   };
 
+  const handleCurrencyChange = (currency: string) => {
+    // Refresh prices when currency changes
+    window.location.reload();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -83,7 +107,8 @@ export default function DomainHelpPage() {
         },
         body: JSON.stringify({
           ...contactInfo,
-          selectedService: selectedService
+          selectedService: selectedService,
+          preferredCurrency: preferredCurrency
         }),
       });
 
@@ -121,12 +146,19 @@ export default function DomainHelpPage() {
               <span className="text-gray-500">•</span>
               <span className="text-gray-700">Domain Help Center</span>
             </div>
-            <Link 
-              href="/auth/dashboard" 
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors"
-            >
-              Go to Dashboard
-            </Link>
+            <div className="flex items-center space-x-4">
+              <CurrencySelector 
+                onCurrencyChange={handleCurrencyChange}
+                className="w-32"
+                showLabel={false}
+              />
+              <Link 
+                href="/auth/dashboard" 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition-colors"
+              >
+                Go to Dashboard
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -175,6 +207,9 @@ export default function DomainHelpPage() {
             <p className="text-lg text-gray-600">
               Select the service that best fits your needs
             </p>
+            <div className="mt-4 text-sm text-gray-500">
+              Prices shown in {preferredCurrency} • Exchange rates updated daily
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -315,6 +350,9 @@ export default function DomainHelpPage() {
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <p className="text-blue-800">
                     <strong>Selected Service:</strong> {services.find(s => s.id === selectedService)?.title} - {services.find(s => s.id === selectedService)?.price}
+                  </p>
+                  <p className="text-sm text-blue-600 mt-1">
+                    Price shown in {preferredCurrency}
                   </p>
                 </div>
               )}
