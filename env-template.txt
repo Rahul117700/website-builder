@@ -17,5 +17,9 @@ ALLOWED_HOSTS=localhost,127.0.0.1,31.97.233.221
 # Image Domains (comma-separated)
 IMAGE_DOMAINS=images.pexels.com,localhost
 
-# Environment
+# Cache Control (set to disable all caching)
+DISABLE_CACHING=true
 NODE_ENV=development
+
+# Force fresh data on every request
+FORCE_FRESH_DATA=true
