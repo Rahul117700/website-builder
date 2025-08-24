@@ -119,9 +119,9 @@ export default function PurchasedTemplatesPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">My Purchased Templates</h1>
-          <p className="text-gray-600">
-            Access and download all the templates you've purchased
-          </p>
+                      <p className="text-gray-600">
+              Access and download all the templates you&apos;ve purchased
+            </p>
         </div>
 
         {templates.length === 0 ? (
