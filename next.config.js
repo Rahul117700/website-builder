@@ -37,77 +37,67 @@ const nextConfig = {
     ];
   },
   async redirects() {
-    return [
-      // nextskillpro.com redirects
-      {
-        source: '/',
-        has: [
+    try {
+      // Get base URL from environment variable
+      const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+      
+      // Fetch dynamic redirects from database
+      const response = await fetch(`${baseUrl}/api/dynamic-redirects`);
+      const data = await response.json();
+      
+      if (data.success && data.redirects) {
+        console.log(`✅ Loaded ${data.count} dynamic redirects from database`);
+        return data.redirects;
+      } else {
+        console.log('⚠️ Using fallback redirects');
+        // Fallback redirects if API fails
+        return [
           {
-            type: 'host',
-            value: 'nextskillpro.com',
+            source: '/',
+            has: [{ type: 'host', value: 'nextskillpro.com' }],
+            destination: '/s/nextskillpro',
+            permanent: false,
           },
-        ],
-        destination: '/s/nextskillpro',
-        permanent: false,
-      },
-      {
-        source: '/',
-        has: [
           {
-            type: 'host',
-            value: 'www.nextskillpro.com',
+            source: '/',
+            has: [{ type: 'host', value: 'agoda.com' }],
+            destination: '/s/agoda',
+            permanent: false,
           },
-        ],
-        destination: '/s/nextskillpro',
-        permanent: false,
-      },
-      // agoda.com redirects
-      {
-        source: '/',
-        has: [
-          {
-            type: 'host',
-            value: 'agoda.com',
-          },
-        ],
-        destination: '/s/agoda',
-        permanent: false,
-      },
-      {
-        source: '/',
-        has: [
-          {
-            type: 'host',
-            value: 'www.agoda.com',
-          },
-        ],
-        destination: '/s/agoda',
-        permanent: false,
-      },
-      // Add more domains here as needed
-      // Example for a new domain:
-      // {
-      //   source: '/',
-      //   has: [
-      //     {
-      //       type: 'host',
-      //       value: 'newsite.com',
-      //     },
-      //   ],
-      //   destination: '/s/newsite',
-      //   permanent: false,
-      // },
-    ];
+        ];
+      }
+    } catch (error) {
+      console.error('❌ Error loading dynamic redirects:', error);
+      // Fallback redirects if API fails
+      return [
+        {
+          source: '/',
+          has: [{ type: 'host', value: 'nextskillpro.com' }],
+          destination: '/s/nextskillpro',
+          permanent: false,
+        },
+        {
+          source: '/',
+          has: [{ type: 'host', value: 'agoda.com' }],
+          destination: '/s/agoda',
+          permanent: false,
+        },
+      ];
+    }
   },
   images: {
-    domains: ['images.pexels.com', 'localhost'],
+    domains: [
+      'images.pexels.com',
+      ...(process.env.IMAGE_DOMAINS?.split(',').map(domain => domain.trim()) || []),
+      ...(process.env.NEXTAUTH_URL ? [process.env.NEXTAUTH_URL.replace(/^https?:\/\//, '')] : [])
+    ].filter(Boolean),
   },
   async rewrites() {
     return [
       // Rewrite API requests to the Express server
       {
         source: '/api/v1/:path*',
-        destination: 'http://localhost:3001/api/v1/:path*',
+        destination: `${process.env.EXPRESS_SERVER_URL || 'http://localhost:3001'}/api/v1/:path*`,
       },
     ];
   },

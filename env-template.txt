@@ -1,0 +1,21 @@
+# Environment Variables Template
+# Copy this to your .env file and update the values
+
+# NextAuth Configuration
+NEXTAUTH_URL=http://31.97.233.221:3000
+NEXTAUTH_SECRET=your-secret-key-here
+
+# Database Configuration
+DATABASE_URL=your-database-url-here
+
+# Express Server Configuration
+EXPRESS_SERVER_URL=http://localhost:3001
+
+# Allowed Hosts for Middleware (comma-separated)
+ALLOWED_HOSTS=localhost,127.0.0.1,31.97.233.221
+
+# Image Domains (comma-separated)
+IMAGE_DOMAINS=images.pexels.com,localhost
+
+# Environment
+NODE_ENV=development
