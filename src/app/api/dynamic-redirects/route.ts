@@ -14,12 +14,6 @@ export async function GET(req: NextRequest) {
             name: true
           }
         }
-      },
-      where: {
-        // Only get domains that are connected (you can add status check here)
-        site: {
-          isNot: null
-        }
       }
     });
 
