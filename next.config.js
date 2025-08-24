@@ -107,41 +107,11 @@ const nextConfig = {
       if (data.success && data.redirects) {
         console.log(`✅ [NextConfig] Loaded ${data.count} dynamic redirects from database`);
         return data.redirects;
-      } else {
-        console.log('⚠️ [NextConfig] Using fallback redirects');
-        // Fallback redirects if API fails
-        return [
-          {
-            source: '/',
-            has: [{ type: 'host', value: 'nextskillpro.com' }],
-            destination: '/s/nextskillpro',
-            permanent: false,
-          },
-          {
-            source: '/',
-            has: [{ type: 'host', value: 'agoda.com' }],
-            destination: '/s/agoda',
-            permanent: false,
-          },
-        ];
       }
+      
     } catch (error) {
       console.error('❌ [NextConfig] Error loading dynamic redirects:', error);
-      // Fallback redirects if API fails
-      return [
-        {
-          source: '/',
-          has: [{ type: 'host', value: 'nextskillpro.com' }],
-          destination: '/s/nextskillpro',
-          permanent: false,
-        },
-        {
-          source: '/',
-          has: [{ type: 'host', value: 'agoda.com' }],
-          destination: '/s/agoda',
-          permanent: false,
-        },
-      ];
+      
     }
   },
   images: {
