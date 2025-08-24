@@ -37,10 +37,10 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
-          // Aggressive cache-busting headers
+          // Enhanced no-store headers as suggested by ChatGPT
           {
             key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate, private, max-age=0',
+            value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
           },
           {
             key: 'Pragma',
@@ -53,6 +53,16 @@ const nextConfig = {
           {
             key: 'Surrogate-Control',
             value: 'no-store',
+          },
+        ],
+      },
+      // Allow static assets to be cached for performance
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },
@@ -81,7 +91,7 @@ const nextConfig = {
       const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
           'Pragma': 'no-cache',
           'X-Request-Timestamp': timestamp.toString(),
           'X-Request-ID': requestId,

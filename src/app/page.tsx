@@ -6,6 +6,11 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import PricingPlans from "@/components/PricingPlans";
 
+// Force dynamic + no data cache for this page
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+
 export default function HomePage() {
   const [plans, setPlans] = useState<any[]>([]);
   const [loadingPlans, setLoadingPlans] = useState(true);
@@ -17,7 +22,11 @@ export default function HomePage() {
     async function fetchPlans() {
       setLoadingPlans(true);
       try {
-        const res = await fetch("/api/plans");
+        // Force no-cache for all fetch calls
+        const res = await fetch("/api/plans", { 
+          cache: 'no-store',
+          next: { revalidate: 0 }
+        });
         const data = await res.json();
         setPlans(Array.isArray(data) ? data : []);
       } catch {
@@ -31,7 +40,11 @@ export default function HomePage() {
     // Fetch latest 3 approved templates by super_admin
     async function fetchTemplates() {
       try {
-        const res = await fetch("/api/templates/super-admin");
+        // Force no-cache for all fetch calls
+        const res = await fetch("/api/templates/super-admin", { 
+          cache: 'no-store',
+          next: { revalidate: 0 }
+        });
         const data = await res.json();
         setTemplates(Array.isArray(data) ? data.slice(0, 3) : []);
       } catch {
