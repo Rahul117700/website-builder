@@ -139,7 +139,7 @@ export default function DomainHelpPage() {
               🔧 Professional Domain Services
             </div>
             <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-              Can't Connect Your Domain?
+              Can&apos;t Connect Your Domain?
             </h1>
             <p className="text-xl text-gray-600 mb-8">
               Our expert team will help you get your domain connected quickly and professionally. 
@@ -340,7 +340,7 @@ export default function DomainHelpPage() {
               Alternative Solutions
             </h2>
             <p className="text-lg text-gray-600">
-              Don't want to wait? Try these alternatives
+              Don&apos;t want to wait? Try these alternatives
             </p>
           </div>
 
