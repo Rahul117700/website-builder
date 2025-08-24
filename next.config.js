@@ -8,18 +8,17 @@ const nextConfig = {
   poweredByHeader: false,
   compress: false,
   
+  // Exclude template folders from compilation
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
+  onDemandEntries: {
+    // Period (in ms) where the server will keep pages in the buffer
+    maxInactiveAge: 25 * 1000,
+    // Number of pages that should be kept simultaneously without being disposed
+    pagesBufferLength: 2,
+  },
+  
   // Exclude template folders from Next.js compilation
   webpack: (config, { isServer }) => {
-    // Ignore template folders during compilation
-    config.module.rules.push({
-      test: /\.(js|ts|tsx|jsx)$/,
-      exclude: [
-        /templates_start_bootstrap/,
-        /node_modules/,
-        /\.next/
-      ]
-    });
-    
     // Set watch options to ignore template folders
     config.watchOptions = {
       ignored: [
@@ -28,12 +27,6 @@ const nextConfig = {
         '**/.git/**',
         '**/.next/**'
       ]
-    };
-    
-    // Ignore specific template files
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      'templates_start_bootstrap': false
     };
     
     return config;
