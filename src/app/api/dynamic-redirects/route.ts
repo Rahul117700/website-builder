@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
 
     console.log(`🎯 [Dynamic Redirects] Returning ${redirects.length} redirects`);
     
-    // Create response with no-cache headers and unique data
+    // Create response with enhanced no-store headers
     const response = NextResponse.json({
       success: true,
       redirects: redirects,
@@ -88,10 +88,11 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    // Add aggressive cache-busting headers
-    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, private');
+    // Enhanced no-store headers as suggested by ChatGPT
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     response.headers.set('Pragma', 'no-cache');
     response.headers.set('Expires', '0');
+    response.headers.set('Surrogate-Control', 'no-store');
     response.headers.set('X-Request-ID', requestId);
     response.headers.set('X-Query-Timestamp', timestamp.toString());
     response.headers.set('X-Cache-Buster', Math.random().toString(36).substring(7));
