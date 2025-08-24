@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import PricingPlans from "@/components/PricingPlans";
+import DomainChecker from "@/components/DomainChecker";
 
 // Force dynamic + no data cache for this page
 export const dynamic = 'force-dynamic';
@@ -17,42 +18,60 @@ export default function HomePage() {
   const { data: session } = useSession();
   const router = useRouter();
   const [templates, setTemplates] = useState<any[]>([]);
+  const [shouldCheckDomain, setShouldCheckDomain] = useState(false);
 
   useEffect(() => {
-    async function fetchPlans() {
-      setLoadingPlans(true);
-      try {
-        // Force no-cache for all fetch calls
-        const res = await fetch("/api/plans", { 
-          cache: 'no-store',
-          next: { revalidate: 0 }
-        });
-        const data = await res.json();
-        setPlans(Array.isArray(data) ? data : []);
-      } catch {
-        setPlans([]);
-      } finally {
-        setLoadingPlans(false);
-      }
+    // Check if we should show domain checker
+    const hostname = window.location.hostname;
+    const isCustomDomain = hostname !== 'localhost' && 
+                          hostname !== '127.0.0.1' && 
+                          !hostname.includes('31.97.233.221');
+    
+    if (isCustomDomain) {
+      console.log('🌐 [HomePage] Custom domain detected, showing domain checker');
+      setShouldCheckDomain(true);
+      return;
     }
-    fetchPlans();
+
+    console.log('🏠 [HomePage] Local/development host, loading main page');
+    loadMainPage();
+  }, []);
+
+  const loadMainPage = async () => {
+    // Load plans
+    setLoadingPlans(true);
+    try {
+      // Force no-cache for all fetch calls
+      const res = await fetch("/api/plans", { 
+        cache: 'no-store',
+        next: { revalidate: 0 }
+      });
+      const data = await res.json();
+      setPlans(Array.isArray(data) ? data : []);
+    } catch {
+      setPlans([]);
+    } finally {
+      setLoadingPlans(false);
+    }
     
     // Fetch latest 3 approved templates by super_admin
-    async function fetchTemplates() {
-      try {
-        // Force no-cache for all fetch calls
-        const res = await fetch("/api/templates/super-admin", { 
-          cache: 'no-store',
-          next: { revalidate: 0 }
-        });
-        const data = await res.json();
-        setTemplates(Array.isArray(data) ? data.slice(0, 3) : []);
-      } catch {
-        setTemplates([]);
-      }
+    try {
+      // Force no-cache for all fetch calls
+      const res = await fetch("/api/templates/super-admin", { 
+        cache: 'no-store',
+        next: { revalidate: 0 }
+      });
+      const data = await res.json();
+      setTemplates(Array.isArray(data) ? data.slice(0, 3) : []);
+    } catch {
+      setTemplates([]);
     }
-    fetchTemplates();
-  }, []);
+  };
+
+  // Show domain checker for custom domains
+  if (shouldCheckDomain) {
+    return <DomainChecker />;
+  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-black">
@@ -238,7 +257,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div>
               <h3 className="text-lg font-semibold mb-4">Website Builder</h3>
               <p className="text-gray-400">
