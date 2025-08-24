@@ -38,6 +38,23 @@ model User {
   siteSales          SiteSale[]
   subscriptions      Subscription[]
   transactions       Transaction[]
+  domainHelpRequests DomainHelpRequest[]
+  
+  // Currency preferences
+  preferredCurrency String    @default("USD")
+  currencyRates    Json?     // Store last known exchange rates
+  lastRateUpdate   DateTime?
+  
+  // Billing address for international payments
+  billingCountry   String?
+  billingState     String?
+  billingCity      String?
+  billingZip       String?
+  billingAddress   String?
+  taxId            String?    // VAT/GST number for business users
+  
+  @@index([email])
+  @@index([preferredCurrency])
 }
 
 model Account {
@@ -97,7 +114,6 @@ model Site {
   bookings          Booking[]
   domains           Domain[]
   pages             Page[]
-  payments          Payment[]
   user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   siteSales         SiteSale?
   submissions       Submission[]
@@ -164,24 +180,32 @@ model Analytics {
 }
 
 model Payment {
-  id             String        @id @default(cuid())
-  amount         Float
-  currency       String        @default("INR")
-  status         String
-  paymentId      String?
-  orderId        String?
-  receipt        String?
-  userId         String
-  planId         String?
-  siteId         String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  subscriptionId String?
-  templateId     String?
-  plan           Plan?         @relation("PlanPayments", fields: [planId], references: [id])
-  site           Site?         @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String    @id @default(cuid())
+  userId            String
+  amount            Float
+  currency          String    @default("USD")  // Payment currency
+  exchangeRate      Float?    // Rate from USD to payment currency
+  usdAmount         Float?    // Amount in USD for reporting (optional for existing records)
+  status            String    @default("PENDING")
+  paymentMethod     String?
+  paymentIntentId   String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId            String?
+  plan              Plan?     @relation("PlanPayments", fields: [planId], references: [id])
+  templateId        String?
+  template          Template? @relation(fields: [templateId], references: [id])
+  
+  // International payment details
+  countryCode       String?
+  taxAmount         Float?    // Tax amount in payment currency
+  taxRate           Float?    // Tax rate percentage
+  
+  @@index([userId])
+  @@index([status])
+  @@index([currency])
+  @@index([createdAt])
 }
 
 model Plan {
@@ -225,20 +249,30 @@ model Notification {
 }
 
 model Subscription {
-  id                     String    @id @default(cuid())
-  userId                 String
-  planId                 String
-  status                 String
-  startDate              DateTime
-  endDate                DateTime
-  renewalDate            DateTime?
-  razorpaySubscriptionId String?
-  cancelAtPeriodEnd      Boolean   @default(false)
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
-  payments               Payment[]
-  plan                   Plan      @relation("PlanSubscriptions", fields: [planId], references: [id])
-  user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String    @id @default(cuid())
+  userId            String
+  planId            String
+  status            String    @default("ACTIVE")
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd Boolean   @default(false)
+  canceledAt        DateTime?
+  created           DateTime  @default(now())
+  endedAt           DateTime?
+  trialStart        DateTime?
+  trialEnd          DateTime?
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan              Plan      @relation("PlanSubscriptions", fields: [planId], references: [id])
+  
+  // Currency and pricing
+  currency          String    @default("USD")
+  amount            Float
+  exchangeRate      Float?    // Rate from USD to subscription currency
+  usdAmount         Float?    // Amount in USD for reporting (optional for existing records)
+  
+  @@index([userId])
+  @@index([status])
+  @@index([currency])
 }
 
 model Activity {
@@ -291,6 +325,7 @@ model Template {
   purchases      PurchasedTemplate[]
   sellerEarnings SellerEarning[]
   siteSales      SiteSale[]
+  payments       Payment[]
 }
 
 model PurchasedTemplate {
@@ -478,9 +513,45 @@ model DomainHelpRequest {
   status          String   @default("PENDING")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  
+  // Relation to user (optional)
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([email])
   @@index([status])
+  @@index([userId])
+}
+
+// New model for currency exchange rates
+model CurrencyRate {
+  id                String    @id @default(cuid())
+  baseCurrency      String    // Base currency (usually USD)
+  targetCurrency    String    // Target currency
+  rate              Float     // Exchange rate
+  lastUpdated       DateTime  @default(now())
+  
+  @@unique([baseCurrency, targetCurrency])
+  @@index([baseCurrency])
+  @@index([targetCurrency])
+  @@index([lastUpdated])
+}
+
+// New model for currency configurations
+model CurrencyConfig {
+  id                String    @id @default(cuid())
+  code              String    @unique // Currency code (USD, EUR, etc.)
+  name              String    // Currency name
+  symbol            String    // Currency symbol ($, €, £, etc.)
+  position          String    @default("LEFT") // LEFT or RIGHT
+  decimalPlaces     Int       @default(2)
+  isActive          Boolean   @default(true)
+  isDefault         Boolean   @default(false)
+  exchangeRate      Float     @default(1.0) // Rate relative to USD
+  lastUpdated       DateTime  @default(now())
+  
+  @@index([code])
+  @@index([isActive])
 }
 
 enum UserRole {
