@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     // Save order in database
     const payment = await prisma.payment.create({
       data: {
-        orderId: order.id,
+        // orderId: order.id, // Payment model no longer has orderId field
         amount,
         currency,
         status: 'created',
@@ -115,7 +115,7 @@ export async function PUT(req: NextRequest) {
       },
       data: {
         status: 'completed',
-        paymentId: razorpay_payment_id,
+        // paymentId: razorpay_payment_id, // Payment model no longer has paymentId field
         updatedAt: new Date(),
       },
       include: { user: true, plan: true },
@@ -129,7 +129,9 @@ export async function PUT(req: NextRequest) {
       status: payment.status 
     });
 
+    // SUBSCRIPTION CREATION DISABLED - No longer using subscription model
     // If payment is for a subscription plan, create a new subscription for the user
+    /*
     if (payment.planId && payment.userId && payment.plan) {
       console.log('Processing plan payment...');
       // Cancel any existing active subscriptions for this user and plan
@@ -157,9 +159,10 @@ export async function PUT(req: NextRequest) {
           userId: payment.userId,
           planId: payment.planId,
           status: 'active',
-          startDate: now,
-          endDate,
-          renewalDate,
+          currentPeriodStart: now,
+          currentPeriodEnd: endDate,
+          amount: payment.amount,
+          currency: payment.currency,
         },
       });
       
@@ -189,6 +192,7 @@ export async function PUT(req: NextRequest) {
         });
       }
     }
+    */
 
     // If payment is for a template, add to PurchasedTemplate and MyTemplate
     if (payment.templateId && payment.userId) {

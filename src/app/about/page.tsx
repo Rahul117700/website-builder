@@ -1,161 +1,376 @@
-"use client";
+'use client';
+
+import { 
+  RocketLaunchIcon, 
+  SparklesIcon, 
+  GlobeAltIcon, 
+  UserGroupIcon,
+  ShieldCheckIcon,
+  HeartIcon,
+  LightBulbIcon,
+  ChartBarIcon
+} from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { useSession, signOut } from 'next-auth/react';
-import Footer from '@/components/Footer';
 
 export default function AboutPage() {
-  const { data: session } = useSession();
+  const values = [
+    {
+      icon: HeartIcon,
+      title: 'Customer First',
+              description: 'We prioritize our customers&apos; success above everything else, providing exceptional support and value.'
+    },
+    {
+      icon: LightBulbIcon,
+      title: 'Innovation',
+      description: 'We continuously innovate our platform to provide cutting-edge tools and features for website creation.'
+    },
+    {
+      icon: ShieldCheckIcon,
+      title: 'Transparency',
+      description: 'No hidden fees, no surprises. We believe in clear, honest pricing and straightforward business practices.'
+    },
+    {
+      icon: UserGroupIcon,
+      title: 'Community',
+      description: 'We foster a supportive community where users can learn, share, and grow together.'
+    }
+  ];
+
+  const team = [
+    {
+      name: 'Development Team',
+      role: 'Platform Development',
+      description: 'Our skilled developers work tirelessly to create a robust, scalable, and user-friendly platform.'
+    },
+    {
+      name: 'Design Team',
+      role: 'Template Creation',
+      description: 'Expert designers craft beautiful, functional templates that help businesses succeed online.'
+    },
+    {
+      name: 'Support Team',
+      role: 'Customer Success',
+      description: 'Dedicated support specialists ensure every user gets the help they need to succeed.'
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-black flex flex-col">
-      {/* Navbar (matching home page) */}
-      <header className="bg-black shadow-sm border-b border-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      {/* Navigation */}
+      <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Logo */}
             <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <Link href="/" className="text-2xl font-bold text-white">Website Builder</Link>
-              </div>
+              <RocketLaunchIcon className="h-8 w-8 text-indigo-600" />
+              <span className="ml-2 text-xl font-bold text-gray-900">Website Builder</span>
             </div>
-            
-            {/* Navigation */}
-            <nav className="hidden md:flex space-x-8">
-              <Link href="/#features" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Features</Link>
-              <Link href="/#templates" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Templates</Link>
-              <Link href="/#pricing" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Pricing</Link>
-              <Link href="/about" className="text-white font-semibold">About Us</Link>
-            </nav>
-            
-            {/* User/CTA Section */}
+            <div className="hidden md:flex items-center space-x-8">
+              <Link href="/landing#features" className="text-gray-600 hover:text-indigo-600">Features</Link>
+              <Link href="/landing#templates" className="text-gray-600 hover:text-indigo-600">Templates</Link>
+              <Link href="/landing#pricing" className="text-gray-600 hover:text-indigo-600">Pricing</Link>
+              <Link href="/about" className="text-indigo-600 font-medium">About</Link>
+            </div>
             <div className="flex items-center space-x-4">
-              <Link href="/auth/dashboard" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">Go to Dashboard</Link>
-              {session?.user ? (
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center space-x-2">
-                    {session.user.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={session.user.image} alt="User" className="h-8 w-8 rounded-full" />
-                    ) : (
-                      <span className="h-8 w-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A7 7 0 0112 15a7 7 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                      </span>
-                    )}
-                    <span className="text-gray-300 text-sm">{session.user.name || session.user.email}</span>
-                  </div>
-                  <button 
-                    onClick={() => signOut({ callbackUrl: '/' })}
-                    className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                  >
-                    Sign Out
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-2">
-                  <span className="text-gray-300 text-sm">Rahul117700</span>
-                </div>
-              )}
+              <Link
+                href="/auth/signup"
+                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                Get Started
+              </Link>
             </div>
           </div>
         </div>
-      </header>
-      
-      {/* Main About Us Content */}
-      <div className="flex flex-col items-center justify-center px-4 py-20 flex-1">
-        <div className="max-w-4xl w-full">
-          {/* Hero Section */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-purple-900/30 px-4 py-2 rounded-full mb-6">
-              <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></span>
-              <span className="text-sm font-medium text-purple-300">About Our Mission</span>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="pt-20 pb-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+            About
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+              {' '}Website Builder
+            </span>
+          </h1>
+          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                              We&apos;re on a mission to democratize website creation, making professional 
+            web development accessible to everyone through our innovative template marketplace.
+          </p>
+        </div>
+      </section>
+
+      {/* Story Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 className="text-4xl font-bold text-gray-900 mb-6">Our Story</h2>
+              <div className="space-y-6 text-lg text-gray-600">
+                <p>
+                  Website Builder was born from a simple observation: creating a professional 
+                  website shouldn&apos;t require technical expertise or expensive subscriptions.
+                </p>
+                <p>
+                  We started as a traditional SaaS platform, but quickly realized that the 
+                  subscription model wasn&apos;t serving our users&apos; best interests. Many users 
+                  only needed a website for a specific project or business, not ongoing 
+                  monthly services.
+                </p>
+                <p>
+                  This led us to revolutionize our business model, focusing on what truly 
+                  matters: providing high-quality templates that users can purchase once 
+                  and use forever.
+                </p>
+              </div>
             </div>
-            <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-6">
-              About Us
-            </h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              Website Builder is on a mission to empower everyone to create beautiful, professional websites with ease. Our platform combines AI-powered tools, a visual editor, and a marketplace of modern templates to help you launch and grow your online presence—no coding required.
+            <div className="relative">
+              <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8">
+                <div className="text-center">
+                  <RocketLaunchIcon className="h-24 w-24 text-indigo-600 mx-auto mb-4" />
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Our Mission</h3>
+                  <p className="text-gray-600">
+                    To empower entrepreneurs, creators, and businesses with the tools they 
+                    need to establish a powerful online presence, without the burden of 
+                    recurring fees or technical complexity.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Business Model Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-50 to-purple-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Business Model</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              We&apos;ve reimagined how website building platforms should work, 
+              focusing on value and transparency.
             </p>
           </div>
-
-          {/* Values Section */}
-          <div className="mb-16">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Our Values</h2>
-              <div className="w-24 h-1 bg-gradient-to-r from-purple-600 to-blue-600 mx-auto rounded-full"></div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white rounded-xl p-8 shadow-lg text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
+                <SparklesIcon className="h-8 w-8 text-indigo-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Template Marketplace</h3>
+              <p className="text-gray-600">
+                Our primary revenue comes from selling premium website templates. 
+                Users pay once and own the template forever.
+              </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Innovation Card */}
-              <div className="group relative bg-gray-900 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-700 hover:border-purple-700">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-orange-500 rounded-t-2xl"></div>
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-red-500 to-orange-500 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <span className="text-3xl">🚀</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-4">Innovation</h3>
-                  <p className="text-gray-300 leading-relaxed">We use the latest technology to make website building fast, fun, and future-proof.</p>
-                </div>
+            <div className="bg-white rounded-xl p-8 shadow-lg text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                <GlobeAltIcon className="h-8 w-8 text-green-600" />
               </div>
-
-              {/* Empowerment Card */}
-              <div className="group relative bg-gray-900 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-700 hover:border-purple-700">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-t-2xl"></div>
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <span className="text-3xl">🤝</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-4">Empowerment</h3>
-                  <p className="text-gray-300 leading-relaxed">We believe everyone should have the tools to build their dream online—no matter their background.</p>
-                </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Domain Services</h3>
+              <p className="text-gray-600">
+                Premium domain setup assistance and technical support for users 
+                who need help connecting custom domains.
+              </p>
+            </div>
+            
+            <div className="bg-white rounded-xl p-8 shadow-lg text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
+                <UserGroupIcon className="h-8 w-8 text-purple-600" />
               </div>
-
-              {/* Community Card */}
-              <div className="group relative bg-gray-900 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-700 hover:border-purple-700">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-t-2xl"></div>
-                <div className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <span className="text-3xl">🌐</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-4">Community</h3>
-                  <p className="text-gray-300 leading-relaxed">We foster a supportive community where users can learn, share, and grow together.</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Support Services</h3>
+              <p className="text-gray-600">
+                Technical consultation and custom development services for users 
+                who need specialized assistance.
+              </p>
+            </div>
+          </div>
+          
+          <div className="mt-16 text-center">
+            <div className="bg-white rounded-2xl p-8 shadow-lg max-w-4xl mx-auto">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Why This Model Works</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">For Users:</h4>
+                  <ul className="space-y-2 text-gray-600">
+                    <li>• No recurring fees</li>
+                    <li>• Full ownership of templates</li>
+                    <li>• Transparent pricing</li>
+                    <li>• Lifetime access to features</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2">For Us:</h4>
+                  <ul className="space-y-2 text-gray-600">
+                    <li>• Sustainable revenue model</li>
+                    <li>• Focus on quality over quantity</li>
+                    <li>• Long-term customer relationships</li>
+                    <li>• Innovation-driven growth</li>
+                  </ul>
                 </div>
               </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Stats Section */}
-          <div className="bg-gray-900 rounded-2xl p-8 shadow-lg border border-gray-700 mb-12">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-              <div className="group">
-                <div className="text-4xl font-bold text-purple-400 mb-2 group-hover:scale-110 transition-transform duration-300">250+</div>
-                <div className="text-white font-medium">Websites Created</div>
+      {/* Values Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Values</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              These core values guide everything we do and every decision we make.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {values.map((value, index) => (
+              <div key={index} className="text-center p-6 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
+                  <value.icon className="h-8 w-8 text-indigo-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">{value.title}</h3>
+                <p className="text-gray-600">{value.description}</p>
               </div>
-              <div className="group">
-                <div className="text-4xl font-bold text-green-400 mb-2 group-hover:scale-110 transition-transform duration-300">99.9%</div>
-                <div className="text-white font-medium">Uptime Guarantee</div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Team Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-50 to-purple-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Team</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                                We&apos;re a dedicated team of professionals committed to making 
+              website creation accessible to everyone.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {team.map((member, index) => (
+              <div key={index} className="bg-white rounded-xl p-8 shadow-lg text-center">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-indigo-100 rounded-full mb-4">
+                  <UserGroupIcon className="h-10 w-10 text-indigo-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">{member.name}</h3>
+                <p className="text-indigo-600 font-medium mb-4">{member.role}</p>
+                <p className="text-gray-600">{member.description}</p>
               </div>
-              <div className="group">
-                <div className="text-4xl font-bold text-blue-400 mb-2 group-hover:scale-110 transition-transform duration-300">24/7</div>
-                <div className="text-white font-medium">Support</div>
-              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Impact</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Numbers that tell the story of our growth and success.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-indigo-600 mb-2">10,000+</div>
+              <div className="text-gray-600">Websites Created</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-indigo-600 mb-2">500+</div>
+              <div className="text-gray-600">Premium Templates</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-indigo-600 mb-2">50+</div>
+              <div className="text-gray-600">Industries Served</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-bold text-indigo-600 mb-2">99%</div>
+              <div className="text-gray-600">Customer Satisfaction</div>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* CTA Section */}
-          <div className="text-center">
-            <Link 
-              href="/" 
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group"
+      {/* CTA Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 to-purple-600">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold text-white mb-6">
+            Join Our Mission
+          </h2>
+          <p className="text-xl text-indigo-100 mb-8">
+            Be part of the revolution in website creation. Start building your 
+            professional website today with our premium templates.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/auth/signup"
+              className="bg-white text-indigo-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors"
             >
-              <span>Back to Home</span>
-              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
+              Get Started Free
+            </Link>
+            <Link
+              href="/landing#templates"
+              className="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-indigo-600 transition-colors"
+            >
+              Browse Templates
             </Link>
           </div>
         </div>
-      </div>
+      </section>
 
-      <Footer />
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center mb-4">
+                <RocketLaunchIcon className="h-8 w-8 text-indigo-400" />
+                <span className="ml-2 text-xl font-bold">Website Builder</span>
+              </div>
+              <p className="text-gray-400">
+                Empowering businesses and creators with professional website templates.
+              </p>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Platform</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link href="/landing#features" className="hover:text-white transition-colors">Features</Link></li>
+                <li><Link href="/landing#templates" className="hover:text-white transition-colors">Templates</Link></li>
+                <li><Link href="/landing#pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link href="/auth/dashboard/marketplace" className="hover:text-white transition-colors">Marketplace</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Company</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="/landing" className="hover:text-white transition-colors">Home</Link></li>
+                <li><Link href="/community" className="hover:text-white transition-colors">Community</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition-colors">Terms</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Support</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link href="/domain-help" className="hover:text-white transition-colors">Domain Help</Link></li>
+                <li><Link href="/auth/dashboard/settings" className="hover:text-white transition-colors">Settings</Link></li>
+                <li><Link href="/auth/signin" className="hover:text-white transition-colors">Sign In</Link></li>
+                <li><Link href="/auth/signup" className="hover:text-white transition-colors">Sign Up</Link></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+            <p>&copy; 2024 Website Builder. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 } 

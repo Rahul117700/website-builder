@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
   const users = await prisma.user.findMany({
     include: {
       sites: true,
-      subscriptions: { include: { plan: true } },
+      // subscriptions: { include: { plan: true } }, // DISABLED - No longer using subscription model
     },
     orderBy: { createdAt: 'desc' },
   });

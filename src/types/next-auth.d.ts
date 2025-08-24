@@ -17,6 +17,7 @@ declare module 'next-auth' {
       planExpiryDate?: Date;
       plan?: Plan;
       role?: 'USER' | 'SUPER_ADMIN';
+      preferredCurrency?: string;
     } & DefaultSession['user'];
   }
 
@@ -26,6 +27,7 @@ declare module 'next-auth' {
     planExpiryDate?: Date;
     password?: string;
     role?: 'USER' | 'SUPER_ADMIN';
+    preferredCurrency?: string;
   }
 }
 
@@ -35,5 +37,6 @@ declare module 'next-auth/jwt' {
     planId?: string;
     planExpiryDate?: Date;
     role?: 'USER' | 'SUPER_ADMIN';
+    preferredCurrency?: string;
   }
 }

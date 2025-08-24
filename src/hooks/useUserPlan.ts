@@ -19,13 +19,12 @@ export function useUserPlan() {
         setLoading(true);
         setError(null);
         
-        const response = await fetch('/api/subscription');
-        if (!response.ok) {
-          throw new Error('Failed to fetch subscription');
-        }
-        
-        const data = await response.json();
-        setUserPlan(data);
+        // Since we're no longer using subscriptions, create a default user plan
+        // that gives access to all features
+        const defaultUserPlan: UserPlan = {
+          purchasedTemplates: []
+        };
+        setUserPlan(defaultUserPlan);
       } catch (err) {
         console.error('Error fetching user plan:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch plan');
@@ -43,11 +42,11 @@ export function useUserPlan() {
     
     try {
       setLoading(true);
-      const response = await fetch('/api/subscription');
-      if (response.ok) {
-        const data = await response.json();
-        setUserPlan(data);
-      }
+      // Since we're no longer using subscriptions, just set the default plan
+      const defaultUserPlan: UserPlan = {
+        purchasedTemplates: []
+      };
+      setUserPlan(defaultUserPlan);
     } catch (err) {
       console.error('Error refreshing plan:', err);
     } finally {
@@ -60,7 +59,8 @@ export function useUserPlan() {
     loading,
     error,
     refreshPlan,
-    hasActivePlan: userPlan?.status === 'active',
-    planName: userPlan?.plan?.name || 'Free',
+    // Since we're no longer using subscriptions, all users have access
+    hasActivePlan: true,
+    planName: 'All Features',
   };
 } 

@@ -40,7 +40,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       ...(enabled !== undefined && { enabled }),
     },
   });
+  // SUBSCRIPTION CREATION DISABLED - No longer using subscription model
   // Change plan if planId provided
+  /*
   let subscription = null;
   if (planId) {
     // Cancel existing active subscriptions
@@ -68,9 +70,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
           userId: user.id,
           planId: plan.id,
           status: 'active',
-          startDate: now,
-          endDate,
-          renewalDate,
+          currentPeriodStart: now,
+          currentPeriodEnd: endDate,
+          amount: plan.price,
+          currency: plan.currency,
         },
       });
       // Increment Revenue table (single row)
@@ -85,7 +88,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       }
     }
   }
-  return NextResponse.json({ user, subscription });
+  */
+  return NextResponse.json({ user, subscription: null });
 }
 
 // DELETE /api/admin/users/[id] - Delete user

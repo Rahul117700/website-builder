@@ -50,6 +50,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           image: user.image,
+          preferredCurrency: user.preferredCurrency,
         };
       },
     }),
@@ -70,8 +71,15 @@ export const authOptions: NextAuthOptions = {
       if (session.user && token) {
         session.user.id = token.id;
         session.user.role = token.role;
+        
+        // Include currency preferences in session
+        if (token.preferredCurrency) {
+          session.user.preferredCurrency = token.preferredCurrency;
+        }
+        
         console.log('Session updated with user ID:', session.user.id);
         console.log('Session updated with user role:', session.user.role);
+        console.log('Session updated with preferred currency:', session.user.preferredCurrency);
       }
       
       console.log('Final session output:', session);
@@ -85,15 +93,19 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.preferredCurrency = user.preferredCurrency;
         console.log('JWT updated with user ID:', user.id);
         console.log('JWT updated with user role:', user.role);
+        console.log('JWT updated with preferred currency:', user.preferredCurrency);
       } else if (!token.role && token.id) {
         console.log('Fetching user role from DB for token ID:', token.id);
         // Fetch user role from DB if not present (for refreshes)
         const dbUser = await prisma.user.findUnique({ where: { id: token.id } });
         console.log('DB user found:', dbUser);
         token.role = dbUser?.role || 'USER';
+        token.preferredCurrency = dbUser?.preferredCurrency || 'USD';
         console.log('JWT role set to:', token.role);
+        console.log('JWT preferred currency set to:', token.preferredCurrency);
       }
       
       console.log('Final JWT output:', token);

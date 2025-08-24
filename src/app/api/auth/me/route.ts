@@ -149,7 +149,7 @@ export async function DELETE(req: NextRequest) {
       await prisma.booking.deleteMany({ where: { siteId: site.id } });
       await prisma.submission.deleteMany({ where: { siteId: site.id } });
       await prisma.analytics.deleteMany({ where: { siteId: site.id } });
-      await prisma.payment.deleteMany({ where: { siteId: site.id } });
+      // await prisma.payment.deleteMany({ where: { siteId: site.id } }); // Payment model no longer has siteId
     }
     // Delete the sites
     await prisma.site.deleteMany({ where: { userId } });
@@ -157,7 +157,7 @@ export async function DELETE(req: NextRequest) {
     await prisma.notification.deleteMany({ where: { userId } });
     await prisma.payment.deleteMany({ where: { userId } });
     await prisma.analytics.deleteMany({ where: { userId } });
-    await prisma.subscription.deleteMany({ where: { userId } });
+    // await prisma.subscription.deleteMany({ where: { userId } }); // DISABLED - No longer using subscription model
     await prisma.account.deleteMany({ where: { userId } });
     await prisma.session.deleteMany({ where: { userId } });
     // Finally, delete the user
