@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
 import { PrismaClient } from '@prisma/client';
-import HomePageClient from './HomePageClient';
 
 // Force dynamic + no data cache for this page
 export const dynamic = 'force-dynamic';
@@ -21,7 +20,8 @@ export default async function HomePage() {
       host === '127.0.0.1:3000' || 
       host.includes('31.97.233.221')) {
     console.log('⏭️ [Server] Skipping check for local/development host');
-    return <HomePageClient />;
+    // For local/development, redirect to dashboard instead of showing main page
+    redirect('/auth/dashboard');
   }
 
   try {
@@ -64,11 +64,13 @@ export default async function HomePage() {
       redirect(destination);
     } else {
       console.log('❌ [Server] No domain mapping found for:', host);
-      return <HomePageClient />;
+      // Redirect to domain help page instead of showing main page
+      redirect('/domain-help');
     }
 
   } catch (error) {
     console.error('❌ [Server] Error checking domain:', error);
-    return <HomePageClient />;
+    // On error, redirect to domain help page
+    redirect('/domain-help');
   }
 }
