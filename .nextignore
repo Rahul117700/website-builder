@@ -1,0 +1,5 @@
+# Ignore template folders from Next.js compilation
+templates_start_bootstrap/
+**/templates_start_bootstrap/**
+**/node_modules/**
+**/.git/**

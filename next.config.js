@@ -8,6 +8,28 @@ const nextConfig = {
   poweredByHeader: false,
   compress: false,
   
+  // Exclude template folders from Next.js compilation
+  webpack: (config, { isServer }) => {
+    config.watchOptions = {
+      ignored: [
+        '**/templates_start_bootstrap/**',
+        '**/node_modules/**',
+        '**/.git/**'
+      ]
+    };
+    
+    // Ignore template folders during compilation
+    config.module.rules.push({
+      test: /\.(js|ts|tsx)$/,
+      exclude: [
+        /templates_start_bootstrap/,
+        /node_modules/
+      ]
+    });
+    
+    return config;
+  },
+  
   async headers() {
     return [
       {
