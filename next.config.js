@@ -3,6 +3,8 @@ const nextConfig = {
   experimental: {
     appDir: true,
   },
+  // Disable Next.js caching
+  generateEtags: false,
   async headers() {
     return [
       {
@@ -32,58 +34,88 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
+          // Add cache-busting headers
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+          {
+            key: 'Pragma',
+            value: 'no-cache',
+          },
+          {
+            key: 'Expires',
+            value: '0',
+          },
         ],
       },
     ];
   },
   async redirects() {
+    console.log('🚀 [NextConfig] redirects() function called');
+    console.log('📅 [NextConfig] Timestamp:', new Date().toISOString());
+    console.log('🌐 [NextConfig] NEXTAUTH_URL:', process.env.NEXTAUTH_URL);
+    
     try {
       // Get base URL from environment variable
       const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+      console.log('🔗 [NextConfig] Using base URL:', baseUrl);
       
-      // Fetch dynamic redirects from database
-      const response = await fetch(`${baseUrl}/api/dynamic-redirects`);
+      // Add cache-busting parameter to API call
+      const timestamp = Date.now();
+      const apiUrl = `${baseUrl}/api/dynamic-redirects?t=${timestamp}`;
+      console.log('📡 [NextConfig] Fetching from API:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'X-Request-Timestamp': timestamp.toString()
+        }
+      });
+      
       const data = await response.json();
+      console.log('📊 [NextConfig] API Response:', data);
       
       if (data.success && data.redirects) {
-        console.log(`✅ Loaded ${data.count} dynamic redirects from database`);
+        console.log(`✅ [NextConfig] Loaded ${data.count} dynamic redirects from database`);
         return data.redirects;
-      } 
-      // else {
-      //   console.log('⚠️ Using fallback redirects');
-      //   // Fallback redirects if API fails
-      //   return [
-      //     {
-      //       source: '/',
-      //       has: [{ type: 'host', value: 'nextskillpro.com' }],
-      //       destination: '/s/nextskillpro',
-      //       permanent: false,
-      //     },
-      //     {
-      //       source: '/',
-      //       has: [{ type: 'host', value: 'agoda.com' }],
-      //       destination: '/s/agoda',
-      //       permanent: false,
-      //     },
-      //   ];
-      // }
+      } else {
+        console.log('⚠️ [NextConfig] Using fallback redirects');
+        // Fallback redirects if API fails
+        return [
+          {
+            source: '/',
+            has: [{ type: 'host', value: 'nextskillpro.com' }],
+            destination: '/s/nextskillpro',
+            permanent: false,
+          },
+          {
+            source: '/',
+            has: [{ type: 'host', value: 'agoda.com' }],
+            destination: '/s/agoda',
+            permanent: false,
+          },
+        ];
+      }
     } catch (error) {
-      console.error('❌ Error loading dynamic redirects:', error);
+      console.error('❌ [NextConfig] Error loading dynamic redirects:', error);
       // Fallback redirects if API fails
-      // return [
-      //   {
-      //     source: '/',
-      //     has: [{ type: 'host', value: 'nextskillpro.com' }],
-      //     destination: '/s/nextskillpro',
-      //     permanent: false,
-      //   },
-      //   {
-      //     source: '/',
-      //     has: [{ type: 'host', value: 'agoda.com' }],
-      //     destination: '/s/agoda',
-      //     permanent: false,
-      //   },
-      // ];
+      return [
+        {
+          source: '/',
+          has: [{ type: 'host', value: 'nextskillpro.com' }],
+          destination: '/s/nextskillpro',
+          permanent: false,
+        },
+        {
+          source: '/',
+          has: [{ type: 'host', value: 'agoda.com' }],
+          destination: '/s/agoda',
+          permanent: false,
+        },
+      ];
     }
   },
   images: {
