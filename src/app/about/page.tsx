@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { 
   RocketLaunchIcon, 
   SparklesIcon, 
@@ -8,11 +9,16 @@ import {
   ShieldCheckIcon,
   HeartIcon,
   LightBulbIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  Bars3Icon,
+  XMarkIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
 export default function AboutPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
   const values = [
     {
       icon: HeartIcon,
@@ -69,6 +75,7 @@ export default function AboutPage() {
               <Link href="/landing#templates" className="text-gray-600 hover:text-indigo-600">Templates</Link>
               <Link href="/landing#pricing" className="text-gray-600 hover:text-indigo-600">Pricing</Link>
               <Link href="/about" className="text-indigo-600 font-medium">About</Link>
+              <Link href="/auth/dashboard/create-template" className="text-gray-600 hover:text-indigo-600">Sell Your Template</Link>
             </div>
             <div className="flex items-center space-x-4">
               <Link
@@ -77,9 +84,35 @@ export default function AboutPage() {
               >
                 Get Started
               </Link>
+              
+              {/* Mobile menu button */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+              >
+                {mobileMenuOpen ? (
+                  <XMarkIcon className="h-6 w-6" />
+                ) : (
+                  <Bars3Icon className="h-6 w-6" />
+                )}
+              </button>
             </div>
           </div>
         </div>
+        
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200">
+              <Link href="/landing#features" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Features</Link>
+              <Link href="/landing#templates" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Templates</Link>
+              <Link href="/landing#pricing" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Pricing</Link>
+              <Link href="/about" className="block px-3 py-2 text-base font-medium text-indigo-600 hover:bg-gray-50 rounded-md">About</Link>
+              <Link href="/auth/dashboard/create-template" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Sell Your Template</Link>
+              <Link href="/auth/signup" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Get Started</Link>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
@@ -317,6 +350,12 @@ export default function AboutPage() {
             >
               Browse Templates
             </Link>
+            <Link
+              href="/auth/dashboard/create-template"
+              className="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-indigo-600 transition-colors"
+            >
+              Sell Your Template
+            </Link>
           </div>
         </div>
       </section>
@@ -342,6 +381,7 @@ export default function AboutPage() {
                 <li><Link href="/landing#templates" className="hover:text-white transition-colors">Templates</Link></li>
                 <li><Link href="/landing#pricing" className="hover:text-white transition-colors">Pricing</Link></li>
                 <li><Link href="/auth/dashboard/marketplace" className="hover:text-white transition-colors">Marketplace</Link></li>
+                <li><Link href="/auth/dashboard/create-template" className="hover:text-white transition-colors">Sell Your Template</Link></li>
               </ul>
             </div>
             
