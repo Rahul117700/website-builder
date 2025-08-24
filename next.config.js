@@ -10,22 +10,31 @@ const nextConfig = {
   
   // Exclude template folders from Next.js compilation
   webpack: (config, { isServer }) => {
+    // Ignore template folders during compilation
+    config.module.rules.push({
+      test: /\.(js|ts|tsx|jsx)$/,
+      exclude: [
+        /templates_start_bootstrap/,
+        /node_modules/,
+        /\.next/
+      ]
+    });
+    
+    // Set watch options to ignore template folders
     config.watchOptions = {
       ignored: [
         '**/templates_start_bootstrap/**',
         '**/node_modules/**',
-        '**/.git/**'
+        '**/.git/**',
+        '**/.next/**'
       ]
     };
     
-    // Ignore template folders during compilation
-    config.module.rules.push({
-      test: /\.(js|ts|tsx)$/,
-      exclude: [
-        /templates_start_bootstrap/,
-        /node_modules/
-      ]
-    });
+    // Ignore specific template files
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'templates_start_bootstrap': false
+    };
     
     return config;
   },
