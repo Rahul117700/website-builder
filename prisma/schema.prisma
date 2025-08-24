@@ -467,6 +467,22 @@ model Domain {
   @@index([siteId])
 }
 
+model DomainHelpRequest {
+  id              String   @id @default(cuid())
+  name            String
+  email           String
+  phone           String?
+  domain          String
+  issue           String
+  selectedService String?
+  status          String   @default("PENDING")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([email])
+  @@index([status])
+}
+
 enum UserRole {
   USER
   SUPER_ADMIN
