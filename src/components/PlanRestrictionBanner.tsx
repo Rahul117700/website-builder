@@ -25,7 +25,8 @@ export default function PlanRestrictionBanner({
   if (!isVisible) return null;
 
   const isWebsiteLimit = feature === 'website_limit';
-  const currentPlanName = userPlan?.plan?.name || 'Free';
+  // Since we're no longer using subscription plans, all users have access to features
+  const currentPlanName = 'All Features';
 
   return (
     <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-6 mb-6">
@@ -43,28 +44,27 @@ export default function PlanRestrictionBanner({
           <p className="text-gray-700 mb-4">
             {isWebsiteLimit ? (
               <>
-                You&#39;ve reached your limit of <strong>{maxWebsites} website{maxWebsites > 1 ? 's' : ''}</strong> on your current <strong>{currentPlanName}</strong> plan. 
+                You&#39;ve reached your limit of <strong>{maxWebsites} website{maxWebsites > 1 ? 's' : ''}</strong>. 
                 {currentWebsiteCount > 0 && (
                   <span> You currently have {currentWebsiteCount} website{currentWebsiteCount > 1 ? 's' : ''}.</span>
                 )}
               </>
             ) : (
               <>
-                This feature requires a <strong>{requiredPlan}</strong> plan or higher. 
-                You&#39;re currently on the <strong>{currentPlanName}</strong> plan.
+                This feature is available to all users. You have access to <strong>{currentPlanName}</strong>.
               </>
             )}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3">
             <button
-              onClick={() => router.push('/auth/dashboard/billing')}
+              onClick={() => router.push('/auth/dashboard/marketplace')}
               className="inline-flex items-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors"
             >
               <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
               </svg>
-              Upgrade Plan
+              Browse Templates
             </button>
             
             <button

@@ -152,9 +152,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Funnels', href: '/auth/dashboard/funnels', icon: RocketLaunchIcon as any, current: pathname === '/auth/dashboard/funnels' },
     { name: 'Purchased Templates', href: '/auth/dashboard/purchased-templates', icon: HeartIcon, current: pathname === '/auth/dashboard/purchased-templates' },
     { name: 'Community', href: '/auth/dashboard/community', icon: UserGroupIcon, current: pathname === '/auth/dashboard/community' },
-    { name: 'Domain', href: '/auth/dashboard/domain', icon: GlobeAltIcon, current: pathname === '/auth/dashboard/domain' },
-    { name: 'Billing', href: '/auth/dashboard/billing', icon: BanknotesIcon, current: pathname === '/auth/dashboard/billing' },
-    { name: 'Transactions', href: '/auth/dashboard/transactions', icon: CreditCardIcon, current: pathname === '/auth/dashboard/transactions' },
+    // { name: 'Domain', href: '/auth/dashboard/domain', icon: GlobeAltIcon, current: pathname === '/auth/dashboard/domain' },
+    // { name: 'Billing', href: '/auth/dashboard/billing', icon: BanknotesIcon, current: pathname === '/auth/dashboard/billing' },
+    // { name: 'Transactions', href: '/auth/dashboard/transactions', icon: CreditCardIcon, current: pathname === '/auth/dashboard/transactions' },
     { name: 'Settings', href: '/auth/dashboard/settings', icon: Cog6ToothIcon, current: pathname === '/auth/dashboard/settings' },
   ].filter(item => !hiddenItems.includes(item.name));
 
@@ -218,7 +218,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     await signOut({ callbackUrl: '/auth/signin' });
   };
 
-  const currentPlanName = userPlan?.plan?.name || 'Free';
+  // Since we're no longer using subscription plans, all users have access to features
+  const currentPlanName = 'All Features';
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black">

@@ -11,7 +11,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   const userId = params.id;
   const payments = await prisma.payment.findMany({
     where: { userId },
-    include: { plan: true, site: true },
+    include: { plan: true },
     orderBy: { createdAt: 'desc' },
   });
   return NextResponse.json(payments);

@@ -13,10 +13,9 @@ export interface Plan {
 }
 
 export interface UserPlan {
-  plan: Plan;
-  status: string;
-  startDate: string;
-  endDate: string;
+  // Since we're no longer using subscription plans, this is simplified
+  // Users can access all features based on what they've purchased
+  purchasedTemplates: string[]; // Array of template IDs they own
 }
 
 // Feature permissions based on plan
@@ -59,46 +58,26 @@ export function getPlanFeatures(planName: string) {
 }
 
 export function canAccessFeature(userPlan: UserPlan | null, feature: keyof typeof PLAN_FEATURES.FREE): boolean {
-  if (!userPlan || userPlan.status !== 'active') {
-    // No active plan, only free features
-    return feature === 'canAccessMarketplace' || feature === 'canAccessCommunity';
-  }
-
-  const planFeatures = getPlanFeatures(userPlan.plan.name);
-  return Boolean(planFeatures[feature]);
+  // Since we're no longer using subscription plans, all users can access all features
+  // Features are now controlled by individual template purchases
+  return true;
 }
 
 export function canCreateWebsite(userPlan: UserPlan | null, currentWebsiteCount: number): boolean {
-  if (!userPlan || userPlan.status !== 'active') {
-    // Free plan - only 1 website
-    return currentWebsiteCount < 1;
-  }
-
-  const planFeatures = getPlanFeatures(userPlan.plan.name);
-  if (planFeatures.maxWebsites === -1) {
-    // Unlimited websites
-    return true;
-  }
-
-  return currentWebsiteCount < planFeatures.maxWebsites;
+  // Since we're no longer using subscription plans, users can create unlimited websites
+  // This is now controlled by individual template purchases and usage
+  return true;
 }
 
 export function getMaxWebsites(userPlan: UserPlan | null): number {
-  if (!userPlan || userPlan.status !== 'active') {
-    return 1; // Free plan
-  }
-
-  const planFeatures = getPlanFeatures(userPlan.plan.name);
-  return planFeatures.maxWebsites === -1 ? -1 : planFeatures.maxWebsites; // -1 means unlimited
+  // Since we're no longer using subscription plans, users can create unlimited websites
+  return -1; // -1 means unlimited
 }
 
 export function getSupportLevel(userPlan: UserPlan | null): string {
-  if (!userPlan || userPlan.status !== 'active') {
-    return 'Basic';
-  }
-
-  const planFeatures = getPlanFeatures(userPlan.plan.name);
-  return planFeatures.supportLevel;
+  // Since we're no longer using subscription plans, all users get basic support
+  // Premium support can be offered as a separate service
+  return 'Basic';
 }
 
 // Navigation items that should be hidden based on plan
