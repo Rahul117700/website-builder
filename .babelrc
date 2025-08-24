@@ -1,7 +1,0 @@
-{
-  "presets": ["next/babel"],
-  "ignore": [
-    "templates_start_bootstrap/**/*",
-    "**/node_modules/**/*"
-  ]
-}

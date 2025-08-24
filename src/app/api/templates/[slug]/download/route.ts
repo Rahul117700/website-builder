@@ -4,7 +4,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
-import archiver from 'archiver';
+import { execSync } from 'child_process';
 
 const prisma = new PrismaClient();
 
@@ -55,27 +55,50 @@ export async function GET(
       );
     }
     
-    // Create a zip file containing the template
-    const archive = archiver('zip', {
-      zlib: { level: 9 } // Sets the compression level
-    });
+    // Create a zip file using system zip command
+    const zipFileName = `${slug}-template.zip`;
+    const zipFilePath = path.join(process.cwd(), 'temp', zipFileName);
     
-    // Set response headers for file download
-    const response = new NextResponse(archive as any, {
-      headers: {
-        'Content-Type': 'application/zip',
-        'Content-Disposition': `attachment; filename="${slug}-template.zip"`,
-        'Cache-Control': 'no-cache, no-store, must-revalidate'
+    // Ensure temp directory exists
+    const tempDir = path.join(process.cwd(), 'temp');
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+    
+    try {
+      // Use system zip command (works on Linux/Mac, for Windows we'll need a different approach)
+      if (process.platform === 'win32') {
+        // For Windows, we'll just return the template directory path for now
+        // In production, you might want to use a Windows-compatible zip library
+        return NextResponse.json(
+          { error: 'Download functionality not yet implemented for Windows' },
+          { status: 501 }
+        );
+      } else {
+        // For Linux/Mac, use zip command
+        execSync(`zip -r "${zipFilePath}" .`, { cwd: templateDir });
+        
+        // Read the zip file and return it
+        const zipBuffer = fs.readFileSync(zipFilePath);
+        
+        // Clean up the temporary zip file
+        fs.unlinkSync(zipFilePath);
+        
+        return new NextResponse(zipBuffer, {
+          headers: {
+            'Content-Type': 'application/zip',
+            'Content-Disposition': `attachment; filename="${zipFileName}"`,
+            'Cache-Control': 'no-cache, no-store, must-revalidate'
+          }
+        });
       }
-    });
-    
-    // Add the template files to the archive
-    archive.directory(templateDir, slug);
-    
-    // Finalize the archive
-    await archive.finalize();
-    
-    return response;
+    } catch (zipError) {
+      console.error('Error creating zip file:', zipError);
+      return NextResponse.json(
+        { error: 'Failed to create template archive' },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error('Error downloading template:', error);
     return NextResponse.json(
