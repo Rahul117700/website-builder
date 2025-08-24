@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { randomUUID } from 'crypto';
 
 // Create Prisma client with no caching
 const prisma = new PrismaClient({
@@ -7,16 +8,17 @@ const prisma = new PrismaClient({
 });
 
 export async function GET(req: NextRequest) {
+  // Generate unique cache-busting ID for each request
+  const requestId = randomUUID();
+  const timestamp = Date.now();
+  
   console.log('🚀 [Dynamic Redirects] API called');
+  console.log('🆔 [Dynamic Redirects] Request ID:', requestId);
   console.log('📅 [Dynamic Redirects] Timestamp:', new Date().toISOString());
   console.log('🌐 [Dynamic Redirects] Database URL:', process.env.DATABASE_URL?.substring(0, 20) + '...');
   
   try {
     console.log('🔍 [Dynamic Redirects] Fetching domains from database...');
-    
-    // Force fresh data by adding timestamp to query
-    const timestamp = Date.now();
-    console.log('⏰ [Dynamic Redirects] Query timestamp:', timestamp);
     
     // Get all connected domains from database with no caching
     const domains = await prisma.domain.findMany({
@@ -67,12 +69,14 @@ export async function GET(req: NextRequest) {
 
     console.log(`🎯 [Dynamic Redirects] Returning ${redirects.length} redirects`);
     
-    // Create response with no-cache headers
+    // Create response with no-cache headers and unique data
     const response = NextResponse.json({
       success: true,
       redirects: redirects,
       count: redirects.length,
+      requestId: requestId,
       timestamp: timestamp,
+      cacheBuster: Math.random().toString(36).substring(7),
       debug: {
         domains: domains.map(d => ({
           host: d.host,
@@ -84,11 +88,13 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    // Add cache-busting headers
-    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    // Add aggressive cache-busting headers
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, private');
     response.headers.set('Pragma', 'no-cache');
     response.headers.set('Expires', '0');
+    response.headers.set('X-Request-ID', requestId);
     response.headers.set('X-Query-Timestamp', timestamp.toString());
+    response.headers.set('X-Cache-Buster', Math.random().toString(36).substring(7));
 
     return response;
 
@@ -97,13 +103,16 @@ export async function GET(req: NextRequest) {
     console.error('📋 [Dynamic Redirects] Error details:', {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : 'No stack trace',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      requestId: requestId
     });
     
     return NextResponse.json({
       success: false,
       error: 'Failed to fetch redirects',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
+      requestId: requestId,
+      timestamp: timestamp
     }, { status: 500 });
   } finally {
     console.log('🔌 [Dynamic Redirects] Disconnecting from database...');

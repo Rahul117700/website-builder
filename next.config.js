@@ -3,8 +3,11 @@ const nextConfig = {
   experimental: {
     appDir: true,
   },
-  // Disable Next.js caching
+  // Disable Next.js caching completely
   generateEtags: false,
+  poweredByHeader: false,
+  compress: false,
+  
   async headers() {
     return [
       {
@@ -34,10 +37,10 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
-          // Add cache-busting headers
+          // Aggressive cache-busting headers
           {
             key: 'Cache-Control',
-            value: 'no-cache, no-store, must-revalidate',
+            value: 'no-cache, no-store, must-revalidate, private, max-age=0',
           },
           {
             key: 'Pragma',
@@ -47,12 +50,22 @@ const nextConfig = {
             key: 'Expires',
             value: '0',
           },
+          {
+            key: 'Surrogate-Control',
+            value: 'no-store',
+          },
         ],
       },
     ];
   },
   async redirects() {
+    // Generate unique cache-busting parameters
+    const timestamp = Date.now();
+    const randomId = Math.random().toString(36).substring(7);
+    const requestId = `${timestamp}-${randomId}`;
+    
     console.log('🚀 [NextConfig] redirects() function called');
+    console.log('🆔 [NextConfig] Request ID:', requestId);
     console.log('📅 [NextConfig] Timestamp:', new Date().toISOString());
     console.log('🌐 [NextConfig] NEXTAUTH_URL:', process.env.NEXTAUTH_URL);
     
@@ -61,18 +74,21 @@ const nextConfig = {
       const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
       console.log('🔗 [NextConfig] Using base URL:', baseUrl);
       
-      // Add cache-busting parameter to API call
-      const timestamp = Date.now();
-      const apiUrl = `${baseUrl}/api/dynamic-redirects?t=${timestamp}`;
+      // Create unique cache-busting URL with multiple parameters
+      const apiUrl = `${baseUrl}/api/dynamic-redirects?t=${timestamp}&id=${randomId}&req=${requestId}&cb=${Math.random()}`;
       console.log('📡 [NextConfig] Fetching from API:', apiUrl);
       
       const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
-          'Cache-Control': 'no-cache',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
-          'X-Request-Timestamp': timestamp.toString()
-        }
+          'X-Request-Timestamp': timestamp.toString(),
+          'X-Request-ID': requestId,
+          'X-Cache-Buster': randomId
+        },
+        // Force fresh request
+        cache: 'no-store'
       });
       
       const data = await response.json();
