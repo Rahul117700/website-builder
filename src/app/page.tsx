@@ -35,8 +35,7 @@ export default async function HomePage() {
     // Query database directly with fresh connection
     const domain = await prisma.domain.findFirst({
       where: {
-        host: host,
-        siteId: { not: null }
+        host: host
       },
       include: {
         site: {
