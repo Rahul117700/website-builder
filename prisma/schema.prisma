@@ -40,21 +40,21 @@ model User {
   transactions       Transaction[]
   domainHelpRequests DomainHelpRequest[]
   
-  // Currency preferences
-  preferredCurrency String    @default("USD")
-  currencyRates    Json?     // Store last known exchange rates
-  lastRateUpdate   DateTime?
+  // Currency preferences - TEMPORARILY COMMENTED OUT
+  // preferredCurrency String    @default("USD")
+  // currencyRates    Json?     // Store last known exchange rates
+  // lastRateUpdate   DateTime?
   
-  // Billing address for international payments
-  billingCountry   String?
-  billingState     String?
-  billingCity      String?
-  billingZip       String?
-  billingAddress   String?
-  taxId            String?    // VAT/GST number for business users
+  // Billing address for international payments - TEMPORARILY COMMENTED OUT
+  // billingCountry   String?
+  // billingState     String?
+  // billingCity      String?
+  // billingZip       String?
+  // billingAddress   String?
+  // taxId            String?    // VAT/GST number for business users
   
   @@index([email])
-  @@index([preferredCurrency])
+  // @@index([preferredCurrency])
 }
 
 model Account {
@@ -132,9 +132,10 @@ model Page {
   cssCode     String?
   htmlCode    String?
   jsCode      String?
-  renderMode  String   @default("html")
-  reactCode   Json?
-  reactBundle String?
+  // TEMPORARILY COMMENTED OUT - not in current database
+  // renderMode  String   @default("html")
+  // reactCode   Json?
+  // reactBundle String?
   site        Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
 
   @@unique([siteId, slug])
@@ -184,8 +185,9 @@ model Payment {
   userId            String
   amount            Float
   currency          String    @default("USD")  // Payment currency
-  exchangeRate      Float?    // Rate from USD to payment currency
-  usdAmount         Float?    // Amount in USD for reporting (optional for existing records)
+  // TEMPORARILY COMMENTED OUT - not in current database
+  // exchangeRate      Float?    // Rate from USD to payment currency
+  // usdAmount         Float?    // Amount in USD for reporting (optional for existing records)
   status            String    @default("PENDING")
   paymentMethod     String?
   paymentIntentId   String?
@@ -197,10 +199,10 @@ model Payment {
   templateId        String?
   template          Template? @relation(fields: [templateId], references: [id])
   
-  // International payment details
-  countryCode       String?
-  taxAmount         Float?    // Tax amount in payment currency
-  taxRate           Float?    // Tax rate percentage
+  // International payment details - TEMPORARILY COMMENTED OUT
+  // countryCode       String?
+  // taxAmount         Float?    // Tax amount in payment currency
+  // taxRate           Float?    // Tax rate percentage
   
   @@index([userId])
   @@index([status])
@@ -264,15 +266,15 @@ model Subscription {
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan              Plan      @relation("PlanSubscriptions", fields: [planId], references: [id])
   
-  // Currency and pricing
-  currency          String    @default("USD")
-  amount            Float
-  exchangeRate      Float?    // Rate from USD to subscription currency
-  usdAmount         Float?    // Amount in USD for reporting (optional for existing records)
+  // Currency and pricing - TEMPORARILY COMMENTED OUT
+  // currency          String    @default("USD")
+  // amount            Float
+  // exchangeRate      Float?    // Rate from USD to subscription currency
+  // usdAmount         Float?    // Amount in USD for reporting (optional for existing records)
   
   @@index([userId])
   @@index([status])
-  @@index([currency])
+  // @@index([currency])
 }
 
 model Activity {
@@ -347,7 +349,8 @@ model MyTemplate {
   html       String?
   css        String?
   js         String?
-  reactCode  Json?
+  // TEMPORARILY COMMENTED OUT - not in current database
+  // reactCode  Json?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   pages      Json?
@@ -523,36 +526,36 @@ model DomainHelpRequest {
   @@index([userId])
 }
 
-// New model for currency exchange rates
-model CurrencyRate {
-  id                String    @id @default(cuid())
-  baseCurrency      String    // Base currency (usually USD)
-  targetCurrency    String    // Target currency
-  rate              Float     // Exchange rate
-  lastUpdated       DateTime  @default(now())
-  
-  @@unique([baseCurrency, targetCurrency])
-  @@index([baseCurrency])
-  @@index([targetCurrency])
-  @@index([lastUpdated])
-}
+// New model for currency exchange rates - TEMPORARILY COMMENTED OUT
+// model CurrencyRate {
+//   id                String    @id @default(cuid())
+//   baseCurrency      String    // Base currency (usually USD)
+//   targetCurrency    String    // Target currency
+//   rate              Float     // Exchange rate
+//   lastUpdated       DateTime  @default(now())
+//   
+//   @@unique([baseCurrency, targetCurrency])
+//   @@index([baseCurrency])
+//   @@index([targetCurrency])
+//   @@index([lastUpdated])
+// }
 
-// New model for currency configurations
-model CurrencyConfig {
-  id                String    @id @default(cuid())
-  code              String    @unique // Currency code (USD, EUR, etc.)
-  name              String    // Currency name
-  symbol            String    // Currency symbol ($, €, £, etc.)
-  position          String    @default("LEFT") // LEFT or RIGHT
-  decimalPlaces     Int       @default(2)
-  isActive          Boolean   @default(true)
-  isDefault         Boolean   @default(false)
-  exchangeRate      Float     @default(1.0) // Rate relative to USD
-  lastUpdated       DateTime  @default(now())
-  
-  @@index([code])
-  @@index([isActive])
-}
+// New model for currency configurations - TEMPORARILY COMMENTED OUT
+// model CurrencyConfig {
+//   id                String    @id @default(cuid())
+//   code              String    @unique // Currency code (USD, EUR, etc.)
+//   name              String    // Currency name
+//   symbol            String    // Currency symbol ($, €, £, etc.)
+//   position          String    @default("LEFT") // LEFT or RIGHT
+//   decimalPlaces     Int       @default(2)
+//   isActive          Boolean   @default(true)
+//   isDefault         Boolean   @default(false)
+//   exchangeRate      Float     @default(1.0) // Rate relative to USD
+//   lastUpdated       DateTime  @default(now())
+//   
+//   @@index([code])
+//   @@index([isActive])
+// }
 
 enum UserRole {
   USER
