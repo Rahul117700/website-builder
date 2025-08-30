@@ -1,99 +1,220 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import { 
   RocketLaunchIcon, 
-  SparklesIcon, 
+  UsersIcon, 
   GlobeAltIcon, 
-  UserGroupIcon,
-  ShieldCheckIcon,
+  SparklesIcon,
+  CheckCircleIcon,
+  StarIcon,
   HeartIcon,
   LightBulbIcon,
-  ChartBarIcon,
-  Bars3Icon,
-  XMarkIcon,
-  MagnifyingGlassIcon
+  ShieldCheckIcon,
+  ChartBarIcon
 } from '@heroicons/react/24/outline';
-import Link from 'next/link';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid';
+import { useState } from 'react';
+import gsap from 'gsap';
 
 export default function AboutPage() {
+  const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
-  const values = [
+  const aboutRef = useRef(null);
+  const missionRef = useRef(null);
+  const teamRef = useRef(null);
+  const valuesRef = useRef(null);
+
+  // GSAP Animations
+  useEffect(() => {
+    gsap.registerPlugin();
+
+    // Set initial visibility
+    gsap.set('.about-title, .about-subtitle, .mission-card, .team-member, .value-card', { 
+      opacity: 1, 
+      y: 0 
+    });
+
+    // About section animations
+    const aboutTl = gsap.timeline();
+    aboutTl
+      .set('.about-title', { opacity: 0, y: 50 })
+      .set('.about-subtitle', { opacity: 0, y: 30 })
+      .to('.about-title', { 
+        duration: 1, 
+        y: 0, 
+        opacity: 1, 
+        ease: 'power3.out' 
+      })
+      .to('.about-subtitle', { 
+        duration: 0.8, 
+        y: 0, 
+        opacity: 1, 
+        ease: 'power2.out' 
+      }, '-=0.5');
+
+    // Mission cards animations
+    gsap.fromTo('.mission-card', 
+      { opacity: 0, y: 30 },
+      {
+        duration: 0.8,
+        y: 0,
+        opacity: 1,
+        stagger: 0.2,
+        ease: 'power2.out',
+        delay: 1
+      }
+    );
+
+    // Team members animations
+    gsap.fromTo('.team-member', 
+      { opacity: 0, y: 30 },
+      {
+        duration: 0.8,
+        y: 0,
+        opacity: 1,
+        stagger: 0.1,
+        ease: 'power2.out',
+        delay: 1.5
+      }
+    );
+
+    // Values animations
+    gsap.fromTo('.value-card', 
+      { opacity: 0, y: 30 },
+      {
+        duration: 0.8,
+        y: 0,
+        opacity: 1,
+        stagger: 0.1,
+        ease: 'power2.out',
+        delay: 2
+      }
+    );
+
+  }, []);
+
+  const teamMembers = [
     {
-      icon: HeartIcon,
-      title: 'Customer First',
-              description: 'We prioritize our customers&apos; success above everything else, providing exceptional support and value.'
+      name: "Sarah Johnson",
+      role: "CEO & Founder",
+      image: "/api/placeholder/150/150",
+      bio: "Former Google engineer with 15+ years in web development. Passionate about democratizing website creation.",
+      expertise: ["Product Strategy", "Team Leadership", "Web Development"]
     },
     {
-      icon: LightBulbIcon,
-      title: 'Innovation',
-      description: 'We continuously innovate our platform to provide cutting-edge tools and features for website creation.'
+      name: "Michael Chen",
+      role: "CTO & Lead Developer",
+      image: "/api/placeholder/150/150",
+      bio: "Full-stack developer with expertise in React, Node.js, and cloud architecture. Built scalable systems for millions of users.",
+      expertise: ["System Architecture", "React Development", "Cloud Infrastructure"]
     },
     {
-      icon: ShieldCheckIcon,
-      title: 'Transparency',
-      description: 'No hidden fees, no surprises. We believe in clear, honest pricing and straightforward business practices.'
+      name: "Emily Rodriguez",
+      role: "Head of Design",
+      image: "/api/placeholder/150/150",
+      bio: "Award-winning designer with experience at Airbnb and Figma. Specializes in user experience and visual design.",
+      expertise: ["UX Design", "Visual Design", "Design Systems"]
     },
     {
-      icon: UserGroupIcon,
-      title: 'Community',
-      description: 'We foster a supportive community where users can learn, share, and grow together.'
+      name: "David Kim",
+      role: "Head of Marketing",
+      image: "/api/placeholder/150/150",
+      bio: "Growth marketing expert with 10+ years scaling SaaS companies. Previously led marketing at Shopify and Stripe.",
+      expertise: ["Growth Marketing", "Brand Strategy", "Customer Acquisition"]
     }
   ];
 
-  const team = [
+  const companyValues = [
     {
-      name: 'Development Team',
-      role: 'Platform Development',
-      description: 'Our skilled developers work tirelessly to create a robust, scalable, and user-friendly platform.'
+      icon: HeartIcon,
+      title: "Customer First",
+      description: "Every decision we make is driven by what's best for our customers. We listen, learn, and iterate based on their feedback."
     },
     {
-      name: 'Design Team',
-      role: 'Template Creation',
-      description: 'Expert designers craft beautiful, functional templates that help businesses succeed online.'
+      icon: LightBulbIcon,
+      title: "Innovation",
+      description: "We constantly push boundaries and explore new technologies to deliver cutting-edge solutions that give our users an edge."
     },
     {
-      name: 'Support Team',
-      role: 'Customer Success',
-      description: 'Dedicated support specialists ensure every user gets the help they need to succeed.'
+      icon: ShieldCheckIcon,
+      title: "Trust & Security",
+      description: "Your data and success are our top priorities. We maintain the highest standards of security and privacy protection."
+    },
+    {
+      icon: UsersIcon,
+      title: "Community",
+      description: "We believe in the power of community. We foster connections between creators, developers, and entrepreneurs."
+    },
+    {
+      icon: ChartBarIcon,
+      title: "Results-Driven",
+      description: "We measure success by the tangible results our users achieve. Every feature is designed to drive real business growth."
+    },
+    {
+      icon: StarIcon,
+      title: "Excellence",
+      description: "We strive for excellence in everything we do, from code quality to customer support to user experience."
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-white overflow-hidden">
       {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50 w-full">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <RocketLaunchIcon className="h-8 w-8 text-indigo-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">Website Builder</span>
+              <RocketLaunchIcon className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600" />
+              <span className="ml-2 text-lg sm:text-xl font-bold text-gray-900">Website Builder</span>
             </div>
-            <div className="hidden md:flex items-center space-x-8">
-              <Link href="/landing#features" className="text-gray-600 hover:text-indigo-600">Features</Link>
-              <Link href="/landing#templates" className="text-gray-600 hover:text-indigo-600">Templates</Link>
-              <Link href="/landing#pricing" className="text-gray-600 hover:text-indigo-600">Pricing</Link>
+            <div className="hidden lg:flex items-center space-x-6">
+              <Link href="/" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Home</Link>
+              <a href="/#features" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Features</a>
+              <a href="/#templates" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Templates</a>
+              <a href="/#pricing" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Pricing</a>
+              <Link href="/auth/dashboard/create-template" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Sell Template</Link>
               <Link href="/about" className="text-indigo-600 font-medium">About</Link>
-              <Link href="/auth/dashboard/create-template" className="text-gray-600 hover:text-indigo-600">Sell Your Template</Link>
+              <Link href="/contact" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Contact</Link>
+              <Link href="/community" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Community</Link>
+              <Link href="/terms" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Terms</Link>
+              <Link href="/privacy" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Privacy</Link>
             </div>
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/auth/signup"
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-              >
-                Get Started
-              </Link>
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              {session ? (
+                <Link
+                  href="/auth/dashboard"
+                  className="bg-indigo-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all transform hover:scale-105 text-sm sm:text-base font-medium"
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/auth/signin"
+                    className="text-gray-700 hover:text-indigo-600 px-3 sm:px-4 py-2 transition-colors text-sm sm:text-base font-medium hover:bg-gray-50 rounded-lg"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    className="bg-indigo-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-indigo-700 transition-all transform hover:scale-105 text-sm sm:text-base font-medium whitespace-nowrap shadow-sm hover:shadow-md"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
               
-              {/* Mobile menu button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+                className="lg:hidden inline-flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
               >
                 {mobileMenuOpen ? (
-                  <XMarkIcon className="h-6 w-6" />
+                  <XMarkIcon className="h-5 w-5" />
                 ) : (
-                  <Bars3Icon className="h-6 w-6" />
+                  <Bars3Icon className="h-5 w-5" />
                 )}
               </button>
             </div>
@@ -102,312 +223,220 @@ export default function AboutPage() {
         
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-200">
-              <Link href="/landing#features" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Features</Link>
-              <Link href="/landing#templates" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Templates</Link>
-              <Link href="/landing#pricing" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Pricing</Link>
+          <div className="lg:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              <Link href="/" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Home</Link>
+              <a href="/#features" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Features</a>
+              <a href="/#templates" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Templates</a>
+              <a href="/#pricing" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Pricing</a>
+              <Link href="/auth/dashboard/create-template" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Sell Template</Link>
               <Link href="/about" className="block px-3 py-2 text-base font-medium text-indigo-600 hover:bg-gray-50 rounded-md">About</Link>
-              <Link href="/auth/dashboard/create-template" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Sell Your Template</Link>
-              <Link href="/auth/signup" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Get Started</Link>
+              <Link href="/contact" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Contact</Link>
+              <Link href="/community" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Community</Link>
+              <Link href="/terms" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Terms</Link>
+              <Link href="/privacy" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Privacy</Link>
+              {!session && (
+                <>
+                  <Link href="/auth/signin" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Sign In</Link>
+                  <Link href="/auth/signup" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Get Started</Link>
+                </>
+              )}
             </div>
           </div>
         )}
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-20 pb-16 px-4 sm:px-6 lg:px-8">
+      <section ref={aboutRef} className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white via-indigo-50 to-purple-50">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-            About
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
-              {' '}Website Builder
+          <h1 className="about-title text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            Building the Future of
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
+              {' '}Web Creation
             </span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                              We&apos;re on a mission to democratize website creation, making professional 
-            web development accessible to everyone through our innovative template marketplace.
+          <p className="about-subtitle text-lg sm:text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            We're on a mission to democratize website creation, making it possible for anyone to build 
+            professional, high-converting websites that drive real business results.
           </p>
         </div>
       </section>
 
-      {/* Story Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">Our Story</h2>
-              <div className="space-y-6 text-lg text-gray-600">
-                <p>
-                  Website Builder was born from a simple observation: creating a professional 
-                  website shouldn&apos;t require technical expertise or expensive subscriptions.
-                </p>
-                <p>
-                  We started as a traditional SaaS platform, but quickly realized that the 
-                  subscription model wasn&apos;t serving our users&apos; best interests. Many users 
-                  only needed a website for a specific project or business, not ongoing 
-                  monthly services.
-                </p>
-                <p>
-                  This led us to revolutionize our business model, focusing on what truly 
-                  matters: providing high-quality templates that users can purchase once 
-                  and use forever.
-                </p>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl p-8">
-                <div className="text-center">
-                  <RocketLaunchIcon className="h-24 w-24 text-indigo-600 mx-auto mb-4" />
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Our Mission</h3>
-                  <p className="text-gray-600">
-                    To empower entrepreneurs, creators, and businesses with the tools they 
-                    need to establish a powerful online presence, without the burden of 
-                    recurring fees or technical complexity.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Business Model Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-50 to-purple-50">
+      {/* Mission Section */}
+      <section ref={missionRef} className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Business Model</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              We&apos;ve reimagined how website building platforms should work, 
-              focusing on value and transparency.
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+              Our Mission
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+              To empower entrepreneurs, creators, and businesses with the tools they need to succeed online.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-xl p-8 shadow-lg text-center">
+            <div className="mission-card text-center p-6 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
-                <SparklesIcon className="h-8 w-8 text-indigo-600" />
+                <GlobeAltIcon className="h-8 w-8 text-indigo-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Template Marketplace</h3>
-              <p className="text-gray-600">
-                Our primary revenue comes from selling premium website templates. 
-                Users pay once and own the template forever.
-              </p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Global Reach</h3>
+              <p className="text-gray-600">We serve creators and businesses in over 150 countries, helping them build their online presence.</p>
             </div>
             
-            <div className="bg-white rounded-xl p-8 shadow-lg text-center">
+            <div className="mission-card text-center p-6 rounded-xl bg-gradient-to-br from-green-50 to-blue-50 border border-green-100">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                <GlobeAltIcon className="h-8 w-8 text-green-600" />
+                <SparklesIcon className="h-8 w-8 text-green-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Domain Services</h3>
-              <p className="text-gray-600">
-                Premium domain setup assistance and technical support for users 
-                who need help connecting custom domains.
-              </p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Innovation First</h3>
+              <p className="text-gray-600">We continuously innovate with cutting-edge technology to stay ahead of the curve.</p>
             </div>
             
-            <div className="bg-white rounded-xl p-8 shadow-lg text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
-                <UserGroupIcon className="h-8 w-8 text-purple-600" />
+            <div className="mission-card text-center p-6 rounded-xl bg-gradient-to-br from-pink-50 to-red-50 border border-pink-100">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-pink-100 rounded-full mb-4">
+                <UsersIcon className="h-8 w-8 text-pink-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Support Services</h3>
-              <p className="text-gray-600">
-                Technical consultation and custom development services for users 
-                who need specialized assistance.
-              </p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Community Driven</h3>
+              <p className="text-gray-600">Our success is built on the success of our community of creators and entrepreneurs.</p>
             </div>
-          </div>
-          
-          <div className="mt-16 text-center">
-            <div className="bg-white rounded-2xl p-8 shadow-lg max-w-4xl mx-auto">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Why This Model Works</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">For Users:</h4>
-                  <ul className="space-y-2 text-gray-600">
-                    <li>• No recurring fees</li>
-                    <li>• Full ownership of templates</li>
-                    <li>• Transparent pricing</li>
-                    <li>• Lifetime access to features</li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">For Us:</h4>
-                  <ul className="space-y-2 text-gray-600">
-                    <li>• Sustainable revenue model</li>
-                    <li>• Focus on quality over quantity</li>
-                    <li>• Long-term customer relationships</li>
-                    <li>• Innovation-driven growth</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Values Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Values</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              These core values guide everything we do and every decision we make.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {values.map((value, index) => (
-              <div key={index} className="text-center p-6 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
-                  <value.icon className="h-8 w-8 text-indigo-600" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{value.title}</h3>
-                <p className="text-gray-600">{value.description}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>
 
       {/* Team Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-indigo-50 to-purple-50">
+      <section ref={teamRef} className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Team</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                                We&apos;re a dedicated team of professionals committed to making 
-              website creation accessible to everyone.
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+              Meet Our Team
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+              The passionate minds behind Website Builder, dedicated to revolutionizing web creation.
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {team.map((member, index) => (
-              <div key={index} className="bg-white rounded-xl p-8 shadow-lg text-center">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-indigo-100 rounded-full mb-4">
-                  <UserGroupIcon className="h-10 w-10 text-indigo-600" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {teamMembers.map((member, index) => (
+              <div key={index} className="team-member bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="text-center mb-4">
+                  <div className="w-20 h-20 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <UsersIcon className="h-10 w-10 text-indigo-600" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">{member.name}</h3>
+                  <p className="text-indigo-600 font-medium">{member.role}</p>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{member.name}</h3>
-                <p className="text-indigo-600 font-medium mb-4">{member.role}</p>
-                <p className="text-gray-600">{member.description}</p>
+                <p className="text-gray-600 text-sm mb-4 text-center">{member.bio}</p>
+                <div className="space-y-2">
+                  {member.expertise.map((skill, i) => (
+                    <div key={i} className="flex items-center text-xs text-gray-500">
+                      <CheckCircleIcon className="h-3 w-3 text-green-500 mr-2 flex-shrink-0" />
+                      {skill}
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      {/* Values Section */}
+      <section ref={valuesRef} className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Impact</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Numbers that tell the story of our growth and success.
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+              Our Values
+            </h2>
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+              The principles that guide everything we do and every decision we make.
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-indigo-600 mb-2">10,000+</div>
-              <div className="text-gray-600">Websites Created</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-indigo-600 mb-2">500+</div>
-              <div className="text-gray-600">Premium Templates</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-indigo-600 mb-2">50+</div>
-              <div className="text-gray-600">Industries Served</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-indigo-600 mb-2">99%</div>
-              <div className="text-gray-600">Customer Satisfaction</div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {companyValues.map((value, index) => (
+              <div key={index} className="value-card bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                <div className="inline-flex items-center justify-center w-12 h-12 bg-indigo-100 rounded-full mb-4">
+                  <value.icon className="h-6 w-6 text-indigo-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">{value.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{value.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 to-purple-600">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 to-purple-600">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
             Join Our Mission
           </h2>
-          <p className="text-xl text-indigo-100 mb-8">
-            Be part of the revolution in website creation. Start building your 
-            professional website today with our premium templates.
+          <p className="text-lg sm:text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
+            Be part of the revolution in web creation. Start building your success story today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/auth/signup"
-              className="bg-white text-indigo-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors"
+              className="bg-white text-indigo-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 hover:shadow-xl"
             >
               Get Started Free
             </Link>
             <Link
-              href="/landing#templates"
-              className="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-indigo-600 transition-colors"
+              href="/contact"
+              className="border-2 border-white text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-white hover:text-indigo-600 transition-all transform hover:scale-105"
             >
-              Browse Templates
-            </Link>
-            <Link
-              href="/auth/dashboard/create-template"
-              className="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-indigo-600 transition-colors"
-            >
-              Sell Your Template
+              Contact Us
             </Link>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8">
+      <footer className="bg-gray-900 text-white py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center mb-4">
-                <RocketLaunchIcon className="h-8 w-8 text-indigo-400" />
-                <span className="ml-2 text-xl font-bold">Website Builder</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            <div className="text-center sm:text-left">
+              <div className="flex items-center justify-center sm:justify-start mb-4">
+                <RocketLaunchIcon className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-400" />
+                <span className="ml-2 text-lg sm:text-xl font-bold">Website Builder</span>
               </div>
-              <p className="text-gray-400">
-                Empowering businesses and creators with professional website templates.
+              <p className="text-sm sm:text-base text-gray-400">
+                Empowering creators and entrepreneurs to build successful online businesses.
               </p>
             </div>
             
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Platform</h3>
+            <div className="text-center sm:text-left">
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Platform</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/landing#features" className="hover:text-white transition-colors">Features</Link></li>
-                <li><Link href="/landing#templates" className="hover:text-white transition-colors">Templates</Link></li>
-                <li><Link href="/landing#pricing" className="hover:text-white transition-colors">Pricing</Link></li>
-                <li><Link href="/auth/dashboard/marketplace" className="hover:text-white transition-colors">Marketplace</Link></li>
-                <li><Link href="/auth/dashboard/create-template" className="hover:text-white transition-colors">Sell Your Template</Link></li>
+                <li><a href="/#features" className="hover:text-white transition-colors text-sm sm:text-base">Features</a></li>
+                <li><a href="/#templates" className="hover:text-white transition-colors text-sm sm:text-base">Templates</a></li>
+                <li><Link href="/auth/dashboard/marketplace" className="hover:text-white transition-colors text-sm sm:text-base">Marketplace</Link></li>
+                <li><Link href="/auth/dashboard/create-template" className="hover:text-white transition-colors text-sm sm:text-base">Sell Your Template</Link></li>
               </ul>
             </div>
             
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Company</h3>
+            <div className="text-center sm:text-left">
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Company</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
-                <li><Link href="/landing" className="hover:text-white transition-colors">Home</Link></li>
-                <li><Link href="/community" className="hover:text-white transition-colors">Community</Link></li>
-                <li><Link href="/terms" className="hover:text-white transition-colors">Terms</Link></li>
+                <li><Link href="/about" className="hover:text-white transition-colors text-sm sm:text-base">About Us</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition-colors text-sm sm:text-base">Contact</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition-colors text-sm sm:text-base">Terms</Link></li>
+                <li><Link href="/privacy" className="hover:text-white transition-colors text-sm sm:text-base">Privacy</Link></li>
               </ul>
             </div>
             
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Support</h3>
+            <div className="text-center sm:text-left">
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Connect</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/domain-help" className="hover:text-white transition-colors">Domain Help</Link></li>
-                <li><Link href="/auth/dashboard/settings" className="hover:text-white transition-colors">Settings</Link></li>
-                <li><Link href="/auth/signin" className="hover:text-white transition-colors">Sign In</Link></li>
-                <li><Link href="/auth/signup" className="hover:text-white transition-colors">Sign Up</Link></li>
+                <li><Link href="/auth/signup" className="hover:text-white transition-colors text-sm sm:text-base">Sign Up</Link></li>
+                <li><Link href="/auth/signin" className="hover:text-white transition-colors text-sm sm:text-base">Sign In</Link></li>
+                <li><Link href="/auth/dashboard" className="hover:text-white transition-colors text-sm sm:text-base">Dashboard</Link></li>
               </ul>
             </div>
           </div>
           
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 Website Builder. All rights reserved.</p>
+          <div className="border-t border-gray-800 mt-8 sm:mt-12 pt-6 sm:pt-8 text-center text-gray-400">
+            <p className="text-sm sm:text-base">&copy; 2024 Website Builder. All rights reserved.</p>
           </div>
         </div>
       </footer>

@@ -1,684 +1,411 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import DashboardLayout from '@/components/layouts/dashboard-layout';
-// Removed site cards from dashboard view
-import CreateSiteModal from '@/components/dashboard/create-site-modal-fixed';
-import { PlusIcon, GlobeAltIcon, PencilIcon, ChartBarIcon, DocumentDuplicateIcon, BellIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import { Site, CreateSiteInput } from '@/types';
-import { WelcomeModal } from '@/components/dashboard/welcome-modal';
-import toast from 'react-hot-toast';
-import { Bar } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  PointElement,
-  LineElement,
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
-import { Card, CardContent, CardHeader } from '@mui/material';
-import Avatar from '@mui/material/Avatar';
-import LinearProgress from '@mui/material/LinearProgress';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, PointElement, LineElement);
+import { 
+  RocketLaunchIcon, 
+  ChartBarIcon,
+  CurrencyDollarIcon,
+  UsersIcon,
+  EyeIcon,
+  ShoppingCartIcon,
+  CogIcon,
+  BellIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+  ArrowTrendingUpIcon,
+  DocumentTextIcon,
+  GlobeAltIcon,
+  CreditCardIcon,
+  CalendarIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  InformationCircleIcon,
+  ChevronDownIcon
+} from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid';
+import gsap from 'gsap';
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const [sites, setSites] = useState<Site[]>([]);
-  const [siteStats, setSiteStats] = useState<Record<string, any>>({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [currentPlan, setCurrentPlan] = useState<any>(null);
-  const [allSitesAnalytics, setAllSitesAnalytics] = useState<Record<string, any>>({});
-  const [allSitesLoading, setAllSitesLoading] = useState(false);
-  const [activityFeed, setActivityFeed] = useState<Array<{ type: string; site?: Site; title: string; date: string; id: string; action: string }>>([]);
-  const [showFunnelGuide, setShowFunnelGuide] = useState(true);
-  const [salesSummary, setSalesSummary] = useState<{ totalSales: number; totalEarnings: number } | null>(null);
-  const [funnelsSummary, setFunnelsSummary] = useState<{ totalVisits: number; conversions: number } | null>(null);
-  const [earningsTotal, setEarningsTotal] = useState<number>(0);
-  const [payoutAmount, setPayoutAmount] = useState<string>('');
+  const { data: session } = useSession();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  // Personalized greeting message
-  const greetingMessages = [
-    "Let's build something amazing today!",
-    "Your websites are growing fast!",
-    "Keep up the great work!",
-    "Every site is a new opportunity.",
-    "You're one step closer to your goals!"
-  ];
-  const greeting = greetingMessages[new Date().getDay() % greetingMessages.length];
+  const dashboardRef = useRef(null);
+  const statsRef = useRef(null);
+  const chartsRef = useRef(null);
 
+  // GSAP Animations
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
-    }
-  }, [status, router]);
+    gsap.registerPlugin();
 
-  // Load persisted preference for the Funnel Guide
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const hidden = window.localStorage.getItem('hide-funnel-guide');
-      if (hidden === '1') setShowFunnelGuide(false);
-    }
+    // Set initial visibility
+    gsap.set('.dashboard-title, .stat-card, .chart-container, .recent-activity', { 
+      opacity: 1, 
+      y: 0 
+    });
+
+    // Dashboard title animation
+    const titleTl = gsap.timeline();
+    titleTl
+      .set('.dashboard-title', { opacity: 0, y: 50 })
+      .to('.dashboard-title', { 
+        duration: 1, 
+        y: 0, 
+        opacity: 1, 
+        ease: 'power3.out' 
+      });
+
+    // Stats cards animation
+    gsap.fromTo('.stat-card', 
+      { opacity: 0, y: 30 },
+      {
+        duration: 0.8,
+        y: 0,
+        opacity: 1,
+        stagger: 0.1,
+        ease: 'power2.out',
+        delay: 0.5
+      }
+    );
+
+    // Charts animation
+    gsap.fromTo('.chart-container', 
+      { opacity: 0, y: 30 },
+      {
+        duration: 0.8,
+        y: 0,
+        opacity: 1,
+        ease: 'power2.out',
+        delay: 1
+      }
+    );
+
+    // Recent activity animation
+    gsap.fromTo('.recent-activity', 
+      { opacity: 0, y: 30 },
+      {
+        duration: 0.8,
+        y: 0,
+        opacity: 1,
+        ease: 'power2.out',
+        delay: 1.2
+      }
+    );
+
   }, []);
 
-  const refreshSitesAndStats = async () => {
-    setIsLoading(true);
-        try {
-          const response = await fetch('/api/sites');
-          if (response.ok) {
-            const data = await response.json();
-        const sitesArr = Array.isArray(data) ? data : data.sites;
-        setSites(sitesArr);
-            // Fetch stats for each site in parallel
-        const statsPromises = sitesArr.map(async (site: Site) => {
-              const [analyticsRes, bookingsRes, submissionsRes, notificationsRes] = await Promise.all([
-                fetch(`/api/analytics?siteId=${site.id}`),
-                fetch(`/api/bookings?siteId=${site.id}`),
-                fetch(`/api/submissions?siteId=${site.id}`),
-            fetch(`/api/notifications`),
-              ]);
-              const analytics = analyticsRes.ok ? await analyticsRes.json() : null;
-              const bookings = bookingsRes.ok ? await bookingsRes.json() : [];
-              const submissions = submissionsRes.ok ? await submissionsRes.json() : [];
-              const notifications = notificationsRes.ok ? await notificationsRes.json() : [];
-              const siteNotifications = Array.isArray(notifications)
-                ? notifications.filter((n: any) => n.read === false && n.message.includes(site.name))
-                : [];
-              return {
-                siteId: site.id,
-            pageViews: analytics?.summary?.totalPageViews || 0,
-                bookings: bookings.length,
-                submissions: submissions.length,
-                unreadNotifications: siteNotifications.length,
-              };
-            });
-            const statsArr = await Promise.all(statsPromises);
-            const statsObj: Record<string, any> = {};
-            statsArr.forEach((stat) => {
-              statsObj[stat.siteId] = stat;
-            });
-            setSiteStats(statsObj);
-          } else {
-            toast.error('Failed to fetch sites');
-          }
-        } catch (error) {
-          toast.error('Error fetching sites');
-        } finally {
-          setIsLoading(false);
-        }
-  };
-
-  useEffect(() => {
-    if (status === 'authenticated') {
-      refreshSitesAndStats();
-      // Fetch current plan
-      fetch('/api/subscription')
-        .then(res => res.json())
-        .then(data => {
-          const plan = data.plan || null;
-          setCurrentPlan(plan);
-          
-          // Only redirect if user has no plan at all (not for free plan)
-          if (!plan) {
-            router.push('/auth/dashboard/billing');
-            toast.error('Please select a plan to access the dashboard');
-          }
-        });
-
-      // Fetch sales summary for dashboard
-      fetch('/api/sites/on-sale')
-        .then(res => (res.ok ? res.json() : []))
-        .then(async (sales) => {
-          try {
-            // Derive totals from siteSale table; also ensure earnings via template sellerEarnings if available
-            const totalSales = Array.isArray(sales) ? sales.reduce((acc: number, s: any) => acc + (s.totalSales || 0), 0) : 0;
-            const totalEarnings = Array.isArray(sales) ? sales.reduce((acc: number, s: any) => acc + (s.earnings || 0), 0) : 0;
-            setSalesSummary({ totalSales, totalEarnings });
-          } catch {
-            setSalesSummary({ totalSales: 0, totalEarnings: 0 });
-          }
-        })
-        .catch(() => setSalesSummary({ totalSales: 0, totalEarnings: 0 }));
-
-      // Fetch funnels performance summary
-      fetch('/api/funnels')
-        .then(res => (res.ok ? res.json() : []))
-        .then((funnels) => {
-          if (!Array.isArray(funnels)) { setFunnelsSummary({ totalVisits: 0, conversions: 0 }); return; }
-          const totalVisits = funnels.reduce((a: number, f: any) => a + (f.totalVisits || 0), 0);
-          const conversions = funnels.reduce((a: number, f: any) => a + (f.conversions || 0), 0);
-          setFunnelsSummary({ totalVisits, conversions });
-        })
-        .catch(() => setFunnelsSummary({ totalVisits: 0, conversions: 0 }));
-
-      // Fetch total earnings for user
-      fetch('/api/users/earnings')
-        .then(res => (res.ok ? res.json() : { total: 0 }))
-        .then(data => setEarningsTotal(data.total || 0))
-        .catch(() => setEarningsTotal(0));
+  const stats = [
+    {
+      title: "Total Revenue",
+      value: "$12,847",
+      change: "+23%",
+      changeType: "positive",
+      icon: CurrencyDollarIcon,
+      color: "from-green-500 to-emerald-600"
+    },
+    {
+      title: "Website Views",
+      value: "45,892",
+      change: "+18%",
+      changeType: "positive",
+      icon: EyeIcon,
+      color: "from-blue-500 to-indigo-600"
+    },
+    {
+      title: "Conversions",
+      value: "3.8%",
+      change: "+0.5%",
+      changeType: "positive",
+      icon: UsersIcon,
+      color: "from-purple-500 to-pink-600"
+    },
+    {
+      title: "Active Templates",
+      value: "12",
+      change: "+2",
+      changeType: "positive",
+      icon: DocumentTextIcon,
+      color: "from-orange-500 to-red-600"
     }
-  }, [status, router]);
+  ];
 
-  // Fetch analytics for all sites
-  useEffect(() => {
-    if (sites.length > 0) {
-      setAllSitesLoading(true);
-      Promise.all(
-        sites.map(site =>
-          fetch(`/api/analytics?siteId=${site.id}&period=30d`)
-            .then(res => res.ok ? res.json() : null)
-            .then(data => ({ siteId: site.id, data }))
-            .catch(() => ({ siteId: site.id, data: null }))
-        )
-      ).then(results => {
-        const analyticsMap: Record<string, any> = {};
-        results.forEach(({ siteId, data }) => {
-          analyticsMap[siteId] = data;
-        });
-        setAllSitesAnalytics(analyticsMap);
-        setAllSitesLoading(false);
-      });
+  const recentActivities = [
+    {
+      type: "sale",
+      title: "Template Sale",
+      description: "E-commerce template sold for $49",
+      time: "2 hours ago",
+      amount: "+$49",
+      icon: ShoppingCartIcon,
+      color: "text-green-600"
+    },
+    {
+      type: "view",
+      title: "Website View",
+      description: "Portfolio website received 150 views",
+      time: "4 hours ago",
+      amount: "+150",
+      icon: EyeIcon,
+      color: "text-blue-600"
+    },
+    {
+      type: "conversion",
+      title: "Lead Generated",
+      description: "New contact form submission",
+      time: "6 hours ago",
+      amount: "+1",
+      icon: UsersIcon,
+      color: "text-purple-600"
+    },
+    {
+      type: "update",
+      title: "Template Updated",
+      description: "Blog template updated with new features",
+      time: "1 day ago",
+      amount: "Updated",
+      icon: DocumentTextIcon,
+      color: "text-orange-600"
     }
-  }, [sites]);
+  ];
 
-  // Fetch recent activity for all sites
-  useEffect(() => {
-    async function fetchActivity() {
-      if (!sites.length) return;
-      const allActivity: any[] = [];
-      // Fetch recent pages
-      for (const site of sites) {
-        const pagesRes = await fetch(`/api/pages?siteId=${site.id}`);
-        if (pagesRes.ok) {
-          const pages = await pagesRes.json();
-          pages.slice(-3).forEach((p: any) => allActivity.push({
-            type: 'page',
-            site,
-            title: p.title,
-            date: p.updatedAt || p.createdAt,
-            id: p.id,
-            action: 'Page updated',
-          }));
-        }
-        // Bookings
-        const bookingsRes = await fetch(`/api/bookings?siteId=${site.id}`);
-        if (bookingsRes.ok) {
-          const bookings = await bookingsRes.json();
-          bookings.slice(0, 2).forEach((b: any) => allActivity.push({
-            type: 'booking',
-            site,
-            title: b.name,
-            date: b.date,
-            id: b.id,
-            action: 'New booking',
-          }));
-        }
-        // Submissions
-        const submissionsRes = await fetch(`/api/submissions?siteId=${site.id}`);
-        if (submissionsRes.ok) {
-          const submissions = await submissionsRes.json();
-          submissions.slice(0, 2).forEach((s: any) => allActivity.push({
-            type: 'submission',
-            site,
-            title: s.formType,
-            date: s.createdAt,
-            id: s.id,
-            action: 'New submission',
-          }));
-        }
-      }
-      // Notifications
-      const notificationsRes = await fetch('/api/notifications');
-      if (notificationsRes.ok) {
-        const notifications = await notificationsRes.json();
-        notifications.slice(0, 3).forEach((n: any) => allActivity.push({
-          type: 'notification',
-          site: sites.find(s => n.message.includes(s.name)),
-          title: n.message,
-          date: n.createdAt,
-          id: n.id,
-          action: 'Notification',
-        }));
-      }
-      // Sort by date desc
-      allActivity.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      setActivityFeed(allActivity.slice(0, 10));
+  const quickActions = [
+    {
+      title: "Create Template",
+      description: "Design and sell new templates",
+      icon: PlusIcon,
+      href: "/auth/dashboard/create-template",
+      color: "from-indigo-500 to-purple-600"
+    },
+    {
+      title: "View Analytics",
+      description: "Check detailed performance metrics",
+      icon: ChartBarIcon,
+      href: "/auth/dashboard/analytics",
+      color: "from-green-500 to-emerald-600"
+    },
+    {
+      title: "Manage Domains",
+      description: "Configure custom domains",
+      icon: GlobeAltIcon,
+      href: "/auth/dashboard/domains",
+      color: "from-blue-500 to-indigo-600"
+    },
+    {
+      title: "Payment Settings",
+      description: "Update billing information",
+      icon: CreditCardIcon,
+      href: "/auth/dashboard/billing",
+      color: "from-orange-500 to-red-600"
     }
-    fetchActivity();
-  }, [sites]);
-
-  const handleCreateSite = async (newSite: CreateSiteInput) => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('/api/sites', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newSite),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        toast.success('Website created successfully!');
-        setIsCreateModalOpen(false);
-        await refreshSitesAndStats();
-        router.push(`/auth/dashboard/sites/${data.site.id}`);
-      } else {
-        const error = await response.json();
-        toast.error(error.error || 'Failed to create site');
-      }
-    } catch (error) {
-      toast.error('Error creating site');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (status === 'loading' || isLoading) {
-    return (
-      <DashboardLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  ];
 
   return (
-    <DashboardLayout>
-      <WelcomeModal />
-      {/* Personalized Greeting */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
-        <Avatar src={session?.user?.image || undefined} alt={session?.user?.name || 'User'} sx={{ width: 56, height: 56 }} />
-        <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Welcome, {session?.user?.name || 'User'}!</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-300">{greeting}</p>
-        </div>
-      </div>
-      {/* Funnel System – Quick Guide */}
-      {showFunnelGuide && (
-        <div className="mb-6 rounded-xl border border-purple-200 dark:border-purple-900/40 bg-purple-50 dark:bg-purple-900/20 p-5">
-          <div className="flex flex-col sm:flex-row items-start gap-3">
-            <div className="mt-0.5">
-              <SparklesIcon className="h-6 w-6 text-purple-600 dark:text-purple-300" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation */}
+      <nav className="bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50 w-full">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <RocketLaunchIcon className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600" />
+              <span className="ml-2 text-lg sm:text-xl font-bold text-gray-900">Website Builder</span>
             </div>
-            <div className="flex-1">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <h3 className="text-base font-bold text-purple-800 dark:text-purple-100">Funnel System – Quick Guide</h3>
-                <button
-                  onClick={() => {
-                    setShowFunnelGuide(false);
-                    if (typeof window !== 'undefined') {
-                      window.localStorage.setItem('hide-funnel-guide', '1');
-                    }
-                  }}
-                  className="text-purple-700/70 hover:text-purple-900 dark:text-purple-300/70 dark:hover:text-purple-100 text-sm"
-                  aria-label="Dismiss guide"
-                >
-                  Dismiss
-                </button>
+            
+            <div className="hidden lg:flex items-center space-x-6">
+              <Link href="/" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Home</Link>
+              <a href="/#features" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Features</a>
+              <a href="/#templates" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Templates</a>
+              <a href="/#pricing" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Pricing</a>
+              <Link href="/auth/dashboard/create-template" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Sell Template</Link>
+              <Link href="/about" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">About</Link>
+              <Link href="/contact" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Contact</Link>
+              <Link href="/community" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Community</Link>
+              <Link href="/terms" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Terms</Link>
+              <Link href="/privacy" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Privacy</Link>
+            </div>
+
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <span className="text-indigo-600 font-semibold text-sm">
+                    {session?.user?.name?.charAt(0) || 'U'}
+                  </span>
+                </div>
+                <span className="hidden sm:block text-sm font-medium text-gray-700">
+                  {session?.user?.name || 'User'}
+                </span>
               </div>
-              <p className="mt-1 text-sm text-purple-900/80 dark:text-purple-100/80">Sell your templates with a simple 2‑step sales flow: landing page + Razorpay checkout.</p>
-              <ul className="mt-3 text-sm text-purple-900/80 dark:text-purple-100/80 list-disc ml-5 space-y-1">
-                <li>Create your funnel at <a className="underline font-semibold" href="/auth/dashboard/funnels">Dashboard → Funnels</a>.</li>
-                <li>Share the public link: <span className="font-mono">/f/&lt;slug&gt;</span>.</li>
-                <li>Buyers pay securely via Razorpay; purchases auto‑appear in <a className="underline font-semibold" href="/auth/dashboard/purchased-templates">Purchased Templates</a>.</li>
-                <li>Track visits and conversions in the Funnels dashboard.</li>
-              </ul>
-              <div className="mt-4 flex flex-col sm:flex-row gap-3">
-                <a href="/auth/dashboard/funnels" className="px-4 py-2 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 text-center">Create a Funnel</a>
-                <a href="/auth/dashboard/purchased-templates" className="px-4 py-2 rounded-lg bg-white text-purple-700 border border-purple-300 hover:bg-purple-100 dark:bg-transparent dark:text-purple-200 dark:border-purple-700 text-center">Purchased Templates</a>
-              </div>
+              
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="lg:hidden inline-flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                {mobileMenuOpen ? (
+                  <XMarkIcon className="h-5 w-5" />
+                ) : (
+                  <Bars3Icon className="h-5 w-5" />
+                )}
+              </button>
             </div>
           </div>
         </div>
-      )}
-      {/* Site cards removed per request */}
-      {/* Trends & Insights */}
-      <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Fastest Growing Site */}
-        <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg shadow flex flex-col items-start">
-          <h4 className="font-bold text-green-700 mb-1">Fastest Growing Site</h4>
-          {(() => {
-            let fastestSite: Site | null = null;
-            let maxGrowth = -Infinity;
-            sites.forEach((site: Site) => {
-              const analytics = allSitesAnalytics[site.id];
-              if (analytics?.timeSeriesData?.length > 1) {
-                const first = analytics.timeSeriesData[0].pageViews;
-                const last = analytics.timeSeriesData[analytics.timeSeriesData.length - 1].pageViews;
-                const growth = last - first;
-                if (growth > maxGrowth) {
-                  maxGrowth = growth;
-                  fastestSite = site;
-                }
-              }
-            });
-            return fastestSite ? (
-              <span className="text-lg font-semibold text-green-800 dark:text-green-200">{(fastestSite as Site).name} <span className="text-xs text-gray-500">(+{maxGrowth} views)</span></span>
-            ) : (
-              <span className="text-gray-500">No data yet.</span>
-            );
-          })()}
-        </div>
-        {/* Recent Spike */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg shadow flex flex-col items-start">
-          <h4 className="font-bold text-blue-700 mb-1">Recent Traffic Spike</h4>
-          {(() => {
-            let spikeSite: Site | null = null;
-            let maxSpike = -Infinity;
-            let spikeDay = '';
-            sites.forEach((site: Site) => {
-              const analytics = allSitesAnalytics[site.id];
-              if (analytics?.timeSeriesData?.length > 1) {
-                for (let i = 1; i < analytics.timeSeriesData.length; i++) {
-                  const diff = analytics.timeSeriesData[i].pageViews - analytics.timeSeriesData[i-1].pageViews;
-                  if (diff > maxSpike) {
-                    maxSpike = diff;
-                    spikeSite = site;
-                    spikeDay = analytics.timeSeriesData[i].date;
-                  }
-                }
-              }
-            });
-            return spikeSite && maxSpike > 0 ? (
-              <span className="text-lg font-semibold text-blue-800 dark:text-blue-200">{(spikeSite as Site).name} <span className="text-xs text-gray-500">(+{maxSpike} views on {spikeDay})</span></span>
-            ) : (
-              <span className="text-gray-500">No spikes detected.</span>
-            );
-          })()}
-        </div>
-        {/* Inactivity Alert */}
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg shadow flex flex-col items-start">
-          <h4 className="font-bold text-yellow-700 mb-1">Inactivity Alert</h4>
-          {(() => {
-            const inactiveSites: Site[] = sites.filter(site => {
-              const analytics = allSitesAnalytics[site.id];
-              if (analytics?.timeSeriesData?.length) {
-                const last7 = analytics.timeSeriesData.slice(-7);
-                return last7.every((d: any) => d.pageViews === 0);
-              }
-              return false;
-            });
-            return inactiveSites.length ? (
-              <span className="text-lg font-semibold text-yellow-800 dark:text-yellow-200">{inactiveSites.map(s => s.name).join(', ')}</span>
-            ) : (
-              <span className="text-gray-500">All sites have recent activity.</span>
-            );
-          })()}
-        </div>
-      </div>
-
-      {/* Business Overview */}
-      <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Sales Summary */}
-        <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg shadow flex flex-col items-start">
-          <h4 className="font-bold text-purple-700 dark:text-purple-200 mb-1">Template Sales</h4>
-          {salesSummary ? (
-            <>
-              <span className="text-lg font-semibold text-purple-800 dark:text-purple-100">{salesSummary.totalSales} sales</span>
-              <span className="text-sm text-purple-700/80 dark:text-purple-200/80">₹{(salesSummary.totalEarnings || 0).toFixed(2)} earnings</span>
-            </>
-          ) : (
-            <span className="text-gray-500">No data yet.</span>
-          )}
-        </div>
-
-        {/* Funnels Performance */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg shadow flex flex-col items-start">
-          <h4 className="font-bold text-blue-700 dark:text-blue-200 mb-1">Funnels Performance</h4>
-          {funnelsSummary ? (
-            <>
-              <span className="text-lg font-semibold text-blue-800 dark:text-blue-100">{funnelsSummary.totalVisits} visits</span>
-              <span className="text-sm text-blue-700/80 dark:text-blue-200/80">{funnelsSummary.conversions} conversions</span>
-            </>
-          ) : (
-            <span className="text-gray-500">No data yet.</span>
-          )}
-          <a href="/auth/dashboard/funnels" className="mt-3 text-sm font-semibold text-blue-700 dark:text-blue-300 underline">View Funnels</a>
-        </div>
-
-        {/* Earnings and Withdraw */}
-        <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg shadow flex flex-col items-start">
-          <h4 className="font-bold text-green-700 dark:text-green-200 mb-1">Your Income</h4>
-          <span className="text-lg font-semibold text-green-800 dark:text-green-100">₹{earningsTotal.toFixed(2)}</span>
-          <div className="mt-3 w-full flex flex-col sm:flex-row gap-2">
-            <input
-              type="number"
-              value={payoutAmount}
-              onChange={e => setPayoutAmount(e.target.value)}
-              placeholder="Withdraw amount (INR)"
-              className="w-full sm:flex-1 rounded border px-3 py-2 bg-white dark:bg-gray-900 border-green-200 dark:border-green-700 text-gray-900 dark:text-white"
-            />
-            <button
-              className="px-4 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 w-full sm:w-auto"
-              onClick={async () => {
-                const amt = parseFloat(payoutAmount);
-                if (!amt || amt <= 0) { toast.error('Enter a valid amount'); return; }
-                const res = await fetch('/api/users/payouts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: amt }) });
-                if (res.ok) {
-                  toast.success('Payout requested successfully!');
-                  setPayoutAmount('');
-                } else {
-                  const data = await res.json().catch(() => ({}));
-                  toast.error(data.error || 'Failed to request payout');
-                }
-              }}
-            >
-              Withdraw
-            </button>
+        
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              <Link href="/" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Home</Link>
+              <a href="/#features" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Features</a>
+              <a href="/#templates" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Templates</a>
+              <a href="/#pricing" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Pricing</a>
+              <Link href="/auth/dashboard/create-template" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Sell Template</Link>
+              <Link href="/about" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">About</Link>
+              <Link href="/contact" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Contact</Link>
+              <Link href="/community" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Community</Link>
+              <Link href="/terms" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Terms</Link>
+              <Link href="/privacy" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Privacy</Link>
+              <Link href="/auth/dashboard" className="block px-3 py-2 text-base font-medium text-indigo-600 hover:bg-gray-50 rounded-md">Dashboard</Link>
+            </div>
           </div>
-          <a href="/auth/dashboard/sales" className="mt-2 text-sm text-green-700 dark:text-green-300 underline">Go to Sales</a>
-        </div>
-      </div>
-      {/* Current Plan and View My Websites Section */}
-      <div className="flex flex-row flex-wrap justify-end items-center w-full gap-4 mb-4">
-        {currentPlan ? (
-          <span className="bg-green-100 text-green-800 text-sm font-semibold px-4 py-2 rounded-lg">
-            Current Plan: {currentPlan.name} ({currentPlan.interval})
-          </span>
-        ) : (
-          <span className="bg-gray-100 text-gray-800 text-sm font-semibold px-4 py-2 rounded-lg">
-            No active plan
-          </span>
         )}
-        <a
-          href="/auth/dashboard/sites"
-          className="bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow px-5 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-        >
-          View My Websites
-        </a>
-      </div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-          Welcome back, {session?.user?.name || 'User'}! Manage your websites and view analytics.
-        </p>
-      </div>
+      </nav>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Left column: Quick Stats + Analytics Overview */}
-        <div className="flex flex-col gap-6 h-full">
-          <div className="bg-white dark:bg-black shadow-sm rounded-lg p-6">
-            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Quick Stats</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Websites</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{sites?.length}</p>
+      {/* Main Content */}
+      <div className="pt-20 px-4 sm:px-6 lg:px-8">
+        {/* Dashboard Header */}
+        <div ref={dashboardRef} className="mb-8">
+          <h1 className="dashboard-title text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+            Welcome back, {session?.user?.name || 'User'}! 🚀
+          </h1>
+          <p className="text-gray-600">Here's what's happening with your business today.</p>
+        </div>
+
+        {/* Stats Grid */}
+        <div ref={statsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat, index) => (
+            <div key={index} className="stat-card bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-lg flex items-center justify-center`}>
+                  <stat.icon className="h-6 w-6 text-white" />
+                </div>
+                <div className={`text-sm font-medium ${
+                  stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {stat.change}
+                </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total Visitors</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {Object.values(siteStats).reduce((sum, stat) => sum + (stat.pageViews || 0), 0)}
-                </p>
+              <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
+              <div className="text-sm text-gray-600">{stat.title}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Main Dashboard Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Revenue Chart */}
+          <div ref={chartsRef} className="lg:col-span-2 chart-container">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900">Revenue Overview</h2>
+                <div className="flex space-x-2">
+                  <button className="px-3 py-1 text-sm bg-indigo-100 text-indigo-700 rounded-lg">7 Days</button>
+                  <button className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">30 Days</button>
+                  <button className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded-lg">90 Days</button>
+                </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Active Templates</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {sites?.length > 0 
-                    ? new Set(sites.map(site => site.template)).size 
-                    : '0'
-                  }
-                </p>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Custom Domains</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {sites?.filter(site => site.customDomain).length}
-                </p>
+              
+              {/* Chart Placeholder */}
+              <div className="h-64 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <ChartBarIcon className="h-16 w-16 text-indigo-400 mx-auto mb-4" />
+                  <p className="text-gray-600">Revenue chart will be displayed here</p>
+                  <p className="text-sm text-gray-500">Showing growth trends and patterns</p>
+                </div>
               </div>
             </div>
           </div>
-          <div className="bg-white dark:bg-black shadow-sm rounded-lg p-6 flex-1">
-            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Analytics Overview</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div className="flex flex-col items-center">
-                <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">
-                  {Object.values(siteStats).reduce((sum, stat) => sum + (stat.pageViews || 0), 0)}
-                </span>
-                <span className="text-gray-600 dark:text-gray-300 mt-1">Total Visitors</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">
-                  {Object.values(siteStats).reduce((sum, stat) => sum + (stat.bookings || 0), 0)}
-                </span>
-                <span className="text-gray-600 dark:text-gray-300 mt-1">Total Bookings</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="text-2xl font-bold text-primary-600 dark:text-primary-400">
-                  {Object.values(siteStats).reduce((sum, stat) => sum + (stat.submissions || 0), 0)}
-                </span>
-                <span className="text-gray-600 dark:text-gray-300 mt-1">Total Submissions</span>
-              </div>
-            </div>
-            {/* All Sites Line Graphs Grid */}
-            <div className="mt-12">
-              <h3 className="text-md font-semibold text-gray-900 dark:text-white mb-4">Site Analytics (Last 30 Days)</h3>
-              <div className="grid grid-cols-1 gap-6">
-                {sites.map(site => (
-                  <Card key={site.id} className="shadow-lg">
-                    <CardHeader title={site.name} />
-                    <CardContent>
-                      {allSitesLoading || !allSitesAnalytics[site.id] ? (
-                        <div className="text-center py-8 text-gray-500">Loading analytics...</div>
-                      ) : allSitesAnalytics[site.id]?.timeSeriesData?.length ? (
-                        <Line
-                          data={{
-                            labels: allSitesAnalytics[site.id].timeSeriesData.map((d: any) => d.date),
-                            datasets: [
-                              {
-                                label: 'Page Views',
-                                data: allSitesAnalytics[site.id].timeSeriesData.map((d: any) => d.pageViews),
-                                borderColor: '#7c3aed',
-                                backgroundColor: 'rgba(124,58,237,0.1)',
-                              },
-                              {
-                                label: 'Visitors',
-                                data: allSitesAnalytics[site.id].timeSeriesData.map((d: any) => d.visitors),
-                                borderColor: '#10b981',
-                                backgroundColor: 'rgba(16,185,129,0.1)',
-                              },
-                            ],
-                          }}
-                          options={{
-                            responsive: true,
-                            plugins: {
-                              legend: { display: true },
-                              title: { display: false },
-                            },
-                            maintainAspectRatio: false,
-                          }}
-                          height={320}
-                        />
-                      ) : (
-                        <div className="text-center py-8 text-gray-400">No analytics data.</div>
-                      )}
-                    </CardContent>
-                  </Card>
+
+          {/* Quick Actions */}
+          <div className="chart-container">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
+              <div className="space-y-4">
+                {quickActions.map((action, index) => (
+                  <Link
+                    key={index}
+                    href={action.href}
+                    className="block p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg hover:from-gray-100 hover:to-gray-200 transition-all duration-300 transform hover:scale-105"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-10 h-10 bg-gradient-to-r ${action.color} rounded-lg flex items-center justify-center`}>
+                        <action.icon className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900">{action.title}</div>
+                        <div className="text-sm text-gray-600">{action.description}</div>
+                      </div>
+                    </div>
+                  </Link>
                 ))}
               </div>
             </div>
           </div>
         </div>
-        {/* Right column: Recent Activity + Notifications/Goal Progress */}
-        <div className="flex flex-col gap-6 h-full">
-          <div className="bg-white dark:bg-black shadow-sm rounded-lg p-6 mb-0">
-            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Recent Activity</h2>
-            <div className="space-y-4 overflow-y-auto" style={{ maxHeight: 400 }}>
-              {activityFeed.length === 0 ? (
-                <p className="text-sm text-gray-500 dark:text-gray-400">No recent activity to display.</p>
-              ) : (
-                activityFeed.map((item, idx) => (
-                  <div key={item.id + '-' + idx} className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-slate-700 rounded-md">
-                    <div className="flex-shrink-0 h-10 w-10 rounded-md bg-primary-100 dark:bg-primary-900/20 flex items-center justify-center">
-                      {item.type === 'page' && <DocumentDuplicateIcon className="h-5 w-5 text-blue-500" />}
-                      {item.type === 'booking' && <ChartBarIcon className="h-5 w-5 text-green-500" />}
-                      {item.type === 'submission' && <PencilIcon className="h-5 w-5 text-purple-500" />}
-                      {item.type === 'notification' && <BellIcon className="h-5 w-5 text-yellow-500" />}
-                      {item.type === 'site' && <GlobeAltIcon className="h-5 w-5 text-gray-500" />}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">{item.action}: {item.title}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {(item.site as Site)?.name ? <span>{(item.site as Site).name} &middot; </span> : null}
-                        {new Date(item.date).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )}
+
+        {/* Recent Activity */}
+        <div ref={chartsRef} className="mt-8 recent-activity">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Recent Activity</h2>
+              <Link href="/auth/dashboard/activity" className="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
+                View All
+              </Link>
             </div>
-          </div>
-          {/* Notifications & Goal Progress card below Recent Activity */}
-          <div className="bg-white dark:bg-black shadow-sm rounded-lg p-6 flex flex-col gap-4">
-            {/* Notifications/Alerts */}
-            <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2">
-              <BellIcon className="h-5 w-5 text-yellow-500" /> Notifications & Alerts
-            </h2>
-            <div className="space-y-2">
-              {activityFeed.filter(a => a.type === 'notification').length === 0 ? (
-                <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm">
-                  <CheckCircleIcon fontSize="small" className="text-green-500" /> All clear! No new notifications.
+            
+            <div className="space-y-4">
+              {recentActivities.map((activity, index) => (
+                <div key={index} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                  <div className={`w-10 h-10 bg-white rounded-lg flex items-center justify-center border-2 border-gray-200`}>
+                    <activity.icon className={`h-5 w-5 ${activity.color}`} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-medium text-gray-900">{activity.title}</div>
+                    <div className="text-sm text-gray-600">{activity.description}</div>
+                    <div className="text-xs text-gray-500 mt-1">{activity.time}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-medium text-gray-900">{activity.amount}</div>
+                  </div>
                 </div>
-              ) : (
-                activityFeed.filter(a => a.type === 'notification').slice(0, 3).map((n, idx) => (
-                  <div key={n.id + '-' + idx} className="flex items-center gap-2 text-yellow-700 dark:text-yellow-200 text-sm">
-                    <WarningAmberIcon fontSize="small" className="text-yellow-500" /> {n.title}
-                  </div>
-                ))
-              )}
-            </div>
-            {/* Goal Progress */}
-            <div className="mt-4">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Goal Progress</h3>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm text-gray-600 dark:text-gray-300">Visitors this month</span>
-                <span className="text-sm font-bold text-primary-600 dark:text-primary-400">{Object.values(siteStats).reduce((sum, stat) => sum + (stat.pageViews || 0), 0)} / 500</span>
-              </div>
-              <LinearProgress variant="determinate" value={Math.min(100, (Object.values(siteStats).reduce((sum, stat) => sum + (stat.pageViews || 0), 0) / 500) * 100)} sx={{ height: 10, borderRadius: 5 }} />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{Object.values(siteStats).reduce((sum, stat) => sum + (stat.pageViews || 0), 0) >= 500 ? 'Goal reached! 🎉' : 'Keep going, you are doing great!'}</p>
+              ))}
             </div>
           </div>
         </div>
-      </div>
 
-      <CreateSiteModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onCreateSite={handleCreateSite}
-      />
-    </DashboardLayout>
+        {/* Bottom CTA */}
+        <div className="mt-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-8 text-center">
+          <h2 className="text-2xl font-bold text-white mb-4">Ready to Scale Your Business?</h2>
+          <p className="text-indigo-100 mb-6 max-w-2xl mx-auto">
+            Create more templates, optimize your existing ones, and reach more customers with our advanced tools and analytics.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/auth/dashboard/create-template"
+              className="bg-white text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105"
+            >
+              Create New Template
+            </Link>
+            <Link
+              href="/auth/dashboard/analytics"
+              className="border-2 border-white text-white px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-indigo-600 transition-all transform hover:scale-105"
+            >
+              View Analytics
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

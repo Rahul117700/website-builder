@@ -1,407 +1,533 @@
-"use client";
-import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+'use client';
 
-interface Discussion {
-  id: string;
-  title: string;
-  content: string;
-  author: {
-    name: string;
-    image: string;
-    role: string;
-  };
-  category: 'question' | 'showcase' | 'tutorial' | 'general';
-  replies: number;
-  likes: number;
-  timestamp: string;
-  tags: string[];
-}
+import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import { 
+  RocketLaunchIcon, 
+  UsersIcon, 
+  ChatBubbleLeftRightIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+  FireIcon,
+  StarIcon,
+  ClockIcon,
+  HeartIcon,
+  EyeIcon,
+  Bars3Icon,
+  XMarkIcon
+} from '@heroicons/react/24/outline';
+import gsap from 'gsap';
 
 export default function CommunityPage() {
   const { data: session } = useSession();
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState('all');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [showNewPostModal, setShowNewPostModal] = useState(false);
-  const [newPostData, setNewPostData] = useState({
-    title: '',
-    content: '',
-    category: 'general',
-    tags: ''
-  });
 
-  // Mock data for discussions
-  const [discussions, setDiscussions] = useState<Discussion[]>([
+  const communityRef = useRef(null);
+  const postsRef = useRef(null);
+
+  // GSAP Animations
+  useEffect(() => {
+    gsap.registerPlugin();
+
+    // Set initial visibility
+    gsap.set('.community-title, .community-subtitle, .community-post', { 
+      opacity: 1, 
+      y: 0 
+    });
+
+    // Community section animations
+    const communityTl = gsap.timeline();
+    communityTl
+      .set('.community-title', { opacity: 0, y: 50 })
+      .set('.community-subtitle', { opacity: 0, y: 30 })
+      .to('.community-title', { 
+        duration: 1, 
+        y: 0, 
+        opacity: 1, 
+        ease: 'power3.out' 
+      })
+      .to('.community-subtitle', { 
+        duration: 0.8, 
+        y: 0, 
+        opacity: 1, 
+        ease: 'power2.out' 
+      }, '-=0.5');
+
+    // Posts animations
+    gsap.fromTo('.community-post', 
+      { opacity: 0, y: 30 },
+      {
+        duration: 0.8,
+        y: 0,
+        opacity: 1,
+        stagger: 0.1,
+        ease: 'power2.out',
+        delay: 1
+      }
+    );
+
+  }, []);
+
+  const filters = [
+    { id: 'all', label: 'All', color: 'bg-indigo-600' },
+    { id: 'question', label: 'Question', color: 'bg-blue-600' },
+    { id: 'showcase', label: 'Showcase', color: 'bg-green-600' },
+    { id: 'tutorial', label: 'Tutorial', color: 'bg-purple-600' },
+    { id: 'general', label: 'General', color: 'bg-gray-600' }
+  ];
+
+  const communityPosts = [
     {
-      id: '1',
-      title: 'How do you handle responsive design for complex layouts?',
-      content: 'I\'m working on a project with a complex grid layout and I\'m struggling with making it responsive. What are your best practices for handling responsive design in complex layouts?',
+      id: 1,
       author: {
-        name: 'Sarah Chen',
-        image: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg',
-        role: 'Frontend Developer'
+        name: "Sarah Chen",
+        avatar: "/api/placeholder/40/40",
+        role: "Frontend Developer"
       },
-      category: 'question',
-      replies: 8,
-      likes: 24,
-      timestamp: '2 hours ago',
-      tags: ['responsive-design', 'css', 'grid']
+      timestamp: "2 hours ago",
+      category: "question",
+      categoryLabel: "Question",
+      categoryColor: "bg-blue-600",
+      title: "How do you handle responsive design for complex layouts?",
+      content: "I'm working on a project with a complex grid layout and I'm struggling with making it responsive. What are your best practices for handling responsive design in complex layouts?",
+      tags: ["responsive-design", "css", "grid"],
+      stats: {
+        replies: 8,
+        likes: 24,
+        views: 156
+      }
     },
     {
-      id: '2',
-      title: 'Just launched my portfolio site!',
-      content: 'After months of work, I finally launched my portfolio website using the AI builder. The results are amazing and I couldn\'t be happier with how it turned out!',
+      id: 2,
       author: {
-        name: 'Alex Rodriguez',
-        image: 'https://images.pexels.com/photos/1121796/pexels-photo-1121796.jpeg',
-        role: 'Full Stack Developer'
+        name: "Alex Rodriguez",
+        avatar: "/api/placeholder/40/40",
+        role: "Full-Stack Developer"
       },
-      category: 'showcase',
-      replies: 15,
-      likes: 67,
-      timestamp: '5 hours ago',
-      tags: ['portfolio', 'showcase', 'ai-builder']
+      timestamp: "5 hours ago",
+      category: "showcase",
+      categoryLabel: "Showcase",
+      categoryColor: "bg-green-600",
+      title: "Just launched my portfolio site!",
+      content: "After months of work, I finally launched my portfolio website using the AI builder. The results are amazing and I couldn't be happier with how it turned out!",
+      tags: ["portfolio", "showcase", "ai-builder"],
+      stats: {
+        replies: 15,
+        likes: 67,
+        views: 342
+      }
     },
     {
-      id: '3',
-      title: 'Step-by-step guide for building e-commerce sites',
-      content: 'I created a comprehensive tutorial for building e-commerce websites from scratch. This guide covers everything from setup to deployment.',
+      id: 3,
       author: {
-        name: 'Mike Johnson',
-        image: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg',
-        role: 'Senior Developer'
+        name: "Emily Watson",
+        avatar: "/api/placeholder/40/40",
+        role: "UX Designer"
       },
-      category: 'tutorial',
-      replies: 32,
-      likes: 128,
-      timestamp: '1 day ago',
-      tags: ['tutorial', 'e-commerce', 'guide']
+      timestamp: "1 day ago",
+      category: "tutorial",
+      categoryLabel: "Tutorial",
+      categoryColor: "bg-purple-600",
+      title: "Complete guide to creating custom animations with GSAP",
+      content: "I've been working with GSAP for years and wanted to share my knowledge. Here's a comprehensive guide to creating smooth, performant animations for your websites.",
+      tags: ["gsap", "animations", "tutorial", "web-design"],
+      stats: {
+        replies: 23,
+        likes: 89,
+        views: 567
+      }
     },
     {
-      id: '4',
-      title: 'Best practices for SEO optimization',
-      content: 'What are your go-to strategies for SEO optimization? I\'m looking to improve my site\'s search engine rankings.',
+      id: 4,
       author: {
-        name: 'Emily Davis',
-        image: 'https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg',
-        role: 'Digital Marketing'
+        name: "Michael Chang",
+        avatar: "/api/placeholder/40/40",
+        role: "Backend Developer"
       },
-      category: 'question',
-      replies: 12,
-      likes: 45,
-      timestamp: '3 days ago',
-      tags: ['seo', 'marketing', 'optimization']
+      timestamp: "2 days ago",
+      category: "question",
+      categoryLabel: "Question",
+      categoryColor: "bg-blue-600",
+      title: "Best practices for API rate limiting?",
+      content: "I'm building a public API and need to implement rate limiting. What are the best practices for implementing rate limiting that's both fair to users and protects the system?",
+      tags: ["api", "rate-limiting", "backend", "security"],
+      stats: {
+        replies: 12,
+        likes: 31,
+        views: 234
+      }
     },
     {
-      id: '5',
-      title: 'My journey from beginner to professional developer',
-      content: 'I wanted to share my story of how I went from knowing nothing about web development to building professional websites. Here\'s what I learned along the way.',
+      id: 5,
       author: {
-        name: 'David Kim',
-        image: 'https://images.pexels.com/photos/927022/pexels-photo-927022.jpeg',
-        role: 'Web Developer'
+        name: "Lisa Thompson",
+        avatar: "/api/placeholder/40/40",
+        role: "Product Manager"
       },
-      category: 'general',
-      replies: 28,
-      likes: 89,
-      timestamp: '1 week ago',
-      tags: ['career', 'learning', 'journey']
+      timestamp: "3 days ago",
+      category: "general",
+      categoryLabel: "General",
+      categoryColor: "bg-gray-600",
+      title: "What's your favorite development tool this year?",
+      content: "I'm always looking for new tools to improve my workflow. What development tools, extensions, or utilities have you discovered this year that you can't live without?",
+      tags: ["tools", "productivity", "development"],
+      stats: {
+        replies: 45,
+        likes: 123,
+        views: 789
+      }
+    },
+    {
+      id: 6,
+      author: {
+        name: "David Kim",
+        avatar: "/api/placeholder/40/40",
+        role: "DevOps Engineer"
+      },
+      timestamp: "4 days ago",
+      category: "showcase",
+      categoryLabel: "Showcase",
+      categoryColor: "bg-green-600",
+      title: "Built a CI/CD pipeline that deploys in under 2 minutes",
+      content: "After optimizing our deployment process, we've reduced our CI/CD pipeline from 15 minutes to under 2 minutes. Here's how we did it and the tools we used.",
+      tags: ["ci-cd", "devops", "automation", "deployment"],
+      stats: {
+        replies: 18,
+        likes: 76,
+        views: 445
+      }
     }
-  ]);
+  ];
 
-  const filteredDiscussions = discussions.filter(discussion => {
-    const matchesTab = activeTab === 'all' || discussion.category === activeTab;
-    const matchesSearch = discussion.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         discussion.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         discussion.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesTab && matchesSearch;
+  const filteredPosts = communityPosts.filter(post => {
+    const matchesFilter = activeFilter === 'all' || post.category === activeFilter;
+    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesFilter && matchesSearch;
   });
-
-  const handleNewPost = () => {
-    if (!session?.user) {
-      router.push('/auth/signin');
-      return;
-    }
-    setShowNewPostModal(true);
-  };
-
-  const submitNewPost = () => {
-    const newDiscussion: Discussion = {
-      id: Date.now().toString(),
-      title: newPostData.title,
-      content: newPostData.content,
-      author: {
-        name: session?.user?.name || 'Anonymous',
-        image: session?.user?.image || '/default-avatar.png',
-        role: 'Developer'
-      },
-      category: newPostData.category as any,
-      replies: 0,
-      likes: 0,
-      timestamp: 'Just now',
-      tags: newPostData.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
-    };
-
-    setDiscussions([newDiscussion, ...discussions]);
-    setNewPostData({ title: '', content: '', category: 'general', tags: '' });
-    setShowNewPostModal(false);
-  };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-slate-800 shadow-sm border-b border-gray-200 dark:border-slate-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white overflow-hidden">
+      {/* Navigation */}
+      <nav className="bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50 w-full">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-8">
-              <Link href="/" className="text-2xl font-bold text-gray-900 dark:text-white">
-                Website Builder
-              </Link>
-              <nav className="hidden md:flex space-x-8">
-                <Link href="/" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">
-                  Home
-                </Link>
-                <Link href="/community" className="text-purple-600 dark:text-purple-400 px-3 py-2 text-sm font-medium">
-                  Community
-                </Link>
-                <Link href="/auth/dashboard" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-2 text-sm font-medium">
+            <div className="flex items-center">
+              <RocketLaunchIcon className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600" />
+              <span className="ml-2 text-lg sm:text-xl font-bold text-gray-900">Website Builder</span>
+            </div>
+            <div className="hidden lg:flex items-center space-x-6">
+              <Link href="/" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Home</Link>
+              <a href="/#features" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Features</a>
+              <a href="/#templates" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Templates</a>
+              <a href="/#pricing" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Pricing</a>
+              <Link href="/auth/dashboard/create-template" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Sell Template</Link>
+              <Link href="/about" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">About</Link>
+              <Link href="/contact" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Contact</Link>
+              <Link href="/community" className="text-indigo-600 font-medium">Community</Link>
+              <Link href="/terms" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Terms</Link>
+              <Link href="/privacy" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Privacy</Link>
+            </div>
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              {session ? (
+                <Link
+                  href="/auth/dashboard"
+                  className="bg-indigo-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all transform hover:scale-105 text-sm sm:text-base font-medium"
+                >
                   Dashboard
                 </Link>
-              </nav>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              {session?.user ? (
-                <div className="flex items-center space-x-3">
-                  <img src={session.user.image || "/default-avatar.png"} alt="User" className="h-8 w-8 rounded-full" />
-                  <span className="text-gray-700 dark:text-gray-300 text-sm">{session.user.name}</span>
-                </div>
               ) : (
-                <Link href="/auth/signin" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-sm font-medium">
-                  Sign in
-                </Link>
+                <>
+                  <Link
+                    href="/auth/signin"
+                    className="text-gray-700 hover:text-indigo-600 px-3 sm:px-4 py-2 transition-colors text-sm sm:text-base font-medium hover:bg-gray-50 rounded-lg"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/auth/signup"
+                    className="bg-indigo-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-indigo-700 transition-all transform hover:scale-105 text-sm sm:text-base font-medium whitespace-nowrap shadow-sm hover:shadow-md"
+                  >
+                    Get Started
+                  </Link>
+                </>
               )}
+              
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="lg:hidden inline-flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                {mobileMenuOpen ? (
+                  <XMarkIcon className="h-5 w-5" />
+                ) : (
+                  <Bars3Icon className="h-5 w-5" />
+                )}
+              </button>
             </div>
           </div>
         </div>
-      </header>
+        
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              <Link href="/" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Home</Link>
+              <a href="/#features" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Features</a>
+              <a href="/#templates" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Templates</a>
+              <a href="/#pricing" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Pricing</a>
+              <Link href="/auth/dashboard/create-template" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Sell Template</Link>
+              <Link href="/about" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">About</Link>
+              <Link href="/contact" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Contact</Link>
+              <Link href="/community" className="block px-3 py-2 text-base font-medium text-indigo-600 hover:bg-gray-50 rounded-md">Community</Link>
+              <Link href="/terms" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Terms</Link>
+              <Link href="/privacy" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Privacy</Link>
+              {!session && (
+                <>
+                  <Link href="/auth/signin" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Sign In</Link>
+                  <Link href="/auth/signup" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Get Started</Link>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </nav>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            Developer Community
+      {/* Hero Section */}
+      <section ref={communityRef} className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white via-indigo-50 to-purple-50">
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="community-title text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            Developer
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
+              {' '}Community
+            </span>
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">
-            Connect with fellow developers, share your knowledge, and grow together.
+          <p className="community-subtitle text-lg sm:text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            Connect with fellow developers, share your knowledge, and grow together. 
+            Join thousands of creators building amazing websites and applications.
           </p>
         </div>
+      </section>
 
-        {/* Search and Filter Bar */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6 mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1">
-              <div className="relative">
+      {/* Community Content */}
+      <section ref={postsRef} className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div className="max-w-6xl mx-auto">
+          {/* Search and Filters */}
+          <div className="mb-12">
+            <div className="flex flex-col lg:flex-row gap-6 items-center justify-between">
+              {/* Search Bar */}
+              <div className="relative w-full lg:w-96">
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search discussions..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
                 />
-                <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
               </div>
-            </div>
 
-            {/* Category Filter */}
-            <div className="flex space-x-2">
-              {['all', 'question', 'showcase', 'tutorial', 'general'].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    activeTab === tab
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600'
-                  }`}
-                >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </button>
-              ))}
-            </div>
+              {/* Filters */}
+              <div className="flex flex-wrap gap-3">
+                {filters.map((filter) => (
+                  <button
+                    key={filter.id}
+                    onClick={() => setActiveFilter(filter.id)}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all transform hover:scale-105 ${
+                      activeFilter === filter.id
+                        ? `${filter.color} text-white shadow-lg`
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
 
-            {/* New Post Button */}
-            <button
-              onClick={handleNewPost}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-            >
-              New Post
-            </button>
+              {/* New Post Button */}
+              <Link
+                href="/community/new-post"
+                className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-all transform hover:scale-105 hover:shadow-lg flex items-center space-x-2"
+              >
+                <PlusIcon className="h-5 w-5" />
+                <span>New Post</span>
+              </Link>
+            </div>
           </div>
-        </div>
 
-        {/* Discussions List */}
-        <div className="space-y-6">
-          {filteredDiscussions.map((discussion) => (
-            <div key={discussion.id} className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-start space-x-4">
-                <img src={discussion.author.image} alt={discussion.author.name} className="w-12 h-12 rounded-full" />
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <span className="font-semibold text-gray-900 dark:text-white">{discussion.author.name}</span>
-                    <span className="text-sm text-gray-500">•</span>
-                    <span className="text-sm text-gray-500">{discussion.timestamp}</span>
-                    <span className="text-sm text-gray-500">•</span>
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      discussion.category === 'question' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
-                      discussion.category === 'showcase' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
-                      discussion.category === 'tutorial' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300' :
-                      'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}>
-                      {discussion.category.charAt(0).toUpperCase() + discussion.category.slice(1)}
-                    </span>
-                  </div>
-                  
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    {discussion.title}
-                  </h3>
-                  
-                  <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
-                    {discussion.content}
-                  </p>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4 text-sm text-gray-500">
-                      <span>{discussion.replies} replies</span>
-                      <span>•</span>
-                      <span>{discussion.likes} likes</span>
+          {/* Community Posts */}
+          <div className="space-y-6">
+            {filteredPosts.map((post) => (
+              <div key={post.id} className="community-post bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                <div className="flex items-start space-x-4">
+                  {/* Author Avatar */}
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center">
+                      <UsersIcon className="h-6 w-6 text-indigo-600" />
                     </div>
-                    
-                    <div className="flex space-x-2">
-                      {discussion.tags.map((tag) => (
-                        <span key={tag} className="px-2 py-1 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 text-xs rounded">
+                  </div>
+
+                  {/* Post Content */}
+                  <div className="flex-1 min-w-0">
+                    {/* Post Header */}
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-semibold text-gray-900">{post.author.name}</span>
+                        <span className="text-sm text-gray-500">•</span>
+                        <span className="text-sm text-gray-500">{post.author.role}</span>
+                        <span className="text-sm text-gray-500">•</span>
+                        <span className="text-sm text-gray-500">{post.timestamp}</span>
+                      </div>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white ${post.categoryColor}`}>
+                        {post.categoryLabel}
+                      </span>
+                    </div>
+
+                    {/* Post Title */}
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3 hover:text-indigo-600 transition-colors cursor-pointer">
+                      {post.title}
+                    </h3>
+
+                    {/* Post Content */}
+                    <p className="text-gray-600 mb-4 leading-relaxed">
+                      {post.content}
+                    </p>
+
+                    {/* Tags */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {post.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 hover:bg-indigo-200 transition-colors cursor-pointer"
+                        >
                           #{tag}
                         </span>
                       ))}
                     </div>
+
+                    {/* Post Stats */}
+                    <div className="flex items-center space-x-6 text-sm text-gray-500">
+                      <div className="flex items-center space-x-1">
+                        <ChatBubbleLeftRightIcon className="h-4 w-4" />
+                        <span>{post.stats.replies} replies</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <HeartIcon className="h-4 w-4" />
+                        <span>{post.stats.likes} likes</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <EyeIcon className="h-4 w-4" />
+                        <span>{post.stats.views} views</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {filteredDiscussions.length === 0 && (
-          <div className="text-center py-12">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No discussions found</h3>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Try adjusting your search or filter criteria.
-            </p>
+            ))}
           </div>
-        )}
-      </div>
 
-      {/* New Post Modal */}
-      {showNewPostModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-2xl mx-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Create New Post</h2>
-              <button
-                onClick={() => setShowNewPostModal(false)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          {/* No Results */}
+          {filteredPosts.length === 0 && (
+            <div className="text-center py-16">
+              <div className="w-24 h-24 bg-gray-100 rounded-full mx-auto mb-6 flex items-center justify-center">
+                <MagnifyingGlassIcon className="h-12 w-12 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No posts found</h3>
+              <p className="text-gray-600 mb-6">
+                Try adjusting your search terms or filters to find what you're looking for.
+              </p>
+              <Link
+                href="/community/new-post"
+                className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-all transform hover:scale-105 hover:shadow-lg inline-flex items-center space-x-2"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+                <PlusIcon className="h-5 w-5" />
+                <span>Create the first post</span>
+              </Link>
             </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  value={newPostData.title}
-                  onChange={(e) => setNewPostData({ ...newPostData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="Enter your post title..."
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Category
-                </label>
-                <select
-                  value={newPostData.category}
-                  onChange={(e) => setNewPostData({ ...newPostData, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                >
-                  <option value="general">General</option>
-                  <option value="question">Question</option>
-                  <option value="showcase">Showcase</option>
-                  <option value="tutorial">Tutorial</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Content
-                </label>
-                <textarea
-                  value={newPostData.content}
-                  onChange={(e) => setNewPostData({ ...newPostData, content: e.target.value })}
-                  rows={6}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="Write your post content..."
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Tags (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  value={newPostData.tags}
-                  onChange={(e) => setNewPostData({ ...newPostData, tags: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="web-development, css, javascript"
-                />
-              </div>
-            </div>
-            
-            <div className="flex justify-end space-x-3 mt-6">
-              <button
-                onClick={() => setShowNewPostModal(false)}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={submitNewPost}
-                disabled={!newPostData.title || !newPostData.content}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors"
-              >
-                Create Post
-              </button>
-            </div>
+          )}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-indigo-600 to-purple-600">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+            Join the Conversation
+          </h2>
+          <p className="text-lg sm:text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
+            Share your knowledge, ask questions, and connect with developers from around the world. 
+            Your next breakthrough idea might be just one discussion away.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/community/new-post"
+              className="bg-white text-indigo-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-gray-100 transition-all transform hover:scale-105 hover:shadow-xl inline-flex items-center space-x-2"
+            >
+              <PlusIcon className="h-6 w-6" />
+              <span>Start a Discussion</span>
+            </Link>
+            <Link
+              href="/auth/signup"
+              className="border-2 border-white text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-white hover:text-indigo-600 transition-all transform hover:scale-105"
+            >
+              Join Community
+            </Link>
           </div>
         </div>
-      )}
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            <div className="text-center sm:text-left">
+              <div className="flex items-center justify-center sm:justify-start mb-4">
+                <RocketLaunchIcon className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-400" />
+                <span className="ml-2 text-lg sm:text-xl font-bold">Website Builder</span>
+              </div>
+              <p className="text-sm sm:text-base text-gray-400">
+                Empowering creators and entrepreneurs to build successful online businesses.
+              </p>
+            </div>
+            
+            <div className="text-center sm:text-left">
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Platform</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li><a href="/#features" className="hover:text-white transition-colors text-sm sm:text-base">Features</a></li>
+                <li><a href="/#templates" className="hover:text-white transition-colors text-sm sm:text-base">Templates</a></li>
+                <li><Link href="/auth/dashboard/marketplace" className="hover:text-white transition-colors text-sm sm:text-base">Marketplace</Link></li>
+                <li><Link href="/auth/dashboard/create-template" className="hover:text-white transition-colors text-sm sm:text-base">Sell Your Template</Link></li>
+              </ul>
+            </div>
+            
+            <div className="text-center sm:text-left">
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Company</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link href="/about" className="hover:text-white transition-colors text-sm sm:text-base">About Us</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition-colors text-sm sm:text-base">Contact</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition-colors text-sm sm:text-base">Terms</Link></li>
+                <li><Link href="/privacy" className="hover:text-white transition-colors text-sm sm:text-base">Privacy</Link></li>
+              </ul>
+            </div>
+            
+            <div className="text-center sm:text-left">
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Connect</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li><Link href="/auth/signup" className="hover:text-white transition-colors text-sm sm:text-base">Sign Up</Link></li>
+                <li><Link href="/auth/signin" className="hover:text-white transition-colors text-sm sm:text-base">Sign In</Link></li>
+                <li><Link href="/auth/dashboard" className="hover:text-white transition-colors text-sm sm:text-base">Dashboard</Link></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-800 mt-8 sm:mt-12 pt-6 sm:pt-8 text-center text-gray-400">
+            <p className="text-sm sm:text-base">&copy; 2024 Website Builder. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 } 
