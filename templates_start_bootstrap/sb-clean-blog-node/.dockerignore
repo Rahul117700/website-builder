@@ -1,8 +1,0 @@
-*
-!src
-!package.json
-!.npmrc
-!ormconfig.ts
-!scripts
-!build
-!src

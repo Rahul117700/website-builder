@@ -9,19 +9,54 @@ export async function GET(
   try {
     const { slug } = params;
     
-    // Construct the path to the template's dist/index.html
-    const templatePath = path.join(process.cwd(), 'templates_start_bootstrap', `startbootstrap-${slug}`, 'dist', 'index.html');
+    // Try multiple possible locations for the HTML file
+    const possiblePaths = [
+      path.join(process.cwd(), 'templates_start_bootstrap', `startbootstrap-${slug}`, 'dist', 'index.html'),
+      path.join(process.cwd(), 'templates_start_bootstrap', `startbootstrap-${slug}`, 'index.html'),
+      path.join(process.cwd(), 'templates_start_bootstrap', `startbootstrap-${slug}`, 'src', 'index.html'),
+      path.join(process.cwd(), 'templates_start_bootstrap', `startbootstrap-${slug}`, 'app', 'index.html')
+    ];
+    
+    let templatePath = null;
+    for (const path of possiblePaths) {
+      if (fs.existsSync(path)) {
+        templatePath = path;
+        break;
+      }
+    }
     
     // Check if the template file exists
-    if (!fs.existsSync(templatePath)) {
+    if (!templatePath) {
       return NextResponse.json(
-        { error: 'Template not found' },
+        { error: 'Template HTML file not found' },
         { status: 404 }
       );
     }
     
     // Read the HTML file
-    const htmlContent = fs.readFileSync(templatePath, 'utf8');
+    let htmlContent = fs.readFileSync(templatePath, 'utf8');
+    
+    // Get the template directory for relative paths
+    const templateDir = path.dirname(templatePath);
+    
+    // Fix relative paths in the HTML content to point to our asset route
+    htmlContent = htmlContent.replace(
+      /(src|href)=["'](?!https?:\/\/|data:|#)([^"']*)/g,
+      (match, attr, assetPath) => {
+        // Convert relative paths to our asset route
+        const cleanPath = assetPath.replace(/^\.\//, ''); // Remove leading ./
+        return `${attr}="/api/templates/${slug}/preview/assets/${cleanPath}"`;
+      }
+    );
+    
+    // Also fix CSS imports and other relative references
+    htmlContent = htmlContent.replace(
+      /url\(['"]?(?!https?:\/\/|data:|#)([^'")\s]+)['"]?\)/g,
+      (match, assetPath) => {
+        const cleanPath = assetPath.replace(/^\.\//, '');
+        return `url("/api/templates/${slug}/preview/assets/${cleanPath}")`;
+      }
+    );
     
     // Create a response with the HTML content
     return new NextResponse(htmlContent, {

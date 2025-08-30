@@ -68,6 +68,7 @@ async function main() {
       marketingEmails: false,
       productEmails: false,
       password: null,
+      enabled: true,
     },
   });
 
@@ -84,10 +85,14 @@ main()
   });
 
 async function clearReactCode() {
-  await prisma.page.updateMany({
-    data: { reactCode: null },
-  });
-  console.log('All reactCode values set to null.');
+  try {
+    await prisma.page.updateMany({
+      data: { reactCode: null },
+    });
+    console.log('All reactCode values set to null.');
+  } catch (error) {
+    console.log('Note: reactCode field does not exist in current database schema');
+  }
 }
 
 clearReactCode().finally(() => prisma.$disconnect()); 
