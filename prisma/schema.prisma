@@ -324,13 +324,14 @@ model Template {
   js             String?
   preview        String?
   pages          Json?
+  // Keep this relation since Payment model references it
+  payments       Payment[]
   // TEMPORARILY COMMENTED OUT - tables don't exist in current database
   // funnels        Funnel[]
   // myTemplates    MyTemplate[]
   // purchases      PurchasedTemplate[]
   // sellerEarnings SellerEarning[]
   // siteSales      SiteSale[]
-  // payments       Payment[]
 }
 
 // TEMPORARILY COMMENTED OUT - table doesn't exist in current database
