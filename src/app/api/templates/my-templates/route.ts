@@ -1,44 +1,85 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { prisma } from '@/lib/prisma';
+import { prisma } from '../../../../lib/prisma';
+import { authOptions } from '../../auth/[...nextauth]/route';
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  const myTemplates = await prisma.myTemplate.findMany({
-    where: { userId: session.user.id },
-    select: {
-      id: true,
-      name: true,
-      html: true,
-      css: true,
-      js: true,
-      pages: true, // Add pages field for new template system
-      reactCode: true,
-      createdAt: true,
-      updatedAt: true,
-      templateId: true,
-      template: {
-        select: {
-          preview: true,
-          category: true,
-          description: true,
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Get user's templates (templates created by the user)
+    const templates = await prisma.template.findMany({
+      where: {
+        createdBy: session.user.id
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        approved: true,
+        createdAt: true,
+        updatedAt: true,
+        payments: {
+          where: {
+            status: 'completed'
+          }
         }
       }
-    },
-    orderBy: { createdAt: 'desc' },
-  });
-  // Flatten the template fields to top-level for frontend compatibility
-  const result = (myTemplates as any[]).map((t: any) => ({
-    ...t,
-    preview: t.template?.preview || null,
-    category: t.template?.category || '',
-    description: t.template?.description || '',
-  }));
-  return NextResponse.json(result);
+    });
+
+    // Get analytics data for each template
+    const templatesWithAnalytics = await Promise.all(
+      templates.map(async (template) => {
+        // Get total views for this template (sites using this template)
+        const totalViews = await prisma.site.count({
+          where: {
+            template: template.name as any // Cast to TemplateType enum
+          }
+        });
+
+        // Get total revenue for this template
+        const totalRevenue = await prisma.payment.aggregate({
+          where: {
+            templateId: template.id,
+            status: 'completed'
+          },
+          _sum: {
+            amount: true
+          }
+        });
+
+        return {
+          id: template.id,
+          name: template.name,
+          description: template.description,
+          price: template.price,
+          status: template.approved ? 'published' : 'draft',
+          views: totalViews,
+          sales: template.payments.length,
+          revenue: totalRevenue._sum.amount || 0,
+          createdAt: template.createdAt,
+          updatedAt: template.updatedAt
+        };
+      })
+    );
+
+    return NextResponse.json(templatesWithAnalytics);
+
+  } catch (error) {
+    console.error('Error fetching user templates:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }
 
 // POST /api/templates/my-templates - Add a template to user's My Templates
