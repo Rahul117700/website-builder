@@ -14,7 +14,7 @@ async function setupTestData() {
       create: {
         email: 'test@example.com',
         name: 'Test User',
-        preferredCurrency: 'USD'
+        // preferredCurrency: 'USD'
       }
     });
     console.log(`  ✅ User created: ${user.email}`);
