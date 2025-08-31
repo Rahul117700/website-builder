@@ -19,6 +19,7 @@ model User {
   image         String?
   password      String?
   role          UserRole  @default(USER)
+
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -40,6 +41,7 @@ model User {
 enum UserRole {
   ADMIN
   USER
+  SUPER_ADMIN
 }
 
 // NextAuth Models
@@ -87,6 +89,7 @@ model Site {
   id          String      @id @default(cuid())
   name        String
   domain      String      @unique
+  subdomain   String      @unique
   type        SiteType
   status      SiteStatus  @default(ACTIVE)
   port        Int         @unique
@@ -96,28 +99,35 @@ model Site {
   // Site Configuration
   components  Json        // Stored as JSON for flexibility
   settings    Json        // Theme, layout, etc.
+
+
   
   // Performance Metrics
   loadTime    Float?      // Average load time in seconds
   visitors    Int         @default(0)
   pageViews   Int         @default(0)
+
   
   // Relations
   userId      String
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   templateId  String?
   template    Template?   @relation(fields: [templateId], references: [id])
+
   
   // Database entries for this site
   databaseEntries DatabaseEntry[]
   products        Product[]
   orders          Order[]
+  analytics       Analytics[]
   
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
   @@map("sites")
 }
+
+
 
 enum SiteType {
   PORTFOLIO
@@ -146,12 +156,14 @@ model Template {
   components  Json        // Predefined component structure
   price       Float?
   isActive    Boolean     @default(true)
+  approved    Boolean     @default(false) // Template approval status
+
   
   // Relations
   sites       Site[]
   
   createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  updatedAt   DateTime    @default(now())
 
   @@map("templates")
 }
@@ -450,7 +462,48 @@ model Analytics {
   // Device Breakdown
   deviceBreakdown Json?
   
-  createdAt   DateTime    @default(now())
+  // Additional tracking fields
+  visitorId String?  // Unique visitor identifier
+  pageUrl   String?  // Page URL for tracking
+  referrer  String?  // Referrer URL
+  userAgent String?  // User agent string
+  browser   String?  // Browser information
+  os        String?  // Device type
+  country   String?  // Country
+  city      String?  // City
+  duration  Int?     // Time spent on page in seconds
+  
+  // Relations
+  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("analytics")
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

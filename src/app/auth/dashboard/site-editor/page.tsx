@@ -352,7 +352,7 @@ export default function SiteEditor() {
               <div className="space-y-2">
                 {component.content.testimonials.map((testimonial: any, index: number) => (
                   <div key={index} className="text-sm">
-                    <p className="text-gray-600 italic">"{testimonial.content}"</p>
+                    <p className="text-gray-600 italic">&quot;{testimonial.content}&quot;</p>
                     <p className="font-medium text-gray-800">- {testimonial.name}</p>
                   </div>
                 ))}

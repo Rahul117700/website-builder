@@ -691,7 +691,7 @@ export default function HomePage() {
               <div className="text-center">
                 <div className="bg-gradient-to-r from-green-600/20 to-blue-600/20 rounded-xl p-4 border border-green-500/30">
                   <h4 className="text-lg font-bold text-white mb-2">🚀 Your Success Story Starts Here</h4>
-                  <p className="text-gray-300 text-sm">Join thousands of entrepreneurs who've transformed their online presence and revenue with our platform</p>
+                  <p className="text-gray-300 text-sm">Join thousands of entrepreneurs who&apos;ve transformed their online presence and revenue with our platform</p>
                 </div>
               </div>
               

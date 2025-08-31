@@ -134,7 +134,7 @@ export default function TermsPage() {
             <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-8 border border-indigo-100">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Important Notice</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                These Terms and Conditions govern your use of Website Builder's services. By accessing or using our platform, 
+                These Terms and Conditions govern your use of Website Builder&apos;s services. By accessing or using our platform, 
                 you acknowledge that you have read, understood, and agree to be bound by these terms.
               </p>
               <p className="text-gray-700 leading-relaxed">

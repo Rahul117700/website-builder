@@ -14,13 +14,13 @@ import {
   CurrencyDollarIcon,
   ServerIcon,
   ShieldCheckIcon,
-  LightningBoltIcon
+  BoltIcon
 } from '@heroicons/react/24/outline';
 import { gsap } from 'gsap';
 
 export default function LaunchSite() {
   const searchParams = useSearchParams();
-  const [selectedType, setSelectedType] = useState(searchParams.get('type') || 'portfolio');
+  const [selectedType, setSelectedType] = useState(searchParams?.get('type') || 'portfolio');
   const [selectedPlan, setSelectedPlan] = useState('basic');
   const [siteName, setSiteName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -98,24 +98,25 @@ export default function LaunchSite() {
         'Order Tracking',
         'Customer Reviews',
         'Shipping Calculator',
-        'Tax Management'
+        'Tax Calculation'
       ],
-      basePrice: 2999
+      basePrice: 2499
     },
     {
-      id: 'funnel',
-      name: 'Funnel',
-      description: 'High-converting landing pages for sales',
-      icon: RocketLaunchIcon,
-      gradient: 'from-rose-500 to-red-600',
+      id: 'blog',
+      name: 'Blog',
+      description: 'Content-focused website for writers and creators',
+      icon: CogIcon,
+      gradient: 'from-blue-500 to-indigo-600',
       features: [
-        'Lead Capture Forms',
-        'A/B Testing',
+        'Article Management',
+        'Category System',
+        'Comment System',
+        'Social Sharing',
+        'Newsletter Integration',
         'Analytics Dashboard',
-        'Mobile Optimized',
-        'Social Proof Elements',
-        'Countdown Timers',
-        'Exit Intent Popups'
+        'SEO Tools',
+        'Monetization Options'
       ],
       basePrice: 799
     }
@@ -195,7 +196,7 @@ export default function LaunchSite() {
       name: 'Performance Boost',
       description: 'CDN and optimization',
       price: 199,
-      icon: LightningBoltIcon
+      icon: BoltIcon
     }
   ];
 
@@ -317,64 +318,7 @@ export default function LaunchSite() {
           </div>
         </div>
 
-        {/* Site Configuration */}
-        <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Configure Your Site
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Basic Info */}
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Site Name
-                </label>
-                <input
-                  type="text"
-                  value={siteName}
-                  onChange={(e) => setSiteName(e.target.value)}
-                  placeholder="Enter your site name"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Site Type
-                </label>
-                <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-                  <div className="flex items-center">
-                    <div className={`p-2 rounded-lg bg-gradient-to-r ${selectedSiteType?.gradient} mr-3`}>
-                      <selectedSiteType?.icon className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{selectedSiteType?.name}</p>
-                      <p className="text-sm text-gray-600">{selectedSiteType?.description}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Features Preview */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Included Features
-              </label>
-              <div className="space-y-2">
-                {selectedSiteType?.features.map((feature, idx) => (
-                  <div key={idx} className="flex items-center text-sm text-gray-600">
-                    <CheckIcon className="h-4 w-4 text-green-500 mr-2" />
-                    {feature}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Hosting Plans */}
+        {/* Hosting Plan Selection */}
         <div 
           ref={plansRef}
           className="space-y-8"
@@ -384,7 +328,7 @@ export default function LaunchSite() {
               Choose Your Hosting Plan
             </h2>
             <p className="text-lg text-gray-600">
-              Select the hosting plan that fits your needs
+              Select the hosting solution that fits your needs
             </p>
           </div>
           
@@ -399,13 +343,17 @@ export default function LaunchSite() {
                     : 'hover:scale-105'
                 }`}
               >
-                {plan.recommended && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-medium">
-                    Recommended
-                  </div>
-                )}
-                
-                <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl border border-gray-100 h-full">
+                <div className={`bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl border border-gray-100 h-full ${
+                  plan.recommended ? 'ring-2 ring-indigo-500' : ''
+                }`}>
+                  {plan.recommended && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <span className="bg-indigo-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        Recommended
+                      </span>
+                    </div>
+                  )}
+                  
                   {selectedPlan === plan.id && (
                     <div className="absolute -top-2 -right-2 w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
                       <CheckIcon className="h-5 w-5 text-white" />

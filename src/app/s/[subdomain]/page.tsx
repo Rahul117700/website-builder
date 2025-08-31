@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
-import type { Site, Page } from '@/types/prisma';
+import type { Site } from '@/types/prisma';
 import SiteViewer from './site-viewer';
 
 interface SitePageProps {
@@ -13,13 +13,7 @@ export default async function SitePage({ params, searchParams }: SitePageProps) 
   const currentSlug = searchParams?.page || 'home';
   const site = await prisma.site.findUnique({
     where: { subdomain },
-    include: {
-      pages: {
-        where: { isPublished: true },
-        orderBy: { createdAt: 'asc' },
-      },
-    },
-  }) as (Site & { pages: Page[] }) | null;
+  }) as Site | null;
 
   if (!site) return notFound();
 

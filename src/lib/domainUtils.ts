@@ -22,51 +22,8 @@ export async function getDomainMappings(): Promise<DomainMapping[]> {
   }
   
   try {
-    // Get domains from the Domain table
-    const domains = await prisma.domain.findMany({
-      include: {
-        site: {
-          select: {
-            subdomain: true
-          }
-        }
-      }
-    });
-    
-    // Transform to mapping format
-    const mappings: DomainMapping[] = domains.map(domain => ({
-      host: domain.host,
-      subdomain: domain.site.subdomain
-    }));
-    
-    // Also check legacy customDomain field on Site table
-    const legacySites = await prisma.site.findMany({
-      where: {
-        customDomain: {
-          not: null
-        }
-      },
-      select: {
-        subdomain: true,
-        customDomain: true
-      }
-    });
-    
-    // Add legacy mappings
-    legacySites.forEach(site => {
-      if (site.customDomain) {
-        mappings.push({
-          host: site.customDomain,
-          subdomain: site.subdomain
-        });
-        
-        // Also add www version
-        mappings.push({
-          host: `www.${site.customDomain}`,
-          subdomain: site.subdomain
-        });
-      }
-    });
+    // Since we removed the Domain model and customDomain field, return empty mappings
+    const mappings: DomainMapping[] = [];
     
     // Update cache
     domainMappingsCache = mappings;

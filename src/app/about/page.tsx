@@ -175,7 +175,7 @@ export default function AboutPage() {
             </span>
           </h1>
           <p className="about-subtitle text-lg sm:text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            We're on a mission to democratize website creation, making it possible for anyone to build 
+            We&apos;re on a mission to democratize website creation, making it possible for anyone to build 
             professional, high-converting websites that drive real business results.
           </p>
         </div>

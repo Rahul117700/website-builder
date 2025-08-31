@@ -417,7 +417,7 @@ export default function DatabaseManager() {
           <div className="max-w-7xl mx-auto">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Database Manager</h1>
             <p className="text-lg text-gray-600 max-w-3xl">
-              Manage your site's data with powerful CRUD operations. Create, read, update, and delete entries across different tables and databases.
+              Manage your site&apos;s data with powerful CRUD operations. Create, read, update, and delete entries across different tables and databases.
             </p>
           </div>
         </div>

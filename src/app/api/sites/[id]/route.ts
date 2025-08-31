@@ -20,13 +20,7 @@ export async function GET(
       where: {
         id: params.id,
       },
-      include: {
-        pages: {
-          orderBy: {
-            createdAt: 'asc',
-          },
-        },
-      },
+
     });
 
     if (!site) {
@@ -76,20 +70,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, description, customDomain, googleAnalyticsId, template } = await req.json();
-
-    // Normalize customDomain if provided (lowercase, strip protocol, trim dots and trailing slash)
-    const normalizedCustomDomain =
-      customDomain === null
-        ? null
-        : (typeof customDomain === 'string' && customDomain.trim().length > 0)
-          ? customDomain
-              .trim()
-              .replace(/^https?:\/\//i, '')
-              .replace(/\/$/, '')
-              .replace(/^www\./i, (m) => 'www.') // keep www. if user intends, but normalized case
-              .toLowerCase()
-          : undefined;
+    const { name, description, googleAnalyticsId, template } = await req.json();
 
     // Update the site and synchronize Domain mappings in a transaction
     const updatedSite = await prisma.$transaction(async (tx: any) => {
@@ -98,23 +79,12 @@ export async function PUT(
         data: {
           name,
           description,
-          ...(normalizedCustomDomain !== undefined && { customDomain: normalizedCustomDomain }),
           googleAnalyticsId,
           ...(template !== undefined && { template }),
         },
       });
 
-      // Sync Domain table if caller provided customDomain (including null)
-      if (normalizedCustomDomain !== undefined) {
-        // Remove existing domain rows for this site
-        await tx.domain.deleteMany({ where: { siteId: site.id } });
-        // Create a new mapping when set
-        if (normalizedCustomDomain) {
-          await tx.domain.create({
-            data: { siteId: site.id, host: normalizedCustomDomain },
-          });
-        }
-      }
+      // Note: customDomain sync with Domain table removed since Domain model was removed
 
       return site;
     });

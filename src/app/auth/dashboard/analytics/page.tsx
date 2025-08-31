@@ -155,7 +155,7 @@ export default function AnalyticsDashboard() {
             Analytics Dashboard
           </h1>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Track your website's performance, understand your audience, and optimize for success with comprehensive analytics and insights.
+            Track your website&apos;s performance, understand your audience, and optimize for success with comprehensive analytics and insights.
           </p>
         </div>
 

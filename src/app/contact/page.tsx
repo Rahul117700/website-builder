@@ -168,7 +168,7 @@ export default function ContactPage() {
             </span>
           </h1>
           <p className="contact-subtitle text-lg sm:text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            We're here to help you succeed. Whether you have questions, need support, 
+            We&apos;re here to help you succeed. Whether you have questions, need support, 
             or want to discuss your next project, our team is ready to assist.
           </p>
         </div>
@@ -187,7 +187,7 @@ export default function ContactPage() {
                   <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
                     <div className="flex items-center">
                       <CheckCircleIcon className="h-5 w-5 text-green-600 mr-2" />
-                      <span className="text-green-800 font-medium">Message sent successfully! We'll get back to you soon.</span>
+                      <span className="text-green-800 font-medium">Message sent successfully! We&apos;ll get back to you soon.</span>
                     </div>
                   </div>
                 )}
@@ -381,7 +381,7 @@ export default function ContactPage() {
             Ready to Get Started?
           </h2>
           <p className="text-lg sm:text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
-            Join thousands of entrepreneurs who've already transformed their online presence with our platform.
+            Join thousands of entrepreneurs who&apos;ve already transformed their online presence with our platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

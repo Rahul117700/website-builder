@@ -184,7 +184,7 @@ export default function PrivacyPage() {
                 </div>
                 
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Children's Privacy</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Children&apos;s Privacy</h3>
                   <p className="text-gray-700 leading-relaxed">
                     Our services are not intended for children under 13 years of age. We do not knowingly collect personal 
                     information from children under 13. If you are a parent or guardian, please contact us immediately.
