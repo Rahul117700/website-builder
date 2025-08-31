@@ -1,357 +1,559 @@
 'use client';
+
 import DashboardLayout from '@/components/layouts/dashboard-layout';
-import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
-import toast from 'react-hot-toast';
+import { useState, useRef, useEffect } from 'react';
+import { 
+  PlusIcon,
+  PencilIcon,
+  TrashIcon,
+  EyeIcon,
+  ChartBarIcon,
+  FunnelIcon,
+  DocumentTextIcon,
+  PhotoIcon,
+  PlayIcon,
+  PauseIcon,
+  ArrowTrendingUpIcon,
+  CurrencyDollarIcon,
+  UsersIcon,
+  ClockIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  MagnifyingGlassIcon,
+  FunnelIcon as FunnelIconSolid
+} from '@heroicons/react/24/outline';
+import { gsap } from 'gsap';
+
+interface Funnel {
+  id: string;
+  name: string;
+  description: string;
+  status: 'active' | 'paused' | 'draft';
+  type: 'lead-generation' | 'sales' | 'webinar' | 'product-launch';
+  steps: FunnelStep[];
+  createdAt: string;
+  updatedAt: string;
+  stats: {
+    visitors: number;
+    conversions: number;
+    revenue: number;
+    conversionRate: number;
+  };
+}
+
+interface FunnelStep {
+  id: string;
+  name: string;
+  type: 'landing' | 'checkout' | 'thank-you' | 'upsell';
+  order: number;
+  status: 'active' | 'inactive';
+}
+
+interface DigitalProduct {
+  id: string;
+  name: string;
+  description: string;
+  type: 'pdf' | 'course' | 'template' | 'software';
+  price: number;
+  status: 'active' | 'inactive';
+  downloads: number;
+  revenue: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function FunnelsPage() {
-  const [funnels, setFunnels] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'funnels' | 'products' | 'analytics'>('funnels');
+  const [funnels, setFunnels] = useState<Funnel[]>([]);
+  const [products, setProducts] = useState<DigitalProduct[]>([]);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
-  const [deleteConfirmModal, setDeleteConfirmModal] = useState(false);
-  const [funnelToDelete, setFunnelToDelete] = useState<any>(null);
-  const [editFunnelModal, setEditFunnelModal] = useState(false);
-  const [funnelToEdit, setFunnelToEdit] = useState<any>(null);
-  const [editForm, setEditForm] = useState<any>({ name: '', slug: '', landingHtml: '', landingCss: '', landingJs: '', thankHtml: '' });
-  const [form, setForm] = useState<any>({ name: '', slug: '', templateId: '', landingHtml: '<section class="container"><h1>Welcome</h1><p>Describe your offer here.</p><button id="buy">Buy Now</button></section>', landingCss: 'body{font-family:system-ui}.container{max-width:720px;margin:64px auto}', landingJs: '', thankHtml: '<h2>Thank you!</h2><p>Your purchase was successful.</p>' });
-  const [templates, setTemplates] = useState<any[]>([]);
-  const selectedTemplate = useMemo(()=> templates.find(t=>t.id===form.templateId),[templates, form.templateId]);
+  const [showCreateFunnel, setShowCreateFunnel] = useState(false);
+  const [showCreateProduct, setShowCreateProduct] = useState(false);
+  const [selectedFunnel, setSelectedFunnel] = useState<Funnel | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<DigitalProduct | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
-     useEffect(() => {
-     async function load() {
-       setLoading(true);
-       const res = await fetch('/api/funnels');
-       setFunnels(res.ok ? await res.json() : []);
-       
-       // Load templates that are on sale instead of purchased templates
-       const t = await fetch('/api/sites/on-sale');
-       const salesData = t.ok ? await t.json() : [];
-       const templatesOnSale = salesData.map((s: any) => ({
-         id: s.templateId,
-         name: s.site?.name || 'Site',
-         price: s.price,
-         site: s.site
-       }));
-       setTemplates(templatesOnSale);
-       setLoading(false);
-     }
-     load();
-   }, []);
+  // GSAP refs
+  const heroRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
-  const handleCreateFunnel = async () => {
-    if (!form.templateId || !form.name || !form.slug) return;
+  useEffect(() => {
+    const tl = gsap.timeline();
     
-    setCreating(true);
+    tl.fromTo(heroRef.current, 
+      { opacity: 0, y: 50 }, 
+      { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }
+    )
+    .fromTo(statsRef.current, 
+      { opacity: 0, y: 30 }, 
+      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 
+      "-=0.4"
+    )
+    .fromTo(contentRef.current, 
+      { opacity: 0, y: 30 }, 
+      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 
+      "-=0.3"
+    );
+
+    loadData();
+  }, []);
+
+  const loadData = async () => {
     try {
-      const res = await fetch('/api/funnels', { 
-        method: 'POST', 
-        headers: {'Content-Type': 'application/json'}, 
-        body: JSON.stringify(form) 
-      });
-      if (res.ok) {
-        location.reload();
-        toast.success('Funnel created successfully!');
-      } else {
-        console.error('Failed to create funnel');
-        toast.error('Failed to create funnel');
+      setLoading(true);
+      // Load funnels and digital products
+      const [funnelsRes, productsRes] = await Promise.all([
+        fetch('/api/funnels'),
+        fetch('/api/digital-products')
+      ]);
+
+      if (funnelsRes.ok) {
+        const funnelsData = await funnelsRes.json();
+        setFunnels(funnelsData);
+      }
+
+      if (productsRes.ok) {
+        const productsData = await productsRes.json();
+        setProducts(productsData);
       }
     } catch (error) {
-      console.error('Error creating funnel:', error);
-      toast.error('Error creating funnel');
+      console.error('Error loading data:', error);
     } finally {
-      setCreating(false);
+      setLoading(false);
     }
   };
 
-  const openEditFunnelModal = (funnel: any) => {
-    setFunnelToEdit(funnel);
-    setEditForm({
-      name: funnel.name,
-      slug: funnel.slug,
-      landingHtml: funnel.landingHtml,
-      landingCss: funnel.landingCss,
-      landingJs: funnel.landingJs,
-      thankHtml: funnel.thankHtml
-    });
-    setEditFunnelModal(true);
-  };
-
-  const handleUpdateFunnel = async () => {
-    if (!funnelToEdit || !editForm.name || !editForm.slug) return;
-    
-    setCreating(true);
-    try {
-      const res = await fetch(`/api/funnels/${funnelToEdit.slug}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: editForm.name,
-          slug: editForm.slug,
-          landingHtml: editForm.landingHtml,
-          landingCss: editForm.landingCss,
-          landingJs: editForm.landingJs,
-          thankHtml: editForm.thankHtml
-        })
-      });
-      
-      if (res.ok) {
-        setEditFunnelModal(false);
-        setFunnelToEdit(null);
-        location.reload();
-        toast.success('Funnel updated successfully!');
-      } else {
-        toast.error('Failed to update funnel');
-      }
-    } catch (error) {
-      console.error('Error updating funnel:', error);
-      toast.error('Error updating funnel');
-    } finally {
-      setCreating(false);
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'bg-green-100 text-green-800';
+      case 'paused': return 'bg-yellow-100 text-yellow-800';
+      case 'draft': return 'bg-gray-100 text-gray-800';
+      case 'inactive': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const handleDeleteFunnel = async () => {
-    if (!funnelToDelete) return;
-    
-    try {
-      const res = await fetch(`/api/funnels/${funnelToDelete.slug}`, {
-        method: 'DELETE'
-      });
-      
-      if (res.ok) {
-        location.reload();
-        toast.success('Funnel deleted successfully');
-        setDeleteConfirmModal(false);
-        setFunnelToDelete(null);
-      } else {
-        toast.error('Failed to delete funnel');
-      }
-    } catch (error) {
-      console.error('Error deleting funnel:', error);
-      toast.error('Error deleting funnel');
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'active': return <CheckCircleIcon className="h-4 w-4" />;
+      case 'paused': return <PauseIcon className="h-4 w-4" />;
+      case 'draft': return <ClockIcon className="h-4 w-4" />;
+      case 'inactive': return <ExclamationTriangleIcon className="h-4 w-4" />;
+      default: return <ClockIcon className="h-4 w-4" />;
     }
   };
 
-  return (
-    <DashboardLayout>
-      <div className="mb-6">
-        <h1 className="text-3xl font-extrabold text-white">Marketing Funnels</h1>
-        <p className="text-gray-400 text-sm">Create a landing page and thank-you flow for selling your templates with Razorpay checkout.</p>
-      </div>
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'pdf': return <DocumentTextIcon className="h-5 w-5" />;
+      case 'course': return <PlayIcon className="h-5 w-5" />;
+      case 'template': return <PhotoIcon className="h-5 w-5" />;
+      case 'software': return <FunnelIcon className="h-5 w-5" />;
+      default: return <DocumentTextIcon className="h-5 w-5" />;
+    }
+  };
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-2 rounded-2xl border border-gray-800 bg-black/40 p-6">
-          <div className="text-white font-semibold mb-3">Your Funnels</div>
-          {loading ? (
-            <div className="text-gray-400">Loading...</div>
-          ) : funnels.length === 0 ? (
-            <div className="text-gray-400">No funnels yet.</div>
-          ) : (
-            <div className="space-y-3">
-              {funnels.map(f => (
-                <div key={f.id} className="rounded-xl border border-gray-800 bg-gray-900 p-4 flex items-center justify-between">
-                  <div>
-                    <div className="text-white font-semibold">{f.name}</div>
-                    <div className="text-gray-400 text-sm">/{f.slug} • Visits {f.visitsCount || 0} • Conversions {f.conversionsCount || 0}</div>
-                  </div>
-                                     <div className="flex flex-wrap gap-2">
-                     <Link className="px-3 py-1 rounded bg-purple-600 text-white hover:bg-purple-700 transition-colors whitespace-nowrap" href={`/f/${f.slug}`} target="_blank">Open</Link>
-                     <button
-                       onClick={() => {
-                         const url = `${window.location.origin}/f/${f.slug}`;
-                         navigator.clipboard.writeText(url);
-                         toast.success('Funnel URL copied to clipboard!');
-                       }}
-                       className="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700 transition-colors whitespace-nowrap"
-                     >
-                       📋 Copy
-                     </button>
-                     <button
-                       onClick={() => openEditFunnelModal(f)}
-                       className="px-3 py-1 rounded bg-green-600 text-white hover:bg-green-700 transition-colors whitespace-nowrap"
-                     >
-                       ✏️ Edit
-                     </button>
-                     <button
-                       onClick={() => {
-                         setFunnelToDelete(f);
-                         setDeleteConfirmModal(true);
-                       }}
-                       className="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700 transition-colors whitespace-nowrap"
-                     >
-                       🗑️ Delete
-                     </button>
-                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+  const totalFunnels = funnels.length;
+  const activeFunnels = funnels.filter(f => f.status === 'active').length;
+  const totalProducts = products.length;
+  const totalRevenue = funnels.reduce((sum, f) => sum + f.stats.revenue, 0) + 
+                      products.reduce((sum, p) => sum + p.revenue, 0);
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
-
-        <div className="rounded-2xl border border-gray-800 bg-black/40 p-6 space-y-3">
-          <div className="text-white font-semibold">Create Funnel</div>
-          <label className="text-sm text-gray-300">Template</label>
-          <select className="w-full mb-3 rounded border bg-black text-white border-gray-800 px-3 py-2" value={form.templateId} onChange={e=>setForm((s:any)=>({ ...s, templateId: e.target.value }))}>
-            <option value="">Select template</option>
-            {templates.map((t:any)=>(<option key={t.id} value={t.id}>{t.name}</option>))}
-          </select>
-          <label className="text-sm text-gray-300">Name</label>
-          <input className="w-full mb-3 rounded border bg-black text-white border-gray-800 px-3 py-2" value={form.name} onChange={e=>setForm((s:any)=>({ ...s, name: e.target.value }))} />
-          <label className="text-sm text-gray-300">Slug (public URL)</label>
-          <input className="w-full mb-3 rounded border bg-black text-white border-gray-800 px-3 py-2" value={form.slug} onChange={e=>setForm((s:any)=>({ ...s, slug: e.target.value.replace(/\s+/g,'-').toLowerCase() }))} />
-                     <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4">
-             <div className="text-blue-400 text-sm mb-2">
-               <strong>Note:</strong> This funnel will use our pre-designed, professional landing page template.
-             </div>
-             <div className="text-blue-300 text-xs">
-               The page will automatically showcase your template with modern design, features list, and secure payment integration.
-             </div>
-           </div>
-          <button 
-            className={`w-full rounded font-semibold py-2 transition-all duration-200 ${
-              creating 
-                ? 'bg-gray-600 text-gray-300 cursor-not-allowed' 
-                : 'bg-purple-600 text-white hover:bg-purple-700'
-            }`} 
-            onClick={handleCreateFunnel}
-            disabled={creating}
-          >
-            {creating ? (
-              <div className="flex items-center justify-center space-x-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Creating...</span>
-              </div>
-            ) : (
-              'Create Funnel'
-            )}
-          </button>
-                     {selectedTemplate && (
-             <p className="text-xs text-gray-400">This funnel will automatically create a professional landing page for &quot;{selectedTemplate.name}&quot; with integrated payment system.</p>
-                      )}
-         </div>
-       </div>
-
-       {/* Delete Confirmation Modal */}
-       {deleteConfirmModal && funnelToDelete && (
-         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-           <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-             <h3 className="text-xl font-semibold text-white mb-4">
-               Delete Funnel
-             </h3>
-             <p className="text-gray-300 mb-6">
-               Are you sure you want to delete the funnel &quot;{funnelToDelete.name}&quot;? This action cannot be undone.
-             </p>
-             <div className="flex gap-3 justify-end">
-               <button
-                 onClick={() => {
-                   setDeleteConfirmModal(false);
-                   setFunnelToDelete(null);
-                 }}
-                 className="px-4 py-2 rounded border border-gray-600 text-gray-300 hover:bg-gray-700 transition-colors"
-               >
-                 Cancel
-               </button>
-               <button
-                 onClick={handleDeleteFunnel}
-                 className="px-4 py-2 rounded bg-red-600 text-white font-semibold hover:bg-red-700 transition-colors"
-               >
-                 Delete Funnel
-               </button>
-             </div>
-           </div>
-         </div>
-               )}
-
-        {/* Edit Funnel Modal */}
-        {editFunnelModal && funnelToEdit && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 shadow-xl max-h-[90vh] overflow-y-auto">
-              <h3 className="text-xl font-semibold text-white mb-4">
-                Edit Marketing Funnel: {funnelToEdit.name}
-              </h3>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Left Column - Form */}
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm text-gray-300 mb-1">Funnel Name</label>
-                    <input
-                      type="text"
-                      value={editForm.name}
-                      onChange={(e) => setEditForm((prev: any) => ({ ...prev, name: e.target.value }))}
-                      className="w-full rounded border px-3 py-2 bg-gray-700 text-white border-gray-600"
-                      placeholder="Enter funnel name"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm text-gray-300 mb-1">URL Slug</label>
-                    <input
-                      type="text"
-                      value={editForm.slug}
-                                           onChange={(e) => setEditForm((prev: any) => ({ ...prev, slug: e.target.value.replace(/\s+/g, '-').toLowerCase() }))}
-                     className="w-full rounded border px-3 py-2 bg-gray-700 text-white border-gray-600"
-                     placeholder="funnel-url"
-                   />
-                 </div>
-                 
-                                   <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4">
-                    <div className="text-blue-400 text-sm mb-2">
-                      <strong>Note:</strong> This funnel uses our pre-designed, professional landing page template.
-                    </div>
-                    <div className="text-blue-300 text-xs">
-                      The page automatically showcases your template with modern design, features list, and secure payment integration.
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Right Column - Preview */}
-                <div className="space-y-4">
-                  <div className="text-white font-semibold mb-2">Funnel Preview</div>
-                  <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
-                    <div className="text-white font-medium mb-2">{funnelToEdit.name}</div>
-                    <div className="text-gray-400 text-sm mb-2">Current Slug: /{funnelToEdit.slug}</div>
-                    <div className="text-gray-400 text-sm mb-3">Template: {funnelToEdit.template?.site?.name || 'Unknown'}</div>
-                    
-                    {/* Funnel URL Preview */}
-                    <div className="bg-gray-800 p-2 rounded text-xs text-gray-300">
-                      <span className="text-gray-400">Funnel URL:</span> {window.location.origin}/f/{editForm.slug}
-                    </div>
-                    
-                    {/* Stats */}
-                    <div className="mt-3 p-2 bg-blue-900/20 border border-blue-700 rounded">
-                      <div className="text-blue-400 text-xs">
-                        Visits: {funnelToEdit.visitsCount || 0} • Conversions: {funnelToEdit.conversionsCount || 0}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex gap-3 justify-end mt-6">
-                <button
-                  onClick={() => {
-                    setEditFunnelModal(false);
-                    setFunnelToEdit(null);
-                  }}
-                  className="px-4 py-2 rounded border border-gray-600 text-gray-300 hover:bg-gray-700 transition-colors"
-                  disabled={creating}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleUpdateFunnel}
-                  disabled={creating || !editForm.name || !editForm.slug}
-                  className="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
-                >
-                  {creating ? 'Updating...' : 'Update Funnel'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </DashboardLayout>
     );
   }
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-8">
+        {/* Hero Section */}
+        <div ref={heroRef} className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Funnels & Digital Products
+          </h1>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Create high-converting sales funnels and sell digital products. Track performance, optimize conversions, and grow your revenue.
+          </p>
+        </div>
+
+        {/* Stats Overview */}
+        <div ref={statsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <div className="flex items-center">
+              <div className="p-3 bg-blue-100 rounded-lg">
+                <FunnelIcon className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Funnels</p>
+                <p className="text-2xl font-bold text-gray-900">{totalFunnels}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <div className="flex items-center">
+              <div className="p-3 bg-green-100 rounded-lg">
+                <CheckCircleIcon className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Active Funnels</p>
+                <p className="text-2xl font-bold text-gray-900">{activeFunnels}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <div className="flex items-center">
+              <div className="p-3 bg-purple-100 rounded-lg">
+                <DocumentTextIcon className="h-6 w-6 text-purple-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Digital Products</p>
+                <p className="text-2xl font-bold text-gray-900">{totalProducts}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <div className="flex items-center">
+              <div className="p-3 bg-yellow-100 rounded-lg">
+                <CurrencyDollarIcon className="h-6 w-6 text-yellow-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                <p className="text-2xl font-bold text-gray-900">₹{totalRevenue.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+          <div className="border-b border-gray-200">
+            <nav className="flex space-x-8 px-6">
+              {[
+                { id: 'funnels', name: 'Sales Funnels', icon: FunnelIcon },
+                { id: 'products', name: 'Digital Products', icon: DocumentTextIcon },
+                { id: 'analytics', name: 'Analytics', icon: ChartBarIcon }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                    activeTab === tab.id
+                      ? 'border-indigo-500 text-indigo-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <tab.icon className="h-5 w-5 mr-2" />
+                  {tab.name}
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          {/* Tab Content */}
+          <div ref={contentRef} className="p-6">
+            {/* Funnels Tab */}
+            {activeTab === 'funnels' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Sales Funnels</h3>
+                  <button
+                    onClick={() => setShowCreateFunnel(true)}
+                    className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                  >
+                    <PlusIcon className="h-4 w-4 mr-2" />
+                    Create Funnel
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {funnels.map((funnel) => (
+                    <div key={funnel.id} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900 mb-2">{funnel.name}</h4>
+                          <p className="text-sm text-gray-600 mb-3">{funnel.description}</p>
+                          <div className="flex items-center space-x-2 mb-3">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(funnel.status)}`}>
+                              {getStatusIcon(funnel.status)}
+                              <span className="ml-1 capitalize">{funnel.status}</span>
+                            </span>
+                            <span className="inline-block px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full capitalize">
+                              {funnel.type.replace('-', ' ')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 mb-4">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Steps:</span>
+                          <span className="font-medium text-gray-900">{funnel.steps.length}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Visitors:</span>
+                          <span className="font-medium text-gray-900">{funnel.stats.visitors.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Conversions:</span>
+                          <span className="font-medium text-gray-900">{funnel.stats.conversions.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Revenue:</span>
+                          <span className="font-medium text-gray-900">₹{funnel.stats.revenue.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Conv. Rate:</span>
+                          <span className="font-medium text-gray-900">{funnel.stats.conversionRate}%</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => setSelectedFunnel(funnel)}
+                          className="flex-1 p-2 text-indigo-600 hover:text-indigo-800 transition-colors text-sm font-medium"
+                          title="Edit Funnel"
+                        >
+                          <PencilIcon className="h-4 w-4 mr-1" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => {/* View funnel */}}
+                          className="flex-1 p-2 text-gray-600 hover:text-gray-800 transition-colors text-sm font-medium"
+                          title="View Funnel"
+                        >
+                          <EyeIcon className="h-4 w-4 mr-1" />
+                          View
+                        </button>
+                        <button
+                          onClick={() => {/* Toggle status */}}
+                          className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
+                          title={funnel.status === 'active' ? 'Pause Funnel' : 'Activate Funnel'}
+                        >
+                          {funnel.status === 'active' ? (
+                            <PauseIcon className="h-4 w-4" />
+                          ) : (
+                            <PlayIcon className="h-4 w-4" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => {/* Delete funnel */}}
+                          className="p-2 text-red-600 hover:text-red-800 transition-colors"
+                          title="Delete Funnel"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {funnels.length === 0 && (
+                    <div className="col-span-full text-center py-12">
+                      <FunnelIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Funnels Created Yet</h3>
+                      <p className="text-gray-500 mb-6">Start building your first sales funnel to convert visitors into customers</p>
+                      <button
+                        onClick={() => setShowCreateFunnel(true)}
+                        className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                      >
+                        Create Your First Funnel
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Products Tab */}
+            {activeTab === 'products' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Digital Products</h3>
+                  <button
+                    onClick={() => setShowCreateProduct(true)}
+                    className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                  >
+                    <PlusIcon className="h-4 w-4 mr-2" />
+                    Add Product
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {products.map((product) => (
+                    <div key={product.id} className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-2">
+                            {getTypeIcon(product.type)}
+                            <span className="inline-block px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full capitalize">
+                              {product.type}
+                            </span>
+                          </div>
+                          <h4 className="font-medium text-gray-900 mb-2">{product.name}</h4>
+                          <p className="text-sm text-gray-600 mb-3">{product.description}</p>
+                          <div className="flex items-center space-x-2 mb-3">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(product.status)}`}>
+                              {getStatusIcon(product.status)}
+                              <span className="ml-1 capitalize">{product.status}</span>
+                            </span>
+                            <span className="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full font-medium">
+                              ₹{product.price}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 mb-4">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Downloads:</span>
+                          <span className="font-medium text-gray-900">{product.downloads.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Revenue:</span>
+                          <span className="font-medium text-gray-900">₹{product.revenue.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Created:</span>
+                          <span className="font-medium text-gray-900">
+                            {new Date(product.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => setSelectedProduct(product)}
+                          className="flex-1 p-2 text-indigo-600 hover:text-indigo-800 transition-colors text-sm font-medium"
+                          title="Edit Product"
+                        >
+                          <PencilIcon className="h-4 w-4 mr-1" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => {/* View product */}}
+                          className="flex-1 p-2 text-gray-600 hover:text-gray-800 transition-colors text-sm font-medium"
+                          title="View Product"
+                        >
+                          <EyeIcon className="h-4 w-4 mr-1" />
+                          View
+                        </button>
+                        <button
+                          onClick={() => {/* Toggle status */}}
+                          className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
+                          title={product.status === 'active' ? 'Deactivate Product' : 'Activate Product'}
+                        >
+                          {product.status === 'active' ? (
+                            <PauseIcon className="h-4 w-4" />
+                          ) : (
+                            <PlayIcon className="h-4 w-4" />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => {/* Delete product */}}
+                          className="p-2 text-red-600 hover:text-red-800 transition-colors"
+                          title="Delete Product"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {products.length === 0 && (
+                    <div className="col-span-full text-center py-12">
+                      <DocumentTextIcon className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Digital Products Yet</h3>
+                      <p className="text-gray-500 mb-6">Start selling digital products like PDFs, courses, templates, and software</p>
+                      <button
+                        onClick={() => setShowCreateProduct(true)}
+                        className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+                      >
+                        Add Your First Product
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Analytics Tab */}
+            {activeTab === 'analytics' && (
+              <div className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900">Performance Analytics</h3>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Funnel Performance */}
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <h4 className="font-medium text-gray-900 mb-4">Top Performing Funnels</h4>
+                    <div className="space-y-3">
+                      {funnels
+                        .sort((a, b) => b.stats.revenue - a.stats.revenue)
+                        .slice(0, 5)
+                        .map((funnel) => (
+                          <div key={funnel.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                            <div>
+                              <p className="font-medium text-gray-900">{funnel.name}</p>
+                              <p className="text-sm text-gray-600">{funnel.type.replace('-', ' ')}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium text-gray-900">₹{funnel.stats.revenue.toLocaleString()}</p>
+                              <p className="text-sm text-gray-600">{funnel.stats.conversionRate}% conv.</p>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+
+                  {/* Product Performance */}
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <h4 className="font-medium text-gray-900 mb-4">Top Selling Products</h4>
+                    <div className="space-y-3">
+                      {products
+                        .sort((a, b) => b.revenue - a.revenue)
+                        .slice(0, 5)
+                        .map((product) => (
+                          <div key={product.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                            <div>
+                              <p className="font-medium text-gray-900">{product.name}</p>
+                              <p className="text-sm text-gray-600">{product.type}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium text-gray-900">₹{product.revenue.toLocaleString()}</p>
+                              <p className="text-sm text-gray-600">{product.downloads} downloads</p>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Revenue Chart Placeholder */}
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <h4 className="font-medium text-gray-900 mb-4">Revenue Over Time</h4>
+                  <div className="h-64 bg-white rounded-lg border border-gray-200 flex items-center justify-center">
+                    <div className="text-center">
+                      <ChartBarIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                      <p className="text-gray-500">Chart placeholder - Revenue trends</p>
+                      <p className="text-sm text-gray-400">Monthly revenue from funnels and products</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}
 
 

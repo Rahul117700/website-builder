@@ -27,7 +27,7 @@ import {
   UserIcon
 } from '@heroicons/react/24/outline';
 import { RocketLaunchIcon } from '@heroicons/react/24/solid';
-import { useTheme } from 'next-themes';
+
 import { WelcomeModal } from '@/components/dashboard/welcome-modal';
 import { io as socketIOClient, Socket } from 'socket.io-client';
 import { useUserPlan } from '@/hooks/useUserPlan';
@@ -43,8 +43,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+
+
   const [showNotifications, setShowNotifications] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -53,10 +53,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [playNotificationSound, setPlayNotificationSound] = useState(false);
   const [lastNotificationCount, setLastNotificationCount] = useState(0);
 
-  // After mounting, we can access the theme
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+
 
   useEffect(() => {
     let socket: Socket | undefined;
@@ -222,26 +219,26 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const currentPlanName = 'All Features';
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black">
+    <div className="min-h-screen bg-gray-50">
       {/* Notification Bell (desktop, top-right) */}
       <div className="hidden lg:block fixed top-4 right-8 z-40">
         <button
-          className="relative p-2 rounded-full bg-white dark:bg-gray-900 shadow border border-gray-200 dark:border-gray-700 hover:bg-purple-50 dark:hover:bg-gray-800"
+          className="relative p-2 rounded-full bg-white shadow border border-gray-200 hover:bg-purple-50"
           onClick={() => setShowNotifications(true)}
           aria-label="Show notifications"
         >
-          <BellIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+          <BellIcon className="h-6 w-6 text-purple-600" />
           <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">{unreadCount}</span>
         </button>
       </div>
       {/* Help Button (desktop, top-right) */}
       <div className="hidden lg:block fixed top-4 right-24 z-40">
         <button
-          className="relative p-2 rounded-full bg-white dark:bg-gray-900 shadow border border-gray-200 dark:border-gray-700 hover:bg-purple-50 dark:hover:bg-gray-800"
+          className="relative p-2 rounded-full bg-white shadow border border-gray-200 hover:bg-purple-50"
           onClick={() => setShowWelcome(true)}
           aria-label="Show help / onboarding"
         >
-          <QuestionMarkCircleIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+          <QuestionMarkCircleIcon className="h-6 w-6 text-purple-600" />
         </button>
       </div>
       
@@ -249,7 +246,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* 
       <div className="hidden lg:block fixed top-4 right-40 z-40">
         <button
-          className="relative p-2 rounded-full bg-white dark:bg-slate-800 shadow border border-gray-200 dark:border-slate-700 hover:bg-purple-50 dark:hover:bg-slate-700"
+                          className="relative p-2 rounded-full bg-white shadow border border-gray-200 hover:bg-purple-50"
           onClick={async () => {
             try {
               const response = await fetch('/api/notifications', {
@@ -269,7 +266,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           }}
           aria-label="Test notification"
         >
-          <span className="text-xs font-bold text-purple-600 dark:text-purple-400">🔔</span>
+          <span className="text-xs font-bold text-purple-600">🔔</span>
         </button>
       </div>
       */}
@@ -279,7 +276,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {!isSidebarOpen && (
           <button
             type="button"
-            className="absolute top-4 left-4 z-50 p-2 rounded-md bg-white dark:bg-gray-900 text-purple-600 dark:text-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md border border-gray-200 dark:border-gray-700"
+            className="absolute top-4 left-4 z-50 p-2 rounded-md bg-white text-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md border border-gray-200"
             onClick={toggleSidebar}
             aria-label="Open sidebar"
           >
@@ -291,12 +288,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="fixed inset-0 z-40 flex">
             {/* Sidebar overlay */}
             <div 
-              className="fixed inset-0 bg-purple-900/10 dark:bg-gray-600/75 transition-opacity" 
+              className="fixed inset-0 bg-purple-900/10 transition-opacity" 
               onClick={toggleSidebar}
             />
             {/* Sidebar */}
             <div
-              className="fixed inset-y-0 left-0 flex w-full max-w-xs flex-col bg-white dark:bg-black pt-5 pb-4 transform transition ease-in-out duration-300 translate-x-0 shadow-2xl rounded-r-2xl border-r border-gray-200 dark:border-gray-800"
+              className="fixed inset-y-0 left-0 flex w-full max-w-xs flex-col bg-white pt-5 pb-4 transform transition ease-in-out duration-300 translate-x-0 shadow-2xl rounded-r-2xl border-r border-gray-200"
             >
               <div className="absolute top-0 right-0 -mr-12 pt-2">
                 <button
@@ -309,7 +306,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </button>
               </div>
               <div className="flex-shrink-0 flex items-center px-4">
-                <Link href="/" className="text-xl font-bold text-primary-600 dark:text-primary-500">
+                <Link href="/" className="text-xl font-bold text-primary-600">
                   Website Builder
                 </Link>
               </div>
@@ -321,15 +318,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       href={item.href}
                       className={`group flex items-center px-3 py-2 text-base font-semibold rounded-xl transition-all duration-150 ${
                         item.current
-                          ? 'bg-purple-100 dark:bg-gray-900 text-purple-700 dark:text-purple-300 shadow-md'
-                          : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-900 hover:text-purple-700 dark:hover:text-purple-300'
+                          ? 'bg-purple-100 text-purple-700 shadow-md'
+                          : 'text-gray-600 hover:bg-purple-50 hover:text-purple-700'
                       }`}
                     >
                       <item.icon
                         className={`mr-4 h-6 w-6 ${
                           item.current
-                            ? 'text-purple-600 dark:text-purple-400'
-                            : 'text-gray-400 dark:text-gray-500 group-hover:text-purple-600 dark:group-hover:text-purple-400'
+                            ? 'text-purple-600'
+                            : 'text-gray-400 group-hover:text-purple-600'
                         }`}
                         aria-hidden="true"
                       />
@@ -338,7 +335,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   ))}
                 </nav>
               </div>
-              <div className="flex-shrink-0 flex border-t border-gray-200 dark:border-gray-800 p-6 mt-4">
+              <div className="flex flex-shrink-0 border-t border-gray-200 p-6 mt-4">
                 <div className="flex-shrink-0 w-full group block">
                   <div className="flex items-center gap-4">
                     <div>
@@ -356,13 +353,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       )}
                     </div>
                     <div className="ml-2 flex-1">
-                      <p className="text-base font-semibold text-gray-900 dark:text-gray-200">
+                      <p className="text-base font-semibold text-gray-900">
                         {session?.user?.name || session?.user?.email || 'User'}
                       </p>
                       <button
                         onClick={handleSignOut}
                         disabled={isLoading}
-                        className="mt-1 text-xs font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 flex items-center gap-1"
+                        className="mt-1 text-xs font-semibold text-purple-600 hover:text-purple-800 flex items-center gap-1"
                       >
                         {isLoading ? (
                           <>
@@ -386,11 +383,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Static sidebar for desktop */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex min-h-0 flex-1 flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
+              <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
+          <div className="flex min-h-0 flex-1 flex-col border-r border-gray-200 bg-white">
           <div className="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
             <div className="flex flex-shrink-0 items-center px-4">
-              <Link href="/" className="text-xl font-bold text-primary-600 dark:text-primary-500">
+              <Link href="/" className="text-xl font-bold text-primary-600">
                 Website Builder
               </Link>
             </div>
@@ -401,15 +398,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   href={item.href}
                   className={`group flex items-center px-3 py-2 text-base font-semibold rounded-xl transition-all duration-150 ${
                     item.current
-                      ? 'bg-purple-100 dark:bg-gray-900 text-purple-700 dark:text-purple-300 shadow-md'
-                      : 'text-gray-600 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-gray-900 hover:text-purple-700 dark:hover:text-purple-300'
+                      ? 'bg-purple-100 text-purple-700 shadow-md'
+                      : 'text-gray-600 hover:bg-purple-50 hover:text-purple-700'
                   }`}
                 >
                   <item.icon
                     className={`mr-3 h-5 w-5 ${
                       item.current
-                        ? 'text-purple-600 dark:text-purple-400'
-                        : 'text-gray-400 dark:text-gray-500 group-hover:text-purple-600 dark:group-hover:text-purple-400'
+                        ? 'text-purple-600'
+                        : 'text-gray-400 group-hover:text-purple-600'
                     }`}
                     aria-hidden="true"
                   />
@@ -418,7 +415,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               ))}
             </nav>
           </div>
-          <div className="flex flex-shrink-0 border-t border-gray-200 dark:border-gray-800 p-6 mt-4">
+                        <div className="flex flex-shrink-0 border-t border-gray-200 p-6 mt-4">
             <div className="flex-shrink-0 w-full group block">
               <div className="flex items-center gap-4">
                 <div>
@@ -435,13 +432,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   )}
                 </div>
                 <div className="ml-2 flex-1">
-                  <p className="text-base font-semibold text-gray-900 dark:text-gray-200">
+                  <p className="text-base font-semibold text-gray-900">
                     {session?.user?.name || session?.user?.email || 'User'}
                   </p>
                   <button
                     onClick={handleSignOut}
                     disabled={isLoading}
-                    className="mt-1 text-xs font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 flex items-center gap-1"
+                    className="mt-1 text-xs font-semibold text-purple-600 hover:text-purple-800 flex items-center gap-1"
                   >
                     {isLoading ? (
                       <>
@@ -464,10 +461,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main content */}
       <div className="lg:pl-64 flex flex-col flex-1">
-        <div className="sticky top-0 z-10 bg-white dark:bg-black pl-1 pt-1 sm:pl-3 sm:pt-3 lg:hidden shadow-md rounded-b-2xl">
+        <div className="sticky top-0 z-10 bg-white pl-1 pt-1 sm:pl-3 sm:pt-3 lg:hidden shadow-md rounded-b-2xl">
           <button
             type="button"
-            className="-ml-0.5 -mt-0.5 inline-flex h-12 w-12 items-center justify-center rounded-md text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500"
+            className="-ml-0.5 -mt-0.5 inline-flex h-12 w-12 items-center justify-center rounded-md text-purple-600 hover:text-purple-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500"
             onClick={toggleSidebar}
           >
             <span className="sr-only">Open sidebar</span>
@@ -476,7 +473,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
         <main className="flex-1 pb-8">
           <div className="px-[20px] py-10 w-full">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg p-8 border border-gray-100 dark:border-gray-800 w-full">
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 w-full">
               {children}
             </div>
           </div>
@@ -486,12 +483,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Notification Modal */}
       {showNotifications && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 w-full max-w-md relative max-h-[80vh] flex flex-col">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center justify-between flex-shrink-0">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative max-h-[80vh] flex flex-col">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center justify-between flex-shrink-0">
               Notifications & Activity
               {notifications.length > 0 && unreadCount > 0 && (
                 <button
-                  className="text-xs px-3 py-1 rounded bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-300 font-semibold ml-2 hover:bg-purple-200 dark:hover:bg-purple-700"
+                  className="text-xs px-3 py-1 rounded bg-purple-100 text-purple-700 font-semibold ml-2 hover:bg-purple-200"
                   onClick={handleMarkAllAsRead}
                 >
                   Mark all as read
@@ -499,36 +496,36 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               )}
             </h2>
             <button
-              className="absolute top-3 right-3 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 flex-shrink-0"
+              className="absolute top-3 right-3 p-1 rounded hover:bg-gray-100 flex-shrink-0"
               onClick={() => setShowNotifications(false)}
               aria-label="Close notifications"
             >
-              <XMarkIcon className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+              <XMarkIcon className="h-5 w-5 text-gray-500" />
             </button>
-            <ul className="divide-y divide-gray-200 dark:divide-gray-800 overflow-y-auto flex-1">
+            <ul className="divide-y divide-gray-200 overflow-y-auto flex-1">
               {notifications.length === 0 ? (
-                <li className="py-4 text-center text-gray-500 dark:text-gray-400">No notifications yet.</li>
+                <li className="py-4 text-center text-gray-500">No notifications yet.</li>
               ) : notifications.map((activity) => (
-                <li key={activity.id} className={`py-3 flex items-start gap-3 cursor-pointer ${!activity.read ? 'bg-purple-50 dark:bg-purple-900/20' : ''}`}
+                <li key={activity.id} className={`py-3 flex items-start gap-3 cursor-pointer ${!activity.read ? 'bg-purple-50' : ''}`}
                     onClick={() => !activity.read && handleMarkAsRead(activity.id)}>
-                  <span className="inline-block h-8 w-8 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center flex-shrink-0">
+                  <span className="inline-block h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
                     {/* Icon based on type */}
-                    {activity.type === 'site' && <GlobeAltIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
-                    {activity.type === 'template' && <SparklesIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
-                    {activity.type === 'booking' && <CubeIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
-                    {activity.type === 'submission' && <InboxArrowDownIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
-                    {activity.type === 'domain' && <GlobeAltIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
-                    {activity.type === 'comment' && <ChatBubbleLeftIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
-                    {activity.type === 'like' && <HeartIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
-                    {activity.type === 'plan' && <CreditCardIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
-                    {activity.type === 'publish' && <GlobeAltIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
+                    {activity.type === 'site' && <GlobeAltIcon className="h-5 w-5 text-purple-600" />}
+                    {activity.type === 'template' && <SparklesIcon className="h-5 w-5 text-purple-600" />}
+                    {activity.type === 'booking' && <CubeIcon className="h-5 w-5 text-purple-600" />}
+                    {activity.type === 'submission' && <InboxArrowDownIcon className="h-5 w-5 text-purple-600" />}
+                    {activity.type === 'domain' && <GlobeAltIcon className="h-5 w-5 text-purple-600" />}
+                    {activity.type === 'comment' && <ChatBubbleLeftIcon className="h-5 w-5 text-purple-600" />}
+                    {activity.type === 'like' && <HeartIcon className="h-5 w-5 text-purple-600" />}
+                    {activity.type === 'plan' && <CreditCardIcon className="h-5 w-5 text-purple-600" />}
+                    {activity.type === 'publish' && <GlobeAltIcon className="h-5 w-5 text-purple-600" />}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm text-gray-900 dark:text-white flex items-center gap-2">
+                    <div className="text-sm text-gray-900 flex items-center gap-2">
                       <span className="truncate">{activity.message}</span>
                       {!activity.read && <span className="ml-2 inline-block w-2 h-2 rounded-full bg-purple-500 flex-shrink-0" />}
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">{new Date(activity.createdAt).toLocaleString()}</div>
+                    <div className="text-xs text-gray-500">{new Date(activity.createdAt).toLocaleString()}</div>
                   </div>
                 </li>
               ))}

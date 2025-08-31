@@ -82,12 +82,12 @@ export default function SalesDashboard() {
       setSales(salesData);
       
       const eRes = await fetch('/api/users/earnings');
-      const eData = eRes.ok ? await res.json() : { total: 0 };
+      const eData = eRes.ok ? await eRes.json() : { total: 0 };
       setEarnings(eData.total || 0);
       
       // Load funnels to show connections
       const fRes = await fetch('/api/funnels');
-      const funnelsData = fRes.ok ? await res.json() : [];
+      const funnelsData = fRes.ok ? await fRes.json() : [];
       setFunnels(funnelsData);
 
       // Load notifications
@@ -179,7 +179,7 @@ export default function SalesDashboard() {
         setSelectedTemplate(null);
         // Reload funnels and sales data
         const fRes = await fetch('/api/funnels');
-        const funnelsData = fRes.ok ? await res.json() : [];
+        const funnelsData = fRes.ok ? await fRes.json() : [];
         setFunnels(funnelsData);
         toast.success('Funnel created successfully!');
         
@@ -207,7 +207,7 @@ export default function SalesDashboard() {
       if (res.ok) {
         // Reload funnels and sales data
         const fRes = await fetch('/api/funnels');
-        const funnelsData = fRes.ok ? await res.json() : [];
+        const funnelsData = fRes.ok ? await fRes.json() : [];
         setFunnels(funnelsData);
         toast.success('Funnel deleted successfully');
         setDeleteConfirmModal(false);
@@ -247,7 +247,7 @@ export default function SalesDashboard() {
         setFunnelToEdit(null);
         // Reload funnels and sales data
         const fRes = await fetch('/api/funnels');
-        const funnelsData = fRes.ok ? await res.json() : [];
+        const funnelsData = fRes.ok ? await fRes.json() : [];
         setFunnels(funnelsData);
         toast.success('Funnel updated successfully!');
         

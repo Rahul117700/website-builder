@@ -5,24 +5,27 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
+import { RocketLaunchIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-    // Credentials login
+    
     const res = await signIn('credentials', {
       redirect: false,
       email,
       password,
     });
+    
     if (res?.error) {
       setError(res.error);
       toast.error(res.error);
@@ -36,80 +39,169 @@ export default function SignInPage() {
   return (
     <>
       <Toaster position="top-right" />
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="w-full max-w-md p-8 space-y-8 bg-gray-900 rounded-2xl shadow-2xl border border-gray-700">
-          <div className="flex flex-col items-center">
-            <span className="mb-2 text-4xl font-extrabold text-purple-400">🔑</span>
-            <h2 className="mt-2 text-center text-3xl font-extrabold text-white tracking-tight">Sign in to your account</h2>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-indigo-50 flex items-center justify-center p-4" style={{ backgroundColor: '#f8fafc' }}>
+        <div className="w-full max-w-md">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
+              <div className="p-3 bg-indigo-100 rounded-full">
+                <RocketLaunchIcon className="h-8 w-8 text-indigo-600" />
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
+            <p className="text-gray-600">Sign in to your Website Builder account</p>
           </div>
-          {/* Social Sign In Buttons */}
-          <div className="flex flex-col gap-3 mt-4">
-            <button
-              type="button"
-              className="flex items-center justify-center gap-3 w-full py-2 rounded-lg font-semibold shadow transition-all text-white bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-red-400"
-              onClick={() => signIn('google', { callbackUrl: '/' })}
-            >
-              <FaGoogle className="w-5 h-5" /> Sign in with Google
-            </button>
-            <button
-              type="button"
-              className="flex items-center justify-center gap-3 w-full py-2 rounded-lg font-semibold shadow transition-all text-white bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500"
-              onClick={() => signIn('github', { callbackUrl: '/' })}
-            >
-              <FaGithub className="w-5 h-5" /> Sign in with GitHub
-            </button>
-          </div>
-          {/* Divider */}
-          <div className="flex items-center my-6">
-            <div className="flex-grow h-px bg-gray-600" />
-            <span className="mx-3 text-gray-400 text-sm">or sign in with email</span>
-            <div className="flex-grow h-px bg-gray-600" />
-          </div>
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-6">
-              <div className="relative">
+
+          {/* Main Card */}
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8" style={{ backgroundColor: '#ffffff' }}>
+            {/* Social Sign In Buttons */}
+            <div className="space-y-3 mb-8">
+              <button
+                type="button"
+                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                style={{ backgroundColor: '#ffffff' }}
+                onClick={() => signIn('google', { callbackUrl: '/' })}
+              >
+                <FaGoogle className="w-5 h-5 text-red-500" />
+                Continue with Google
+              </button>
+              <button
+                type="button"
+                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                style={{ backgroundColor: '#ffffff' }}
+                onClick={() => signIn('github', { callbackUrl: '/' })}
+              >
+                <FaGithub className="w-5 h-5" />
+                Continue with GitHub
+              </button>
+            </div>
+
+            {/* Divider */}
+            <div className="relative mb-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white text-gray-500" style={{ backgroundColor: '#ffffff' }}>Or continue with email</span>
+              </div>
+            </div>
+
+            {/* Sign In Form */}
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email address
+                </label>
                 <input
                   id="email"
                   name="email"
                   type="email"
                   autoComplete="email"
                   required
-                  className="input-field peer placeholder-transparent focus:border-purple-500 focus:ring-2 focus:ring-purple-400 bg-gray-800 text-white border-gray-600"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                  style={{ backgroundColor: '#ffffff', color: '#111827' }}
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="Email address"
+                  placeholder="Enter your email"
                 />
-                <label htmlFor="email" className="absolute left-3 top-2 text-gray-400 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-400 peer-[&:not(:placeholder-shown)]:-top-4 peer-[&:not(:placeholder-shown)]:text-xs bg-gray-900 px-1 pointer-events-none">Email address</label>
               </div>
-              <div className="relative">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  className="input-field peer placeholder-transparent focus:border-purple-500 focus:ring-2 focus:ring-purple-400 bg-gray-800 text-white border-gray-600"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="Password"
-                />
-                <label htmlFor="password" className="absolute left-3 top-2 text-gray-400 text-sm transition-all duration-200 peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-focus:-top-4 peer-focus:text-xs peer-focus:text-purple-400 peer-[&:not(:placeholder-shown)]:-top-4 peer-[&:not(:placeholder-shown)]:text-xs bg-gray-900 px-1 pointer-events-none">Password</label>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    required
+                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                    style={{ backgroundColor: '#ffffff', color: '#111827' }}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    ) : (
+                      <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
-            {error && <div className="text-red-400 text-sm mt-2">{error}</div>}
-            <div>
+
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <input
+                    id="remember-me"
+                    name="remember-me"
+                    type="checkbox"
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                    Remember me
+                  </label>
+                </div>
+                <Link 
+                  href="/auth/forgot-password" 
+                  className="text-sm text-indigo-600 hover:text-indigo-500 hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+
               <button
                 type="submit"
-                className="w-full py-2 rounded-lg font-bold shadow bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white text-lg transition focus:outline-none focus:ring-2 focus:ring-purple-400"
                 disabled={loading}
+                className="w-full py-3 px-4 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
+                style={{ backgroundColor: '#4f46e5' }}
               >
-                {loading ? 'Signing in...' : 'Sign In'}
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Signing in...
+                  </div>
+                ) : (
+                  'Sign in'
+                )}
               </button>
+            </form>
+
+            {/* Sign Up Link */}
+            <div className="mt-8 text-center">
+              <p className="text-sm text-gray-600">
+                Don't have an account?{' '}
+                <Link 
+                  href="/auth/signup" 
+                  className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
+                >
+                  Sign up for free
+                </Link>
+              </p>
             </div>
-          </form>
-          <div className="flex justify-between mt-4">
-            <Link href="/auth/forgot-password" className="text-sm text-purple-400 hover:text-purple-300 hover:underline">Forgot password?</Link>
-            <Link href="/auth/signup" className="text-sm text-purple-400 hover:text-purple-300 hover:underline">Sign up</Link>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-8 text-center">
+            <p className="text-xs text-gray-500">
+              By signing in, you agree to our{' '}
+              <Link href="/terms" className="hover:underline">Terms of Service</Link>
+              {' '}and{' '}
+              <Link href="/privacy" className="hover:underline">Privacy Policy</Link>
+            </p>
           </div>
         </div>
       </div>

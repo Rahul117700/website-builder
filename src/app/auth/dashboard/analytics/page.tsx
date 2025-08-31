@@ -1,187 +1,146 @@
 'use client';
+
 import DashboardLayout from '@/components/layouts/dashboard-layout';
-import { useSession } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState, useMemo, useRef } from 'react';
-import * as React from 'react';
-import { Line } from 'react-chartjs-2';
-import { Pie } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-} from 'chart.js';
-import { Card, CardContent, CardHeader } from '@mui/material';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import TableChartIcon from '@mui/icons-material/TableChart';
-import Skeleton from '@mui/material/Skeleton';
-import Button from '@mui/material/Button';
-import { useUserPlan } from '@/hooks/useUserPlan';
-import { canAccessFeature } from '@/utils/planPermissions';
-import PlanRestrictionBanner from '@/components/PlanRestrictionBanner';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import SkeletonLoader from '@/components/ui/SkeletonLoader';
+import { useState, useRef, useEffect } from 'react';
+import { 
+  ChartBarIcon,
+  EyeIcon,
+  UsersIcon,
+  CurrencyDollarIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  CalendarIcon,
+  GlobeAltIcon,
+  DevicePhoneMobileIcon,
+  DeviceTabletIcon,
+  ComputerDesktopIcon
+} from '@heroicons/react/24/outline';
+import { gsap } from 'gsap';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
-
-function Select({ value, onValueChange, options, placeholder }: { value: string; onValueChange: (v: string) => void; options: { value: string; label: string }[]; placeholder?: string }) {
-  return (
-    <select
-      className="w-full max-w-xs border rounded-md px-3 py-2 text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
-      value={value}
-      onChange={e => onValueChange(e.target.value)}
-    >
-      <option value="" disabled>{placeholder || 'Select a site'}</option>
-      {options.map(opt => (
-        <option key={opt.value} value={opt.value}>{opt.label}</option>
-      ))}
-    </select>
-  );
+interface AnalyticsData {
+  visitors: {
+    total: number;
+    change: number;
+    trend: 'up' | 'down';
+  };
+  pageViews: {
+    total: number;
+    change: number;
+    trend: 'up' | 'down';
+  };
+  conversionRate: {
+    total: number;
+    change: number;
+    trend: 'up' | 'down';
+  };
+  revenue: {
+    total: number;
+    change: number;
+    trend: 'up' | 'down';
+  };
+  topPages: Array<{
+    path: string;
+    views: number;
+    change: number;
+  }>;
+  trafficSources: Array<{
+    source: string;
+    visitors: number;
+    percentage: number;
+  }>;
+  deviceBreakdown: Array<{
+    device: string;
+    visitors: number;
+    percentage: number;
+  }>;
+  monthlyData: Array<{
+    month: string;
+    visitors: number;
+    revenue: number;
+  }>;
 }
 
-export default function AnalyticsPage() {
-  const { status } = useSession();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+export default function AnalyticsDashboard() {
   const [sites, setSites] = useState<any[]>([]);
-  const [selectedSite, setSelectedSite] = useState<string>('');
-  const [analytics, setAnalytics] = useState<any | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [period, setPeriod] = useState<string>('30d');
-  const [pageFilter, setPageFilter] = useState<string>('');
-  const [countryFilter, setCountryFilter] = useState<string>('');
-  const refreshTimeout = useRef<NodeJS.Timeout | null>(null);
-  const [allSitesAnalytics, setAllSitesAnalytics] = useState<Record<string, any>>({});
-  const [allSitesLoading, setAllSitesLoading] = useState(false);
-  const [dateRange, setDateRange] = useState('30d');
-  const { userPlan } = useUserPlan();
-  
-  const dateOptions = [
-    { label: 'Last 7 days', value: '7d' },
-    { label: 'Last 14 days', value: '14d' },
-    { label: 'Last 30 days', value: '30d' },
-    // Add custom if needed
-  ];
+  const [selectedSite, setSelectedSite] = useState<any>(null);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
 
-  // Check if user can access analytics
-  const canAccessAnalytics = canAccessFeature(userPlan, 'canUseAnalytics');
+  // GSAP refs
+  const heroRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const chartsRef = useRef<HTMLDivElement>(null);
 
-  // All useEffect hooks must be called before any conditional returns
-  React.useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/');
-    }
-  }, [status, router]);
+  useEffect(() => {
+    const tl = gsap.timeline();
+    
+    tl.fromTo(heroRef.current, 
+      { opacity: 0, y: 50 }, 
+      { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }
+    )
+    .fromTo(statsRef.current, 
+      { opacity: 0, y: 30 }, 
+      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 
+      "-=0.4"
+    )
+    .fromTo(chartsRef.current, 
+      { opacity: 0, y: 30 }, 
+      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 
+      "-=0.3"
+    );
 
-  React.useEffect(() => {
-    if (status === 'authenticated') {
-      fetch('/api/sites')
-        .then(res => res.json())
-        .then(data => setSites(Array.isArray(data) ? data : data.sites || []))
-        .catch(() => setSites([]));
-    }
-  }, [status]);
+    loadUserSites();
+  }, []);
 
-  React.useEffect(() => {
-    const siteId = searchParams ? searchParams.get('siteId') : null;
-    if (siteId) setSelectedSite(siteId);
-  }, [searchParams]);
-
-  // Define fetchAnalytics function before hooks that use it
-  const fetchAnalytics = () => {
-    if (selectedSite) {
+  const loadUserSites = async () => {
+    try {
       setLoading(true);
-      setError(null);
-      fetch(`/api/analytics?siteId=${selectedSite}&period=${period}`)
-        .then(async res => {
-          if (!res.ok) throw new Error((await res.json()).error || 'Failed to fetch analytics');
-          return res.json();
-        })
-        .then(setAnalytics)
-        .catch(err => setError(err.message || 'Failed to fetch analytics'))
-        .finally(() => setLoading(false));
-    } else {
-      setAnalytics(null);
+      const response = await fetch('/api/sites/my-sites');
+      if (response.ok) {
+        const sitesData = await response.json();
+        setSites(sitesData);
+        if (sitesData.length > 0) {
+          setSelectedSite(sitesData[0]);
+          loadAnalyticsData(sitesData[0].id);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading sites:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // All remaining useEffect hooks must be called before any conditional returns
-  React.useEffect(() => {
-    fetchAnalytics();
-    // Listen for custom event to refresh analytics after a site page is visited
-    const handler = () => {
-      if (refreshTimeout.current) clearTimeout(refreshTimeout.current);
-      refreshTimeout.current = setTimeout(() => fetchAnalytics(), 1200);
-    };
-    window.addEventListener('site-analytics-refresh', handler);
-    return () => window.removeEventListener('site-analytics-refresh', handler);
-  }, [selectedSite, period]);
-
-  // Fetch analytics for all sites if none selected
-  useEffect(() => {
-    if (!selectedSite && sites.length > 0) {
-      setAllSitesLoading(true);
-      Promise.all(
-        sites.map(site =>
-          fetch(`/api/analytics?siteId=${site.id}&period=${period}`)
-            .then(res => res.ok ? res.json() : null)
-            .then(data => ({ siteId: site.id, data }))
-            .catch(() => ({ siteId: site.id, data: null }))
-        )
-      ).then(results => {
-        const analyticsMap: Record<string, any> = {};
-        results.forEach(({ siteId, data }) => {
-          analyticsMap[siteId] = data;
-        });
-        setAllSitesAnalytics(analyticsMap);
-        setAllSitesLoading(false);
-      });
+  const loadAnalyticsData = async (siteId: string) => {
+    try {
+      const response = await fetch(`/api/analytics/${siteId}?timeRange=${timeRange}`);
+      if (response.ok) {
+        const data = await response.json();
+        setAnalyticsData(data);
+      }
+    } catch (error) {
+      console.error('Error loading analytics data:', error);
     }
-  }, [selectedSite, sites, period]);
+  };
 
-  // Filtered analytics data
-  const filteredRawData = useMemo(() => {
-    if (!analytics?.rawData) return [];
-    return analytics.rawData.filter((row: any) =>
-      (pageFilter ? row.pageUrl === pageFilter : true) &&
-      (countryFilter ? row.country === countryFilter : true)
-    );
-  }, [analytics, pageFilter, countryFilter]);
+  const handleSiteChange = (site: any) => {
+    setSelectedSite(site);
+    loadAnalyticsData(site.id);
+  };
 
-  // Filtered time series
-  const filteredTimeSeries = useMemo(() => {
-    if (!filteredRawData.length) return [];
-    const map: Record<string, { date: string; pageViews: number; visitors: Set<string> }> = {};
-    filteredRawData.forEach((row: any) => {
-      const date = row.createdAt.split('T')[0];
-      if (!map[date]) map[date] = { date, pageViews: 0, visitors: new Set() };
-      map[date].pageViews += 1;
-      if (row.visitorId) map[date].visitors.add(row.visitorId);
-    });
-    return Object.values(map).map(d => ({ ...d, visitors: d.visitors.size }));
-  }, [filteredRawData]);
+  const handleTimeRangeChange = (range: '7d' | '30d' | '90d' | '1y') => {
+    setTimeRange(range);
+    if (selectedSite) {
+      loadAnalyticsData(selectedSite.id);
+    }
+  };
 
-  // If user can't access analytics, show restriction banner
-  if (!canAccessAnalytics) {
+  if (loading) {
     return (
       <DashboardLayout>
-        <div className="p-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Analytics</h1>
-          <PlanRestrictionBanner
-            userPlan={userPlan}
-            feature="Analytics"
-            requiredPlan="Pro"
-          />
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
       </DashboardLayout>
     );
@@ -189,412 +148,303 @@ export default function AnalyticsPage() {
 
   return (
     <DashboardLayout>
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Analytics</h1>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-          View analytics for your websites here.
-        </p>
-      </div>
-      <div className="mb-6 flex items-center gap-4">
-        <label className="block text-sm font-medium mb-1">Select Website</label>
-        <Select
-          value={selectedSite}
-          onValueChange={setSelectedSite}
-          options={sites.map((s: any) => ({ value: s.id, label: s.name }))}
-          placeholder="Select a site"
-        />
-        <button
-          className="ml-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow px-4 py-2 text-sm flex items-center gap-2"
-          onClick={fetchAnalytics}
-          disabled={loading}
-        >
-          {loading ? (
-            <>
-              <LoadingSpinner size="sm" color="white" />
-              Refreshing...
-            </>
-          ) : (
-            'Refresh'
-          )}
-        </button>
-      </div>
-      {loading && (
-        <div className="text-center py-12">
-          <LoadingSpinner size="lg" className="mx-auto mb-4" />
-          <p className="text-gray-500">Loading analytics data...</p>
+      <div className="space-y-8">
+        {/* Hero Section */}
+        <div ref={heroRef} className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Analytics Dashboard
+          </h1>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Track your website's performance, understand your audience, and optimize for success with comprehensive analytics and insights.
+          </p>
         </div>
-      )}
-      {error && (
-        <div className="text-center py-8 text-red-500">{error}</div>
-      )}
-      {analytics && !loading && !error && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
-            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-6 flex flex-col items-center shadow">
-              <VisibilityIcon className="text-purple-600 mb-2" fontSize="large" />
-              <span className="text-3xl font-bold text-purple-700">{analytics ? analytics.summary.totalPageViews : <Skeleton width={40} />}</span>
-              <span className="text-gray-600 dark:text-gray-300 mt-1">Page Views</span>
-              {/* Trend arrow (placeholder, replace with real trend logic) */}
-              <span className="flex items-center gap-1 text-xs mt-1 text-green-600"><TrendingUpIcon fontSize="small" /> +5%</span>
-            </div>
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 flex flex-col items-center shadow">
-              <PeopleAltIcon className="text-blue-600 mb-2" fontSize="large" />
-              <span className="text-3xl font-bold text-blue-700">{analytics ? analytics.summary.totalVisitors : <Skeleton width={40} />}</span>
-              <span className="text-gray-600 dark:text-gray-300 mt-1">Unique Visitors</span>
-              <span className="flex items-center gap-1 text-xs mt-1 text-red-600"><TrendingDownIcon fontSize="small" /> -2%</span>
-            </div>
-            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-6 flex flex-col items-center shadow">
-              <TableChartIcon className="text-green-600 mb-2" fontSize="large" />
-              <span className="text-3xl font-bold text-green-700">{analytics ? analytics.summary.popularPages[0]?.views : <Skeleton width={40} />}</span>
-              <span className="text-gray-600 dark:text-gray-300 mt-1">Top Page Views</span>
-              <span className="flex items-center gap-1 text-xs mt-1 text-green-600"><TrendingUpIcon fontSize="small" /> +8%</span>
+
+        {/* Site Selection */}
+        {sites.length > 0 && (
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Select Site</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {sites.map((site) => (
+                <div
+                  key={site.id}
+                  onClick={() => handleSiteChange(site)}
+                  className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                    selectedSite?.id === site.id
+                      ? 'border-indigo-500 bg-indigo-50'
+                      : 'border-gray-200 hover:border-indigo-300 hover:bg-gray-50'
+                  }`}
+                >
+                  <h3 className="font-medium text-gray-900 mb-2">{site.name}</h3>
+                  <p className="text-sm text-gray-600 mb-2">{site.description}</p>
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span className="capitalize">{site.type}</span>
+                    <span>{site.status}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-          {/* Date range picker */}
-          <div className="flex gap-2 mb-4">
-            {dateOptions.map(opt => (
-              <Button
-                key={opt.value}
-                variant={dateRange === opt.value ? 'contained' : 'outlined'}
-                color="primary"
-                size="small"
-                onClick={() => setDateRange(opt.value)}
-              >
-                {opt.label}
-              </Button>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-4 items-end mb-2">
-            <div>
-              <label className="block text-sm font-medium mb-1">Filter by Page</label>
-              <select
-                className="border rounded px-2 py-1 text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
-                value={pageFilter}
-                onChange={e => setPageFilter(e.target.value)}
-              >
-                <option value="">All Pages</option>
-                {Array.from(new Set(analytics.rawData.map((r: any) => r.pageUrl).filter(Boolean))).map((url) => (
-                  <option key={String(url)} value={String(url)}>{String(url)}</option>
-                ))}
-              </select>
+        )}
+
+        {selectedSite && analyticsData ? (
+          <>
+            {/* Time Range Selector */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Analytics: {selectedSite.name}
+                </h2>
+                <div className="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+                  {[
+                    { value: '7d', label: '7 Days' },
+                    { value: '30d', label: '30 Days' },
+                    { value: '90d', label: '90 Days' },
+                    { value: '1y', label: '1 Year' }
+                  ].map((range) => (
+                    <button
+                      key={range.value}
+                      onClick={() => handleTimeRangeChange(range.value as any)}
+                      className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                        timeRange === range.value
+                          ? 'bg-white text-indigo-600 shadow-sm'
+                          : 'text-gray-600 hover:text-gray-800'
+                      }`}
+                    >
+                      {range.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Filter by Country</label>
-              <select
-                className="border rounded px-2 py-1 text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
-                value={countryFilter}
-                onChange={e => setCountryFilter(e.target.value)}
-              >
-                <option value="">All Countries</option>
-                {Array.from(new Set(analytics.rawData.map((r: any) => r.country).filter(Boolean))).map((country) => (
-                  <option key={String(country)} value={String(country)}>{String(country)}</option>
-                ))}
-              </select>
+
+            {/* Key Metrics */}
+            <div ref={statsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Visitors</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {analyticsData.visitors.total.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <UsersIcon className="h-6 w-6 text-blue-600" />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center">
+                  {analyticsData.visitors.trend === 'up' ? (
+                    <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
+                  ) : (
+                    <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
+                  )}
+                  <span className={`text-sm font-medium ${
+                    analyticsData.visitors.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {analyticsData.visitors.change > 0 ? '+' : ''}{analyticsData.visitors.change}%
+                  </span>
+                  <span className="text-sm text-gray-500 ml-2">vs last period</span>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Page Views</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {analyticsData.pageViews.total.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-purple-100 rounded-lg">
+                    <EyeIcon className="h-6 w-6 text-purple-600" />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center">
+                  {analyticsData.pageViews.trend === 'up' ? (
+                    <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
+                  ) : (
+                    <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
+                  )}
+                  <span className={`text-sm font-medium ${
+                    analyticsData.pageViews.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {analyticsData.pageViews.change > 0 ? '+' : ''}{analyticsData.pageViews.change}%
+                  </span>
+                  <span className="text-sm text-gray-500 ml-2">vs last period</span>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Conversion Rate</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {analyticsData.conversionRate.total}%
+                    </p>
+                  </div>
+                  <div className="p-3 bg-green-100 rounded-lg">
+                    <ChartBarIcon className="h-6 w-6 text-green-600" />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center">
+                  {analyticsData.conversionRate.trend === 'up' ? (
+                    <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
+                  ) : (
+                    <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
+                  )}
+                  <span className={`text-sm font-medium ${
+                    analyticsData.conversionRate.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {analyticsData.conversionRate.change > 0 ? '+' : ''}{analyticsData.conversionRate.change}%
+                  </span>
+                  <span className="text-sm text-gray-500 ml-2">vs last period</span>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Revenue</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      ₹{analyticsData.revenue.total.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-yellow-100 rounded-lg">
+                    <CurrencyDollarIcon className="h-6 w-6 text-yellow-600" />
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center">
+                  {analyticsData.revenue.trend === 'up' ? (
+                    <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
+                  ) : (
+                    <ArrowTrendingDownIcon className="h-4 w-4 text-red-500 mr-1" />
+                  )}
+                  <span className={`text-sm font-medium ${
+                    analyticsData.revenue.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {analyticsData.revenue.change > 0 ? '+' : ''}{analyticsData.revenue.change}%
+                  </span>
+                  <span className="text-sm text-gray-500 ml-2">vs last period</span>
+                </div>
+              </div>
             </div>
-            <div className="ml-auto flex gap-2">
-              <button
-                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow px-4 py-2 text-sm flex items-center gap-2"
-                onClick={() => downloadJSON(filteredRawData, selectedSite, period)}
+
+            {/* Charts and Detailed Analytics */}
+            <div ref={chartsRef} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Monthly Trends Chart */}
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Trends</h3>
+                <div className="h-64 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center">
+                  <div className="text-center">
+                    <ChartBarIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500">Chart placeholder - Monthly trends</p>
+                    <p className="text-sm text-gray-400">Visitors and Revenue over time</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Pages */}
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Pages</h3>
+                <div className="space-y-3">
+                  {analyticsData.topPages.map((page, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center">
+                        <span className="text-sm font-medium text-gray-500 w-6">{index + 1}</span>
+                        <div className="ml-3">
+                          <p className="font-medium text-gray-900">{page.path}</p>
+                          <p className="text-sm text-gray-600">{page.views.toLocaleString()} views</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className={`inline-block px-2 py-1 text-xs rounded-full ${
+                          page.change > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {page.change > 0 ? '+' : ''}{page.change}%
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Traffic Sources */}
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Traffic Sources</h3>
+                <div className="space-y-3">
+                  {analyticsData.trafficSources.map((source, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center">
+                        <GlobeAltIcon className="h-5 w-5 text-gray-400 mr-3" />
+                        <span className="font-medium text-gray-900">{source.source}</span>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium text-gray-900">{source.visitors.toLocaleString()}</p>
+                        <p className="text-sm text-gray-600">{source.percentage}%</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Device Breakdown */}
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Device Breakdown</h3>
+                <div className="space-y-3">
+                  {analyticsData.deviceBreakdown.map((device, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center">
+                        {device.device === 'Desktop' ? (
+                          <ComputerDesktopIcon className="h-5 w-5 text-gray-400 mr-3" />
+                        ) : device.device === 'Mobile' ? (
+                          <DevicePhoneMobileIcon className="h-5 w-5 text-gray-400 mr-3" />
+                        ) : (
+                          <DeviceTabletIcon className="h-5 w-5 text-gray-400 mr-3" />
+                        )}
+                        <span className="font-medium text-gray-900">{device.device}</span>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-medium text-gray-900">{device.visitors.toLocaleString()}</p>
+                        <p className="text-sm text-gray-600">{device.percentage}%</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <ChartBarIcon className="mx-auto h-16 w-16" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No Analytics Data Available</h3>
+            <p className="text-gray-500 mb-6">
+              {!selectedSite 
+                ? 'Select a site to view its analytics'
+                : 'Analytics data is being collected. Check back soon!'
+              }
+            </p>
+            {!selectedSite && sites.length > 0 && (
+              <button 
+                onClick={() => handleSiteChange(sites[0])}
+                className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors"
               >
-                Export JSON
+                View Analytics
               </button>
-              <button
-                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow px-4 py-2 text-sm flex items-center gap-2"
-                onClick={() => downloadCSV(filteredRawData, selectedSite, period)}
-              >
-                Export CSV
-              </button>
-            </div>
+            )}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <SummaryCard
-              value={filteredRawData.length}
-              label="Page Views"
-              tooltip="Total number of page views for the selected filters."
-            />
-            <SummaryCard
-              value={new Set(filteredRawData.map((r: any) => r.visitorId).filter(Boolean)).size}
-              label="Unique Visitors"
-              tooltip="Number of unique visitors (by visitorId) for the selected filters."
-            />
-            <SummaryCard
-              value={getTopBreakdown(filteredRawData, 'pageUrl')[0]?.count || 0}
-              label="Top Page Views"
-              tooltip="Views for the most popular page in the selected filters."
-            />
+        )}
+
+        {sites.length === 0 && (
+          <div className="text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No Sites Found</h3>
+            <p className="text-gray-500 mb-6">You need to create a site first to view analytics</p>
+            <button className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+              Create Your First Site
+            </button>
           </div>
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
-            <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Top Pages <InfoTooltip text="Most visited pages for the selected filters." /></h2>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-gray-900 dark:text-white">
-                  <th className="py-1 text-gray-900 dark:text-white">Page</th>
-                  <th className="py-1 text-gray-900 dark:text-white">Views</th>
-                </tr>
-              </thead>
-              <tbody>
-                {getTopBreakdown(filteredRawData, 'pageUrl').map((page: any) => (
-                  <tr key={page.label}>
-                    <td className="py-1 text-black dark:text-white">{page.label}</td>
-                    <td className="py-1 text-black dark:text-white">{page.count}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {/* In the main analytics section, use a two-column grid for charts */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* Line Chart */}
-            <div style={{ maxHeight: 320 }}>
-              <Line
-                key={JSON.stringify(filteredTimeSeries)}
-                data={{
-                  labels: filteredTimeSeries.map((d: any) => d.date),
-                  datasets: [
-                    {
-                      label: 'Page Views',
-                      data: filteredTimeSeries.map((d: any) => d.pageViews),
-                      borderColor: 'rgb(139, 92, 246)',
-                      backgroundColor: 'rgba(139, 92, 246, 0.2)',
-                      tension: 0.4,
-                    },
-                    {
-                      label: 'Visitors',
-                      data: filteredTimeSeries.map((d: any) => d.visitors),
-                      borderColor: 'rgb(34,197,94)',
-                      backgroundColor: 'rgba(34,197,94,0.2)',
-                      tension: 0.4,
-                    },
-                  ],
-                }}
-                options={{
-                  responsive: true,
-                  plugins: {
-                    legend: { position: 'top' as const,
-                      labels: {
-                        color: '#000',
-                        font: { weight: 'bold' },
-                      }
-                    },
-                    title: { display: false },
-                  },
-                  scales: {
-                    x: {
-                      title: { display: true, text: 'Date', color: '#000', font: { weight: 'bold' } },
-                      ticks: { color: '#000' },
-                      grid: { color: 'rgba(0,0,0,0.1)' },
-                    },
-                    y: {
-                      title: { display: true, text: 'Count', color: '#000', font: { weight: 'bold' } },
-                      beginAtZero: true,
-                      ticks: { color: '#000' },
-                      grid: { color: 'rgba(0,0,0,0.1)' },
-                    },
-                  },
-                }}
-                height={240}
-              />
-            </div>
-            {/* Pie Chart: Top Countries or Top Pages */}
-            <div style={{ maxHeight: 320 }}>
-              {(() => {
-                const countryLabels: string[] = analytics && analytics.rawData
-                  ? Array.from(new Set(analytics.rawData.map((r: any) => r.country).filter(Boolean))) as string[]
-                  : [];
-                const countryData = analytics && analytics.rawData
-                  ? countryLabels.map((country: string) =>
-                      analytics.rawData.filter((r: any) => r.country === country).length
-                    )
-                  : [];
-                return countryLabels.length > 0 && countryData.some(count => count > 0) ? (
-                  <Pie
-                    data={{
-                      labels: countryLabels,
-                      datasets: [
-                        {
-                          label: 'Visitors',
-                          data: countryData,
-                          backgroundColor: [
-                            '#7c3aed', '#10b981', '#f59e42', '#f43f5e', '#6366f1', '#fbbf24', '#14b8a6', '#a21caf', '#eab308', '#0ea5e9'
-                          ],
-                        },
-                      ],
-                    }}
-                    options={{
-                      responsive: true,
-                      plugins: {
-                        legend: { display: true, position: 'bottom' },
-                        title: { display: true, text: 'Top Countries' },
-                      },
-                      maintainAspectRatio: false,
-                    }}
-                    height={240}
-                  />
-                ) : (
-                  <div className="text-center py-8 text-gray-400">No country data available.</div>
-                );
-              })()}
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <BreakdownTable
-              title="Top Referrers"
-              data={getTopBreakdown(filteredRawData, 'referrer')}
-              label="Referrer"
-              tooltip="Websites that sent traffic to your site."
-            />
-            <BreakdownTable
-              title="Top Devices"
-              data={getTopBreakdown(filteredRawData, 'device')}
-              label="Device"
-              tooltip="Device types used by your visitors."
-            />
-            <BreakdownTable
-              title="Top Browsers"
-              data={getTopBreakdown(filteredRawData, 'browser')}
-              label="Browser"
-              tooltip="Browsers used by your visitors."
-            />
-            <BreakdownTable
-              title="Top Countries"
-              data={getTopBreakdown(filteredRawData, 'country')}
-              label="Country"
-              tooltip="Countries where your visitors are located."
-            />
-          </div>
-        </div>
-      )}
-      {!selectedSite && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {sites.map(site => (
-            <Card key={site.id} className="shadow-lg">
-              <CardHeader title={site.name} />
-              <CardContent>
-                {allSitesLoading || !allSitesAnalytics[site.id] ? (
-                  <div className="text-center py-8 text-gray-500">Loading analytics...</div>
-                ) : allSitesAnalytics[site.id]?.timeSeriesData?.length ? (
-                  <Line
-                    data={{
-                      labels: allSitesAnalytics[site.id].timeSeriesData.map((d: any) => d.date),
-                      datasets: [
-                        {
-                          label: 'Page Views',
-                          data: allSitesAnalytics[site.id].timeSeriesData.map((d: any) => d.pageViews),
-                          borderColor: '#7c3aed',
-                          backgroundColor: 'rgba(124,58,237,0.1)',
-                        },
-                        {
-                          label: 'Visitors',
-                          data: allSitesAnalytics[site.id].timeSeriesData.map((d: any) => d.visitors),
-                          borderColor: '#10b981',
-                          backgroundColor: 'rgba(16,185,129,0.1)',
-                        },
-                      ],
-                    }}
-                    options={{
-                      responsive: true,
-                      plugins: {
-                        legend: { display: true },
-                        title: { display: false },
-                      },
-                    }}
-                  />
-                ) : (
-                  <div className="text-center py-8 text-gray-400">No analytics data.</div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+        )}
+      </div>
     </DashboardLayout>
-  );
-}
-
-// Helper and component for breakdowns
-function getTopBreakdown(data: any[], key: string, top = 5) {
-  const counts: Record<string, number> = {};
-  data.forEach((item) => {
-    const value = item[key] || 'Unknown';
-    counts[value] = (counts[value] || 0) + 1;
-  });
-  return Object.entries(counts)
-    .map(([k, v]) => ({ label: k, count: v }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, top);
-}
-
-function BreakdownTable({ title, data, label, tooltip }: { title: string; data: { label: string; count: number }[]; label: string; tooltip: string }) {
-  return (
-    <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
-      <h3 className="text-md font-semibold mb-2 flex items-center gap-1 text-black dark:text-white">{title} <InfoTooltip text={tooltip} /></h3>
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="text-left text-black dark:text-white">
-            <th className="py-1 text-black dark:text-white">{label}</th>
-            <th className="py-1 text-black dark:text-white">Count</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row) => (
-            <tr key={row.label}>
-              <td className="py-1 text-black dark:text-white">{row.label}</td>
-              <td className="py-1 text-black dark:text-white">{row.count}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-// Export helpers
-function downloadJSON(data: any[], siteId: string, period: string) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `analytics-${siteId}-${period}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function downloadCSV(data: any[], siteId: string, period: string) {
-  if (!data.length) return;
-  const keys = Object.keys(data[0]);
-  const csv = [
-    keys.join(','),
-    ...data.map(row => keys.map(k => JSON.stringify(row[k] ?? '')).join(',')),
-  ].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `analytics-${siteId}-${period}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-// Tooltip component
-function InfoTooltip({ text }: { text: string }) {
-  return (
-    <span className="ml-1 cursor-pointer group relative inline-block align-middle">
-      <svg className="w-4 h-4 text-gray-400 inline-block" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><text x="12" y="16" textAnchor="middle" fontSize="12" fill="currentColor">?</text></svg>
-      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 bg-gray-900 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity duration-200 whitespace-pre-line">
-        {text}
-      </span>
-    </span>
-  );
-}
-
-// SummaryCard component
-function SummaryCard({ value, label, tooltip }: { value: number; label: string; tooltip: string }) {
-  return (
-    <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-4 text-center relative">
-      <div className="text-3xl font-bold text-purple-600">{value}</div>
-      <div className="text-sm text-gray-500 mt-1 flex items-center justify-center gap-1">
-        {label} <InfoTooltip text={tooltip} />
-      </div>
-    </div>
   );
 } 
