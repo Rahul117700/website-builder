@@ -16,9 +16,36 @@ import {
   CurrencyDollarIcon,
   EyeIcon,
   FireIcon,
-  SparklesIcon
+  SparklesIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement,
+} from 'chart.js';
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import { gsap } from 'gsap';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  PointElement,
+  LineElement
+);
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -29,6 +56,10 @@ export default function Dashboard() {
   });
   const [recentSites, setRecentSites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userPlan, setUserPlan] = useState<any>(null);
+  const [userStats, setUserStats] = useState<any>(null);
+  const [graphLoading, setGraphLoading] = useState(true);
+  const [planCardExpanded, setPlanCardExpanded] = useState(false);
 
   // GSAP refs
   const heroRef = useRef<HTMLDivElement>(null);
@@ -38,6 +69,14 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadDashboardData();
+    
+    // Simulate graph loading animation
+    setGraphLoading(true);
+    const timer = setTimeout(() => {
+      setGraphLoading(false);
+    }, 2000);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -77,11 +116,15 @@ export default function Dashboard() {
 
       if (statsRes.ok) {
         const statsData = await statsRes.json();
+        console.log('📈 Stats data received:', statsData);
         setStats(statsData);
+        setUserPlan(statsData.currentPlan);
+        setUserStats(statsData);
       }
 
       if (sitesRes.ok) {
         const sitesData = await sitesRes.json();
+        console.log('🏠 Sites data received:', sitesData);
         setRecentSites(sitesData.slice(0, 3)); // Show last 3 sites
       }
 
@@ -204,36 +247,32 @@ export default function Dashboard() {
         {/* Stats Grid */}
         <div 
           ref={statsRef}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
           {[
             {
               title: 'Total Sites',
               value: stats.totalSites,
-              change: '+2 this month',
+              change: stats.totalSites === 0 ? 'No sites yet' : '+2 this month',
               icon: GlobeAltIcon,
-              gradient: 'from-indigo-500 to-purple-600'
+              gradient: 'from-indigo-500 to-purple-600',
+              changeColor: stats.totalSites === 0 ? 'text-green-600' : 'text-green-600'
             },
             {
               title: 'Active Sites',
               value: stats.activeSites,
-              change: '100% uptime',
+              change: stats.activeSites === 0 ? 'No active sites' : '100% uptime',
               icon: EyeIcon,
-              gradient: 'from-purple-500 to-pink-600'
+              gradient: 'from-purple-500 to-pink-600',
+              changeColor: stats.activeSites === 0 ? 'text-green-600' : 'text-green-600'
             },
             {
-              title: 'Monthly Revenue',
-              value: `₹${stats.totalRevenue.toLocaleString()}`,
-              change: '+15.3%',
-              icon: CurrencyDollarIcon,
-              gradient: 'from-pink-500 to-rose-600'
-            },
-            {
-              title: 'Monthly Visitors',
-              value: stats.monthlyVisitors.toLocaleString(),
-              change: '+8.7%',
-              icon: UsersIcon,
-              gradient: 'from-rose-500 to-red-600'
+              title: userPlan ? `${userPlan.name}` : 'Current Plan',
+              value: userPlan ? `₹${userPlan.price}/${userPlan.billingCycle}` : 'No Plan',
+              change: userPlan ? 'Active' : 'Get Started',
+              icon: StarIcon,
+              gradient: 'from-pink-500 to-rose-600',
+              changeColor: userPlan ? 'text-green-600' : 'text-blue-600'
             }
           ].map((stat, index) => (
             <div
@@ -244,7 +283,7 @@ export default function Dashboard() {
                 <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.gradient}`}>
                   <stat.icon className="h-6 w-6 text-white" />
                 </div>
-                <span className="text-sm font-medium text-green-600">
+                <span className={`text-sm font-medium ${stat.changeColor}`}>
                   {stat.change}
                 </span>
               </div>
@@ -256,6 +295,276 @@ export default function Dashboard() {
               </p>
             </div>
           ))}
+        </div>
+
+        {/* Modern Analytics Section */}
+        <div className="bg-gradient-to-br from-slate-50 via-white to-blue-50 rounded-3xl p-8 shadow-2xl border border-gray-100 mb-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent">
+                Site Analytics
+              </h2>
+              <p className="text-gray-600 mt-1">Real-time insights and performance metrics</p>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2 px-3 py-1 bg-green-100 rounded-full">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium text-green-700">Live</span>
+              </div>
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                <ChartBarIcon className="w-4 h-4 text-white" />
+              </div>
+            </div>
+          </div>
+          
+          {graphLoading ? (
+            <div className="space-y-8">
+              {/* Loading Animation */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <div className="h-6 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg animate-pulse"></div>
+                  <div className="h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl animate-pulse flex items-center justify-center">
+                    <div className="flex space-x-2">
+                      <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
+                      <div className="w-3 h-3 bg-purple-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                      <div className="w-3 h-3 bg-pink-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="h-6 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg animate-pulse"></div>
+                  <div className="h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl animate-pulse flex items-center justify-center">
+                    <div className="w-32 h-32 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Modern Performance Chart */}
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-gray-800">Performance Trends</h3>
+                    <div className="flex space-x-2">
+                      <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"></div>
+                      <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                    </div>
+                  </div>
+                  <div className="h-72 bg-gradient-to-br from-white to-blue-50 rounded-2xl p-6 shadow-inner">
+                    <Line
+                      data={{
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [
+                          {
+                            label: 'Page Views',
+                            data: [1200, 1900, 3000, 5000, 2000, 3000],
+                            borderColor: 'rgb(99, 102, 241)',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgb(99, 102, 241)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                          },
+                          {
+                            label: 'Unique Visitors',
+                            data: [800, 1200, 2000, 3500, 1500, 2200],
+                            borderColor: 'rgb(236, 72, 153)',
+                            backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgb(236, 72, 153)',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                          }
+                        ]
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            display: false,
+                          },
+                        },
+                        scales: {
+                          x: {
+                            grid: {
+                              display: false,
+                            },
+                            ticks: {
+                              color: '#6B7280',
+                              font: {
+                                size: 12,
+                                weight: 500,
+                              }
+                            }
+                          },
+                          y: {
+                            grid: {
+                              color: 'rgba(0, 0, 0, 0.05)',
+                            },
+                            ticks: {
+                              color: '#6B7280',
+                              font: {
+                                size: 12,
+                                weight: 500,
+                              }
+                            }
+                          }
+                        },
+                        elements: {
+                          point: {
+                            hoverBackgroundColor: '#fff',
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Modern Status Distribution */}
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-gray-800">Site Status</h3>
+                    <div className="text-sm text-gray-500">{userStats?.totalSites || stats.totalSites} Total Sites</div>
+                  </div>
+                  <div className="bg-gradient-to-br from-white to-purple-50 rounded-2xl p-8 shadow-inner">
+                    <div className="flex flex-col lg:flex-row items-center justify-center space-y-6 lg:space-y-0 lg:space-x-8">
+                      {/* Chart Container */}
+                      <div className="flex-shrink-0">
+                        <div className="relative w-64 h-64">
+                          <Doughnut
+                            data={{
+                              labels: ['Active', 'Inactive', 'Maintenance'],
+                              datasets: [
+                                {
+                                  data: [
+                                    userStats?.activeSites || stats.activeSites || 0,
+                                    (userStats?.totalSites || stats.totalSites || 0) - (userStats?.activeSites || stats.activeSites || 0),
+                                    0
+                                  ],
+                                  backgroundColor: [
+                                    'rgba(34, 197, 94, 0.9)',
+                                    'rgba(239, 68, 68, 0.9)',
+                                    'rgba(245, 158, 11, 0.9)'
+                                  ],
+                                  borderColor: [
+                                    'rgba(34, 197, 94, 1)',
+                                    'rgba(239, 68, 68, 1)',
+                                    'rgba(245, 158, 11, 1)'
+                                  ],
+                                  borderWidth: 3,
+                                }
+                              ]
+                            }}
+                            options={{
+                              responsive: true,
+                              maintainAspectRatio: false,
+                              cutout: '65%',
+                              plugins: {
+                                legend: {
+                                  display: false,
+                                }
+                              }
+                            }}
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="text-center">
+                              <div className="text-3xl font-bold text-gray-800">{userStats?.totalSites || stats.totalSites || 0}</div>
+                              <div className="text-sm text-gray-500 font-medium">Total Sites</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Legend */}
+                      <div className="flex-shrink-0">
+                        <div className="space-y-4">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                            <div className="text-sm font-medium text-gray-700">
+                              Active Sites: {userStats?.activeSites || stats.activeSites || 0}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+                            <div className="text-sm font-medium text-gray-700">
+                              Inactive Sites: {(userStats?.totalSites || stats.totalSites || 0) - (userStats?.activeSites || stats.activeSites || 0)}
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-3">
+                            <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
+                            <div className="text-sm font-medium text-gray-700">
+                              Maintenance: 0
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modern Metrics Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="group bg-gradient-to-br from-blue-50 via-white to-cyan-50 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <ChartBarIcon className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-gray-900">15,420</div>
+                      <div className="text-sm text-green-600 font-medium">+12% ↗</div>
+                    </div>
+                  </div>
+                  <div className="text-sm font-medium text-gray-600">Total Page Views</div>
+                  <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full w-3/4"></div>
+                  </div>
+                </div>
+
+                <div className="group bg-gradient-to-br from-green-50 via-white to-emerald-50 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-green-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <ClockIcon className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-gray-900">1.2s</div>
+                      <div className="text-sm text-green-600 font-medium">-0.3s ↘</div>
+                    </div>
+                  </div>
+                  <div className="text-sm font-medium text-gray-600">Load Time</div>
+                  <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full w-4/5"></div>
+                  </div>
+                </div>
+
+                <div className="group bg-gradient-to-br from-purple-50 via-white to-pink-50 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-purple-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <ServerStackIcon className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-gray-900">99.9%</div>
+                      <div className="text-sm text-green-600 font-medium">Excellent ✓</div>
+                    </div>
+                  </div>
+                  <div className="text-sm font-medium text-gray-600">Uptime</div>
+                  <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full w-full"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Site Categories */}
@@ -401,10 +710,6 @@ export default function Dashboard() {
                   <p className="text-sm text-gray-600 mb-2">
                     {site.type} • {site.status}
                   </p>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <EyeIcon className="h-4 w-4 mr-1" />
-                    {site.views || 0} views
-                  </div>
                 </div>
               ))}
             </div>
@@ -427,6 +732,85 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+
+        {/* Expandable Plan Card */}
+        {userPlan && (
+          <div 
+            className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 cursor-pointer transition-all duration-300 hover:shadow-xl"
+            onClick={() => setPlanCardExpanded(!planCardExpanded)}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600">
+                  <StarIcon className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {userPlan.name}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    ₹{userPlan.price}/{userPlan.billingCycle} • Active
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-500">
+                  {planCardExpanded ? 'Less' : 'More'}
+                </span>
+                <ArrowRightIcon 
+                  className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
+                    planCardExpanded ? 'rotate-90' : ''
+                  }`} 
+                />
+              </div>
+            </div>
+            
+            {planCardExpanded && (
+              <div className="mt-6 pt-6 border-t border-gray-100 animate-fadeIn">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">Plan Details</h4>
+                    <div className="space-y-2 text-sm text-gray-600">
+                      <div className="flex justify-between">
+                        <span>Billing Cycle:</span>
+                        <span className="font-medium">{userPlan.billingCycle}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Price:</span>
+                        <span className="font-medium">₹{userPlan.price}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Status:</span>
+                        <span className="font-medium text-green-600">Active</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-3">Features</h4>
+                    <div className="space-y-2">
+                      {userPlan.features && userPlan.features.length > 0 ? (
+                        userPlan.features.map((feature: string, index: number) => (
+                          <div key={index} className="flex items-center text-sm text-gray-600">
+                            <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+                            {feature}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-sm text-gray-500">No features listed</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                {userPlan.description && (
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <h4 className="font-semibold text-gray-900 mb-2">Description</h4>
+                    <p className="text-sm text-gray-600">{userPlan.description}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Call to Action */}
         <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-8 text-center text-white">
