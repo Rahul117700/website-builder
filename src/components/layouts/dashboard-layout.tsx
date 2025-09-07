@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { 
   Bars3Icon, 
@@ -42,7 +42,9 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { data: session } = useSession();
   const pathname = usePathname();
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -177,6 +179,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
+  const toggleSidebarCollapse = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
   // Mark notification as read
@@ -306,9 +312,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </button>
               </div>
               <div className="flex-shrink-0 flex items-center px-4">
-                <Link href="/" className="text-xl font-bold text-primary-600">
+                <button
+                  onClick={() => router.push('/')}
+                  className="text-xl font-bold text-primary-600 hover:opacity-80 transition-opacity duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded-lg p-1"
+                  aria-label="Go to home"
+                >
                   Website Builder
-                </Link>
+                </button>
               </div>
               <div className="mt-5 flex-1 h-0 overflow-y-auto">
                 <nav className="px-2 space-y-1">
@@ -382,14 +392,27 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         )}
       </div>
 
-      {/* Static sidebar for desktop */}
-              <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-          <div className="flex min-h-0 flex-1 flex-col border-r border-gray-200 bg-white">
+      {/* Collapsible sidebar for desktop */}
+      <div className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 group ${
+        isSidebarCollapsed ? 'lg:w-16 hover:lg:w-64' : 'lg:w-64'
+      }`}>
+        <div className="flex min-h-0 flex-1 flex-col border-r border-gray-200 bg-white">
           <div className="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
-            <div className="flex flex-shrink-0 items-center px-4">
-              <Link href="/" className="text-xl font-bold text-primary-600">
-                Website Builder
-              </Link>
+            <div className="flex flex-shrink-0 items-center justify-between px-4">
+              <button
+                onClick={() => router.push('/')}
+                className="text-xl font-bold text-primary-600 hover:opacity-80 transition-opacity duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded-lg p-1"
+                aria-label="Go to home"
+              >
+                {isSidebarCollapsed ? 'WB' : 'Website Builder'}
+              </button>
+              <button
+                onClick={toggleSidebarCollapse}
+                className="hidden lg:block p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              >
+                <Bars3Icon className="h-5 w-5" />
+              </button>
             </div>
             <nav className="mt-5 flex-1 px-2 space-y-1">
               {navigation.map((item) => (
@@ -401,21 +424,26 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       ? 'bg-purple-100 text-purple-700 shadow-md'
                       : 'text-gray-600 hover:bg-purple-50 hover:text-purple-700'
                   }`}
+                  title={isSidebarCollapsed ? item.name : undefined}
                 >
                   <item.icon
-                    className={`mr-3 h-5 w-5 ${
+                    className={`${isSidebarCollapsed ? 'mx-auto' : 'mr-3'} h-5 w-5 ${
                       item.current
                         ? 'text-purple-600'
                         : 'text-gray-400 group-hover:text-purple-600'
                     }`}
                     aria-hidden="true"
                   />
-                  {item.name}
+                  <span className={`transition-opacity duration-200 ${
+                    isSidebarCollapsed ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
+                  }`}>
+                    {item.name}
+                  </span>
                 </Link>
               ))}
             </nav>
           </div>
-                        <div className="flex flex-shrink-0 border-t border-gray-200 p-6 mt-4">
+          <div className="flex flex-shrink-0 border-t border-gray-200 p-6 mt-4">
             <div className="flex-shrink-0 w-full group block">
               <div className="flex items-center gap-4">
                 <div>
@@ -431,7 +459,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     </div>
                   )}
                 </div>
-                <div className="ml-2 flex-1">
+                <div className={`ml-2 flex-1 transition-opacity duration-200 ${
+                  isSidebarCollapsed ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
+                }`}>
                   <p className="text-base font-semibold text-gray-900">
                     {session?.user?.name || session?.user?.email || 'User'}
                   </p>
@@ -460,7 +490,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64 flex flex-col flex-1">
+      <div className={`flex flex-col flex-1 transition-all duration-300 ${
+        isSidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'
+      }`}>
         <div className="sticky top-0 z-10 bg-white pl-1 pt-1 sm:pl-3 sm:pt-3 lg:hidden shadow-md rounded-b-2xl">
           <button
             type="button"

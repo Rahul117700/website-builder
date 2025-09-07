@@ -31,12 +31,12 @@ interface CommunityPost {
   videoLink?: string | null;
   websiteLink?: string | null;
   likes: number;
-  views: number;
   isPinned: boolean;
   createdAt: string;
   isLiked?: boolean;
   _count?: {
     comments: number;
+    postLikes: number;
   };
 }
 
@@ -72,6 +72,7 @@ export default function CommunityPage() {
   const [expandedPost, setExpandedPost] = useState<string | null>(null);
   const [comments, setComments] = useState<{[postId: string]: any[]}>({});
   const [loadingComments, setLoadingComments] = useState<{[postId: string]: boolean}>({});
+  const [likingPosts, setLikingPosts] = useState<Set<string>>(new Set());
 
   const categories = [
     { value: 'all', label: 'All Posts' },
@@ -186,7 +187,14 @@ export default function CommunityPage() {
       return;
     }
 
+    // Prevent multiple rapid likes
+    if (likingPosts.has(postId)) {
+      return;
+    }
+
     try {
+      setLikingPosts(prev => new Set(prev).add(postId));
+      
       const response = await fetch(`/api/community/posts/${postId}/like`, {
         method: 'POST',
       });
@@ -210,6 +218,12 @@ export default function CommunityPage() {
     } catch (error) {
       console.error('Error liking post:', error);
       toast.error('Failed to like post');
+    } finally {
+      setLikingPosts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(postId);
+        return newSet;
+      });
     }
   };
 
@@ -256,6 +270,11 @@ export default function CommunityPage() {
       return;
     }
 
+    // Prevent multiple rapid submissions
+    if (submittingComment === postId) {
+      return;
+    }
+
     try {
       setSubmittingComment(postId);
       const response = await fetch(`/api/community/posts/${postId}/comments`, {
@@ -271,8 +290,20 @@ export default function CommunityPage() {
         toast.success('Comment added successfully!');
         // Refresh the comments for this post
         fetchComments(postId);
-        // Refresh the posts to get updated comment count
-        fetchPosts();
+        // Update comment count locally without refetching all posts
+        setPosts(prevPosts => 
+          prevPosts.map(post => 
+            post.id === postId 
+              ? { 
+                  ...post, 
+                  _count: { 
+                    comments: (post._count?.comments || 0) + 1,
+                    postLikes: post._count?.postLikes || 0
+                  } 
+                }
+              : post
+          )
+        );
       } else {
         const error = await response.json();
         toast.error(error.message || 'Failed to add comment');
@@ -557,22 +588,23 @@ export default function CommunityPage() {
                   <div className="flex items-center gap-4">
                     <button
                       onClick={() => handleLikePost(post.id)}
+                      disabled={likingPosts.has(post.id)}
                       className={`flex items-center gap-1 transition-colors ${
                         post.isLiked 
                           ? 'text-red-500 hover:text-red-600' 
                           : 'text-black hover:text-purple-600'
-                      }`}
+                      } ${likingPosts.has(post.id) ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                      <HeartIcon className={`w-4 h-4 ${post.isLiked ? 'fill-current' : ''}`} />
+                      {likingPosts.has(post.id) ? (
+                        <div className="w-4 h-4 border-2 border-gray-300 border-t-purple-600 rounded-full animate-spin"></div>
+                      ) : (
+                        <HeartIcon className={`w-4 h-4 ${post.isLiked ? 'fill-current' : ''}`} />
+                      )}
                       <span>{post.likes}</span>
                     </button>
                     <div className="flex items-center gap-1 text-black">
                       <ChatBubbleLeftIcon className="w-4 h-4" />
                       <span>{post._count?.comments || 0}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-black">
-                      <EyeIcon className="w-4 h-4" />
-                      <span>{post.views}</span>
                     </div>
                     {/* Delete button - only show for post author */}
                     {session?.user?.email === post.authorEmail && (
@@ -667,7 +699,8 @@ export default function CommunityPage() {
                           placeholder="Add a comment..."
                           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-black"
                           onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
+                            if (e.key === 'Enter' && !submittingComment) {
+                              e.preventDefault(); // Prevent default form submission
                               handleAddComment(post.id);
                             }
                           }}
