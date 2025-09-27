@@ -45,6 +45,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false);
 
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -299,7 +300,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             />
             {/* Sidebar */}
             <div
-              className="fixed inset-y-0 left-0 flex w-full max-w-xs flex-col bg-white pt-5 pb-4 transform transition ease-in-out duration-300 translate-x-0 shadow-2xl rounded-r-2xl border-r border-gray-200"
+              className="fixed inset-y-0 left-0 flex w-full max-w-xs flex-col bg-white pt-4 pb-4 transform transition ease-in-out duration-300 translate-x-0 shadow-2xl rounded-r-2xl border-r border-gray-200 z-50"
             >
               <div className="absolute top-0 right-0 -mr-12 pt-2">
                 <button
@@ -320,20 +321,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   Website Builder
                 </button>
               </div>
-              <div className="mt-5 flex-1 h-0 overflow-y-auto">
-                <nav className="px-2 space-y-1">
+              <div className="mt-4 flex-1 h-0 overflow-y-auto scrollbar-hide">
+                <nav className="px-3 space-y-1">
                   {navigation.map((item) => (
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`group flex items-center px-3 py-2 text-base font-semibold rounded-xl transition-all duration-150 ${
+                      className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
                         item.current
-                          ? 'bg-purple-100 text-purple-700 shadow-md'
-                          : 'text-gray-600 hover:bg-purple-50 hover:text-purple-700'
+                          ? 'bg-purple-100 text-purple-700 shadow-sm border border-purple-200'
+                          : 'text-gray-600 hover:bg-purple-50 hover:text-purple-700 hover:shadow-sm'
                       }`}
                     >
                       <item.icon
-                        className={`mr-4 h-6 w-6 ${
+                        className={`mr-3 h-5 w-5 flex-shrink-0 ${
                           item.current
                             ? 'text-purple-600'
                             : 'text-gray-400 group-hover:text-purple-600'
@@ -345,31 +346,31 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   ))}
                 </nav>
               </div>
-              <div className="flex flex-shrink-0 border-t border-gray-200 p-6 mt-4">
+              <div className="flex flex-shrink-0 border-t border-gray-200 p-4">
                 <div className="flex-shrink-0 w-full group block">
-                  <div className="flex items-center gap-4">
-                    <div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0">
                       {session?.user?.image ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          className="inline-block h-10 w-10 rounded-full border border-purple-200"
+                          className="h-10 w-10 rounded-full border-2 border-purple-200 shadow-sm"
                           src={session.user.image}
                           alt=""
                         />
                       ) : (
-                        <div className="inline-block h-10 w-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center border border-purple-200">
+                        <div className="h-10 w-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center border-2 border-purple-200 shadow-sm">
                           <UserIcon className="h-6 w-6" />
                         </div>
                       )}
                     </div>
-                    <div className="ml-2 flex-1">
-                      <p className="text-base font-semibold text-gray-900">
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-gray-900 truncate">
                         {session?.user?.name || session?.user?.email || 'User'}
                       </p>
                       <button
                         onClick={handleSignOut}
                         disabled={isLoading}
-                        className="mt-1 text-xs font-semibold text-purple-600 hover:text-purple-800 flex items-center gap-1"
+                        className="mt-1 text-xs font-medium text-purple-600 hover:text-purple-800 flex items-center gap-1 transition-colors"
                       >
                         {isLoading ? (
                           <>
@@ -393,49 +394,51 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Collapsible sidebar for desktop */}
-      <div className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 group ${
-        isSidebarCollapsed ? 'lg:w-16 hover:lg:w-64' : 'lg:w-64'
-      }`}>
-        <div className="flex min-h-0 flex-1 flex-col border-r border-gray-200 bg-white">
-          <div className="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
-            <div className="flex flex-shrink-0 items-center justify-between px-4">
+      <div className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 group z-30 ${
+        isSidebarCollapsed ? (isSidebarHovered ? 'lg:w-64' : 'lg:w-16') : 'lg:w-64'
+      }`} 
+      onMouseEnter={() => setIsSidebarHovered(true)}
+      onMouseLeave={() => setIsSidebarHovered(false)}>
+        <div className="flex min-h-0 flex-1 flex-col border-r border-gray-200 bg-white shadow-xl">
+          <div className="flex flex-1 flex-col pt-4 pb-4 h-full">
+            <div className="flex flex-shrink-0 items-center justify-between px-4 mb-4">
               <button
                 onClick={() => router.push('/')}
-                className="text-xl font-bold text-primary-600 hover:opacity-80 transition-opacity duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded-lg p-1"
+                className="text-xl font-bold text-purple-600 hover:opacity-80 transition-opacity duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded-lg p-2"
                 aria-label="Go to home"
               >
-                {isSidebarCollapsed ? 'WB' : 'Website Builder'}
+                {isSidebarCollapsed && !isSidebarHovered ? 'WB' : 'Website Builder'}
               </button>
               <button
                 onClick={toggleSidebarCollapse}
-                className="hidden lg:block p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                className="hidden lg:block p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all duration-200"
                 aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
               >
                 <Bars3Icon className="h-5 w-5" />
               </button>
             </div>
-            <nav className="mt-5 flex-1 px-2 space-y-1">
+            <nav className="flex-1 px-3 space-y-1 overflow-y-auto scrollbar-hide">
               {navigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`group flex items-center px-3 py-2 text-base font-semibold rounded-xl transition-all duration-150 ${
+                  className={`group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
                     item.current
-                      ? 'bg-purple-100 text-purple-700 shadow-md'
-                      : 'text-gray-600 hover:bg-purple-50 hover:text-purple-700'
+                      ? 'bg-purple-100 text-purple-700 shadow-sm border border-purple-200'
+                      : 'text-gray-600 hover:bg-purple-50 hover:text-purple-700 hover:shadow-sm'
                   }`}
                   title={isSidebarCollapsed ? item.name : undefined}
                 >
                   <item.icon
-                    className={`${isSidebarCollapsed ? 'mx-auto' : 'mr-3'} h-5 w-5 ${
+                    className={`${isSidebarCollapsed && !isSidebarHovered ? 'mx-auto' : 'mr-3'} h-5 w-5 flex-shrink-0 ${
                       item.current
                         ? 'text-purple-600'
                         : 'text-gray-400 group-hover:text-purple-600'
                     }`}
                     aria-hidden="true"
                   />
-                  <span className={`transition-opacity duration-200 ${
-                    isSidebarCollapsed ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
+                  <span className={`whitespace-nowrap transition-all duration-200 ${
+                    isSidebarCollapsed ? (isSidebarHovered ? 'opacity-100 w-auto' : 'opacity-0 w-0 overflow-hidden') : 'opacity-100 w-auto'
                   }`}>
                     {item.name}
                   </span>
@@ -443,32 +446,32 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               ))}
             </nav>
           </div>
-          <div className="flex flex-shrink-0 border-t border-gray-200 p-6 mt-4">
+          <div className="flex flex-shrink-0 border-t border-gray-200 p-4">
             <div className="flex-shrink-0 w-full group block">
-              <div className="flex items-center gap-4">
-                <div>
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0">
                   {session?.user?.image ? (
                     <img
-                      className="inline-block h-10 w-10 rounded-full border border-purple-200"
+                      className="h-10 w-10 rounded-full border-2 border-purple-200 shadow-sm"
                       src={session.user.image}
                       alt=""
                     />
                   ) : (
-                    <div className="inline-block h-10 w-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center border border-purple-200">
+                    <div className="h-10 w-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center border-2 border-purple-200 shadow-sm">
                       <UserIcon className="h-6 w-6" />
                     </div>
                   )}
                 </div>
-                <div className={`ml-2 flex-1 transition-opacity duration-200 ${
-                  isSidebarCollapsed ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
+                <div className={`flex-1 transition-all duration-200 ${
+                  isSidebarCollapsed ? (isSidebarHovered ? 'opacity-100 w-auto' : 'opacity-0 w-0 overflow-hidden') : 'opacity-100 w-auto'
                 }`}>
-                  <p className="text-base font-semibold text-gray-900">
+                  <p className="text-sm font-semibold text-gray-900 truncate">
                     {session?.user?.name || session?.user?.email || 'User'}
                   </p>
                   <button
                     onClick={handleSignOut}
                     disabled={isLoading}
-                    className="mt-1 text-xs font-semibold text-purple-600 hover:text-purple-800 flex items-center gap-1"
+                    className="mt-1 text-xs font-medium text-purple-600 hover:text-purple-800 flex items-center gap-1 transition-colors"
                   >
                     {isLoading ? (
                       <>
@@ -490,10 +493,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Main content */}
-      <div className={`flex flex-col flex-1 transition-all duration-300 ${
-        isSidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'
+      <div className={`flex flex-col flex-1 transition-all duration-300 relative z-10 ${
+        isSidebarCollapsed ? (isSidebarHovered ? 'lg:pl-64' : 'lg:pl-16') : 'lg:pl-64'
       }`}>
-        <div className="sticky top-0 z-10 bg-white pl-1 pt-1 sm:pl-3 sm:pt-3 lg:hidden shadow-md rounded-b-2xl">
+        <div className="sticky top-0 z-20 bg-white pl-1 pt-1 sm:pl-3 sm:pt-3 lg:hidden shadow-md rounded-b-2xl">
           <button
             type="button"
             className="-ml-0.5 -mt-0.5 inline-flex h-12 w-12 items-center justify-center rounded-md text-purple-600 hover:text-purple-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500"

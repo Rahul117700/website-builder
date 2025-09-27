@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { prisma } from '../../../../lib/prisma';
-// import { authOptions } from '../../../auth/[...nextauth]/route';
-// import { authOptions } from '../auth/[...nextauth]/route';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '../../auth/[...nextauth]/route';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { siteId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -19,7 +17,7 @@ export async function GET(
     // Verify the site belongs to the user
     const site = await prisma.site.findFirst({
       where: {
-        id: params.id,
+        id: params.siteId,
         userId: session.user.id
       }
     });
