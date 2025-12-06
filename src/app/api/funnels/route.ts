@@ -1,88 +1,143 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { prisma } from '../../../lib/prisma';
-import { authOptions } from '../auth/[...nextauth]/route';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { PrismaClient } from '@prisma/client';
 
-export async function GET() {
+const prisma = new PrismaClient();
+
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
+    
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // For now, return mock funnels data
-    // In the future, this would query actual funnels from the database
-    const mockFunnels = [
-      {
-        id: '1',
-        name: 'Lead Generation Funnel',
-        description: 'High-converting funnel for capturing leads and building email lists',
-        status: 'active' as const,
-        type: 'lead-generation' as const,
-        steps: [
-          { id: '1', name: 'Landing Page', type: 'landing', order: 1, status: 'active' },
-          { id: '2', name: 'Thank You Page', type: 'thank-you', order: 2, status: 'active' }
-        ],
-        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        stats: {
-          visitors: 12500,
-          conversions: 1250,
-          revenue: 0,
-          conversionRate: 10.0
-        }
+    const funnels = await prisma.funnel.findMany({
+      where: {
+        userId: session.user.id
       },
-      {
-        id: '2',
-        name: 'Product Sales Funnel',
-        description: 'Optimized funnel for selling digital products and courses',
-        status: 'active' as const,
-        type: 'sales' as const,
-        steps: [
-          { id: '3', name: 'Sales Page', type: 'landing', order: 1, status: 'active' },
-          { id: '4', name: 'Checkout', type: 'checkout', order: 2, status: 'active' },
-          { id: '5', name: 'Upsell', type: 'upsell', order: 3, status: 'active' },
-          { id: '6', name: 'Thank You', type: 'thank-you', order: 4, status: 'active' }
-        ],
-        createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        stats: {
-          visitors: 8900,
-          conversions: 445,
-          revenue: 44500,
-          conversionRate: 5.0
-        }
+      include: {
+        template: true,
+        product: true
       },
-      {
-        id: '3',
-        name: 'Webinar Registration',
-        description: 'Funnel for promoting and registering attendees for webinars',
-        status: 'paused' as const,
-        type: 'webinar' as const,
-        steps: [
-          { id: '7', name: 'Registration Page', type: 'landing', order: 1, status: 'active' },
-          { id: '8', name: 'Confirmation', type: 'thank-you', order: 2, status: 'active' }
-        ],
-        createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-        stats: {
-          visitors: 3200,
-          conversions: 640,
-          revenue: 0,
-          conversionRate: 20.0
-        }
+      orderBy: {
+        createdAt: 'desc'
       }
-    ];
+    });
 
-    return NextResponse.json(mockFunnels);
-
+    return NextResponse.json(funnels);
   } catch (error) {
     console.error('Error fetching funnels:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Ensure user exists in database
+    let user = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    });
+
+    if (!user) {
+      // Create user if they don't exist
+      const bcrypt = require('bcryptjs');
+      const hashedPassword = await bcrypt.hash('temp_password_' + Date.now(), 12);
+      
+      user = await prisma.user.create({
+        data: {
+          name: session.user.name || 'User',
+          email: session.user.email,
+          password: hashedPassword,
+          role: 'USER',
+          emailVerified: new Date(),
+          image: session.user.image
+        }
+      });
+
+      console.log('✅ Created new user in database:', user.email);
+    }
+
+    const body = await request.json();
+    const { name, description, templateId, productId, customizations } = body;
+
+    if (!name) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+    }
+
+    // Check user's subscription status
+    const activeSubscription = await prisma.userSubscription.findFirst({
+      where: {
+        userId: user.id,
+        status: 'ACTIVE',
+        endDate: {
+          gte: new Date()
+        }
+      },
+      include: {
+        plan: true
+      }
+    });
+
+    // If no active subscription, check if user already has a funnel (free tier: 1 funnel max)
+    if (!activeSubscription) {
+      const existingFunnels = await prisma.funnel.findMany({
+        where: { userId: user.id }
+      });
+
+      if (existingFunnels.length >= 1) {
+        return NextResponse.json({ 
+          error: 'Free tier limit reached',
+          message: 'You can only create 1 funnel on the free tier. Upgrade to a plan to create unlimited funnels!',
+          requiresUpgrade: true,
+          upgradeUrl: '/auth/dashboard/plans'
+        }, { status: 403 });
+      }
+    }
+
+    // Verify template exists if provided
+    let template = null;
+    if (templateId) {
+      template = await prisma.funnelTemplate.findUnique({
+        where: { id: templateId }
+      });
+      
+      if (!template) {
+        return NextResponse.json({ error: 'Template not found' }, { status: 404 });
+      }
+    }
+
+    // Create funnel with the correct user ID
+    const funnel = await prisma.funnel.create({
+      data: {
+        name,
+        description,
+        userId: user.id, // Use the database user ID
+        templateId: templateId || null,
+        productId: productId || null,
+        customizations: customizations || {},
+        status: 'DRAFT',
+        published: false
+      },
+      include: {
+        template: true,
+        product: true
+      }
+    });
+
+    return NextResponse.json(funnel, { status: 201 });
+  } catch (error) {
+    console.error('Error creating funnel:', error);
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
+  }
+}

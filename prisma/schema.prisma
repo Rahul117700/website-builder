@@ -12,36 +12,55 @@ datasource db {
 
 // User Management
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String     @unique
   emailVerified DateTime?
   image         String?
+  phone         String?
+  website       String?
   password      String?
-  role          UserRole  @default(USER)
+  role          UserRole   @default(USER)
+  status        UserStatus @default(ACTIVE)
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
-  sites         Site[]
-  funnels       Funnel[]
-  products      DigitalProduct[]
-  transactions  Transaction[]
-  razorpayConfigs RazorpayConfig[]
-  apiKeys      ApiKey[]
+  sites                Site[]
+  funnels              Funnel[]
+  products             DigitalProduct[]
+  transactions         Transaction[]
+  razorpayConfigs      RazorpayConfig[]
+  apiKeys              ApiKey[]
+  assignedInstances    Instance[]            @relation("UserInstance")
+  domains              Domain[]              @relation("UserDomains")
+  notifications        UserNotification[]    @relation("UserNotifications")
+  platformTransactions PlatformTransaction[]
+  subscriptions        UserSubscription[]
+
+  // Community
+  communityPosts    CommunityPost[]
+  communityComments CommunityComment[]
+  communityLikes    CommunityPostLike[]
 
   // NextAuth
-  accounts     Account[]
-  sessions     Session[]
+  accounts Account[]
+  sessions Session[]
 
-  @@map("User")  
+  @@map("User")
 }
 
 enum UserRole {
   ADMIN
   USER
   SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+  SUSPENDED
 }
 
 // NextAuth Models
@@ -86,48 +105,42 @@ model VerificationToken {
 
 // Site Management
 model Site {
-  id          String      @id @default(cuid())
+  id          String     @id @default(cuid())
   name        String
-  domain      String      @unique
-  subdomain   String      @unique
+  domain      String     @unique
+  subdomain   String     @unique
   type        SiteType
-  status      SiteStatus  @default(ACTIVE)
-  port        Int         @unique
+  status      SiteStatus @default(ACTIVE)
+  port        Int        @unique
   ipAddress   String
   description String?
-  
+
   // Site Configuration
-  components  Json        // Stored as JSON for flexibility
-  settings    Json        // Theme, layout, etc.
+  components Json // Stored as JSON for flexibility
+  settings   Json // Theme, layout, etc.
 
-
-  
   // Performance Metrics
-  loadTime    Float?      // Average load time in seconds
-  visitors    Int         @default(0)
-  pageViews   Int         @default(0)
+  loadTime  Float? // Average load time in seconds
+  visitors  Int    @default(0)
+  pageViews Int    @default(0)
 
-  
   // Relations
-  userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  templateId  String?
-  template    Template?   @relation(fields: [templateId], references: [id])
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  templateId String?
+  template   Template? @relation(fields: [templateId], references: [id])
 
-  
   // Database entries for this site
   databaseEntries DatabaseEntry[]
   products        Product[]
   orders          Order[]
   analytics       Analytics[]
-  
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("sites")
 }
-
-
 
 enum SiteType {
   PORTFOLIO
@@ -148,65 +161,64 @@ enum SiteStatus {
 
 // Template Management
 model Template {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
   description String?
   category    SiteType
   thumbnail   String?
-  components  Json        // Predefined component structure
+  components  Json // Predefined component structure
   price       Float?
-  isActive    Boolean     @default(true)
-  approved    Boolean     @default(false) // Template approval status
+  isActive    Boolean  @default(true)
+  approved    Boolean  @default(false) // Template approval status
 
-  
   // Relations
-  sites       Site[]
-  
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @default(now())
+  sites Site[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 
   @@map("templates")
 }
 
 // Database Management
 model DatabaseEntry {
-  id          String      @id @default(cuid())
-  tableName   String      // e.g., "projects", "products", "blog_posts"
-  data        Json        // Flexible JSON data storage
-  siteId      String
-  
+  id        String @id @default(cuid())
+  tableName String // e.g., "projects", "products", "blog_posts"
+  data      Json // Flexible JSON data storage
+  siteId    String
+
   // Relations
-  site        Site        @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("database_entries")
 }
 
 // E-commerce Models
 model Product {
-  id          String      @id @default(cuid())
-  name        String
-  description String?
-  price       Float
+  id           String        @id @default(cuid())
+  name         String
+  description  String?
+  price        Float
   comparePrice Float?
-  images      String[]    // Array of image URLs
-  category    String?
-  tags        String[]
-  status      ProductStatus @default(ACTIVE)
-  inventory   Int         @default(0)
-  sku         String?     @unique
-  weight      Float?
-  dimensions  Json?       // {length, width, height}
-  
+  images       String[] // Array of image URLs
+  category     String?
+  tags         String[]
+  status       ProductStatus @default(ACTIVE)
+  inventory    Int           @default(0)
+  sku          String?       @unique
+  weight       Float?
+  dimensions   Json? // {length, width, height}
+
   // Relations
-  siteId      String
-  site        Site        @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  orders      OrderItem[]
-  
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  siteId String
+  site   Site        @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  orders OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("products")
 }
@@ -227,28 +239,28 @@ model Order {
   tax         Float       @default(0)
   shipping    Float       @default(0)
   discount    Float       @default(0)
-  
+
   // Customer Information
   customerName    String
   customerEmail   String
   customerPhone   String?
   shippingAddress Json
   billingAddress  Json
-  
+
   // Payment Information
-  paymentMethod   String?
-  paymentStatus   PaymentStatus @default(PENDING)
-  razorpayOrderId String?
+  paymentMethod     String?
+  paymentStatus     PaymentStatus @default(PENDING)
+  razorpayOrderId   String?
   razorpayPaymentId String?
-  
+
   // Relations
   siteId      String
-  site        Site        @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  site        Site         @relation(fields: [siteId], references: [id], onDelete: Cascade)
   items       OrderItem[]
   transaction Transaction?
-  
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("orders")
 }
@@ -272,42 +284,42 @@ enum PaymentStatus {
 }
 
 model OrderItem {
-  id          String      @id @default(cuid())
-  quantity    Int
-  price       Float
-  total       Float
-  
+  id       String @id @default(cuid())
+  quantity Int
+  price    Float
+  total    Float
+
   // Relations
-  orderId     String
-  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId   String
-  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("order_items")
 }
 
 // Transaction Management
 model Transaction {
-  id          String      @id @default(cuid())
+  id          String            @id @default(cuid())
   amount      Float
-  currency    String      @default("INR")
+  currency    String            @default("INR")
   status      TransactionStatus @default(PENDING)
   type        TransactionType
   description String?
-  
+
   // Razorpay Integration
   razorpayOrderId   String?
   razorpayPaymentId String?
   razorpayRefundId  String?
-  
+
   // Relations
-  userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  orderId     String      @unique
-  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("transactions")
 }
@@ -329,50 +341,118 @@ enum TransactionType {
 
 // Razorpay Configuration
 model RazorpayConfig {
-  id              String      @id @default(cuid())
-  keyId           String
-  keySecret       String
-  webhookSecret   String?
-  isActive        Boolean     @default(true)
-  
+  id            String  @id @default(cuid())
+  keyId         String
+  keySecret     String
+  webhookSecret String?
+  accountId     String? // Razorpay account ID for split payments
+  isActive      Boolean @default(true)
+
   // Relations
-  userId          String
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("razorpay_configs")
 }
 
-// Funnels & Digital Products
-model Funnel {
-  id          String      @id @default(cuid())
-  name        String
+// Platform Settings for Super Admin
+model PlatformSettings {
+  id          String  @id @default(cuid())
+  key         String  @unique
+  value       String
   description String?
-  type        FunnelType
-  status      FunnelStatus @default(ACTIVE)
-  
-  // Funnel Structure
-  steps       Json        // Array of funnel steps
-  settings    Json        // Funnel configuration
-  
-  // Performance Metrics
-  visitors    Int         @default(0)
-  conversions Int         @default(0)
-  revenue     Float       @default(0)
-  
+  category    String  @default("general")
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("platform_settings")
+}
+
+// Platform Razorpay Configuration
+model PlatformRazorpayConfig {
+  id            String  @id @default(cuid())
+  keyId         String
+  keySecret     String
+  accountId     String
+  webhookSecret String?
+  isActive      Boolean @default(true)
+  environment   String  @default("live") // live or test
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("platform_razorpay_configs")
+}
+
+// Platform Transactions (for tracking commission fees)
+model PlatformTransaction {
+  id             String @id @default(cuid())
+  funnelId       String
+  userId         String
+  customerEmail  String
+  totalAmount    Float
+  platformFee    Float
+  userAmount     Float
+  commissionRate Float
+  paymentId      String
+  status         String @default("PENDING")
+
   // Relations
-  userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  funnel Funnel @relation(fields: [funnelId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("platform_transactions")
+}
+
+// User Funnels
+model Funnel {
+  id             String       @id @default(cuid())
+  name           String
+  description    String?
+  userId         String
+  templateId     String?
+  productId      String?      @unique
+  status         FunnelStatus @default(DRAFT)
+  customizations Json? // headline, colors, button text, etc.
+  sellerInfo     Json? // seller name, email, bio, avatar, social links
+  published      Boolean      @default(false)
+  url            String? // Generated URL when published
+  domain         String? // Custom domain
+
+  // Performance Metrics
+  visitors       Int   @default(0)
+  conversions    Int   @default(0)
+  revenue        Float @default(0)
+  conversionRate Float @default(0)
+
+  // Relations
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template             FunnelTemplate?       @relation(fields: [templateId], references: [id])
+  product              DigitalProduct?       @relation(fields: [productId], references: [id], onDelete: SetNull)
+  analytics            FunnelAnalytics[]
+  orders               FunnelOrder[]
+  platformTransactions PlatformTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("funnels")
 }
 
 enum FunnelType {
+  SOFTWARE
+  IMAGES
+  VIDEOS
+  CODE
+  DOCUMENTS
   LEAD_GENERATION
   SALES
   WEBINAR
@@ -388,122 +468,385 @@ enum FunnelStatus {
 }
 
 model DigitalProduct {
-  id          String      @id @default(cuid())
+  id          String             @id @default(cuid())
   name        String
   description String?
   type        DigitalProductType
   price       Float
-  status      ProductStatus @default(ACTIVE)
-  
+  currency    String             @default("INR")
+  status      ProductStatus      @default(ACTIVE)
+
   // File Information
-  fileUrl     String?
-  fileSize    Int?
-  fileType    String?
-  
+  fileUrl    String?
+  fileSize   Int?
+  fileType   String?
+  previewUrl String? // Preview image/video URL
+
   // Performance Metrics
-  downloads   Int         @default(0)
-  revenue     Float       @default(0)
-  
+  downloads Int   @default(0)
+  revenue   Float @default(0)
+  sales     Int   @default(0)
+
   // Relations
-  userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  userId String
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  funnel Funnel?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("digital_products")
 }
 
+// Funnel Orders
+model FunnelOrder {
+  id            String  @id @default(cuid())
+  funnelId      String
+  customerEmail String
+  amount        Float
+  currency      String  @default("INR")
+  status        String  @default("PENDING") // PENDING, COMPLETED, FAILED, REFUNDED
+  paymentId     String? // Razorpay payment ID
+  paymentMethod String? // RAZORPAY, STRIPE, etc.
+  metadata      Json? // Additional order data
+
+  // Relations
+  funnel Funnel @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("funnel_orders")
+}
+
+// Funnel Analytics
+model FunnelAnalytics {
+  id        String  @id @default(cuid())
+  funnelId  String
+  event     String // 'view', 'conversion', 'download', etc.
+  metadata  Json? // Additional event data
+  userAgent String?
+  ipAddress String?
+
+  // Relations
+  funnel Funnel @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@map("funnel_analytics")
+}
+
 enum DigitalProductType {
+  SOFTWARE
+  CODE
+  DOCUMENTS
+  IMAGES
+  VIDEOS
   COURSE
   EBOOK
   TEMPLATE
-  SOFTWARE
-  PDF
   AUDIO
-  VIDEO
   OTHER
 }
 
 // API Key Management
 model ApiKey {
-  id          String      @id @default(cuid())
+  id          String    @id @default(cuid())
   name        String
-  key         String      @unique
-  permissions String[]    // Array of permissions
+  key         String    @unique
+  permissions String[] // Array of permissions
   lastUsed    DateTime?
-  isActive    Boolean     @default(true)
-  
+  isActive    Boolean   @default(true)
+
   // Relations
-  userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("api_keys")
 }
 
 // Analytics & Tracking
 model Analytics {
-  id          String      @id @default(cuid())
-  siteId      String
-  date        DateTime
-  visitors    Int
-  pageViews   Int
-  bounceRate  Float?
+  id                 String   @id @default(cuid())
+  siteId             String
+  date               DateTime
+  visitors           Int
+  pageViews          Int
+  bounceRate         Float?
   avgSessionDuration Float?
-  conversionRate Float?
-  revenue     Float?
-  
+  conversionRate     Float?
+  revenue            Float?
+
   // Traffic Sources
   trafficSources Json?
-  
+
   // Device Breakdown
   deviceBreakdown Json?
-  
+
   // Additional tracking fields
-  visitorId String?  // Unique visitor identifier
-  pageUrl   String?  // Page URL for tracking
-  referrer  String?  // Referrer URL
-  userAgent String?  // User agent string
-  browser   String?  // Browser information
-  os        String?  // Device type
-  country   String?  // Country
-  city      String?  // City
-  duration  Int?     // Time spent on page in seconds
-  
+  visitorId String? // Unique visitor identifier
+  pageUrl   String? // Page URL for tracking
+  referrer  String? // Referrer URL
+  userAgent String? // User agent string
+  browser   String? // Browser information
+  os        String? // Device type
+  country   String? // Country
+  city      String? // City
+  duration  Int? // Time spent on page in seconds
+
   // Relations
-  site      Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
-  
+  site Site @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("analytics")
 }
 
+// Instance Management
+model Instance {
+  id             String         @id @default(cuid())
+  port           Int            @unique
+  url            String         @unique
+  status         InstanceStatus @default(AVAILABLE)
+  assignedUserId String?
 
+  // Relations
+  assignedUser User?    @relation("UserInstance", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  domains      Domain[] @relation("InstanceDomains")
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  @@map("instances")
+}
 
+enum InstanceStatus {
+  AVAILABLE
+  ALLOCATED
+  IN_USE
+  MAINTENANCE
+}
 
+// Domain Management
+model Domain {
+  id         String @id @default(cuid())
+  domain     String @unique
+  instanceId String
+  userId     String
 
+  // Relations
+  instance Instance @relation("InstanceDomains", fields: [instanceId], references: [id], onDelete: Cascade)
+  user     User     @relation("UserDomains", fields: [userId], references: [id], onDelete: Cascade)
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  @@map("domains")
+}
 
+// Navigation Settings for Super Admin
+model NavigationSettings {
+  id        String   @id @default(cuid())
+  itemName  String   @unique
+  isHidden  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  @@map("navigation_settings")
+}
 
+// Funnel Templates (Managed by Super Admin)
+model FunnelTemplate {
+  id          String     @id @default(cuid())
+  name        String
+  type        FunnelType
+  description String
+  previewUrl  String
+  htmlSchema  Json // Structure of the funnel with placeholders
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
+  // Relations
+  funnels Funnel[]
 
+  @@map("funnel_templates")
+}
 
+// User Notifications
+model UserNotification {
+  id        String               @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      NotificationType     @default(INFO)
+  category  NotificationCategory @default(SYSTEM)
+  metadata  Json? // Additional notification data
+  read      Boolean              @default(false)
+  createdAt DateTime             @default(now())
 
+  // Relations
+  user User @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, read])
+  @@index([userId, createdAt])
+  @@map("user_notifications")
+}
 
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
 
+enum NotificationCategory {
+  COMMUNITY
+  SYSTEM
+  PAYMENT
+  SITE
+  SALE
+}
 
+// Subscription Management
+model SubscriptionPlan {
+  id               String  @id @default(cuid())
+  name             String
+  description      String? @db.Text
+  price            Float
+  currency         String  @default("INR")
+  duration         Int // Duration in days
+  features         Json // Array of features
+  isActive         Boolean @default(true)
+  maxFunnels       Int     @default(-1) // -1 means unlimited
+  maxProducts      Int     @default(-1) // -1 means unlimited
+  maxCustomDomains Int     @default(0)
+  priority         Int     @default(0) // For sorting plans
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  // Relations
+  subscriptions UserSubscription[]
 
+  @@map("subscription_plans")
+}
 
+model UserSubscription {
+  id        String             @id @default(cuid())
+  userId    String
+  planId    String
+  status    SubscriptionStatus @default(ACTIVE)
+  startDate DateTime           @default(now())
+  endDate   DateTime
+  autoRenew Boolean            @default(false)
 
+  // Payment details
+  transactionId     String?
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  amount            Float
+  currency          String  @default("INR")
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@index([userId, status])
+  @@index([endDate])
+  @@map("user_subscriptions")
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  SUSPENDED
+}
+
+// Newsletter Subscriptions
+model NewsletterSubscription {
+  id             String           @id @default(cuid())
+  email          String           @unique
+  name           String?
+  source         String? // Where they subscribed from (e.g., 'newsletter-popup', 'footer', etc.)
+  status         NewsletterStatus @default(ACTIVE)
+  subscribedAt   DateTime         @default(now())
+  unsubscribedAt DateTime?
+  metadata       Json? // Additional data (IP, user agent, etc.)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([status])
+  @@map("newsletter_subscriptions")
+}
+
+enum NewsletterStatus {
+  ACTIVE
+  UNSUBSCRIBED
+  BOUNCED
+  SPAM
+}
+
+// Community Models
+model CommunityPost {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  authorId    String
+  authorName  String
+  authorEmail String
+  category    String   @default("general")
+  tags        String[] @default([])
+  likes       Int      @default(0)
+  views       Int      @default(0)
+  isPublished Boolean  @default(true)
+  isPinned    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author    User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments  CommunityComment[]
+  postLikes CommunityPostLike[]
+
+  @@map("CommunityPost")
+}
+
+model CommunityComment {
+  id        String   @id @default(cuid())
+  content   String
+  authorId  String
+  postId    String
+  parentId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author   User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post     CommunityPost      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent   CommunityComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  children CommunityComment[] @relation("CommentReplies")
+
+  @@map("CommunityComment")
+}
+
+model CommunityPostLike {
+  id        String   @id @default(cuid())
+  userId    String
+  postId    String
+  createdAt DateTime @default(now())
+
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@map("CommunityPostLike")
+}

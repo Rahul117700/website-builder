@@ -31,6 +31,7 @@ import {
   PlayIcon as PlayIconSolid,
   ArrowRightIcon as ArrowRightIconSolid
 } from '@heroicons/react/24/solid';
+import Logo from '@/components/Logo';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -306,14 +307,13 @@ export default function LandingPage() {
       <nav className="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <RocketLaunchIcon className="h-8 w-8 text-indigo-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">Website Builder</span>
-            </div>
+            <Logo 
+              variant="gradient" 
+              size="lg"
+              href="/"
+            />
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-600 hover:text-indigo-600 transition-colors">Features</a>
-              <a href="#templates" className="text-gray-600 hover:text-indigo-600 transition-colors">Templates</a>
-              <a href="#pricing" className="text-gray-600 hover:text-indigo-600 transition-colors">Pricing</a>
               <Link href="/auth/dashboard/create-template" className="text-gray-600 hover:text-indigo-600 transition-colors">Sell Your Template</Link>
             </div>
             <div className="flex items-center space-x-4">
@@ -473,12 +473,135 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              Real Success Stories
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              See how entrepreneurs are making ₹50,000+ monthly with our platform
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Testimonial 1 */}
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="flex items-center mb-6">
+                <div className="flex text-yellow-400">
+                  {[...Array(5)].map((_, i) => (
+                    <StarIcon key={i} className="h-6 w-6 fill-current" />
+                  ))}
+                </div>
+                <span className="ml-3 text-lg font-semibold text-gray-900">5.0</span>
+              </div>
+              <blockquote className="text-gray-700 mb-6 italic text-lg leading-relaxed">
+                "I bought this and made my first ₹75,000 online in just 3 weeks! The funnel templates are incredible and the analytics helped me optimize everything. Best investment I've ever made!"
+              </blockquote>
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  AS
+                </div>
+                <div className="ml-4">
+                  <p className="font-semibold text-gray-900 text-lg">Amit Sharma</p>
+                  <p className="text-gray-600">Digital Marketing Coach</p>
+                </div>
+              </div>
+              <div className="mt-4 text-center">
+                <span className="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                  ₹75,000 in 3 weeks
+                </span>
+              </div>
+            </div>
+
+            {/* Testimonial 2 */}
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="flex items-center mb-6">
+                <div className="flex text-yellow-400">
+                  {[...Array(5)].map((_, i) => (
+                    <StarIcon key={i} className="h-6 w-6 fill-current" />
+                  ))}
+                </div>
+                <span className="ml-3 text-lg font-semibold text-gray-900">5.0</span>
+              </div>
+              <blockquote className="text-gray-700 mb-6 italic text-lg leading-relaxed">
+                "Super easy to understand for beginners. I had zero technical knowledge but created my first sales funnel in 30 minutes. Made ₹1,20,000 in my first month!"
+              </blockquote>
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  PK
+                </div>
+                <div className="ml-4">
+                  <p className="font-semibold text-gray-900 text-lg">Priya Kumar</p>
+                  <p className="text-gray-600">Online Course Creator</p>
+                </div>
+              </div>
+              <div className="mt-4 text-center">
+                <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                  ₹1,20,000 first month
+                </span>
+              </div>
+            </div>
+
+            {/* Testimonial 3 */}
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="flex items-center mb-6">
+                <div className="flex text-yellow-400">
+                  {[...Array(5)].map((_, i) => (
+                    <StarIcon key={i} className="h-6 w-6 fill-current" />
+                  ))}
+                </div>
+                <span className="ml-3 text-lg font-semibold text-gray-900">5.0</span>
+              </div>
+              <blockquote className="text-gray-700 mb-6 italic text-lg leading-relaxed">
+                "Started with ₹0 budget, now making ₹2,50,000+ per month! The conversion optimization features helped me increase sales by 300%. Worth every rupee!"
+              </blockquote>
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  MG
+                </div>
+                <div className="ml-4">
+                  <p className="font-semibold text-gray-900 text-lg">Meera Gupta</p>
+                  <p className="text-gray-600">Affiliate Marketer</p>
+                </div>
+              </div>
+              <div className="mt-4 text-center">
+                <span className="inline-block bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium">
+                  ₹2,50,000 monthly
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Section */}
+          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-8 text-white transform hover:scale-105 transition-all duration-300">
+              <div className="text-3xl md:text-4xl font-bold mb-2">₹2.5Cr+</div>
+              <div className="text-sm opacity-90">Total Revenue Generated</div>
+            </div>
+            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl p-8 text-white transform hover:scale-105 transition-all duration-300">
+              <div className="text-3xl md:text-4xl font-bold mb-2">10,000+</div>
+              <div className="text-sm opacity-90">Happy Customers</div>
+            </div>
+            <div className="bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl p-8 text-white transform hover:scale-105 transition-all duration-300">
+              <div className="text-3xl md:text-4xl font-bold mb-2">₹85,000</div>
+              <div className="text-sm opacity-90">Average Monthly Income</div>
+            </div>
+            <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-2xl p-8 text-white transform hover:scale-105 transition-all duration-300">
+              <div className="text-3xl md:text-4xl font-bold mb-2">4.9/5</div>
+              <div className="text-sm opacity-90">Customer Rating</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Templates Section */}
       <section ref={templatesRef} id="templates" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              The best companies build on Website Builder
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              The best companies build on SellEarnDirect
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Professional templates designed to convert visitors into customers. 
@@ -589,31 +712,22 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center mb-4">
-                <RocketLaunchIcon className="h-8 w-8 text-indigo-400" />
-                <span className="ml-2 text-xl font-bold">Website Builder</span>
-              </div>
-              <p className="text-gray-400">
-                The ultimate platform for building professional websites with premium templates.
+              <Logo 
+                variant="white" 
+                size="lg"
+                href=""
+              />
+              <p className="text-gray-400 mt-3">
+                Create sales funnels and sell digital products with ease.
               </p>
             </div>
             
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Platform</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#templates" className="hover:text-white transition-colors">Templates</a></li>
-                <li><Link href="/auth/dashboard/marketplace" className="hover:text-white transition-colors">Marketplace</Link></li>
-                <li><Link href="/auth/dashboard/create-template" className="hover:text-white transition-colors">Sell Your Template</Link></li>
-              </ul>
-            </div>
             
             <div>
               <h3 className="text-lg font-semibold mb-4">Support</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link href="/domain-help" className="hover:text-white transition-colors">Domain Help</Link></li>
-                <li><Link href="/community" className="hover:text-white transition-colors">Community</Link></li>
-                <li><Link href="/terms" className="hover:text-white transition-colors">Terms</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
+                <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
               </ul>
             </div>
             
@@ -628,7 +742,7 @@ export default function LandingPage() {
           </div>
           
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 Website Builder. All rights reserved.</p>
+            <p>&copy; 2025 SellEarnDirect. All rights reserved.</p>
           </div>
         </div>
       </footer>

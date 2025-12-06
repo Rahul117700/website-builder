@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { Bars3Icon, XMarkIcon, UserIcon } from '@heroicons/react/24/outline';
+import Logo from '@/components/Logo';
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -23,13 +24,16 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto pl-2 pr-4 sm:pl-3 sm:pr-6 lg:pl-4 lg:pr-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center">
-              <span className="text-2xl font-bold text-black">Website Builder</span>
-            </Link>
+          <div className="flex-shrink-0 -ml-2 sm:-ml-3 lg:-ml-4">
+            <Logo 
+              variant="icon-only" 
+              size="lg"
+              href="/"
+              showText={false}
+            />
           </div>
 
           {/* Desktop Navigation */}
@@ -40,18 +44,6 @@ export default function Navbar() {
                 className="text-black hover:text-purple-600 transition-colors"
               >
                 Features
-              </button>
-              <button
-                onClick={() => scrollToSection('templates')}
-                className="text-black hover:text-purple-600 transition-colors"
-              >
-                Templates
-              </button>
-              <button
-                onClick={() => scrollToSection('pricing')}
-                className="text-black hover:text-purple-600 transition-colors"
-              >
-                Pricing
               </button>
               <Link href="/about" className="text-black hover:text-purple-600 transition-colors">
                 About Us

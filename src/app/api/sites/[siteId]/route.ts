@@ -27,7 +27,6 @@ export async function GET(
         type: true,
         status: true,
         subdomain: true,
-        customDomain: true,
         components: true,
         createdAt: true,
         updatedAt: true

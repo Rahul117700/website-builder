@@ -16,7 +16,7 @@ declare module 'next-auth' {
       planId?: string;
       planExpiryDate?: Date;
       plan?: Plan;
-      role?: 'USER' | 'SUPER_ADMIN';
+      role?: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
       preferredCurrency?: string;
     } & DefaultSession['user'];
   }
@@ -26,7 +26,7 @@ declare module 'next-auth' {
     planId?: string;
     planExpiryDate?: Date;
     password?: string;
-    role?: 'USER' | 'SUPER_ADMIN';
+    role?: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
     preferredCurrency?: string;
   }
 }
@@ -36,7 +36,7 @@ declare module 'next-auth/jwt' {
     id: string;
     planId?: string;
     planExpiryDate?: Date;
-    role?: 'USER' | 'SUPER_ADMIN';
+    role?: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
     preferredCurrency?: string;
   }
 }

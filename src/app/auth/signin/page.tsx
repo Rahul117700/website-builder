@@ -5,7 +5,8 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
-import { RocketLaunchIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import Logo from '@/components/Logo';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
@@ -43,13 +44,18 @@ export default function SignInPage() {
         <div className="w-full max-w-md">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <div className="p-3 bg-indigo-100 rounded-full">
-                <RocketLaunchIcon className="h-8 w-8 text-indigo-600" />
-              </div>
+            <div className="flex justify-center mb-6">
+              <Link href="/">
+                <img 
+                  src="/logo/logo.png" 
+                  alt="SellEarnDirect - Turn Traffic Into Revenue" 
+                  className="h-20 w-auto object-contain hover:scale-105 transition-transform no-blur"
+                  style={{ maxWidth: '250px' }}
+                />
+              </Link>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
-            <p className="text-gray-600">Sign in to your Website Builder account</p>
+            <p className="text-gray-600">Sign in to your account</p>
           </div>
 
           {/* Main Card */}

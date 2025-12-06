@@ -13,6 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import gsap from 'gsap';
 import Header from '@/components/Header';
+import Logo from '@/components/Logo';
 
 export default function PrivacyPage() {
   const { data: session } = useSession();
@@ -136,7 +137,7 @@ export default function PrivacyPage() {
             <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-8 border border-indigo-100">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Your Privacy Matters</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                At Website Builder, we understand the importance of privacy and are committed to protecting your personal information. 
+                At SellEarnDirect, we understand the importance of privacy and are committed to protecting your personal information. 
                 This Privacy Policy explains how we collect, use, and safeguard your data when you use our services.
               </p>
               <p className="text-gray-700 leading-relaxed">

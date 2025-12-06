@@ -1,978 +1,1352 @@
 'use client';
+
 import DashboardLayout from '@/components/layouts/dashboard-layout';
-import { useEffect, useState, useRef } from 'react';
-import Link from 'next/link';
-import { 
-  RocketLaunchIcon,
-  GlobeAltIcon,
-  ServerStackIcon,
-  ShoppingCartIcon,
+import { useState, useEffect, useRef } from 'react';
+import {
   ChartBarIcon,
-  CogIcon,
-  PlusIcon,
-  ArrowRightIcon,
-  StarIcon,
-  UsersIcon,
-  CurrencyDollarIcon,
   EyeIcon,
-  FireIcon,
-  SparklesIcon,
-  ClockIcon,
+  UserGroupIcon,
+  CurrencyDollarIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
-  ArrowUpIcon,
-  ArrowDownIcon,
-  CheckCircleIcon,
-  ExclamationTriangleIcon,
-  InformationCircleIcon,
-  HeartIcon,
-  ChatBubbleLeftIcon,
-  ShareIcon,
-  BookmarkIcon,
-  BellIcon,
-  UserGroupIcon,
-  AcademicCapIcon,
-  BriefcaseIcon,
-  HomeIcon,
-  LightBulbIcon,
-  PaintBrushIcon,
-  CodeBracketIcon,
-  DevicePhoneMobileIcon,
-  ComputerDesktopIcon,
-  CloudIcon,
-  ShieldCheckIcon,
+  CalendarIcon,
+  ClockIcon,
+  GlobeAltIcon,
+  FunnelIcon,
+  PlusIcon,
+  SparklesIcon,
+  FireIcon,
+  StarIcon,
+  ArrowPathIcon,
   BoltIcon,
-  GiftIcon,
-  TrophyIcon,
-  StarIcon as StarIconSolid,
-  FireIcon as FireIconSolid,
-  SparklesIcon as SparklesIconSolid
+  PresentationChartLineIcon,
+  BanknotesIcon,
+  UsersIcon,
+  EyeSlashIcon,
+  ShareIcon,
+  ClipboardDocumentListIcon,
+  ArchiveBoxIcon,
+  ComputerDesktopIcon,
+  PhotoIcon,
+  VideoCameraIcon,
+  CodeBracketIcon,
+  DocumentIcon,
+  CloudArrowUpIcon,
+  PaintBrushIcon,
+  CheckCircleIcon,
+  CreditCardIcon
 } from '@heroicons/react/24/outline';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-  PointElement,
-  LineElement,
-  Filler,
-} from 'chart.js';
-import { Bar, Doughnut, Line, Pie } from 'react-chartjs-2';
 import { gsap } from 'gsap';
+import Link from 'next/link';
 
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-  PointElement,
-  LineElement,
-  Filler
-);
+interface RecentActivity {
+  id: string;
+  type: 'funnel_created' | 'funnel_published' | 'order_completed';
+  title: string;
+  description: string;
+  timestamp: string;
+  icon: 'plus' | 'eye' | 'dollar';
+}
 
-export default function Dashboard() {
-  const [stats, setStats] = useState({
-    totalSites: 0,
-    activeSites: 0,
+interface DashboardStats {
+  totalFunnels: number;
+  publishedFunnels: number;
+  totalRevenue: number;
+  totalVisitors: number;
+  conversionRate: number;
+  totalConversions: number;
+  revenueGrowth: number;
+  topFunnel: {
+    id: string;
+    name: string;
+    revenue: number;
+    visitors: number;
+  } | null;
+  recentActivity: RecentActivity[];
+}
+
+interface ChartData {
+  date: string;
+  dayName: string;
+  revenue: number;
+  orders: number;
+}
+
+interface TopFunnel {
+  id: string;
+  name: string;
+  visitors: number;
+  conversions: number;
+  revenue: number;
+  conversionRate: number;
+  status: string;
+  published: boolean;
+}
+
+export default function DashboardPage() {
+  const [stats, setStats] = useState<DashboardStats>({
+    totalFunnels: 0,
+    publishedFunnels: 0,
     totalRevenue: 0,
-    monthlyVisitors: 0,
-    totalTemplates: 0,
-    totalSales: 0,
+    totalVisitors: 0,
     conversionRate: 0,
-    avgLoadTime: 0
+    totalConversions: 0,
+    revenueGrowth: 0,
+    topFunnel: null,
+    recentActivity: []
   });
-  const [recentSites, setRecentSites] = useState<any[]>([]);
-  const [recentTemplates, setRecentTemplates] = useState<any[]>([]);
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [topFunnels, setTopFunnels] = useState<TopFunnel[]>([]);
+  const [currentViewers, setCurrentViewers] = useState(0);
+  const [topViewedFunnel, setTopViewedFunnel] = useState<{name: string, viewers: number} | null>(null);
+  const [viewerHistory, setViewerHistory] = useState<{time: string, viewers: number}[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userPlan, setUserPlan] = useState<any>(null);
-  const [userStats, setUserStats] = useState<any>(null);
-  const [graphLoading, setGraphLoading] = useState(true);
-  const [planCardExpanded, setPlanCardExpanded] = useState(false);
-  const [selectedTimeRange, setSelectedTimeRange] = useState('7d');
+  const [hasRazorpayConfig, setHasRazorpayConfig] = useState(false);
+  const [checkingRazorpay, setCheckingRazorpay] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+  const [subscriptionData, setSubscriptionData] = useState<any>(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(true);
 
   // GSAP refs
   const heroRef = useRef<HTMLDivElement>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
-  const featuresRef = useRef<HTMLDivElement>(null);
-  const sitesRef = useRef<HTMLDivElement>(null);
-  const chartsRef = useRef<HTMLDivElement>(null);
-  const activityRef = useRef<HTMLDivElement>(null);
+  const quickActionsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    loadDashboardData();
-    
-    // Simulate graph loading animation
-    setGraphLoading(true);
-    const timer = setTimeout(() => {
-      setGraphLoading(false);
-    }, 2000);
-    
-    return () => clearTimeout(timer);
+    setIsClient(true);
   }, []);
 
   useEffect(() => {
-    // GSAP animations
-    const tl = gsap.timeline();
+    if (!isClient || typeof window === 'undefined') return;
     
-    tl.fromTo(heroRef.current, 
-      { opacity: 0, y: 50 }, 
+    const tl = gsap.timeline();
+
+    tl.fromTo(heroRef.current,
+      { opacity: 0, y: 50 },
       { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }
     )
-    .fromTo(statsRef.current, 
-      { opacity: 0, y: 30 }, 
-      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 
-      "-=0.4"
-    )
-    .fromTo(chartsRef.current, 
-      { opacity: 0, y: 30 }, 
-      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 
-      "-=0.3"
-    )
-    .fromTo(featuresRef.current, 
-      { opacity: 0, y: 30 }, 
-      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 
-      "-=0.3"
-    )
-    .fromTo(sitesRef.current, 
-      { opacity: 0, y: 30 }, 
-      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 
-      "-=0.3"
-    )
-    .fromTo(activityRef.current, 
-      { opacity: 0, y: 30 }, 
-      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 
+    .fromTo(quickActionsRef.current,
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
       "-=0.3"
     );
-  }, [stats, recentSites]);
 
-  const loadDashboardData = async () => {
+    loadDashboardStats();
+    checkRazorpayConfig();
+    loadSubscriptionData();
+    loadRealTimeViewers();
+    
+    // Set up interval to refresh viewer data every 30 seconds
+    const viewerInterval = setInterval(loadRealTimeViewers, 30000);
+    
+    return () => clearInterval(viewerInterval);
+  }, [isClient]);
+
+  const checkRazorpayConfig = async () => {
+    try {
+      setCheckingRazorpay(true);
+      const response = await fetch('/api/razorpay-config');
+      const data = await response.json();
+      setHasRazorpayConfig(data.hasConfig || false);
+    } catch (error) {
+      console.error('Error checking Razorpay config:', error);
+      setHasRazorpayConfig(false);
+    } finally {
+      setCheckingRazorpay(false);
+    }
+  };
+
+  const loadSubscriptionData = async () => {
+    try {
+      setLoadingSubscription(true);
+      const response = await fetch('/api/user/subscriptions');
+      if (response.ok) {
+        const data = await response.json();
+        setSubscriptionData(data);
+      }
+    } catch (error) {
+      console.error('Error loading subscription data:', error);
+    } finally {
+      setLoadingSubscription(false);
+    }
+  };
+
+  const loadRealTimeViewers = async () => {
+    try {
+      const response = await fetch('/api/realtime-viewers');
+      if (response.ok) {
+        const data = await response.json();
+        const newViewers = data.totalCurrentViewers || 0;
+        setCurrentViewers(newViewers);
+        setTopViewedFunnel(data.topViewedFunnel || null);
+        
+        // Track viewer history for the last 7 data points (every 30 minutes)
+        if (typeof window !== 'undefined') {
+          const now = new Date();
+          const timeStr = now.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+          });
+        
+          setViewerHistory(prev => {
+            const updated = [...prev, { time: timeStr, viewers: newViewers }];
+            // Keep only last 7 data points
+            return updated.length > 7 ? updated.slice(-7) : updated;
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error loading real-time viewers:', error);
+    }
+  };
+
+  const loadDashboardStats = async () => {
     try {
       setLoading(true);
+      const response = await fetch('/api/dashboard-analytics');
       
-      // Load dashboard stats from real APIs
-      const [statsRes, sitesRes, templatesRes, activityRes] = await Promise.all([
-        fetch('/api/dashboard/stats'),
-        fetch('/api/sites/my-sites'),
-        fetch('/api/templates/my-templates'),
-        fetch('/api/activity/recent')
-      ]);
-
-      if (statsRes.ok) {
-        const statsData = await statsRes.json();
-        console.log('📈 Stats data received:', statsData);
-        setStats(statsData);
-        setUserPlan(statsData.currentPlan);
-        setUserStats(statsData);
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Map API response to dashboard stats
+        const dashboardStats: DashboardStats = {
+          totalFunnels: data.overview.totalFunnels,
+          publishedFunnels: data.overview.publishedFunnels,
+          totalRevenue: data.overview.totalRevenue,
+          totalVisitors: data.overview.totalVisitors,
+          conversionRate: data.overview.conversionRate,
+          totalConversions: data.overview.totalConversions || 0,
+          revenueGrowth: data.overview.revenueGrowth,
+          topFunnel: data.chartData.topFunnels.length > 0 ? {
+            id: data.chartData.topFunnels[0].id,
+            name: data.chartData.topFunnels[0].name,
+            revenue: data.chartData.topFunnels[0].revenue,
+            visitors: data.chartData.topFunnels[0].visitors
+          } : null,
+          recentActivity: data.recentActivity || []
+        };
+        
+        setStats(dashboardStats);
+        setChartData(data.chartData.revenue7Days || []);
+        setTopFunnels(data.chartData.topFunnels || []);
+      } else {
+        console.error('Failed to load dashboard stats');
+        // Set empty stats on error
+        setStats({
+          totalFunnels: 0,
+          publishedFunnels: 0,
+          totalRevenue: 0,
+          totalVisitors: 0,
+          conversionRate: 0,
+          totalConversions: 0,
+          revenueGrowth: 0,
+          topFunnel: null,
+          recentActivity: []
+        });
+        setChartData([]);
+        setTopFunnels([]);
       }
-
-      if (sitesRes.ok) {
-        const sitesData = await sitesRes.json();
-        console.log('🏠 Sites data received:', sitesData);
-        setRecentSites(sitesData.slice(0, 4));
-      }
-
-      if (templatesRes.ok) {
-        const templatesData = await templatesRes.json();
-        console.log('🎨 Templates data received:', templatesData);
-        setRecentTemplates(templatesData.slice(0, 4));
-      }
-
-      if (activityRes.ok) {
-        const activityData = await activityRes.json();
-        console.log('📊 Activity data received:', activityData);
-        setRecentActivity(activityData.slice(0, 6));
-      }
-
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      console.error('Error loading dashboard stats:', error);
+      // Set empty stats on error
+      setStats({
+        totalFunnels: 0,
+        publishedFunnels: 0,
+        totalRevenue: 0,
+        totalVisitors: 0,
+        conversionRate: 0,
+        totalConversions: 0,
+        revenueGrowth: 0,
+        topFunnel: null,
+        recentActivity: []
+      });
+      setChartData([]);
+      setTopFunnels([]);
     } finally {
       setLoading(false);
     }
   };
 
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="w-full h-screen m-0 p-4 flex items-center justify-center bg-gray-50">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
-        {/* Hero Section */}
-        <div 
-          ref={heroRef}
-          className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50 rounded-3xl p-8 shadow-2xl border border-gray-100"
-        >
-          {/* Background Elements */}
-          <div className="absolute inset-0 -z-10">
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-r from-blue-400/10 to-indigo-400/10 rounded-full blur-3xl"></div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-emerald-400/5 to-cyan-400/5 rounded-full blur-3xl"></div>
-          </div>
-          
-          <div className="text-center relative z-10">
-            <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full text-sm font-medium text-indigo-700 mb-6">
-              <SparklesIcon className="h-4 w-4 mr-2" />
-              Welcome back! Ready to build something amazing?
-            </div>
-            
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Your Creative
-              <span className="block bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Command Center
-              </span>
-            </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
-              Build, launch, and scale your digital presence with our powerful suite of tools. 
-              From stunning websites to powerful analytics - everything you need to succeed.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/auth/dashboard/launch-site"
-                className="group inline-flex items-center px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-2xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl"
-              >
-                <RocketLaunchIcon className="h-5 w-5 mr-2 group-hover:rotate-12 transition-transform" />
-                Launch New Site
-                <ArrowRightIcon className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link
-                href="/auth/dashboard/marketplace"
-                className="group inline-flex items-center px-8 py-4 bg-white text-gray-900 font-semibold rounded-2xl border-2 border-gray-200 hover:border-indigo-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
-              >
-                <SparklesIcon className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
-                Browse Templates
-                <ArrowRightIcon className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
+      <div className="w-full h-screen m-0 p-4 sm:p-6 space-y-4 sm:space-y-6 bg-gray-50 overflow-y-auto">
+        {/* Header */}
+        <div ref={heroRef} data-tour="dashboard-header">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
+            <Link
+              href="/auth/dashboard/funnels"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-200 flex items-center text-sm sm:text-base"
+            >
+              <PlusIcon className="h-4 w-4 mr-1" />
+              Sell Product
+            </Link>
           </div>
         </div>
 
-        {/* Enhanced Stats Grid */}
-        <div 
-          ref={statsRef}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
-          {[
-            {
-              title: 'Total Sites',
-              value: stats.totalSites || 0,
-              change: stats.totalSites === 0 ? 'Start building' : '+2 this month',
-              changeValue: '+12%',
-              icon: GlobeAltIcon,
-              gradient: 'from-blue-500 to-cyan-500',
-              changeColor: stats.totalSites === 0 ? 'text-gray-500' : 'text-green-600',
-              bgGradient: 'from-blue-50 to-cyan-50',
-              borderColor: 'border-blue-200'
-            },
-            {
-              title: 'Active Sites',
-              value: stats.activeSites || 0,
-              change: stats.activeSites === 0 ? 'No active sites' : '100% uptime',
-              changeValue: '99.9%',
-              icon: EyeIcon,
-              gradient: 'from-emerald-500 to-green-500',
-              changeColor: stats.activeSites === 0 ? 'text-gray-500' : 'text-green-600',
-              bgGradient: 'from-emerald-50 to-green-50',
-              borderColor: 'border-emerald-200'
-            },
-            {
-              title: 'Templates',
-              value: stats.totalTemplates || 0,
-              change: stats.totalTemplates === 0 ? 'No templates' : 'Available',
-              changeValue: '+5 new',
-              icon: SparklesIcon,
-              gradient: 'from-purple-500 to-pink-500',
-              changeColor: stats.totalTemplates === 0 ? 'text-gray-500' : 'text-purple-600',
-              bgGradient: 'from-purple-50 to-pink-50',
-              borderColor: 'border-purple-200'
-            },
-            {
-              title: 'Revenue',
-              value: `₹${(stats.totalRevenue || 0).toLocaleString()}`,
-              change: stats.totalRevenue === 0 ? 'No revenue yet' : 'This month',
-              changeValue: '+23%',
-              icon: CurrencyDollarIcon,
-              gradient: 'from-orange-500 to-red-500',
-              changeColor: stats.totalRevenue === 0 ? 'text-gray-500' : 'text-green-600',
-              bgGradient: 'from-orange-50 to-red-50',
-              borderColor: 'border-orange-200'
-            }
-          ].map((stat, index) => (
-            <div
-              key={stat.title}
-              className={`group bg-gradient-to-br ${stat.bgGradient} rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border ${stat.borderColor} relative overflow-hidden`}
-            >
-              {/* Background Pattern */}
-              <div className="absolute top-0 right-0 w-20 h-20 opacity-10">
-                <div className={`w-full h-full bg-gradient-to-br ${stat.gradient} rounded-full blur-xl`}></div>
+        {/* Subscription Status Banner */}
+        {!loadingSubscription && (
+          <div className={`relative overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl ${
+            subscriptionData?.hasActivePlan
+              ? 'bg-gradient-to-r from-purple-600 to-pink-600'
+              : 'bg-gradient-to-r from-orange-500 to-red-500'
+          }`}>
+            <div className="relative z-10">
+              <div className="flex flex-col gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CreditCardIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                    <h3 className="text-lg sm:text-xl font-bold text-white">
+                      {subscriptionData?.hasActivePlan ? 'Active Subscription' : 'No Active Plan'}
+                    </h3>
+                  </div>
+                  {subscriptionData?.hasActivePlan ? (
+                    <>
+                      <p className="text-white/90 text-base sm:text-lg font-semibold mb-1">
+                        {subscriptionData.activeSubscription.plan.name}
+                      </p>
+                      <p className="text-white/80 text-xs sm:text-sm">
+                        Expires on: {new Date(subscriptionData.activeSubscription.endDate).toLocaleDateString()} 
+                        {subscriptionData.usage.daysRemaining > 0 && (
+                          <span className="block sm:inline sm:ml-2">
+                            ({subscriptionData.usage.daysRemaining} days remaining)
+                          </span>
+                        )}
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                          {subscriptionData.usage.funnels} / {subscriptionData.usage.maxFunnels === -1 ? '∞' : subscriptionData.usage.maxFunnels} Funnels
+                        </span>
+                        <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                          {subscriptionData.usage.products} / {subscriptionData.usage.maxProducts === -1 ? '∞' : subscriptionData.usage.maxProducts} Products
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <div>
+                      <p className="text-white/90 text-sm sm:text-base mb-3">
+                        🎁 <strong>Free Tier:</strong> Create 1 funnel with 100 visitors limit
+                      </p>
+                      <p className="text-white/80 text-xs sm:text-sm mb-2">
+                        Upgrade to unlock unlimited funnels, unlimited visitors, and advanced features!
+                      </p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                          ⚡ 1 Funnel (Free)
+                        </span>
+                        <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                          👥 100 Visitors Limit
+                        </span>
+                        <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                          🚀 Upgrade for Unlimited
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="flex-shrink-0">
+                  <Link
+                    href="/auth/dashboard/plans"
+                    className="inline-flex items-center justify-center w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-white text-purple-600 rounded-lg sm:rounded-xl font-bold hover:bg-gray-50 transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
+                  >
+                    {subscriptionData?.hasActivePlan ? 'Manage Plan' : 'View Plans'}
+                    <ArrowTrendingUpIcon className="h-4 w-4 ml-2" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Payment Configuration Banner - Only show when Razorpay is NOT configured */}
+        {!checkingRazorpay && !hasRazorpayConfig && (
+          <div className="relative overflow-hidden rounded-2xl p-6 sm:p-8 shadow-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500">
+            <div className="absolute top-0 right-0 -mt-4 -mr-4 w-40 h-40 bg-white opacity-10 rounded-full"></div>
+            <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-32 h-32 bg-white opacity-10 rounded-full"></div>
+            
+            <div className="relative z-10">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                <div className="flex-1">
+                  <div className="inline-flex items-center px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full mb-3">
+                        <BoltIcon className="h-4 w-4 text-white mr-2" />
+                        <span className="text-xs font-semibold text-white">100% DIRECT PAYMENTS</span>
+                  </div>
+                  
+                      <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+                        💰 Get Paid Directly to Your Bank Account!
+                      </h2>
+                      
+                      <p className="text-base sm:text-lg text-white/90 mb-3">
+                        All money from your sales goes <strong>straight to YOUR account</strong> - No middleman, No delays!
+                      </p>
+                  
+                  <div className="flex flex-wrap items-center gap-4 mb-4">
+                    <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-2 rounded-lg">
+                      <CheckCircleIcon className="h-5 w-5 text-white mr-2" />
+                      <span className="text-sm text-white font-medium">Instant Settlements</span>
+                    </div>
+                    <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-2 rounded-lg">
+                      <CheckCircleIcon className="h-5 w-5 text-white mr-2" />
+                      <span className="text-sm text-white font-medium">Zero Platform Fees</span>
+                    </div>
+                    <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-2 rounded-lg">
+                      <CheckCircleIcon className="h-5 w-5 text-white mr-2" />
+                      <span className="text-sm text-white font-medium">Secure Razorpay</span>
+                    </div>
+                  </div>
+                  
+                    <p className="text-sm text-white/80 flex items-start">
+                      <SparklesIcon className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+                      <span><strong>How it works:</strong> Simply connect your Razorpay account and start selling. Every payment goes directly to your bank - we never hold your money!</span>
+                    </p>
+                </div>
+                
+                <div className="flex-shrink-0">
+                      <Link
+                        href="/auth/dashboard/razorpay-setup"
+                        className="group inline-flex items-center px-6 py-3 bg-white text-teal-600 rounded-xl font-bold text-base hover:bg-gray-50 transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-105"
+                      >
+                        <BanknotesIcon className="h-5 w-5 mr-2" />
+                        Connect Razorpay Now
+                        <ArrowTrendingUpIcon className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                      <p className="text-xs text-white/70 text-center mt-2">Takes only 2 minutes ⚡</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Enhanced Analytics Dashboard */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Enhanced Total Earnings Card */}
+          <div className="lg:col-span-2 bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900 border border-emerald-500/20 rounded-2xl p-6 shadow-2xl relative overflow-hidden" data-tour="dashboard-stats">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-transparent"></div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-400/20 rounded-full -translate-y-16 translate-x-16"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-emerald-300/20 rounded-full translate-y-12 -translate-x-12"></div>
+                </div>
+
+            {/* Header */}
+            <div className="relative z-10 flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-emerald-400 to-green-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <BanknotesIcon className="h-6 w-6 text-white" />
+              </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">Total Earnings</h3>
+                  <p className="text-sm text-emerald-200">All-time revenue</p>
+            </div>
+          </div>
+              <div className={`flex items-center px-4 py-2 rounded-full ${
+                stats.revenueGrowth >= 0 
+                  ? 'text-green-100 bg-green-500/20 border border-green-500/30' 
+                  : 'text-red-100 bg-red-500/20 border border-red-500/30'
+              }`}>
+                {stats.revenueGrowth >= 0 ? (
+                  <ArrowTrendingUpIcon className="h-5 w-5 mr-2" />
+                ) : (
+                  <ArrowTrendingDownIcon className="h-5 w-5 mr-2" />
+                )}
+                <span className="text-sm font-semibold">
+                  {stats.revenueGrowth >= 0 ? '+' : ''}{stats.revenueGrowth.toFixed(1)}%
+                </span>
+              </div>
+            </div>
+
+            {/* Main Revenue Display */}
+            <div className="relative z-10 mb-6">
+              <div className="flex items-baseline space-x-2 mb-2">
+                <span className="text-5xl font-bold text-white">₹</span>
+                <span className="text-5xl font-bold text-white">{stats.totalRevenue.toLocaleString()}</span>
+              </div>
+              <p className="text-emerald-200 text-sm">Lifetime earnings from all products</p>
+              
+              {/* Current Viewers */}
+              <div className="mt-4 flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="relative">
+                    <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                      <EyeIcon className="h-4 w-4 text-blue-400" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse border border-white/20"></div>
+                  </div>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <p className="text-white font-semibold">{currentViewers}</p>
+                      <span className="text-xs text-green-400 bg-green-500/20 px-2 py-0.5 rounded-full">Live</span>
+                    </div>
+                    <p className="text-emerald-200 text-xs">Currently viewing your funnels</p>
+                  </div>
+                </div>
+                {topViewedFunnel && (
+                  <div className="text-right">
+                    <p className="text-white text-sm font-medium truncate max-w-32">{topViewedFunnel.name}</p>
+                    <p className="text-emerald-200 text-xs">{topViewedFunnel.viewers} viewers</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Enhanced Chart Section */}
+            <div className="relative z-10 bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-6 border border-white/20">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h4 className="text-white font-semibold">Live User Activity</h4>
+                  <p className="text-emerald-200 text-xs">Real-time funnel viewers</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-white font-bold flex items-center">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse mr-2"></div>
+                    {currentViewers}
+                  </p>
+                  <p className="text-emerald-200 text-xs">viewing now</p>
+                </div>
               </div>
               
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.gradient} group-hover:scale-110 transition-transform duration-300`}>
-                    <stat.icon className="h-6 w-6 text-white" />
-                  </div>
-                  <div className="text-right">
-                    <div className={`text-sm font-medium ${stat.changeColor}`}>
-                      {stat.change}
-                    </div>
-                    <div className={`text-xs ${stat.changeColor} opacity-75`}>
-                      {stat.changeValue}
-                    </div>
-                  </div>
-                </div>
-                <h3 className="text-3xl font-bold text-gray-900 mb-1 group-hover:scale-105 transition-transform duration-300">
-                  {stat.value}
-                </h3>
-                <p className="text-sm text-gray-600 font-medium">
-                  {stat.title}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Comprehensive Analytics Dashboard */}
-        <div 
-          ref={chartsRef}
-          className="bg-gradient-to-br from-slate-50 via-white to-blue-50 rounded-3xl p-8 shadow-2xl border border-gray-100"
-        >
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8">
-            <div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent">
-                Analytics Dashboard
-              </h2>
-              <p className="text-gray-600 mt-1">Real-time insights and performance metrics</p>
-            </div>
-            <div className="flex items-center space-x-4 mt-4 lg:mt-0">
-              {/* Time Range Selector */}
-              <div className="flex bg-white rounded-lg p-1 shadow-sm border border-gray-200">
-                {['7d', '30d', '90d', '1y'].map((range) => (
-                  <button
-                    key={range}
-                    onClick={() => setSelectedTimeRange(range)}
-                    className={`px-3 py-1 text-sm font-medium rounded-md transition-all duration-200 ${
-                      selectedTimeRange === range
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                    }`}
-                  >
-                    {range}
-                  </button>
-                ))}
-              </div>
-              <div className="flex items-center space-x-2 px-3 py-1 bg-green-100 rounded-full">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-medium text-green-700">Live</span>
-              </div>
-            </div>
-          </div>
-          
-          {graphLoading ? (
-            <div className="space-y-8">
-              {/* Loading Animation */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <div className="h-6 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg animate-pulse"></div>
-                  <div className="h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl animate-pulse flex items-center justify-center">
-                    <div className="flex space-x-2">
-                      <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
-                      <div className="w-3 h-3 bg-purple-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                      <div className="w-3 h-3 bg-pink-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="h-6 bg-gradient-to-r from-gray-200 to-gray-300 rounded-lg animate-pulse"></div>
-                  <div className="h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl animate-pulse flex items-center justify-center">
-                    <div className="w-32 h-32 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full animate-pulse"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              {/* Main Charts Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Performance Trends Chart */}
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-gray-800">Performance Trends</h3>
-                    <div className="flex space-x-2">
-                      <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
-                    </div>
-                  </div>
-                  <div className="h-80 bg-gradient-to-br from-white to-blue-50 rounded-2xl p-6 shadow-inner border border-gray-100">
-                    <Line
-                      data={{
-                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-                        datasets: [
-                          {
-                            label: 'Page Views',
-                            data: [1200, 1900, 3000, 5000, 4200, 3800, 4500],
-                            borderColor: 'rgb(99, 102, 241)',
-                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4,
-                            pointBackgroundColor: 'rgb(99, 102, 241)',
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                            pointRadius: 6,
-                            pointHoverRadius: 8,
-                          },
-                          {
-                            label: 'Unique Visitors',
-                            data: [800, 1200, 2000, 3500, 2800, 3200, 3800],
-                            borderColor: 'rgb(236, 72, 153)',
-                            backgroundColor: 'rgba(236, 72, 153, 0.1)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4,
-                            pointBackgroundColor: 'rgb(236, 72, 153)',
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                            pointRadius: 6,
-                            pointHoverRadius: 8,
-                          }
-                        ]
-                      }}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                              usePointStyle: true,
-                              padding: 20,
-                              font: {
-                                size: 12,
-                                weight: 500
-                              }
-                            }
-                          },
-                        },
-                        scales: {
-                          x: {
-                            grid: {
-                              display: false,
-                            },
-                            ticks: {
-                              color: '#6B7280',
-                              font: {
-                                size: 12,
-                                weight: 500,
-                              }
-                            }
-                          },
-                          y: {
-                            grid: {
-                              color: 'rgba(0, 0, 0, 0.05)',
-                            },
-                            ticks: {
-                              color: '#6B7280',
-                              font: {
-                                size: 12,
-                                weight: 500,
-                              }
-                            }
-                          }
-                        },
-                        elements: {
-                          point: {
-                            hoverBackgroundColor: '#fff',
-                          }
-                        }
-                      }}
+              {/* Live Viewer Chart */}
+              <div className="h-16 relative">
+                {isClient && viewerHistory.length > 0 ? (
+                  <svg className="w-full h-full" viewBox="0 0 300 60">
+                    {/* Grid lines */}
+                    <defs>
+                      <pattern id="viewerGrid" width="30" height="10" patternUnits="userSpaceOnUse">
+                        <path d="M 30 0 L 0 0 0 10" fill="none" stroke="#ffffff20" strokeWidth="0.5"/>
+                      </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#viewerGrid)" />
+                    
+                    {/* Area under curve */}
+                    <defs>
+                      <linearGradient id="viewerAreaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3"/>
+                        <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.05"/>
+                      </linearGradient>
+                    </defs>
+                    
+                    {/* Viewer area */}
+                    <polygon
+                      fill="url(#viewerAreaGradient)"
+                      points={`10,50 ${viewerHistory.map((point, index) => {
+                        const x = (index / Math.max(viewerHistory.length - 1, 1)) * 280 + 10;
+                        const maxViewers = Math.max(...viewerHistory.map(p => p.viewers), 1);
+                        const y = 50 - (point.viewers / maxViewers) * 40;
+                        return `${x},${y}`;
+                      }).join(' ')} 290,50`}
                     />
-                  </div>
-                </div>
-
-                {/* Revenue Distribution */}
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-gray-800">Revenue Sources</h3>
-                    <div className="text-sm text-gray-500">This Month</div>
-                  </div>
-                  <div className="bg-gradient-to-br from-white to-purple-50 rounded-2xl p-8 shadow-inner border border-gray-100">
-                    <div className="flex flex-col lg:flex-row items-center justify-center space-y-6 lg:space-y-0 lg:space-x-8">
-                      {/* Chart Container */}
-                      <div className="flex-shrink-0">
-                        <div className="relative w-64 h-64">
-                          <Pie
-                            data={{
-                              labels: ['Templates', 'Services', 'Subscriptions', 'Other'],
-                              datasets: [
-                                {
-                                  data: [45, 30, 20, 5],
-                                  backgroundColor: [
-                                    'rgba(99, 102, 241, 0.9)',
-                                    'rgba(236, 72, 153, 0.9)',
-                                    'rgba(34, 197, 94, 0.9)',
-                                    'rgba(245, 158, 11, 0.9)'
-                                  ],
-                                  borderColor: [
-                                    'rgba(99, 102, 241, 1)',
-                                    'rgba(236, 72, 153, 1)',
-                                    'rgba(34, 197, 94, 1)',
-                                    'rgba(245, 158, 11, 1)'
-                                  ],
-                                  borderWidth: 3,
-                                }
-                              ]
-                            }}
-                            options={{
-                              responsive: true,
-                              maintainAspectRatio: false,
-                              plugins: {
-                                legend: {
-                                  display: false,
-                                }
-                              }
-                            }}
+                    
+                    {/* Viewer line */}
+                    <polyline
+                      fill="none"
+                      stroke="url(#viewerGradient)"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      points={viewerHistory.map((point, index) => {
+                        const x = (index / Math.max(viewerHistory.length - 1, 1)) * 280 + 10;
+                        const maxViewers = Math.max(...viewerHistory.map(p => p.viewers), 1);
+                        const y = 50 - (point.viewers / maxViewers) * 40;
+                        return `${x},${y}`;
+                      }).join(' ')}
+                    />
+                    
+                    {/* Enhanced data points */}
+                    {viewerHistory.map((point, index) => {
+                      const x = (index / Math.max(viewerHistory.length - 1, 1)) * 280 + 10;
+                      const maxViewers = Math.max(...viewerHistory.map(p => p.viewers), 1);
+                      const y = 50 - (point.viewers / maxViewers) * 40;
+                      const isLatest = index === viewerHistory.length - 1;
+                      return (
+                        <g key={index}>
+                          <circle
+                            cx={x}
+                            cy={y}
+                            r={isLatest ? "5" : "4"}
+                            fill="#ffffff"
+                            stroke={isLatest ? "#f59e0b" : "#3b82f6"}
+                            strokeWidth={isLatest ? "3" : "2"}
+                            className="hover:r-6 transition-all cursor-pointer"
                           />
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="text-center">
-                              <div className="text-3xl font-bold text-gray-800">₹{stats.totalRevenue || 0}</div>
-                              <div className="text-sm text-gray-500 font-medium">Total Revenue</div>
-                            </div>
-                          </div>
-                        </div>
+                          {isLatest && (
+                            <circle
+                              cx={x}
+                              cy={y}
+                              r="7"
+                              fill="none"
+                              stroke="#f59e0b"
+                              strokeWidth="1"
+                              opacity="0.5"
+                              className="animate-ping"
+                            />
+                          )}
+                          <text
+                            x={x}
+                            y={y - 8}
+                            fontSize="8"
+                            fill="#ffffff"
+                            textAnchor="middle"
+                            className="opacity-0 hover:opacity-100 transition-opacity"
+                          >
+                            {point.viewers}
+                          </text>
+                        </g>
+                      );
+                    })}
+                    
+                    {/* Time labels */}
+                    {viewerHistory.map((point, index) => {
+                      const x = (index / Math.max(viewerHistory.length - 1, 1)) * 280 + 10;
+                      return (
+                        <text
+                          key={`time-${index}`}
+                          x={x}
+                          y="58"
+                          fontSize="8"
+                          fill="#ffffff80"
+                          textAnchor="middle"
+                        >
+                          {point.time}
+                        </text>
+                      );
+                    })}
+                    
+                    {/* Enhanced gradient definition */}
+                    <defs>
+                      <linearGradient id="viewerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#3b82f6" />
+                        <stop offset="50%" stopColor="#60a5fa" />
+                        <stop offset="100%" stopColor="#93c5fd" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-white/60">
+                    <div className="text-center">
+                      <div className="w-8 h-8 mx-auto mb-2 bg-blue-500/20 rounded-full flex items-center justify-center">
+                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
                       </div>
-                      
-                      {/* Legend */}
-                      <div className="flex-shrink-0">
-                        <div className="space-y-4">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-4 h-4 bg-indigo-500 rounded-full"></div>
-                            <div className="text-sm font-medium text-gray-700">Templates: 45%</div>
-                          </div>
-                          <div className="flex items-center space-x-3">
-                            <div className="w-4 h-4 bg-pink-500 rounded-full"></div>
-                            <div className="text-sm font-medium text-gray-700">Services: 30%</div>
-                          </div>
-                          <div className="flex items-center space-x-3">
-                            <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                            <div className="text-sm font-medium text-gray-700">Subscriptions: 20%</div>
-                          </div>
-                          <div className="flex items-center space-x-3">
-                            <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
-                            <div className="text-sm font-medium text-gray-700">Other: 5%</div>
-                          </div>
-                        </div>
-                      </div>
+                      <p className="text-xs">{isClient ? 'Collecting viewer data...' : 'Loading...'}</p>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              {/* Key Metrics Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="group bg-gradient-to-br from-blue-50 via-white to-cyan-50 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <ChartBarIcon className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-gray-900">15,420</div>
-                      <div className="text-sm text-green-600 font-medium flex items-center">
-                        <ArrowUpIcon className="w-3 h-3 mr-1" />
-                        +12%
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-sm font-medium text-gray-600">Total Page Views</div>
-                  <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full w-3/4"></div>
-                  </div>
-                </div>
-
-                <div className="group bg-gradient-to-br from-green-50 via-white to-emerald-50 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-green-100">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <ClockIcon className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-gray-900">1.2s</div>
-                      <div className="text-sm text-green-600 font-medium flex items-center">
-                        <ArrowDownIcon className="w-3 h-3 mr-1" />
-                        -0.3s
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-sm font-medium text-gray-600">Avg Load Time</div>
-                  <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full w-4/5"></div>
-                  </div>
-                </div>
-
-                <div className="group bg-gradient-to-br from-purple-50 via-white to-pink-50 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-purple-100">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <ServerStackIcon className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-gray-900">99.9%</div>
-                      <div className="text-sm text-green-600 font-medium flex items-center">
-                        <CheckCircleIcon className="w-3 h-3 mr-1" />
-                        Excellent
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-sm font-medium text-gray-600">Uptime</div>
-                  <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full w-full"></div>
-                  </div>
-                </div>
-
-                <div className="group bg-gradient-to-br from-orange-50 via-white to-red-50 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-orange-100">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                      <CurrencyDollarIcon className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-gray-900">₹{stats.totalRevenue || 0}</div>
-                      <div className="text-sm text-green-600 font-medium flex items-center">
-                        <ArrowUpIcon className="w-3 h-3 mr-1" />
-                        +23%
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-sm font-medium text-gray-600">Total Revenue</div>
-                  <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full w-2/3"></div>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Quick Actions & Features */}
-        <div 
-          ref={featuresRef}
-          className="space-y-8"
-        >
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Quick Actions & Tools
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Everything you need to build, manage, and grow your digital presence
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              {
-                title: 'Launch New Site',
-                description: 'Create a stunning website in minutes with our drag-and-drop builder',
-                icon: RocketLaunchIcon,
-                gradient: 'from-indigo-500 to-purple-600',
-                bgGradient: 'from-indigo-50 to-purple-50',
-                borderColor: 'border-indigo-200',
-                href: '/auth/dashboard/launch-site',
-                features: ['Drag & Drop Builder', 'Mobile Responsive', 'SEO Optimized', 'Fast Loading']
-              },
-              {
-                title: 'Browse Templates',
-                description: 'Choose from hundreds of professionally designed templates',
-                icon: SparklesIcon,
-                gradient: 'from-purple-500 to-pink-600',
-                bgGradient: 'from-purple-50 to-pink-50',
-                borderColor: 'border-purple-200',
-                href: '/auth/dashboard/marketplace',
-                features: ['500+ Templates', 'All Categories', 'Regular Updates', 'Easy Customization']
-              },
-              {
-                title: 'Analytics Dashboard',
-                description: 'Track your site performance with detailed analytics and insights',
-                icon: ChartBarIcon,
-                gradient: 'from-blue-500 to-cyan-600',
-                bgGradient: 'from-blue-50 to-cyan-50',
-                borderColor: 'border-blue-200',
-                href: '/auth/dashboard/analytics',
-                features: ['Real-time Data', 'Performance Metrics', 'User Insights', 'Revenue Tracking']
-              },
-              {
-                title: 'E-commerce Hub',
-                description: 'Manage products, orders, and payments all in one place',
-                icon: ShoppingCartIcon,
-                gradient: 'from-green-500 to-emerald-600',
-                bgGradient: 'from-green-50 to-emerald-50',
-                borderColor: 'border-green-200',
-                href: '/auth/dashboard/ecommerce',
-                features: ['Product Management', 'Order Tracking', 'Payment Processing', 'Inventory Control']
-              },
-              {
-                title: 'Database Manager',
-                description: 'Organize and manage your site data with powerful CRUD operations',
-                icon: ServerStackIcon,
-                gradient: 'from-orange-500 to-red-600',
-                bgGradient: 'from-orange-50 to-red-50',
-                borderColor: 'border-orange-200',
-                href: '/auth/dashboard/database',
-                features: ['Data Management', 'CRUD Operations', 'Data Export', 'Backup & Restore']
-              },
-              {
-                title: 'Community Hub',
-                description: 'Connect with other creators and share your work with the community',
-                icon: UserGroupIcon,
-                gradient: 'from-pink-500 to-rose-600',
-                bgGradient: 'from-pink-50 to-rose-50',
-                borderColor: 'border-pink-200',
-                href: '/auth/dashboard/community',
-                features: ['Share Projects', 'Get Feedback', 'Collaborate', 'Learn & Grow']
-              }
-            ].map((feature, index) => (
-              <Link
-                key={feature.title}
-                href={feature.href}
-                className={`group bg-gradient-to-br ${feature.bgGradient} rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border ${feature.borderColor} cursor-pointer`}
+            {/* Bottom Section */}
+            <div className="relative z-10 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                  <span className="text-blue-400 text-sm">👁️</span>
+                </div>
+                <span className="text-blue-200 text-sm">Track live user activity on your funnels</span>
+              </div>
+              <Link 
+                href="/auth/dashboard/analytics"
+                className="bg-blue-500/20 hover:bg-blue-500/30 text-blue-200 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border border-blue-500/30 hover:border-blue-400/50"
               >
-                <div className={`p-4 rounded-xl bg-gradient-to-r ${feature.gradient} mb-4 group-hover:scale-110 transition-transform duration-300 w-fit`}>
-                  <feature.icon className="h-8 w-8 text-white" />
-                </div>
-                
-                <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 mb-4 text-sm">
-                  {feature.description}
-                </p>
-                
-                <div className="space-y-2 mb-6">
-                  {feature.features.map((item, idx) => (
-                    <div key={idx} className="flex items-center text-xs text-gray-600">
-                      <CheckCircleIcon className="w-3 h-3 text-green-500 mr-2 flex-shrink-0" />
-                      {item}
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="flex items-center text-indigo-600 font-medium group-hover:text-indigo-700 transition-colors">
-                  Get Started
-                  <ArrowRightIcon className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </div>
+                View Analytics →
               </Link>
-            ))}
+            </div>
+          </div>
+
+          {/* Quick Stats Cards */}
+          <div className="space-y-4">
+            {/* Conversion Rate Card */}
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl p-4 shadow-md">
+              <div className="flex items-center justify-between mb-2">
+                <EyeIcon className="h-5 w-5 text-blue-700" />
+                <div className="text-right">
+                  <p className="text-xs text-blue-600">Conversion Rate</p>
+                  <p className="text-lg font-bold text-blue-900">{stats.conversionRate.toFixed(1)}%</p>
+                </div>
+              </div>
+              <div className="w-full bg-blue-200 rounded-full h-2 mb-2">
+                <div className="bg-blue-600 h-2 rounded-full transition-all duration-1000" 
+                     style={{ width: `${Math.min(stats.conversionRate * 10, 100)}%` }}></div>
+              </div>
+              <p className="text-xs text-blue-600">Industry avg: 2.5%</p>
+            </div>
+
+            {/* Visitors Card */}
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-xl p-4 shadow-md">
+              <div className="flex items-center justify-between mb-2">
+                <UserGroupIcon className="h-5 w-5 text-purple-700" />
+                <div className="text-right">
+                  <p className="text-xs text-purple-600">Total Visitors</p>
+                  <p className="text-lg font-bold text-purple-900">{stats.totalVisitors.toLocaleString()}</p>
+                </div>
+              </div>
+              <div className="flex items-center text-purple-700">
+                  <ArrowTrendingUpIcon className="h-4 w-4 mr-1" />
+                <span className="text-xs font-medium">+8.2% this week</span>
+                </div>
+              </div>
+
+            {/* Active Products Card */}
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 rounded-xl p-4 shadow-md">
+              <div className="flex items-center justify-between mb-2">
+                <FunnelIcon className="h-5 w-5 text-orange-700" />
+                <div className="text-right">
+                  <p className="text-xs text-orange-600">Active Products</p>
+                  <p className="text-lg font-bold text-orange-900">{stats.publishedFunnels}</p>
+            </div>
+              </div>
+              <div className="flex items-center text-orange-700">
+                <SparklesIcon className="h-4 w-4 mr-1" />
+                <span className="text-xs font-medium">Live & selling</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Recent Activity & Projects */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Recent Sites */}
-          <div 
-            ref={sitesRef}
-            className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                <GlobeAltIcon className="h-5 w-5 mr-2 text-indigo-600" />
-                Recent Sites
-              </h2>
+        {/* Quick Actions */}
+        <div ref={quickActionsRef} className="grid grid-cols-1 lg:grid-cols-2 gap-4" data-tour="quick-actions">
+          {/* Create Product Types */}
+          <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-4 sm:p-6 text-white">
+            <div className="mb-4">
+              <h3 className="text-lg sm:text-xl font-bold mb-1">Sell Your Product</h3>
+              <p className="text-sm text-purple-100">Choose your product type to get started</p>
+              <p className="text-xs text-purple-200 mt-2">📝 Quick Start: Click any product type below to create your sales page in minutes!</p>
+            </div>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               <Link
-                href="/auth/dashboard/sites"
-                className="text-indigo-600 hover:text-indigo-700 font-medium flex items-center text-sm"
+                href="/auth/dashboard/funnels?type=SOFTWARE"
+                className="bg-white/20 backdrop-blur-sm text-white p-3 rounded-lg hover:bg-white/30 transition-all duration-200 flex flex-col items-center justify-center text-center"
               >
-                View All
-                <ArrowRightIcon className="h-4 w-4 ml-1" />
+                <ComputerDesktopIcon className="h-6 w-6 mb-1" />
+                <span className="text-xs">Software</span>
+              </Link>
+              <Link
+                href="/auth/dashboard/funnels?type=CODE"
+                className="bg-white/20 backdrop-blur-sm text-white p-3 rounded-lg hover:bg-white/30 transition-all duration-200 flex flex-col items-center justify-center text-center"
+              >
+                <CodeBracketIcon className="h-6 w-6 mb-1" />
+                <span className="text-xs">Code</span>
+              </Link>
+              <Link
+                href="/auth/dashboard/funnels?type=DOCUMENTS"
+                className="bg-white/20 backdrop-blur-sm text-white p-3 rounded-lg hover:bg-white/30 transition-all duration-200 flex flex-col items-center justify-center text-center"
+              >
+                <DocumentIcon className="h-6 w-6 mb-1" />
+                <span className="text-xs">Docs</span>
+              </Link>
+              <Link
+                href="/auth/dashboard/funnels?type=IMAGES"
+                className="bg-white/20 backdrop-blur-sm text-white p-3 rounded-lg hover:bg-white/30 transition-all duration-200 flex flex-col items-center justify-center text-center"
+              >
+                <PhotoIcon className="h-6 w-6 mb-1" />
+                <span className="text-xs">Images</span>
+              </Link>
+              <Link
+                href="/auth/dashboard/funnels?type=VIDEOS"
+                className="bg-white/20 backdrop-blur-sm text-white p-3 rounded-lg hover:bg-white/30 transition-all duration-200 flex flex-col items-center justify-center text-center"
+              >
+                <VideoCameraIcon className="h-6 w-6 mb-1" />
+                <span className="text-xs">Videos</span>
+              </Link>
+              <Link
+                href="/auth/dashboard/funnels?type=COURSE"
+                className="bg-white/20 backdrop-blur-sm text-white p-3 rounded-lg hover:bg-white/30 transition-all duration-200 flex flex-col items-center justify-center text-center"
+              >
+                <PresentationChartLineIcon className="h-6 w-6 mb-1" />
+                <span className="text-xs">Course</span>
               </Link>
             </div>
-            
-            {loading ? (
+          </div>
+
+          {/* Top Performing Product */}
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 sm:p-6" data-tour="top-funnel">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900">Top Product</h3>
+              <FireIcon className="h-5 w-5 text-orange-500" />
+            </div>
+            <p className="text-xs text-gray-500 mb-4">🏆 Your best performing product right now</p>
+            {stats.topFunnel ? (
               <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="h-16 bg-gray-200 rounded-lg"></div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <StarIcon className="h-5 w-5 text-white" />
                   </div>
-                ))}
-              </div>
-            ) : recentSites.length > 0 ? (
-              <div className="space-y-4">
-                {recentSites.map((site) => (
-                  <div
-                    key={site.id}
-                    className="group p-4 rounded-xl border border-gray-100 hover:border-indigo-200 hover:shadow-md transition-all duration-200 cursor-pointer"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                        <GlobeAltIcon className="h-6 w-6 text-indigo-600" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors truncate">
-                          {site.name}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          {site.type} • {site.status}
-                        </p>
-                        <div className="flex items-center mt-1">
-                          <div className={`w-2 h-2 rounded-full mr-2 ${
-                            site.status === 'active' ? 'bg-green-500' : 'bg-gray-400'
-                          }`}></div>
-                          <span className="text-xs text-gray-500">
-                            {site.status === 'active' ? 'Live' : 'Draft'}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-medium text-gray-900">
-                          {site.visitors || 0} views
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {new Date(site.updatedAt || site.createdAt).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold text-gray-900 truncate">{stats.topFunnel.name}</h4>
+                    <p className="text-xs text-gray-600">{stats.topFunnel.visitors} visitors</p>
                   </div>
-                ))}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-center p-3 bg-gray-50 rounded-lg">
+                    <p className="text-lg sm:text-xl font-bold text-green-600">₹{stats.topFunnel.revenue.toLocaleString()}</p>
+                    <p className="text-xs text-gray-600">Revenue</p>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50 rounded-lg">
+                    <p className="text-lg sm:text-xl font-bold text-blue-600">{stats.topFunnel.visitors}</p>
+                    <p className="text-xs text-gray-600">Visitors</p>
+                  </div>
+                </div>
+                <Link
+                  href="/auth/dashboard/analytics"
+                  className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-purple-700 transition-colors text-center block text-sm"
+                >
+                  View Analytics
+                </Link>
               </div>
             ) : (
-              <div className="text-center py-8">
-                <GlobeAltIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  No sites yet
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  Launch your first site and start building your digital presence
-                </p>
+              <div className="text-center py-6">
+                <FunnelIcon className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+                <p className="text-sm text-gray-600 mb-2">No products created yet</p>
+                <p className="text-xs text-gray-500 mb-4">💡 Create your first product to start earning!</p>
                 <Link
-                  href="/auth/dashboard/launch-site"
-                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-300"
+                  href="/auth/dashboard/funnels"
+                  className="inline-block bg-purple-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-purple-700 transition-colors text-sm"
                 >
-                  <PlusIcon className="h-4 w-4 mr-2" />
-                  Launch Your First Site
+                  Sell Your First Product
                 </Link>
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <p className="text-xs text-blue-800">
+                    <strong>Quick Guide:</strong> Choose a product type → Add details → Customize page → Start selling! 
+                  </p>
+                </div>
               </div>
             )}
           </div>
+        </div>
 
-          {/* Recent Activity */}
-          <div 
-            ref={activityRef}
-            className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
-          >
+        {/* Performance Analytics Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Revenue Performance Chart */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                <ClockIcon className="h-5 w-5 mr-2 text-indigo-600" />
-                Recent Activity
-              </h2>
-              <Link
-                href="/auth/dashboard/activity"
-                className="text-indigo-600 hover:text-indigo-700 font-medium flex items-center text-sm"
-              >
-                View All
-                <ArrowRightIcon className="h-4 w-4 ml-1" />
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Revenue Performance</h3>
+                <p className="text-sm text-gray-600">Track your earnings over time</p>
+              </div>
+              <div className="flex space-x-2">
+                <button className="px-3 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium">7D</button>
+                <button className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-lg text-xs">30D</button>
+                <button className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-lg text-xs">90D</button>
+              </div>
+            </div>
+            
+            {/* Interactive Chart Area */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">Revenue</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">Orders</span>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-gray-900">₹{stats.totalRevenue.toLocaleString()}</p>
+                  <p className="text-sm text-green-600">+12.5% vs last period</p>
+                </div>
+              </div>
+              
+              {/* Chart Visualization */}
+              <div className="h-48 bg-gradient-to-b from-gray-50 to-white rounded-lg p-4 border">
+                {chartData.length > 0 ? (
+                  <svg className="w-full h-full" viewBox="0 0 400 180">
+                    {/* Grid lines */}
+                    <defs>
+                      <pattern id="chartGrid" width="40" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 40 0 L 0 0 0 20" fill="none" stroke="#e5e7eb" strokeWidth="0.5"/>
+                      </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#chartGrid)" />
+                    
+                    {/* Y-axis labels */}
+                    <text x="5" y="15" fontSize="10" fill="#6b7280">₹{Math.max(...chartData.map(d => d.revenue)).toLocaleString()}</text>
+                    <text x="5" y="95" fontSize="10" fill="#6b7280">₹0</text>
+                    
+                    {/* Revenue line */}
+                    <polyline
+                      fill="none"
+                      stroke="url(#revenueLineGradient)"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      points={chartData.map((day, index) => {
+                        const x = (index / (chartData.length - 1)) * 350 + 25;
+                        const maxRevenue = Math.max(...chartData.map(d => d.revenue));
+                        const y = 170 - (day.revenue / Math.max(maxRevenue, 1)) * 150;
+                        return `${x},${y}`;
+                      }).join(' ')}
+                    />
+                    
+                    {/* Orders line */}
+                    <polyline
+                      fill="none"
+                      stroke="url(#ordersLineGradient)"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeDasharray="5,5"
+                      points={chartData.map((day, index) => {
+                        const x = (index / (chartData.length - 1)) * 350 + 25;
+                        const maxOrders = Math.max(...chartData.map(d => d.orders));
+                        const y = 170 - (day.orders / Math.max(maxOrders, 1)) * 150;
+                        return `${x},${y}`;
+                      }).join(' ')}
+                    />
+                    
+                    {/* Data points for revenue */}
+                    {chartData.map((day, index) => {
+                      const x = (index / (chartData.length - 1)) * 350 + 25;
+                      const maxRevenue = Math.max(...chartData.map(d => d.revenue));
+                      const y = 170 - (day.revenue / Math.max(maxRevenue, 1)) * 150;
+                      return (
+                        <g key={`revenue-${index}`}>
+                          <circle
+                            cx={x}
+                            cy={y}
+                            r="4"
+                            fill="#8b5cf6"
+                            className="hover:r-6 transition-all cursor-pointer"
+                          />
+                          <text
+                            x={x}
+                            y={y - 10}
+                            fontSize="8"
+                            fill="#6b7280"
+                            textAnchor="middle"
+                            className="opacity-0 hover:opacity-100 transition-opacity"
+                          >
+                            ₹{day.revenue}
+                          </text>
+                        </g>
+                      );
+                    })}
+                    
+                    {/* Day labels */}
+                    {chartData.map((day, index) => {
+                      const x = (index / (chartData.length - 1)) * 350 + 25;
+                      return (
+                        <text
+                          key={`day-${index}`}
+                          x={x}
+                          y="175"
+                          fontSize="9"
+                          fill="#6b7280"
+                          textAnchor="middle"
+                        >
+                          {day.dayName}
+                        </text>
+                      );
+                    })}
+                    
+                    {/* Gradient definitions */}
+                    <defs>
+                      <linearGradient id="revenueLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#8b5cf6" />
+                        <stop offset="100%" stopColor="#ec4899" />
+                      </linearGradient>
+                      <linearGradient id="ordersLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#3b82f6" />
+                        <stop offset="100%" stopColor="#06b6d4" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    <div className="text-center">
+                      <ChartBarIcon className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                      <p className="text-sm">No data available</p>
+                      <p className="text-xs text-gray-400">Start selling to see your performance</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Top Performing Products */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Top Products</h3>
+                <p className="text-sm text-gray-600">Your best performing items</p>
+              </div>
+              <Link href="/auth/dashboard/analytics" className="text-purple-600 hover:text-purple-700 text-sm font-medium">
+                View All →
               </Link>
             </div>
             
             <div className="space-y-4">
-              {recentActivity.length > 0 ? recentActivity.map((activity, index) => (
-                <div key={activity.id || index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full flex items-center justify-center">
-                      {activity.type === 'site' && <GlobeAltIcon className="h-4 w-4 text-indigo-600" />}
-                      {activity.type === 'template' && <SparklesIcon className="h-4 w-4 text-purple-600" />}
-                      {activity.type === 'sale' && <CurrencyDollarIcon className="h-4 w-4 text-green-600" />}
-                      {activity.type === 'comment' && <ChatBubbleLeftIcon className="h-4 w-4 text-blue-600" />}
-                      {activity.type === 'like' && <HeartIcon className="h-4 w-4 text-red-600" />}
-                      {!['site', 'template', 'sale', 'comment', 'like'].includes(activity.type) && <BellIcon className="h-4 w-4 text-gray-600" />}
+              {topFunnels.length > 0 ? (
+                topFunnels.map((product, index) => (
+                  <div key={product.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div className="flex items-start space-x-3 flex-1 min-w-0">
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <span className="text-white text-xs font-bold">{index + 1}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 text-sm break-words leading-tight mb-1">{product.name}</p>
+                        <div className="flex items-center space-x-3 text-xs text-gray-600">
+                          <span>{product.visitors} visitors</span>
+                          <span>•</span>
+                          <span>{product.conversionRate}% conversion</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0 ml-3">
+                      <p className="font-bold text-gray-900 text-sm">₹{product.revenue.toLocaleString()}</p>
+                      <div className="flex items-center justify-end">
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          product.published 
+                            ? 'text-green-700 bg-green-100' 
+                            : 'text-gray-600 bg-gray-100'
+                        }`}>
+                          {product.published ? 'Live' : 'Draft'}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-900 font-medium">
-                      {activity.message || activity.text || 'New activity'}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {activity.time || new Date(activity.createdAt || Date.now()).toLocaleString()}
-                    </p>
-                  </div>
-                  {!activity.read && (
-                    <div className="w-2 h-2 bg-indigo-500 rounded-full flex-shrink-0"></div>
-                  )}
-                </div>
-              )) : (
-                <div className="text-center py-8">
-                  <BellIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No recent activity
-                  </h3>
-                  <p className="text-gray-600">
-                    Your activity will appear here as you use the platform
-                  </p>
+                ))
+              ) : (
+                <div className="text-center py-6">
+                  <FunnelIcon className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+                  <p className="text-sm text-gray-600 mb-2">No products created yet</p>
+                  <p className="text-xs text-gray-500">Create your first product to see performance data</p>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Modern Call to Action */}
-        <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-3xl p-8 text-center text-white relative overflow-hidden">
-          {/* Background Elements */}
-          <div className="absolute inset-0 -z-10">
-            <div className="absolute top-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white/5 rounded-full blur-2xl"></div>
+        {/* Achievement & Goals Section */}
+        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-6 text-white mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-xl font-bold mb-2">🎯 Your Success Journey</h3>
+              <p className="text-purple-100">Track your milestones and achievements</p>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-bold">
+                {stats.totalRevenue >= 50000 ? 'Level 5' :
+                 stats.totalRevenue >= 25000 ? 'Level 4' :
+                 stats.totalRevenue >= 10000 ? 'Level 3' :
+                 stats.totalRevenue >= 5000 ? 'Level 2' : 'Level 1'}
+              </p>
+              <p className="text-purple-100 text-sm">
+                {stats.totalRevenue >= 50000 ? 'Master Seller' :
+                 stats.totalRevenue >= 25000 ? 'Expert Seller' :
+                 stats.totalRevenue >= 10000 ? 'Pro Seller' :
+                 stats.totalRevenue >= 5000 ? 'Advanced Seller' : 'Beginner Seller'}
+              </p>
+            </div>
           </div>
           
-          <div className="relative z-10">
-            <div className="inline-flex items-center px-4 py-2 bg-white/20 rounded-full text-sm font-medium mb-6">
-              <SparklesIcon className="h-4 w-4 mr-2" />
-              Join 10,000+ creators building amazing websites
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            {/* Achievement Badges */}
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+              <div className="flex items-center space-x-3">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  stats.totalConversions > 0 ? 'bg-yellow-400' : 'bg-gray-400'
+                }`}>
+                  <StarIcon className={`h-5 w-5 ${stats.totalConversions > 0 ? 'text-yellow-800' : 'text-gray-600'}`} />
+                </div>
+                <div>
+                  <p className="font-semibold">First Sale</p>
+                  <p className="text-purple-100 text-sm">
+                    {stats.totalConversions > 0 ? 'Unlocked!' : 'In Progress'}
+                  </p>
+                </div>
+              </div>
             </div>
             
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-              Ready to Build Something
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-300">
-                Extraordinary?
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+              <div className="flex items-center space-x-3">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  stats.totalRevenue >= 10000 ? 'bg-green-400' : 'bg-gray-400'
+                }`}>
+                  <BanknotesIcon className={`h-5 w-5 ${stats.totalRevenue >= 10000 ? 'text-green-800' : 'text-gray-600'}`} />
+                </div>
+                <div>
+                  <p className="font-semibold">₹10K Revenue</p>
+                  <p className="text-purple-100 text-sm">
+                    {stats.totalRevenue >= 10000 ? 'Achieved!' : 
+                     stats.totalRevenue > 0 ? `₹${stats.totalRevenue.toLocaleString()} earned` : 'In Progress'}
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+              <div className="flex items-center space-x-3">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  stats.totalFunnels >= 5 ? 'bg-blue-400' : 'bg-gray-400'
+                }`}>
+                  <FireIcon className={`h-5 w-5 ${stats.totalFunnels >= 5 ? 'text-blue-800' : 'text-gray-600'}`} />
+                </div>
+                <div>
+                  <p className="font-semibold">Multi-Product</p>
+                  <p className="text-purple-100 text-sm">
+                    {stats.totalFunnels >= 5 ? `${stats.totalFunnels} funnels!` : 
+                     `${stats.totalFunnels}/5 funnels`}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Progress Bar */}
+          <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium">
+                Next Goal: ₹{stats.totalRevenue >= 50000 ? '100K' :
+                           stats.totalRevenue >= 25000 ? '50K' :
+                           stats.totalRevenue >= 10000 ? '25K' :
+                           stats.totalRevenue >= 5000 ? '10K' : '5K'} Revenue
               </span>
-            </h2>
-            <p className="text-xl text-indigo-100 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Transform your ideas into stunning websites that convert visitors into customers. 
-              Start your journey today with our powerful tools and professional templates.
+              <span className="text-sm">
+                {(() => {
+                  const nextGoal = stats.totalRevenue >= 50000 ? 100000 :
+                                  stats.totalRevenue >= 25000 ? 50000 :
+                                  stats.totalRevenue >= 10000 ? 25000 :
+                                  stats.totalRevenue >= 5000 ? 10000 : 5000;
+                  return Math.floor((stats.totalRevenue / nextGoal) * 100);
+                })()}%
+              </span>
+            </div>
+            <div className="w-full bg-white/20 rounded-full h-3">
+              <div className="bg-gradient-to-r from-yellow-400 to-orange-400 h-3 rounded-full transition-all duration-1000" 
+                   style={{ 
+                     width: `${(() => {
+                       const nextGoal = stats.totalRevenue >= 50000 ? 100000 :
+                                       stats.totalRevenue >= 25000 ? 50000 :
+                                       stats.totalRevenue >= 10000 ? 25000 :
+                                       stats.totalRevenue >= 5000 ? 10000 : 5000;
+                       return Math.min((stats.totalRevenue / nextGoal) * 100, 100);
+                     })()}%` 
+                   }}></div>
+            </div>
+            <p className="text-purple-100 text-xs mt-2">
+              {(() => {
+                const nextGoal = stats.totalRevenue >= 50000 ? 100000 :
+                                stats.totalRevenue >= 25000 ? 50000 :
+                                stats.totalRevenue >= 10000 ? 25000 :
+                                stats.totalRevenue >= 5000 ? 10000 : 5000;
+                
+                if (stats.totalRevenue >= nextGoal) {
+                  return "🎉 Goal achieved! Set a new target!";
+                } else {
+                  const remaining = nextGoal - stats.totalRevenue;
+                  return `Keep going! ₹${remaining.toLocaleString()} to go! 🚀`;
+                }
+              })()}
             </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-              <Link
-                href="/auth/dashboard/launch-site"
-                className="group inline-flex items-center px-8 py-4 bg-white text-indigo-600 font-semibold rounded-2xl hover:bg-gray-50 transition-all duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl"
-              >
-                <RocketLaunchIcon className="h-5 w-5 mr-2 group-hover:rotate-12 transition-transform" />
-                Launch New Site
-                <ArrowRightIcon className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link
-                href="/auth/dashboard/marketplace"
-                className="group inline-flex items-center px-8 py-4 border-2 border-white text-white font-semibold rounded-2xl hover:bg-white hover:text-indigo-600 transition-all duration-300 transform hover:-translate-y-1"
-              >
-                <SparklesIcon className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />
-                Browse Templates
-                <ArrowRightIcon className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Link>
+          </div>
+        </div>
+
+        {/* Real-time Insights & Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Recent Activity */}
+          <div className="lg:col-span-2 bg-white rounded-lg border border-gray-200 shadow-sm p-4 sm:p-6" data-tour="recent-activity">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <ClockIcon className="h-5 w-5 text-gray-400" />
+              </div>
+          </div>
+          <p className="text-xs text-gray-500 mb-4">📊 Track your latest actions and sales</p>
+          <div className="space-y-3">
+            {stats.recentActivity.length > 0 ? (
+              stats.recentActivity.map((activity) => {
+                const getIconConfig = () => {
+                  switch (activity.icon) {
+                    case 'plus':
+                      return { Icon: PlusIcon, bgColor: 'bg-green-100', textColor: 'text-green-800' };
+                    case 'eye':
+                      return { Icon: EyeIcon, bgColor: 'bg-blue-100', textColor: 'text-blue-800' };
+                    case 'dollar':
+                      return { Icon: CurrencyDollarIcon, bgColor: 'bg-purple-100', textColor: 'text-purple-800' };
+                    default:
+                      return { Icon: ClockIcon, bgColor: 'bg-gray-100', textColor: 'text-gray-800' };
+                  }
+                };
+                
+                const { Icon, bgColor, textColor } = getIconConfig();
+                
+                const getTimeAgo = (timestamp: string) => {
+                  if (typeof window === 'undefined') return 'Just now';
+                  const now = new Date();
+                  const date = new Date(timestamp);
+                  const diffMs = now.getTime() - date.getTime();
+                  const diffMins = Math.floor(diffMs / 60000);
+                  const diffHours = Math.floor(diffMs / 3600000);
+                  const diffDays = Math.floor(diffMs / 86400000);
+                  
+                  if (diffMins < 60) return `${diffMins} ${diffMins === 1 ? 'minute' : 'minutes'} ago`;
+                  if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
+                  return `${diffDays} ${diffDays === 1 ? 'day' : 'days'} ago`;
+                };
+                
+                return (
+                  <div key={activity.id} className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                    <div className={`p-2 rounded-lg ${bgColor} ${textColor} flex-shrink-0`}>
+                      <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 text-sm truncate">{activity.title}</p>
+                      <p className="text-xs text-gray-600 truncate">{activity.description}</p>
+                      <p className="text-xs text-gray-500 mt-1">{getTimeAgo(activity.timestamp)}</p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="text-center py-6">
+                <ClockIcon className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+                <p className="text-sm text-gray-600">No recent activity</p>
+                <p className="text-xs text-gray-500 mt-1">Start selling to see activity here</p>
+                <div className="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-100">
+                  <p className="text-xs text-amber-800">
+                    <strong>💡 Pro Tip:</strong> Your product views, sales, and updates will appear here once you start selling!
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+          </div>
+
+          {/* Enhanced Live Insights Panel */}
+          <div className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 border border-purple-500/20 rounded-xl p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
+                <h3 className="text-xl font-bold text-white">Live Insights</h3>
+              </div>
+              <div className="px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full">
+                <span className="text-xs text-green-400 font-medium">Real-time</span>
+              </div>
             </div>
             
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-2xl mx-auto">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white mb-1">10,000+</div>
-                <div className="text-indigo-200 text-sm">Active Users</div>
+            <div className="space-y-5">
+              {/* Total Earnings Summary */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-emerald-500 rounded-xl flex items-center justify-center">
+                      <BanknotesIcon className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-white/90">Total Earnings</p>
+                      <p className="text-xs text-white/60">All-time revenue</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-white">₹{stats.totalRevenue.toLocaleString()}</p>
+                    <div className="flex items-center">
+                      {stats.revenueGrowth >= 0 ? (
+                        <ArrowTrendingUpIcon className="h-4 w-4 text-green-400 mr-1" />
+                      ) : (
+                        <ArrowTrendingDownIcon className="h-4 w-4 text-red-400 mr-1" />
+                      )}
+                      <span className={`text-sm font-medium ${stats.revenueGrowth >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {stats.revenueGrowth >= 0 ? '+' : ''}{stats.revenueGrowth.toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Mini progress indicator */}
+                <div className="w-full bg-white/10 rounded-full h-2">
+                  <div className="bg-gradient-to-r from-green-400 to-emerald-500 h-2 rounded-full transition-all duration-1000" 
+                       style={{ width: `${Math.min((stats.totalRevenue / 50000) * 100, 100)}%` }}></div>
+                </div>
+                <p className="text-xs text-white/60 mt-2">Progress to ₹50K milestone</p>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white mb-1">500+</div>
-                <div className="text-indigo-200 text-sm">Templates</div>
+
+              {/* Today's Performance */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
+                      <CalendarIcon className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-white/90">Today's Sales</p>
+                      <p className="text-xs text-white/60">Current day revenue</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xl font-bold text-white">
+                      ₹{chartData.length > 0 ? chartData[chartData.length - 1]?.revenue || 0 : 0}
+                    </p>
+                    <p className="text-xs text-white/60">
+                      {chartData.length > 0 ? chartData[chartData.length - 1]?.orders || 0 : 0} orders
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-white mb-1">99.9%</div>
-                <div className="text-indigo-200 text-sm">Uptime</div>
+
+              {/* Active Products */}
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-500 rounded-xl flex items-center justify-center">
+                      <FunnelIcon className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-white/90">Active Products</p>
+                      <p className="text-xs text-white/60">Live funnels</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xl font-bold text-white">{stats.publishedFunnels}</p>
+                    <p className="text-xs text-white/60">of {stats.totalFunnels} total</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 gap-3">
+                <Link
+                  href="/auth/dashboard/funnels"
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-4 rounded-xl text-sm font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl"
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span>New Product</span>
+                </Link>
+                <Link
+                  href="/auth/dashboard/analytics"
+                  className="bg-white/10 backdrop-blur-sm text-white border border-white/20 py-3 px-4 rounded-xl text-sm font-medium hover:bg-white/20 transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <ChartBarIcon className="h-4 w-4" />
+                  <span>Analytics</span>
+                </Link>
+              </div>
+
+              {/* Performance Tip */}
+              <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 backdrop-blur-sm rounded-xl p-4 border border-amber-500/30">
+                <div className="flex items-start space-x-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-amber-400 to-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-sm">💡</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white mb-1">Pro Tip</p>
+                    <p className="text-xs text-white/80 leading-relaxed">
+                      {stats.totalRevenue > 10000 ? 
+                        "You're doing great! Consider creating more products to scale your revenue." :
+                        "Focus on optimizing your existing products and improving conversion rates."}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -981,4 +1355,3 @@ export default function Dashboard() {
     </DashboardLayout>
   );
 }
-

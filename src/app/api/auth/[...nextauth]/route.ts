@@ -50,6 +50,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           image: user.image,
+          role: user.role,
           // preferredCurrency: user.preferredCurrency, // TODO: Add this field to User model
         };
       },
@@ -71,6 +72,8 @@ export const authOptions: NextAuthOptions = {
       if (session.user && token) {
         session.user.id = token.id;
         session.user.role = token.role;
+        session.user.email = token.email || session.user.email;
+        session.user.name = token.name || session.user.name;
         
         // Include currency preferences in session
         // if (token.preferredCurrency) {
@@ -79,6 +82,7 @@ export const authOptions: NextAuthOptions = {
         
         console.log('Session updated with user ID:', session.user.id);
         console.log('Session updated with user role:', session.user.role);
+        console.log('Session updated with user email:', session.user.email);
         // console.log('Session updated with preferred currency:', session.user.preferredCurrency);
       }
       
@@ -93,18 +97,26 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
+        token.email = user.email;
+        token.name = user.name;
         // token.preferredCurrency = user.preferredCurrency;
         console.log('JWT updated with user ID:', user.id);
         console.log('JWT updated with user role:', user.role);
+        console.log('JWT updated with user email:', user.email);
         // console.log('JWT updated with preferred currency:', user.preferredCurrency);
       } else if (!token.role && token.id) {
         console.log('Fetching user role from DB for token ID:', token.id);
         // Fetch user role from DB if not present (for refreshes)
         const dbUser = await prisma.user.findUnique({ where: { id: token.id } });
         console.log('DB user found:', dbUser);
-        // token.role = dbUser?.role || 'USER';
-        // token.preferredCurrency = dbUser?.preferredCurrency || 'USD';
+        if (dbUser) {
+          token.role = dbUser.role || 'USER';
+          token.email = dbUser.email;
+          token.name = dbUser.name;
+          // token.preferredCurrency = dbUser.preferredCurrency || 'USD';
+        }
         console.log('JWT role set to:', token.role);
+        console.log('JWT email set to:', token.email);
         // console.log('JWT preferred currency set to:', token.preferredCurrency);
       }
       

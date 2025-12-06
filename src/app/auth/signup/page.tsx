@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
-import { RocketLaunchIcon, EyeIcon, EyeSlashIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, CheckIcon } from '@heroicons/react/24/outline';
+import Logo from '@/components/Logo';
 
 export default function SignUpPage() {
   const [name, setName] = useState('');
@@ -65,13 +66,18 @@ export default function SignUpPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 bg-indigo-100 rounded-full">
-              <RocketLaunchIcon className="h-8 w-8 text-indigo-600" />
-            </div>
+          <div className="flex justify-center mb-6">
+            <Link href="/">
+              <img 
+                src="/logo/logo.png" 
+                alt="SellEarnDirect - Turn Traffic Into Revenue" 
+                className="h-20 w-auto object-contain hover:scale-105 transition-transform no-blur"
+                style={{ maxWidth: '250px' }}
+              />
+            </Link>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Create your account</h1>
-          <p className="text-gray-600">Start building amazing websites today</p>
+          <p className="text-gray-600">Start selling digital products today</p>
         </div>
 
         {/* Main Card */}

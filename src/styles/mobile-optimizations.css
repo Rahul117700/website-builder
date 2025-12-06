@@ -1,0 +1,113 @@
+/* Mobile Optimizations for Product Customization Page */
+
+/* Ensure proper touch targets */
+@media (max-width: 640px) {
+  .mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better spacing for mobile forms */
+  .mobile-form-spacing > * + * {
+    margin-top: 1rem;
+  }
+  
+  /* Improve button spacing */
+  .mobile-button-group {
+    gap: 0.75rem;
+  }
+  
+  /* Better text sizing for mobile */
+  .mobile-text-responsive {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  
+  /* Improve input field sizing */
+  .mobile-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.75rem;
+  }
+  
+  /* Better scroll behavior */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Improve tab navigation on mobile */
+  .mobile-tab-nav {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .mobile-tab-nav::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Better preview container */
+  .mobile-preview-container {
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+  
+  /* Improve help tooltips on mobile */
+  .mobile-tooltip {
+    max-width: 90vw;
+    word-wrap: break-word;
+  }
+  
+  /* Better progress indicators */
+  .mobile-progress-indicator {
+    font-size: 0.75rem;
+  }
+  
+  /* Improve color picker accessibility */
+  .mobile-color-picker {
+    min-width: 48px;
+    min-height: 48px;
+  }
+  
+  /* Better file upload areas */
+  .mobile-file-upload {
+    min-height: 120px;
+    border: 2px dashed #d1d5db;
+  }
+  
+  /* Improve validation messages */
+  .mobile-validation-message {
+    font-size: 0.75rem;
+    padding: 0.5rem;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tablet-grid-adjustment {
+    grid-template-columns: 1fr;
+  }
+  
+  .tablet-spacing {
+    padding: 1rem;
+  }
+}
+
+/* Prevent horizontal scroll on mobile */
+@media (max-width: 640px) {
+  body {
+    overflow-x: hidden;
+  }
+  
+  .prevent-mobile-scroll {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+}
+
+/* Improve focus states for mobile */
+@media (max-width: 640px) {
+  .mobile-focus:focus {
+    outline: 2px solid #8b5cf6;
+    outline-offset: 2px;
+  }
+}

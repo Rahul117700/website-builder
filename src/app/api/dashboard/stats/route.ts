@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     const activeSites = sites.filter(site => site.status === 'ACTIVE').length;
 
     // Get user's current plan
-    const subscription = await prisma.subscription.findFirst({
+    const subscription = await prisma.userSubscription.findFirst({
       where: {
         userId,
         status: 'ACTIVE'
@@ -39,7 +39,8 @@ export async function GET(request: NextRequest) {
           select: {
             name: true,
             price: true,
-            billingCycle: true,
+            duration: true,
+            currency: true,
             description: true,
             features: true
           }

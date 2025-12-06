@@ -10,6 +10,7 @@ import {
   UserIcon
 } from '@heroicons/react/24/outline';
 import { RocketLaunchIcon } from '@heroicons/react/24/solid';
+import Logo from '@/components/Logo';
 
 interface HeaderProps {
   showProfile?: boolean;
@@ -35,30 +36,42 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
 
   return (
     <nav className={`bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50 w-full ${className}`}>
-      <div className="w-full px-4 sm:px-6 lg:px-8">
+      <div className="w-full pl-2 pr-4 sm:pl-3 sm:pr-6 lg:pl-4 lg:pr-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex items-center">
-            <RocketLaunchIcon className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600" />
-            <span className="ml-2 text-lg sm:text-xl font-bold text-gray-900">Website Builder</span>
+          <div data-tour="logo" className="flex-shrink-0">
+            <Logo 
+              variant="icon-only" 
+              size="lg"
+              href="/"
+              showText={false}
+            />
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-6">
+          <div className="hidden lg:flex items-center space-x-6" data-tour="navigation">
             <Link href="/" className="text-indigo-600 font-medium">Home</Link>
-            <a href="#features" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Features</a>
-            <a href="#templates" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Templates</a>
-            <a href="#pricing" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Pricing</a>
-            <Link href="/auth/dashboard/create-template" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Sell Template</Link>
+            <Link 
+              href="/#features" 
+              onClick={(e) => {
+                // If already on home page, scroll smoothly
+                if (window.location.pathname === '/') {
+                  e.preventDefault();
+                  scrollToSection('features');
+                }
+                // Otherwise, let the link navigate normally
+              }}
+              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium"
+            >
+              Features
+            </Link>
+            <Link href="/blog" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Blog</Link>
             <Link href="/about" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">About</Link>
             <Link href="/contact" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Contact</Link>
-            <Link href="/community" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Community</Link>
-            <Link href="/terms" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Terms</Link>
-            <Link href="/privacy" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Privacy</Link>
           </div>
 
           {/* Right side - Profile and Auth */}
-          <div className="flex items-center space-x-3 sm:space-x-4">
+          <div className="flex items-center gap-2" data-tour="profile-section">
             {session && showProfile ? (
               <div className="relative">
                 {/* Profile Button */}
@@ -87,14 +100,14 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                     <Link
                       href="/auth/dashboard"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       onClick={() => setProfileMenuOpen(false)}
                     >
                       Dashboard
                     </Link>
                     <Link
                       href="/auth/dashboard/settings"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                       onClick={() => setProfileMenuOpen(false)}
                     >
                       Profile Settings
@@ -105,7 +118,7 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
                         handleSignOut();
                         setProfileMenuOpen(false);
                       }}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 flex items-center space-x-2"
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2 transition-colors"
                     >
                       <ArrowRightOnRectangleIcon className="h-4 w-4" />
                       <span>Sign Out</span>
@@ -116,7 +129,7 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
             ) : session ? (
               <Link
                 href="/auth/dashboard"
-                className="bg-indigo-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all transform hover:scale-105 text-sm sm:text-base font-medium"
+                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all text-sm font-medium"
               >
                 Dashboard
               </Link>
@@ -124,15 +137,15 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
               <>
                 <Link
                   href="/auth/signin"
-                  className="text-gray-700 hover:text-indigo-600 px-3 sm:px-4 py-2 transition-colors text-sm sm:text-base font-medium hover:bg-gray-50 rounded-lg"
+                  className="hidden sm:inline-block text-gray-700 hover:text-indigo-600 px-3 py-2 transition-colors text-sm font-medium hover:bg-gray-50 rounded-lg"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/auth/signup"
-                  className="bg-indigo-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-indigo-700 transition-all transform hover:scale-105 text-sm sm:text-base font-medium whitespace-nowrap shadow-sm hover:shadow-md"
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all text-sm font-medium whitespace-nowrap shadow-sm hover:shadow-md"
                 >
-                  Get Started
+                  Sign Up
                 </Link>
               </>
             )}
@@ -156,16 +169,25 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
       {mobileMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link href="/" className="block px-3 py-2 text-base font-medium text-indigo-600 hover:bg-gray-50 rounded-md">Home</Link>
-            <a href="#features" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Features</a>
-            <a href="#templates" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Templates</a>
-            <a href="#pricing" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Pricing</a>
-            <Link href="/auth/dashboard/create-template" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Sell Template</Link>
-            <Link href="/about" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">About</Link>
-            <Link href="/contact" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Contact</Link>
-            <Link href="/community" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Community</Link>
-            <Link href="/terms" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Terms</Link>
-            <Link href="/privacy" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Privacy</Link>
+            <Link href="/" className="block px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-gray-50 rounded-md">Home</Link>
+            <Link 
+              href="/#features" 
+              onClick={(e) => {
+                // If already on home page, scroll smoothly
+                if (window.location.pathname === '/') {
+                  e.preventDefault();
+                  scrollToSection('features');
+                }
+                // Otherwise, let the link navigate normally
+                setMobileMenuOpen(false);
+              }}
+              className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md"
+            >
+              Features
+            </Link>
+            <Link href="/blog" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Blog</Link>
+            <Link href="/about" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">About</Link>
+            <Link href="/contact" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Contact</Link>
             
             {/* Mobile Profile Section */}
             {session && showProfile && (
@@ -210,8 +232,20 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
             {!session && (
               <>
                 <hr className="my-2" />
-                <Link href="/auth/signin" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Sign In</Link>
-                <Link href="/auth/signup" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Get Started</Link>
+                <div className="px-3 space-y-2">
+                  <Link 
+                    href="/auth/signin" 
+                    className="block py-3 text-center font-medium text-gray-700 bg-white border-2 border-gray-300 hover:bg-gray-50 hover:border-indigo-600 rounded-lg transition-all"
+                  >
+                    Sign In
+                  </Link>
+                  <Link 
+                    href="/auth/signup" 
+                    className="block py-3 text-center font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg shadow-md hover:shadow-lg transition-all"
+                  >
+                    Sign Up Free
+                  </Link>
+                </div>
               </>
             )}
           </div>

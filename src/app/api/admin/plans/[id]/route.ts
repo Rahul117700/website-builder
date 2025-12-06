@@ -15,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const plan = await prisma.plan.findUnique({
+    const plan = await prisma.subscriptionPlan.findUnique({
       where: { id: params.id }
     });
 
@@ -42,16 +42,20 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, description, price, billingCycle, features, isActive } = await request.json();
+    const { name, description, price, duration, currency, features, maxFunnels, maxProducts, maxCustomDomains, isActive } = await request.json();
 
-    const plan = await prisma.plan.update({
+    const plan = await prisma.subscriptionPlan.update({
       where: { id: params.id },
       data: {
         name,
         description,
         price,
-        billingCycle,
+        duration,
+        currency,
         features,
+        maxFunnels,
+        maxProducts,
+        maxCustomDomains,
         isActive
       }
     });
@@ -78,7 +82,7 @@ export async function DELETE(
     const planId = params.id;
 
     // Check if plan has active subscriptions
-    const activeSubscriptions = await prisma.subscription.count({
+    const activeSubscriptions = await prisma.userSubscription.count({
       where: {
         planId,
         status: 'ACTIVE'
@@ -92,7 +96,7 @@ export async function DELETE(
     }
 
     // Delete the plan
-    await prisma.plan.delete({
+    await prisma.subscriptionPlan.delete({
       where: { id: planId }
     });
 

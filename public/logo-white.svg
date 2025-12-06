@@ -1,0 +1,44 @@
+<svg width="200" height="40" viewBox="0 0 200 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Modern Icon with Gradient -->
+  <defs>
+    <linearGradient id="white-primary-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95" />
+      <stop offset="50%" style="stop-color:#f3f4f6;stop-opacity:0.95" />
+      <stop offset="100%" style="stop-color:#e5e7eb;stop-opacity:0.95" />
+    </linearGradient>
+    <linearGradient id="white-accent-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10B981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
+    <filter id="white-glow">
+      <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Circular Background -->
+  <circle cx="20" cy="20" r="18" fill="url(#white-primary-gradient)" filter="url(#white-glow)" opacity="0.9"/>
+  
+  <!-- Arrow Symbol (Direct) -->
+  <path d="M 13 20 L 20 13 L 27 20 L 20 27 Z" fill="#6366F1" fill-opacity="0.95"/>
+  <path d="M 20 13 L 27 20" stroke="#6366F1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 20 27 L 27 20" stroke="#6366F1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Dollar Symbol -->
+  <circle cx="26" cy="10" r="7" fill="url(#white-accent-gradient)" filter="url(#white-glow)"/>
+  <path d="M 26 7 L 26 13 M 24 8.5 L 28 8.5 M 24 11.5 L 28 11.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Brand Text in White -->
+  <text x="48" y="16" fill="#FFFFFF" font-family="'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="-0.3">
+    Sell
+  </text>
+  <text x="48" y="28" fill="#FFFFFF" font-family="'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="-0.3">
+    Earn
+  </text>
+  <text x="75" y="16" fill="#F3F4F6" font-family="'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="700" letter-spacing="-0.3">
+    Direct
+  </text>
+</svg>

@@ -18,15 +18,19 @@ export async function POST(
     const postId = params.id;
     const userId = session.user.id;
 
+    // TODO: Community models need to be added to schema
     // Check if user already liked this post
-    const existingLike = await prisma.communityPostLike.findFirst({
-      where: {
-        postId,
-        userId
-      }
-    });
+    // const existingLike = await prisma.communityPostLike.findFirst({
+    //   where: {
+    //     postId,
+    //     userId
+    //   }
+    // });
 
-    if (existingLike) {
+    // Placeholder response until models are added
+    return NextResponse.json({ liked: false, message: 'Community features coming soon' });
+    
+    /* if (existingLike) {
       // Unlike the post
       await prisma.communityPostLike.delete({
         where: {
@@ -45,7 +49,7 @@ export async function POST(
       });
 
       return NextResponse.json({ liked: true });
-    }
+    } */
   } catch (error) {
     console.error('Error toggling post like:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
