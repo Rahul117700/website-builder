@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma db push && next build",
+    "build": "prisma generate && next build",
     "start": "next start",
-     "postinstall": "prisma generate",
+    "postinstall": "prisma generate",
     "lint": "next lint",
     "server": "node server.js",
     "dev:full": "concurrently \"npm run dev\" \"npm run server\""
