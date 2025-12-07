@@ -90,6 +90,7 @@ export default function PublicFunnelPage() {
     message: '',
     type: 'info'
   });
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
 
   useEffect(() => {
     if (funnelId) {
@@ -124,6 +125,19 @@ export default function PublicFunnelPage() {
 
       const data = await response.json();
       setFunnel(data);
+
+      // Fetch related products from same seller
+      if (data.userId) {
+        try {
+          const relatedResponse = await fetch(`/api/funnels/user/${data.userId}?limit=4&exclude=${funnelId}`);
+          if (relatedResponse.ok) {
+            const relatedData = await relatedResponse.json();
+            setRelatedProducts(relatedData.funnels || []);
+          }
+        } catch (err) {
+          console.error('Error loading related products:', err);
+        }
+      }
     } catch (err) {
       console.error('Error loading funnel:', err);
       setError('Failed to load funnel');
@@ -564,6 +578,9 @@ export default function PublicFunnelPage() {
             description: funnel.product?.description
           }}
           onPurchase={handlePurchase}
+          relatedProducts={relatedProducts}
+          email={customerEmail}
+          onEmailChange={setCustomerEmail}
         />
       </div>
     </>

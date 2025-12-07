@@ -13,13 +13,13 @@ interface LogoLoaderProps {
  * Logo-based loading component
  * Shows animated logo with engaging messages to retain users
  */
-export default function LogoLoader({ 
-  message, 
+export default function LogoLoader({
+  message,
   fullScreen = false,
   size = 'lg'
 }: LogoLoaderProps) {
   const [currentMessage, setCurrentMessage] = useState(0);
-  
+
   const messages = [
     message || 'Loading amazing content...',
     'Almost there! 🚀',
@@ -70,11 +70,6 @@ export default function LogoLoader({
               <div className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
             </div>
           </div>
-
-          {/* Retention Message */}
-          <p className="text-sm text-gray-600 max-w-md mx-auto">
-            💡 <strong>Pro Tip:</strong> While you wait, did you know you can create unlimited funnels with our premium plans?
-          </p>
         </div>
       </div>
     );
@@ -99,4 +94,3 @@ export default function LogoLoader({
     </div>
   );
 }
-

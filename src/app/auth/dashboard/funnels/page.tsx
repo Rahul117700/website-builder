@@ -468,6 +468,10 @@ export default function FunnelsDashboard() {
     limit?: number;
   } | null>(null);
 
+  // Subscription state
+  const [subscriptionData, setSubscriptionData] = useState<any>(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(true);
+
   // GSAP refs
   const heroRef = useRef<HTMLDivElement>(null);
   const funnelsRef = useRef<HTMLDivElement>(null);
@@ -487,7 +491,23 @@ export default function FunnelsDashboard() {
 
     loadFunnels();
     loadTemplates();
+    loadSubscriptionData();
   }, []);
+
+  const loadSubscriptionData = async () => {
+    try {
+      setLoadingSubscription(true);
+      const response = await fetch('/api/subscription');
+      if (response.ok) {
+        const data = await response.json();
+        setSubscriptionData(data);
+      }
+    } catch (error) {
+      console.error('Error loading subscription data:', error);
+    } finally {
+      setLoadingSubscription(false);
+    }
+  };
 
   const loadFunnels = async () => {
     try {
@@ -1355,19 +1375,19 @@ export default function FunnelsDashboard() {
                     </div>
                     <div className="flex items-center justify-center gap-2 mb-1">
                       <p className="text-3xl font-bold text-purple-700">{funnel.visitors}</p>
-                      {funnel.visitors >= 80 && funnel.visitors < 100 && (
+                      {!subscriptionData?.hasActivePlan && funnel.visitors >= 80 && funnel.visitors < 100 && (
                         <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full whitespace-nowrap">
                           ⚠️ {100 - funnel.visitors} left
                         </span>
                       )}
-                      {funnel.visitors >= 100 && (
+                      {!subscriptionData?.hasActivePlan && funnel.visitors >= 100 && (
                         <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full whitespace-nowrap">
                           🚫 Limit
                         </span>
                       )}
                     </div>
                     <p className="text-xs text-purple-600 font-semibold uppercase tracking-wide">Visitors</p>
-                    {funnel.visitors >= 80 && (
+                    {!subscriptionData?.hasActivePlan && funnel.visitors >= 80 && (
                       <Link
                         href="/auth/dashboard/plans"
                         className="mt-2 inline-block text-xs text-purple-600 hover:text-purple-800 underline font-medium"

@@ -8,9 +8,9 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { TextPlugin } from 'gsap/TextPlugin';
 import * as THREE from 'three';
-import { 
-  RocketLaunchIcon, 
-  GlobeAltIcon, 
+import {
+  RocketLaunchIcon,
+  GlobeAltIcon,
   ChartBarIcon,
   ShoppingBagIcon,
   HeartIcon,
@@ -35,7 +35,7 @@ import dynamic from 'next/dynamic';
 import { blogPosts } from '@/data/blogs';
 
 const ProductTour = dynamic(() => import('@/components/ProductTour'), { ssr: false });
-import { 
+import {
   PlayIcon as PlayIconSolid,
   ArrowRightIcon as ArrowRightIconSolid
 } from '@heroicons/react/24/solid';
@@ -56,7 +56,7 @@ export default function HomePage() {
   const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   // Refs for animations
   const heroRef = useRef<HTMLElement>(null);
   const featuresRef = useRef<HTMLElement>(null);
@@ -259,14 +259,14 @@ export default function HomePage() {
   // Check for tour parameter and start tour
   useEffect(() => {
     if (!searchParams) return;
-    
+
     const tourParam = searchParams.get('tour');
     if (tourParam === 'true') {
       // Start the tour after a delay to ensure everything is loaded
       setTimeout(() => {
         setRunTour(true);
       }, 1000);
-      
+
       // Remove the tour parameter from URL without triggering a page reload
       if (typeof window !== 'undefined') {
         const newUrl = new URL(window.location.href);
@@ -284,7 +284,7 @@ export default function HomePage() {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    
+
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x000000, 0);
     threeContainerRef.current.appendChild(renderer.domElement);
@@ -292,43 +292,43 @@ export default function HomePage() {
     // Create floating particles - reduced count and opacity for subtlety
     const particles = new THREE.Group();
     const particleCount = 50; // Reduced from 100
-    
+
     for (let i = 0; i < particleCount; i++) {
       const geometry = new THREE.SphereGeometry(0.015, 8, 8); // Smaller particles
-      const material = new THREE.MeshBasicMaterial({ 
+      const material = new THREE.MeshBasicMaterial({
         color: new THREE.Color().setHSL(Math.random() * 0.3 + 0.6, 0.8, 0.6),
         transparent: true,
         opacity: 0.3 // Reduced opacity from 0.6
       });
       const particle = new THREE.Mesh(geometry, material);
-      
+
       particle.position.set(
         (Math.random() - 0.5) * 15, // Reduced spread
         (Math.random() - 0.5) * 15,
         (Math.random() - 0.5) * 15
       );
-      
+
       particles.add(particle);
     }
-    
+
     scene.add(particles);
     camera.position.z = 5;
 
     // Animation loop - slower and more subtle
     const animate = () => {
       requestAnimationFrame(animate);
-      
+
       particles.rotation.x += 0.0005; // Slower rotation
       particles.rotation.y += 0.001;
-      
+
       particles.children.forEach((particle, i) => {
         particle.position.y += Math.sin(Date.now() * 0.0005 + i) * 0.0005; // Slower movement
         particle.position.x += Math.cos(Date.now() * 0.0005 + i) * 0.0005;
       });
-      
+
       renderer.render(scene, camera);
     };
-    
+
     animate();
 
     // Handle resize
@@ -337,9 +337,9 @@ export default function HomePage() {
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     };
-    
+
     window.addEventListener('resize', handleResize);
-    
+
     // Store references
     threeSceneRef.current = { scene, camera, renderer, particles };
 
@@ -355,7 +355,7 @@ export default function HomePage() {
   // Auto-carousel effect
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
+
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % totalSlides);
     }, 5000); // Change slide every 5 seconds
@@ -366,7 +366,7 @@ export default function HomePage() {
   // Auto-rotate Success Stories carousel
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
+
     const interval = setInterval(() => {
       setCurrentStorySlide((prev) => (prev + 1) % totalStorySlides);
     }, 6000); // Change story every 6 seconds
@@ -377,7 +377,7 @@ export default function HomePage() {
   // Auto-rotate Top Funnel carousel
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
+
     const interval = setInterval(() => {
       setCurrentFunnelSlide((prev) => (prev + 1) % topFunnels.length);
     }, 5000); // Change funnel every 5 seconds
@@ -389,7 +389,7 @@ export default function HomePage() {
   useEffect(() => {
     // Only run on client side
     if (typeof window === 'undefined') return;
-    
+
     // Fallback: Ensure all content is visible by default
     const ensureVisibility = () => {
       const elements = document.querySelectorAll('.hero-title, .hero-subtitle, .hero-buttons, .hero-logos, .hero-visual, .feature-card, footer');
@@ -402,66 +402,66 @@ export default function HomePage() {
     };
 
     // Set initial visibility for all elements
-    gsap.set('.hero-title, .hero-subtitle, .hero-buttons, .hero-logos, .hero-visual', { 
-      opacity: 1, 
-      y: 0 
+    gsap.set('.hero-title, .hero-subtitle, .hero-buttons, .hero-logos, .hero-visual', {
+      opacity: 1,
+      y: 0
     });
-    
-    gsap.set('.feature-card, footer', { 
-      opacity: 1, 
-      y: 0 
+
+    gsap.set('.feature-card, footer', {
+      opacity: 1,
+      y: 0
     });
 
     // Hero animations - only run once on page load with proper initial states
     const heroTl = gsap.timeline({
       onComplete: () => {
         // Ensure hero elements stay visible after animation
-        gsap.set('.hero-title, .hero-subtitle, .hero-buttons, .hero-logos, .hero-visual', { 
-          opacity: 1, 
-          y: 0 
+        gsap.set('.hero-title, .hero-subtitle, .hero-buttons, .hero-logos, .hero-visual', {
+          opacity: 1,
+          y: 0
         });
       }
     });
-    
+
     heroTl
       .set('.hero-title', { opacity: 0, y: 50 })
       .set('.hero-subtitle', { opacity: 0, y: 30 })
       .set('.hero-buttons', { opacity: 0, y: 20 })
       .set('.hero-logos', { opacity: 0, y: 20 })
       .set('.hero-visual', { opacity: 0, y: 30 })
-      .to('.hero-title', { 
-        duration: 1, 
-        y: 0, 
-        opacity: 1, 
-        ease: 'power3.out' 
+      .to('.hero-title', {
+        duration: 1,
+        y: 0,
+        opacity: 1,
+        ease: 'power3.out'
       })
-      .to('.hero-subtitle', { 
-        duration: 0.8, 
-        y: 0, 
-        opacity: 1, 
-        ease: 'power2.out' 
+      .to('.hero-subtitle', {
+        duration: 0.8,
+        y: 0,
+        opacity: 1,
+        ease: 'power2.out'
       }, '-=0.5')
-      .to('.hero-buttons', { 
-        duration: 0.8, 
-        y: 0, 
-        opacity: 1, 
-        ease: 'power2.out' 
+      .to('.hero-buttons', {
+        duration: 0.8,
+        y: 0,
+        opacity: 1,
+        ease: 'power2.out'
       }, '-=0.3')
-      .to('.hero-logos', { 
-        duration: 0.8, 
-        y: 0, 
-        opacity: 1, 
-        ease: 'power2.out' 
+      .to('.hero-logos', {
+        duration: 0.8,
+        y: 0,
+        opacity: 1,
+        ease: 'power2.out'
       }, '-=0.5')
-      .to('.hero-visual', { 
-        duration: 1, 
-        y: 0, 
-        opacity: 1, 
-        ease: 'power2.out' 
+      .to('.hero-visual', {
+        duration: 1,
+        y: 0,
+        opacity: 1,
+        ease: 'power2.out'
       }, '-=0.3');
 
     // Features animations - simple fade in without scroll trigger
-    gsap.fromTo('.feature-card', 
+    gsap.fromTo('.feature-card',
       { opacity: 0, y: 30 },
       {
         duration: 0.8,
@@ -478,7 +478,7 @@ export default function HomePage() {
 
 
     // Footer animations - simple fade in without scroll trigger
-    gsap.fromTo('footer', 
+    gsap.fromTo('footer',
       { opacity: 0, y: 30 },
       {
         duration: 1,
@@ -539,7 +539,8 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white overflow-hidden">
       {/* Custom CSS for Marquee Animations and Carousel */}
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes marquee {
           0% {
             transform: translateX(0%);
@@ -890,6 +891,15 @@ export default function HomePage() {
           50% { transform: translateY(-20px) translateX(10px); opacity: 0.8; }
         }
 
+        @keyframes shine {
+          0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+          100% { transform: translateX(200%) translateY(200%) rotate(45deg); }
+        }
+
+        .animate-shine {
+          animation: shine 1.5s ease-in-out;
+        }
+
         /* Mobile Optimizations */
         @media (max-width: 768px) {
           .payment-hero {
@@ -1039,8 +1049,8 @@ export default function HomePage() {
       `}}></style>
 
       {/* Three.js Background */}
-      <div 
-        ref={threeContainerRef} 
+      <div
+        ref={threeContainerRef}
         className="fixed inset-0 pointer-events-none"
         style={{ zIndex: 0 }}
       />
@@ -1057,9 +1067,129 @@ export default function HomePage() {
               {' '}Revenue
             </span>
           </h1>
-          <div className="hero-subtitle text-base sm:text-lg md:text-xl text-gray-600 mb-6 leading-relaxed px-4 sm:px-8 lg:px-16" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-subtitle">
+          <div className="hero-subtitle text-base sm:text-lg md:text-xl text-gray-600 mb-8 leading-relaxed px-4 sm:px-8 lg:px-16" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-subtitle">
             Create sales funnels that turn your website visitors into paying customers. A funnel is like a guided path that leads people from interest to purchase - no technical skills needed!
           </div>
+
+          {/* Process Flowchart - Luxury Modern Design */}
+          <div className="max-w-6xl mx-auto mb-12 px-4">
+            {/* Subtitle */}
+            <p className="text-center text-sm font-medium text-gray-500 mb-8 tracking-wide uppercase">How It Works</p>
+
+            <div className="relative">
+              {/* Connection Line */}
+              <div className="hidden sm:block absolute top-10 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gray-200 to-transparent" style={{ zIndex: 0 }}></div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-6 relative" style={{ zIndex: 1 }}>
+                {/* Step 1 - Create */}
+                <div className="flex flex-col items-center group">
+                  <div className="relative mb-4">
+                    {/* Glow effect on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                    {/* Main card */}
+                    <div className="relative w-20 h-20 rounded-3xl bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-lg flex items-center justify-center group-hover:scale-110 group-hover:shadow-2xl group-hover:border-indigo-200 transition-all duration-300">
+                      <RocketLaunchIcon className="w-9 h-9 text-gray-700 group-hover:text-indigo-600 transition-colors" />
+                    </div>
+
+                    {/* Step number badge */}
+                    <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-xs font-bold flex items-center justify-center shadow-md">
+                      1
+                    </div>
+                  </div>
+
+                  <div className="text-center space-y-1">
+                    <h4 className="font-semibold text-sm text-gray-900">Create Funnel</h4>
+                    <p className="text-xs text-gray-500">Sign up & start building</p>
+                  </div>
+                </div>
+
+                {/* Step 2 - Add Product */}
+                <div className="flex flex-col items-center group">
+                  <div className="relative mb-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                    <div className="relative w-20 h-20 rounded-3xl bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-lg flex items-center justify-center group-hover:scale-110 group-hover:shadow-2xl group-hover:border-blue-200 transition-all duration-300">
+                      <ShoppingBagIcon className="w-9 h-9 text-gray-700 group-hover:text-blue-600 transition-colors" />
+                    </div>
+
+                    <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 text-white text-xs font-bold flex items-center justify-center shadow-md">
+                      2
+                    </div>
+                  </div>
+
+                  <div className="text-center space-y-1">
+                    <h4 className="font-semibold text-sm text-gray-900">Add Product</h4>
+                    <p className="text-xs text-gray-500">Upload your digital file</p>
+                  </div>
+                </div>
+
+                {/* Step 3 - Customize */}
+                <div className="flex flex-col items-center group">
+                  <div className="relative mb-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-green-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                    <div className="relative w-20 h-20 rounded-3xl bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-lg flex items-center justify-center group-hover:scale-110 group-hover:shadow-2xl group-hover:border-emerald-200 transition-all duration-300">
+                      <Cog6ToothIcon className="w-9 h-9 text-gray-700 group-hover:text-emerald-600 transition-colors" />
+                    </div>
+
+                    <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 text-white text-xs font-bold flex items-center justify-center shadow-md">
+                      3
+                    </div>
+                  </div>
+
+                  <div className="text-center space-y-1">
+                    <h4 className="font-semibold text-sm text-gray-900">Customize</h4>
+                    <p className="text-xs text-gray-500">Design your page</p>
+                  </div>
+                </div>
+
+                {/* Step 4 - Publish */}
+                <div className="flex flex-col items-center group">
+                  <div className="relative mb-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-amber-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                    <div className="relative w-20 h-20 rounded-3xl bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-lg flex items-center justify-center group-hover:scale-110 group-hover:shadow-2xl group-hover:border-orange-200 transition-all duration-300">
+                      <GlobeAltIcon className="w-9 h-9 text-gray-700 group-hover:text-orange-600 transition-colors" />
+                    </div>
+
+                    <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 text-white text-xs font-bold flex items-center justify-center shadow-md">
+                      4
+                    </div>
+                  </div>
+
+                  <div className="text-center space-y-1">
+                    <h4 className="font-semibold text-sm text-gray-900">Publish</h4>
+                    <p className="text-xs text-gray-500">Go live instantly</p>
+                  </div>
+                </div>
+
+                {/* Step 5 - Earn */}
+                <div className="flex flex-col items-center group">
+                  <div className="relative mb-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/30 to-amber-500/30 rounded-3xl blur-2xl opacity-60 group-hover:opacity-100 transition-opacity duration-500 animate-pulse"></div>
+
+                    <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-yellow-50 to-amber-50 backdrop-blur-sm border-2 border-yellow-300/50 shadow-xl flex items-center justify-center group-hover:scale-110 group-hover:shadow-2xl group-hover:border-yellow-400 transition-all duration-300">
+                      <CurrencyDollarIcon className="w-10 h-10 text-yellow-600 group-hover:text-yellow-700 transition-colors" />
+                    </div>
+
+                    <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white text-sm font-bold flex items-center justify-center shadow-lg animate-bounce">
+                      ✓
+                    </div>
+
+                    {/* Sparkle effect */}
+                    <div className="absolute -top-1 -left-1 text-lg animate-pulse">✨</div>
+                  </div>
+
+                  <div className="text-center space-y-1">
+                    <h4 className="font-bold text-sm bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">Get Sales</h4>
+                    <p className="text-xs text-gray-500 font-medium">Start earning!</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="hero-buttons flex flex-col sm:flex-row gap-3 justify-center mb-8" style={{ opacity: 1, transform: 'translateY(0)' }}>
             <Link
               href={session ? "/auth/dashboard" : "/auth/signin"}
@@ -1088,7 +1218,7 @@ export default function HomePage() {
               <div className="absolute top-10 left-10 w-20 h-20 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-full blur-xl animate-pulse"></div>
               <div className="absolute top-20 right-20 w-16 h-16 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }}></div>
               <div className="absolute bottom-20 left-20 w-24 h-24 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-              
+
               {/* Floating Particles */}
               <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-green-300 rounded-full animate-bounce"></div>
               <div className="absolute top-1/3 right-1/3 w-1.5 h-1.5 bg-blue-300 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }}></div>
@@ -1116,13 +1246,12 @@ export default function HomePage() {
                 }
 
                 return (
-                  <div 
+                  <div
                     key={index}
-                    className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-                      currentSlide === index 
-                        ? 'opacity-100 translate-x-0 z-10' 
-                        : 'opacity-0 translate-x-full z-0'
-                    }`}
+                    className={`absolute inset-0 transition-all duration-700 ease-in-out ${currentSlide === index
+                      ? 'opacity-100 translate-x-0 z-10'
+                      : 'opacity-0 translate-x-full z-0'
+                      }`}
                   >
                     <div className="h-full flex flex-col lg:flex-row">
                       {/* Image Section - 50% - Unchanged */}
@@ -1174,21 +1303,21 @@ export default function HomePage() {
                                       <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
                                         <defs>
                                           <linearGradient id={`colorRevenue${index}`} x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                                           </linearGradient>
                                         </defs>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                                         <XAxis dataKey="month" stroke="#6b7280" fontSize={11} />
                                         <YAxis stroke="#6b7280" fontSize={11} />
-                                        <Tooltip 
+                                        <Tooltip
                                           contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
                                           formatter={(value: any) => [`₹${value}K`, 'Revenue']}
                                         />
-                                        <Area 
-                                          type="monotone" 
-                                          dataKey="revenue" 
-                                          stroke="#10b981" 
+                                        <Area
+                                          type="monotone"
+                                          dataKey="revenue"
+                                          stroke="#10b981"
                                           strokeWidth={2}
                                           fillOpacity={1}
                                           fill={`url(#colorRevenue${index})`}
@@ -1218,7 +1347,7 @@ export default function HomePage() {
                                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                                         <XAxis type="number" stroke="#6b7280" fontSize={11} />
                                         <YAxis dataKey="category" type="category" stroke="#6b7280" fontSize={11} width={65} />
-                                        <Tooltip 
+                                        <Tooltip
                                           contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
                                           formatter={(value: any) => [`₹${value}K`, 'Earnings']}
                                         />
@@ -1252,32 +1381,32 @@ export default function HomePage() {
                                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                                         <XAxis dataKey="week" stroke="#6b7280" fontSize={11} />
                                         <YAxis stroke="#6b7280" fontSize={11} />
-                                        <Tooltip 
+                                        <Tooltip
                                           contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
                                           formatter={(value: any, name: string) => [
                                             name === 'sales' ? `${value} sales` : `₹${value}K`,
                                             name === 'sales' ? 'Sales' : 'Revenue'
                                           ]}
                                         />
-                                        <Legend 
+                                        <Legend
                                           verticalAlign="bottom"
                                           height={30}
                                           wrapperStyle={{ fontSize: '10px', paddingTop: '8px' }}
                                           iconType="line"
                                           iconSize={10}
                                         />
-                                        <Line 
-                                          type="monotone" 
-                                          dataKey="sales" 
-                                          stroke="#8b5cf6" 
+                                        <Line
+                                          type="monotone"
+                                          dataKey="sales"
+                                          stroke="#8b5cf6"
                                           strokeWidth={2}
                                           dot={{ fill: '#8b5cf6', r: 4 }}
                                           name="Sales"
                                         />
-                                        <Line 
-                                          type="monotone" 
-                                          dataKey="revenue" 
-                                          stroke="#ec4899" 
+                                        <Line
+                                          type="monotone"
+                                          dataKey="revenue"
+                                          stroke="#ec4899"
                                           strokeWidth={2}
                                           dot={{ fill: '#ec4899', r: 4 }}
                                           name="Revenue (₹K)"
@@ -1308,14 +1437,14 @@ export default function HomePage() {
                                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                                         <XAxis dataKey="time" stroke="#6b7280" fontSize={11} />
                                         <YAxis stroke="#6b7280" fontSize={11} />
-                                        <Tooltip 
+                                        <Tooltip
                                           contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
                                           formatter={(value: any, name: string) => [
                                             name === 'sales' ? `${value} sales` : `₹${value}K`,
                                             name === 'sales' ? 'Sales' : 'Revenue'
                                           ]}
                                         />
-                                        <Legend 
+                                        <Legend
                                           verticalAlign="bottom"
                                           height={30}
                                           wrapperStyle={{ fontSize: '10px', paddingTop: '8px' }}
@@ -1337,7 +1466,7 @@ export default function HomePage() {
                           {/* Educational Info */}
                           <div className="mt-4 grid grid-cols-2 gap-2">
                             {slide.highlights.map((highlight, idx) => (
-                              <div 
+                              <div
                                 key={idx}
                                 className="bg-white rounded-lg p-2 border border-gray-200 shadow-sm"
                               >
@@ -1371,25 +1500,24 @@ export default function HomePage() {
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                    currentSlide === index 
-                      ? 'bg-indigo-600 w-8' 
-                      : 'bg-gray-400 hover:bg-gray-600'
-                  }`}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${currentSlide === index
+                    ? 'bg-indigo-600 w-8'
+                    : 'bg-gray-400 hover:bg-gray-600'
+                    }`}
                   aria-label={`Go to slide ${index + 1}`}
                 />
               ))}
             </div>
-            
+
             {/* Enhanced Floating Elements */}
             <div className="absolute -top-4 -left-4 w-8 h-8 bg-green-500/20 rounded-full blur-sm animate-pulse"></div>
             <div className="absolute -bottom-4 -right-4 w-12 h-12 bg-blue-500/20 rounded-full blur-sm animate-pulse" style={{ animationDelay: '1s' }}></div>
             <div className="absolute top-1/2 -right-8 w-6 h-6 bg-purple-500/20 rounded-full blur-sm animate-pulse" style={{ animationDelay: '2s' }}></div>
-            
+
             {/* Additional Floating Elements */}
             <div className="absolute top-1/4 -right-12 w-4 h-4 bg-emerald-500/20 rounded-full blur-sm animate-pulse" style={{ animationDelay: '0.5s' }}></div>
             <div className="absolute bottom-1/3 -left-8 w-10 h-10 bg-indigo-500/20 rounded-full blur-sm animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-            
+
             {/* Animated Connection Lines */}
             <div className="absolute top-1/2 left-0 w-16 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent animate-pulse"></div>
             <div className="absolute top-1/2 right-0 w-16 h-px bg-gradient-to-l from-transparent via-blue-500/30 to-transparent animate-pulse" style={{ animationDelay: '0.5s' }}></div>
@@ -1397,55 +1525,366 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Success Stories Section - 2 Column with Carousel */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-white relative" style={{ zIndex: 10 }}>
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+      {/* Premium Direct Payment Feature Section - Luxury Glassmorphism */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden" style={{ zIndex: 10 }}>
+        {/* Animated background elements - Subtle colored blurs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-20 w-[500px] h-[500px] bg-indigo-100/40 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-20 w-[600px] h-[600px] bg-purple-100/30 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-pink-100/20 rounded-full blur-3xl"></div>
+          <div className="absolute top-40 right-40 w-[400px] h-[400px] bg-yellow-100/30 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          {/* Premium Badge */}
+          <div className="flex justify-center mb-8">
+            <div 
+              className="inline-flex items-center space-x-2 px-6 py-3 rounded-full font-bold text-sm"
+              style={{
+                background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.95), rgba(249, 115, 22, 0.95))',
+                backdropFilter: 'blur(20px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                border: '1px solid rgba(255, 255, 255, 0.6)',
+                boxShadow: '0 8px 32px rgba(251, 191, 36, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+                color: '#1f2937'
+              }}
+            >
+              <BoltIcon className="h-5 w-5" />
+              <span className="hidden sm:inline">💰 100% DIRECT PAYMENTS - ZERO MIDDLEMAN FEES</span>
+              <span className="sm:hidden">💰 DIRECT PAYMENTS</span>
+            </div>
+          </div>
+
+          {/* Main Heading */}
+          <div className="text-center mb-12">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+              Accept Payments Directly
+              <br />
+              <span className="inline-block mt-2 px-8 py-3 rounded-2xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-600" style={{
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7))',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.5)',
+                boxShadow: '0 8px 32px rgba(251, 191, 36, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundImage: 'linear-gradient(135deg, #F59E0B, #F97316, #F59E0B)'
+              }}>
+                No Middleman Fees
+              </span>
+            </h2>
+
+            {/* Subtitle with glassmorphism container */}
+            <div 
+              className="inline-block max-w-3xl mx-auto px-8 py-6 rounded-3xl"
+              style={{
+                background: 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(20px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                border: '1px solid rgba(255, 255, 255, 0.6)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)'
+              }}
+            >
+              <p className="text-base sm:text-lg md:text-xl text-gray-700 leading-relaxed">
+                Get paid directly to your bank account. <strong className="text-gray-900">No platform fees, no hidden charges.</strong> Keep 100% of your revenue minus standard payment processing fees.
+              </p>
+            </div>
+          </div>
+
+          {/* Payment Cards Grid - Luxury Glassmorphism */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            {[
+              {
+                title: "Credit/Debit Cards",
+                description: "Accept Visa, Mastercard, Amex, and more. Secure payment processing with industry-standard encryption.",
+                icon: "💳",
+                gradient: "from-blue-500 to-blue-600",
+                bgGradient: "from-blue-50 to-blue-100"
+              },
+              {
+                title: "UPI Payments",
+                description: "Instant UPI payments via PhonePe, Google Pay, Paytm, and all UPI apps. Real-time transaction processing.",
+                icon: "📱",
+                gradient: "from-green-500 to-emerald-600",
+                bgGradient: "from-green-50 to-emerald-100"
+              },
+              {
+                title: "Bank Transfers",
+                description: "Direct bank transfers (NEFT/RTGS/IMPS). Lower fees, faster processing, and direct settlement.",
+                icon: "🏦",
+                gradient: "from-purple-500 to-pink-600",
+                bgGradient: "from-purple-50 to-pink-100"
+              }
+            ].map((method, index) => (
+              <div
+                key={index}
+                className="group relative rounded-3xl p-8 transition-all duration-500 hover:scale-105"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  backdropFilter: 'blur(20px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.6)',
+                  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)'
+                }}
+              >
+                {/* Glow effect on hover */}
+                <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{
+                    background: `linear-gradient(135deg, ${index === 0 ? 'rgba(59, 130, 246, 0.15)' : index === 1 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(168, 85, 247, 0.15)'}, transparent)`,
+                    filter: 'blur(30px)',
+                    zIndex: -1
+                  }}
+                ></div>
+
+                {/* Icon with glassmorphism */}
+                <div className="relative mb-6">
+                  <div 
+                    className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl text-5xl bg-gradient-to-br ${method.gradient} text-white transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}
+                    style={{
+                      boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.4)'
+                    }}
+                  >
+                    {method.icon}
+                  </div>
+                </div>
+
+                <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600 transition-all duration-300">
+                  {method.title}
+                </h3>
+                <p className="text-gray-600 text-base leading-relaxed">
+                  {method.description}
+                </p>
+
+                {/* Shine effect */}
+                <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
+                  <div className="absolute -inset-10 -skew-x-12 bg-gradient-to-r from-transparent via-white/40 to-transparent group-hover:animate-shine"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Process Steps - Luxury Glassmorphism */}
+          <div 
+            className="rounded-3xl p-8 sm:p-12 mb-12"
+            style={{
+              background: 'rgba(255, 255, 255, 0.7)',
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              border: '1px solid rgba(255, 255, 255, 0.6)',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)'
+            }}
+          >
+            <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-12">
+              Start Earning in 3 Simple Steps
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                {
+                  number: "1",
+                  title: "Create Your Funnel",
+                  description: "Build your sales page with our drag-and-drop builder",
+                  icon: RocketLaunchIcon,
+                  color: "from-indigo-500 to-purple-600"
+                },
+                {
+                  number: "2",
+                  title: "Add Payment Method",
+                  description: "Connect your bank account or payment gateway",
+                  icon: CurrencyDollarIcon,
+                  color: "from-blue-500 to-cyan-600"
+                },
+                {
+                  number: "3",
+                  title: "Start Earning",
+                  description: "Accept payments directly - no platform fees!",
+                  icon: BanknotesIcon,
+                  color: "from-green-500 to-emerald-600"
+                }
+              ].map((step, index) => (
+                <div 
+                  key={index} 
+                  className="group text-center relative"
+                >
+                  {/* Connection line (hidden on mobile) */}
+                  {index < 2 && (
+                    <div className="hidden md:block absolute top-12 left-1/2 w-full h-0.5 bg-gradient-to-r from-gray-300 to-gray-200" style={{ zIndex: 0 }}></div>
+                  )}
+
+                  <div className="relative z-10">
+                    {/* Number badge with glassmorphism */}
+                    <div className="relative inline-block mb-6">
+                      <div 
+                        className="inline-flex items-center justify-center w-24 h-24 rounded-full font-bold text-3xl transform group-hover:scale-110 transition-all duration-300"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.95), rgba(249, 115, 22, 0.95))',
+                          backdropFilter: 'blur(10px)',
+                          WebkitBackdropFilter: 'blur(10px)',
+                          border: '2px solid rgba(255, 255, 255, 0.6)',
+                          boxShadow: '0 12px 40px rgba(251, 191, 36, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.6)',
+                          color: '#1f2937'
+                        }}
+                      >
+                        {step.number}
+                      </div>
+                      {/* Icon overlay */}
+                      <div 
+                        className="absolute -bottom-2 -right-2 w-12 h-12 rounded-full flex items-center justify-center"
+                        style={{
+                          background: `linear-gradient(135deg, ${index === 0 ? 'rgba(99, 102, 241, 0.95)' : index === 1 ? 'rgba(59, 130, 246, 0.95)' : 'rgba(16, 185, 129, 0.95)'}, ${index === 0 ? 'rgba(168, 85, 247, 0.95)' : index === 1 ? 'rgba(6, 182, 212, 0.95)' : 'rgba(5, 150, 105, 0.95)'})`,
+                          border: '2px solid rgba(255, 255, 255, 0.8)',
+                          boxShadow: '0 4px 16px rgba(0, 0, 0, 0.15)'
+                        }}
+                      >
+                        <step.icon className="h-6 w-6 text-white" />
+                      </div>
+                    </div>
+
+                    <h4 className="text-2xl font-bold text-gray-900 mb-3">
+                      {step.title}
+                    </h4>
+                    <p className="text-gray-600 text-base leading-relaxed max-w-xs mx-auto">
+                      {step.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA Button - Premium Glassmorphism */}
+          <div className="text-center">
+            <Link
+              href={session ? "/auth/dashboard" : "/auth/signin"}
+              className="group inline-flex items-center justify-center px-12 py-5 rounded-2xl font-bold text-xl transition-all duration-300 hover:scale-105"
+              style={{
+                background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.95), rgba(249, 115, 22, 0.95))',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                border: '2px solid rgba(255, 255, 255, 0.6)',
+                boxShadow: '0 20px 60px rgba(251, 191, 36, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.6)',
+                color: '#1f2937'
+              }}
+            >
+              <span className="hidden sm:inline">Start Earning Directly Now</span>
+              <span className="sm:hidden">Start Earning Now</span>
+              <ArrowRightIconSolid className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
+            </Link>
             
+            <div 
+              className="inline-block mt-6 px-6 py-3 rounded-xl"
+              style={{
+                background: 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.6)',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.05)'
+              }}
+            >
+              <p className="text-gray-700 text-sm font-medium">
+                ✨ No credit card required • Free to start • Keep 100% of your revenue
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Success Stories Section - 2 Column with Carousel */}
+      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-gray-50/30 to-white relative overflow-hidden" style={{ zIndex: 10 }}>
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-10 right-20 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 left-20 w-80 h-80 bg-purple-200/15 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+
             {/* Left Column - Text Content */}
-            <div className="text-center lg:text-left">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-                Real People,
-                <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
-                  Real Success
-                </span>
-              </h2>
-              <p className="text-base sm:text-lg text-gray-600 mb-6 leading-relaxed">
-                Join thousands of digital entrepreneurs who've transformed their ideas into thriving online businesses with our platform.
-              </p>
-              <p className="text-sm text-gray-500 mb-8">
-                From software creators to course instructors, discover how our customers are building sustainable revenue streams and growing their digital empires.
-              </p>
-              <div className="flex items-center justify-center lg:justify-start gap-6 text-sm">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-indigo-600">₹2.5Cr+</div>
-                  <div className="text-gray-600 mt-1">Total Revenue</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-purple-600">10K+</div>
-                  <div className="text-gray-600 mt-1">Active Sellers</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-pink-600">4.9/5</div>
-                  <div className="text-gray-600 mt-1">Avg Rating</div>
-                </div>
+            <div className="text-center lg:text-left relative">
+              {/* Glassmorphism container for stats */}
+              <div 
+                className="rounded-3xl p-8 mb-8"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.6)',
+                  backdropFilter: 'blur(20px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)'
+                }}
+              >
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
+                  Real People,
+                  <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
+                    Real Success
+                  </span>
+                </h2>
+                <p className="text-base sm:text-lg text-gray-600 mb-6 leading-relaxed">
+                  Join thousands of digital entrepreneurs who've transformed their ideas into thriving online businesses with our platform.
+                </p>
+                <p className="text-sm text-gray-500 mb-8">
+                  From software creators to course instructors, discover how our customers are building sustainable revenue streams and growing their digital empires.
+                </p>
+              </div>
+
+              {/* Stats with glassmorphism */}
+              <div className="flex items-center justify-center lg:justify-start gap-4 sm:gap-6">
+                {[
+                  { value: '₹2.5Cr+', label: 'Total Revenue', color: 'indigo' },
+                  { value: '10K+', label: 'Active Sellers', color: 'purple' },
+                  { value: '4.9/5', label: 'Avg Rating', color: 'pink' }
+                ].map((stat, index) => (
+                  <div
+                    key={index}
+                    className="group relative rounded-2xl p-4 sm:p-6 transition-all duration-500 hover:scale-110"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.7)',
+                      backdropFilter: 'blur(20px) saturate(180%)',
+                      WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+                      minWidth: '120px'
+                    }}
+                  >
+                    {/* Glow effect */}
+                    <div className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+                      style={{
+                        background: `linear-gradient(135deg, rgba(${stat.color === 'indigo' ? '99, 102, 241' : stat.color === 'purple' ? '168, 85, 247' : '236, 72, 153'}, 0.2), rgba(${stat.color === 'indigo' ? '99, 102, 241' : stat.color === 'purple' ? '168, 85, 247' : '236, 72, 153'}, 0.1))`,
+                        filter: 'blur(20px)',
+                        zIndex: -1
+                      }}
+                    ></div>
+                    <div className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r ${stat.color === 'indigo' ? 'from-indigo-600 to-indigo-700' : stat.color === 'purple' ? 'from-purple-600 to-purple-700' : 'from-pink-600 to-pink-700'} bg-clip-text text-transparent`}>
+                      {stat.value}
+                    </div>
+                    <div className="text-gray-600 mt-1 text-xs sm:text-sm font-medium">{stat.label}</div>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Right Column - Carousel */}
             <div className="relative">
-              <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-3xl shadow-2xl border-2 border-gray-100 overflow-hidden backdrop-blur-sm">
-            {/* Carousel Container */}
+              <div 
+                className="rounded-3xl overflow-hidden"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.7)',
+                  backdropFilter: 'blur(20px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6)'
+                }}
+              >
+                {/* Carousel Container */}
                 <div className="carousel-container relative h-[700px] sm:h-[650px] md:h-[700px]">
                   {/* Success Story Slides */}
                   <div className="carousel-wrapper">
                     {storiesWithImages.map((story, index) => (
-                      <div 
+                      <div
                         key={index}
-                        className={`success-story-slide absolute inset-0 p-4 sm:p-6 transition-all duration-700 ease-in-out ${
-                          currentStorySlide === index ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-                        }`}
+                        className={`success-story-slide absolute inset-0 p-4 sm:p-6 transition-all duration-700 ease-in-out ${currentStorySlide === index ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                          }`}
                       >
                         {/* Background Image Layer */}
                         {story.backgroundImage && (
@@ -1461,8 +1900,16 @@ export default function HomePage() {
                             <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-white/90 to-white/95"></div>
                           </div>
                         )}
-                        
-                        <div className="h-full flex flex-col bg-white rounded-2xl shadow-2xl overflow-hidden relative z-10">
+
+                        <div 
+                          className="h-full flex flex-col rounded-2xl overflow-hidden relative z-10"
+                          style={{
+                            background: 'rgba(255, 255, 255, 0.9)',
+                            backdropFilter: 'blur(10px)',
+                            WebkitBackdropFilter: 'blur(10px)',
+                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                          }}
+                        >
                           {/* Featured Image Section - MAIN FOCUS */}
                           <div className="relative h-72 sm:h-56 md:h-64 overflow-hidden z-20">
                             {story.backgroundImage ? (
@@ -1537,77 +1984,104 @@ export default function HomePage() {
                               </div>
                             )}
                           </div>
-                          
+
                           {/* Content Section */}
                           <div className="flex-1 p-4 sm:p-6 flex flex-col bg-white">
-                            {/* Success Metrics - Enhanced Cards */}
+                            {/* Success Metrics - Enhanced Cards with Glassmorphism */}
                             <div className="grid grid-cols-2 gap-3 mb-4">
-                            <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 text-center border-2 border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                              <div className="text-2xl sm:text-3xl font-black text-gray-900 mb-1">{story.revenue}</div>
-                              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Total Revenue</div>
-                            </div>
-                            <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 text-center border-2 border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                              <div className="text-2xl sm:text-3xl font-black text-gray-900 mb-1">{story.timePeriod}</div>
-                              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Time Period</div>
-                            </div>
-                          </div>
-
-                            {/* Quote - Premium Design with Image Accent */}
-                            <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-xl p-6 mb-4 flex-1 border-2 border-indigo-100 shadow-lg relative overflow-hidden">
-                            {/* Accent Image Background - More Visible */}
-                            {story.accentImage && (
-                              <div className="absolute inset-0 opacity-15">
-                                <img
-                                  src={story.accentImage}
-                                  alt=""
-                                  className="w-full h-full object-cover"
-                                  loading="eager"
-                                  style={{ display: 'block' }}
-                                  aria-hidden="true"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-purple-50/80 to-pink-50/80"></div>
+                              <div 
+                                className="rounded-xl p-4 text-center transition-all duration-300 hover:scale-105"
+                                style={{
+                                  background: 'rgba(255, 255, 255, 0.6)',
+                                  backdropFilter: 'blur(15px) saturate(180%)',
+                                  WebkitBackdropFilter: 'blur(15px) saturate(180%)',
+                                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)'
+                                }}
+                              >
+                                <div className="text-2xl sm:text-3xl font-black text-gray-900 mb-1">{story.revenue}</div>
+                                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Total Revenue</div>
                               </div>
-                            )}
-                            
-                            {/* Decorative Quote Marks */}
-                            <div className="absolute top-2 left-3 text-6xl text-indigo-200/40 font-serif leading-none z-10">"</div>
-                            <div className="absolute bottom-2 right-3 text-6xl text-indigo-200/40 font-serif leading-none z-10">"</div>
-                            
-                            <div className="relative z-10">
-                              <p className="text-gray-800 text-sm sm:text-base leading-relaxed font-medium italic relative z-10">
-                                {story.quote}
-                              </p>
+                              <div 
+                                className="rounded-xl p-4 text-center transition-all duration-300 hover:scale-105"
+                                style={{
+                                  background: 'rgba(255, 255, 255, 0.6)',
+                                  backdropFilter: 'blur(15px) saturate(180%)',
+                                  WebkitBackdropFilter: 'blur(15px) saturate(180%)',
+                                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)'
+                                }}
+                              >
+                                <div className="text-2xl sm:text-3xl font-black text-gray-900 mb-1">{story.timePeriod}</div>
+                                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Time Period</div>
+                              </div>
                             </div>
-                            
-                            {/* Decorative Pattern */}
-                            <div className="absolute inset-0 opacity-5 z-0">
-                              <div className="absolute top-0 right-0 w-20 h-20 border-2 border-indigo-300 rounded-full"></div>
-                              <div className="absolute bottom-0 left-0 w-16 h-16 border-2 border-purple-300 rounded-full"></div>
+
+                            {/* Quote - Premium Design with Image Accent - Glassmorphism */}
+                            <div 
+                              className="rounded-xl p-6 mb-4 flex-1 relative overflow-hidden"
+                              style={{
+                                background: 'rgba(255, 255, 255, 0.5)',
+                                backdropFilter: 'blur(20px) saturate(180%)',
+                                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                                border: '1px solid rgba(255, 255, 255, 0.3)',
+                                boxShadow: '0 8px 32px rgba(99, 102, 241, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6)'
+                              }}
+                            >
+                              {/* Accent Image Background - More Visible */}
+                              {story.accentImage && (
+                                <div className="absolute inset-0 opacity-15">
+                                  <img
+                                    src={story.accentImage}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                    loading="eager"
+                                    style={{ display: 'block' }}
+                                    aria-hidden="true"
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/80 via-purple-50/80 to-pink-50/80"></div>
+                                </div>
+                              )}
+
+                              {/* Decorative Quote Marks */}
+                              <div className="absolute top-2 left-3 text-6xl text-indigo-200/40 font-serif leading-none z-10">"</div>
+                              <div className="absolute bottom-2 right-3 text-6xl text-indigo-200/40 font-serif leading-none z-10">"</div>
+
+                              <div className="relative z-10">
+                                <p className="text-gray-800 text-sm sm:text-base leading-relaxed font-medium italic relative z-10">
+                                  {story.quote}
+                                </p>
+                              </div>
+
+                              {/* Decorative Pattern */}
+                              <div className="absolute inset-0 opacity-5 z-0">
+                                <div className="absolute top-0 right-0 w-20 h-20 border-2 border-indigo-300 rounded-full"></div>
+                                <div className="absolute bottom-0 left-0 w-16 h-16 border-2 border-purple-300 rounded-full"></div>
+                              </div>
                             </div>
-                          </div>
 
                             {/* Before/After - Enhanced Transformation Card */}
                             <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 mb-4 border-2 border-gray-200 shadow-md">
-                            <div className="flex items-center justify-between">
-                              <div className="text-center flex-1">
-                                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Before</div>
-                                <div className="text-sm font-bold text-gray-600 bg-white rounded-lg py-2 px-3 shadow-sm">{story.before}</div>
-                              </div>
-                              <div className="mx-3 sm:mx-4">
-                                <div className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full p-2 shadow-lg">
-                                  <ArrowRightIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                              <div className="flex items-center justify-between">
+                                <div className="text-center flex-1">
+                                  <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Before</div>
+                                  <div className="text-sm font-bold text-gray-600 bg-white rounded-lg py-2 px-3 shadow-sm">{story.before}</div>
                                 </div>
-                              </div>
-                              <div className="text-center flex-1">
-                                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">After</div>
-                                <div className="text-sm font-bold bg-white rounded-lg py-2 px-3 shadow-sm border-2 border-indigo-200">
-                                  <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
-                                    {story.after}
-                                  </span>
+                                <div className="mx-3 sm:mx-4">
+                                  <div className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full p-2 shadow-lg">
+                                    <ArrowRightIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                                  </div>
+                                </div>
+                                <div className="text-center flex-1">
+                                  <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">After</div>
+                                  <div className="text-sm font-bold bg-white rounded-lg py-2 px-3 shadow-sm border-2 border-indigo-200">
+                                    <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
+                                      {story.after}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
                           </div>
                         </div>
                       </div>
@@ -1622,11 +2096,10 @@ export default function HomePage() {
                       <button
                         key={index}
                         onClick={() => setCurrentStorySlide(index)}
-                        className={`h-2.5 rounded-full transition-all duration-300 ${
-                          currentStorySlide === index 
-                            ? 'w-10 bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg' 
-                            : 'w-2.5 bg-gray-300 hover:bg-gray-400 hover:w-3'
-                        }`}
+                        className={`h-2.5 rounded-full transition-all duration-300 ${currentStorySlide === index
+                          ? 'w-10 bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg'
+                          : 'w-2.5 bg-gray-300 hover:bg-gray-400 hover:w-3'
+                          }`}
                         aria-label={`Go to slide ${index + 1}`}
                       />
                     ))}
@@ -1655,8 +2128,15 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" ref={featuresRef} className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-gray-50 relative" style={{ zIndex: 10 }}>
-        <div className="max-w-7xl mx-auto">
+      <section id="features" ref={featuresRef} className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-gray-50/50 to-white relative overflow-hidden" style={{ zIndex: 10 }}>
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-indigo-200/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-pink-200/10 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4" data-tour="features-title">
               Everything You Need to
@@ -1667,129 +2147,68 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="feature-card bg-white rounded-xl sm:rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-indigo-200"
+                className="feature-card group relative rounded-2xl sm:rounded-3xl p-6 sm:p-8 transition-all duration-500 hover:scale-105"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.7)',
+                  backdropFilter: 'blur(20px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6)'
+                }}
                 data-tour={`feature-${index + 1}`}
               >
-                <div className={`inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white mb-4`}>
-                  <feature.icon className="h-6 w-6 sm:h-7 sm:w-7" />
+                {/* Glow effect on hover */}
+                <div className="absolute inset-0 rounded-2xl sm:rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{
+                    background: `linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1))`,
+                    filter: 'blur(20px)',
+                    zIndex: -1
+                  }}
+                ></div>
+
+                {/* Icon with glassmorphism background */}
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
+                  <div 
+                    className="relative inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-2xl text-white"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(168, 85, 247, 0.9))',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      boxShadow: '0 8px 32px rgba(99, 102, 241, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+                    }}
+                  >
+                    <feature.icon className="h-7 w-7 sm:h-8 sm:w-8" />
+                  </div>
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                <p className="text-gray-600 text-sm sm:text-base leading-relaxed">{feature.description}</p>
+
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-600 group-hover:to-purple-600 transition-all duration-300">{feature.title}</h3>
+                <p className="text-gray-600 text-sm sm:text-base leading-relaxed" style={{ textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)' }}>{feature.description}</p>
+
+                {/* Shine effect on hover */}
+                <div className="absolute inset-0 rounded-2xl sm:rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
+                  <div className="absolute -inset-10 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shine"></div>
+                </div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Payment Methods Section */}
-      <section className="payment-hero py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden" style={{ zIndex: 10 }}>
-        <div className="max-w-7xl mx-auto relative z-10">
-          {/* Badge */}
-          <div className="payment-badge inline-flex items-center space-x-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-4 py-2 rounded-full font-bold text-sm sm:text-base mb-6">
-            <span className="hidden sm:inline">💰 100% DIRECT PAYMENTS - ZERO MIDDLEMAN FEES</span>
-            <span className="sm:hidden">💰 DIRECT PAYMENTS</span>
-          </div>
-
-          {/* Main Heading */}
-          <h2 className="payment-hero h2 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-            Accept Payments Directly
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">No Middleman Fees</span>
-          </h2>
-
-          {/* Subtitle */}
-          <p className="payment-hero .subtitle text-base sm:text-lg md:text-xl text-gray-300 mb-8 max-w-3xl">
-            Get paid directly to your bank account. No platform fees, no hidden charges. Keep 100% of your revenue minus standard payment processing fees.
-          </p>
-
-          {/* Payment Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {[
-              {
-                title: "Credit/Debit Cards",
-                description: "Accept Visa, Mastercard, Amex, and more. Secure payment processing with industry-standard encryption.",
-                icon: "💳",
-                color: "from-blue-500 to-indigo-600"
-              },
-              {
-                title: "UPI Payments",
-                description: "Instant UPI payments via PhonePe, Google Pay, Paytm, and all UPI apps. Real-time transaction processing.",
-                icon: "📱",
-                color: "from-green-500 to-emerald-600"
-              },
-              {
-                title: "Bank Transfers",
-                description: "Direct bank transfers (NEFT/RTGS/IMPS). Lower fees, faster processing, and direct settlement.",
-                icon: "🏦",
-                color: "from-purple-500 to-pink-600"
-              }
-            ].map((method, index) => (
-              <div
-                key={index}
-                className="payment-card bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300"
-              >
-                <div className={`text-4xl mb-4 inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-br ${method.color} text-white`}>
-                  {method.icon}
-                </div>
-                <h3 className="payment-card h3 text-xl font-bold text-white mb-2">{method.title}</h3>
-                <p className="payment-card p text-gray-300 text-sm leading-relaxed">{method.description}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Process Steps */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            {[
-              {
-                number: "1",
-                title: "Create Your Funnel",
-                description: "Build your sales page with our drag-and-drop builder"
-              },
-              {
-                number: "2",
-                title: "Add Payment Method",
-                description: "Connect your bank account or payment gateway"
-              },
-              {
-                number: "3",
-                title: "Start Earning",
-                description: "Accept payments directly - no platform fees!"
-              }
-            ].map((step, index) => (
-              <div key={index} className="process-step text-center">
-                <div className="process-number inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 text-gray-900 font-bold text-2xl mb-4">
-                  {step.number}
-                </div>
-                <h4 className="process-step h4 text-xl font-bold text-white mb-2">{step.title}</h4>
-                <p className="process-step p text-gray-300 text-sm">{step.description}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* CTA Button */}
-          <div className="text-center">
-            <Link
-              href={session ? "/auth/dashboard" : "/auth/signin"}
-              className="cta-button inline-flex items-center justify-center bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-8 py-4 rounded-xl font-bold text-lg hover:from-yellow-500 hover:to-orange-600 transition-all shadow-xl hover:shadow-2xl"
-            >
-              <span className="hidden sm:inline">Start Earning Directly Now</span>
-              <span className="sm:hidden">Start Earning Now</span>
-              <ArrowRightIconSolid className="ml-2 sm:ml-3 h-5 w-5 sm:h-6 sm:w-6" />
-            </Link>
-            <p className="text-white/70 text-xs sm:text-sm mt-3 sm:mt-4 px-4">
-              No credit card required • Free to start • Keep 100% of your revenue
-            </p>
           </div>
         </div>
       </section>
 
       {/* Blog Section */}
-      <section id="blog" className="py-20 px-4 sm:px-6 lg:px-8 bg-white" style={{ zIndex: 10 }}>
-        <div className="max-w-7xl mx-auto">
+      <section id="blog" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-gray-50/30 to-white relative overflow-hidden" style={{ zIndex: 10 }}>
+        {/* Background decorative elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-96 h-96 bg-purple-200/15 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-10 w-80 h-80 bg-pink-200/15 rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               Latest from Our <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Blog</span>
@@ -1812,23 +2231,57 @@ export default function HomePage() {
                 <Link
                   key={post.id}
                   href={`/blog/${post.slug}`}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 group border border-gray-100"
+                  className="group relative rounded-2xl overflow-hidden transition-all duration-500 hover:scale-105"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.7)',
+                    backdropFilter: 'blur(20px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6)'
+                  }}
                 >
-                  <div className="p-6">
+                  {/* Glow effect on hover */}
+                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(236, 72, 153, 0.1))',
+                      filter: 'blur(20px)',
+                      zIndex: -1
+                    }}
+                  ></div>
+
+                  <div className="p-6 relative z-10">
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
+                      <span 
+                        className="px-3 py-1 text-purple-700 text-xs font-semibold rounded-full"
+                        style={{
+                          background: 'rgba(237, 233, 254, 0.8)',
+                          backdropFilter: 'blur(10px)',
+                          WebkitBackdropFilter: 'blur(10px)',
+                          border: '1px solid rgba(167, 139, 250, 0.3)',
+                          boxShadow: '0 2px 8px rgba(167, 139, 250, 0.2)'
+                        }}
+                      >
                         {post.category}
                       </span>
                       {post.featured && (
-                        <span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full">
+                        <span 
+                          className="px-3 py-1 text-yellow-700 text-xs font-semibold rounded-full"
+                          style={{
+                            background: 'rgba(254, 243, 199, 0.8)',
+                            backdropFilter: 'blur(10px)',
+                            WebkitBackdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(251, 191, 36, 0.3)',
+                            boxShadow: '0 2px 8px rgba(251, 191, 36, 0.2)'
+                          }}
+                        >
                           Featured
                         </span>
                       )}
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors line-clamp-2">
+                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-pink-600 transition-all duration-300 line-clamp-2" style={{ textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)' }}>
                       {post.title}
                     </h3>
-                    <p className="text-gray-600 mb-4 line-clamp-3 text-sm">
+                    <p className="text-gray-600 mb-4 line-clamp-3 text-sm" style={{ textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)' }}>
                       {post.excerpt}
                     </p>
                     <div className="flex items-center justify-between">
@@ -1842,8 +2295,22 @@ export default function HomePage() {
                           <span>{post.readTime} min</span>
                         </div>
                       </div>
-                      <ArrowRightIcon className="h-5 w-5 text-purple-600 group-hover:translate-x-1 transition-transform" />
+                      <div 
+                        className="p-2 rounded-lg transition-all duration-300 group-hover:translate-x-1"
+                        style={{
+                          background: 'rgba(168, 85, 247, 0.1)',
+                          backdropFilter: 'blur(10px)',
+                          WebkitBackdropFilter: 'blur(10px)'
+                        }}
+                      >
+                        <ArrowRightIcon className="h-5 w-5 text-purple-600" />
+                      </div>
                     </div>
+                  </div>
+
+                  {/* Shine effect on hover */}
+                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
+                    <div className="absolute -inset-10 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shine"></div>
                   </div>
                 </Link>
               ))}

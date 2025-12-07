@@ -14,6 +14,7 @@ interface SocialProofItem {
 /**
  * Social Proof Component
  * Shows real-time activity to create FOMO and encourage signups
+ * HIDDEN ON MOBILE to prevent obstruction of checkout form
  */
 export default function SocialProof() {
   const [items, setItems] = useState<SocialProofItem[]>([]);
@@ -65,7 +66,7 @@ export default function SocialProof() {
   if (items.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 z-[9996] bg-white rounded-lg shadow-lg border border-gray-200 p-3 max-w-xs">
+    <div className="hidden @md:block fixed bottom-4 left-4 z-[9996] bg-white rounded-lg shadow-lg border border-gray-200 p-3 max-w-xs">
       <div className="flex items-center gap-2 mb-2">
         <FireIcon className="h-4 w-4 text-orange-500" />
         <span className="text-xs font-bold text-gray-900">Live Activity</span>
@@ -97,4 +98,3 @@ export default function SocialProof() {
     </div>
   );
 }
-

@@ -74,7 +74,8 @@ export default function FunnelCustomizer() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
-  const [embedCode, setEmbedCode] = useState('Link');
+  const [selectedTab, setSelectedTab] = useState('Link'); // Tab selection
+  const [embedHtml, setEmbedHtml] = useState(''); // Actual embed code
   const [showMobilePreview, setShowMobilePreview] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -155,8 +156,8 @@ export default function FunnelCustomizer() {
         if (data.url) {
           setShareUrl(`${window.location.origin}${data.url}`);
           // Generate embed code
-          const embedHtml = `<div id="funnel-card-${data.id}"></div><script src="${window.location.origin}/embed.js" data-id="${data.id}"></script>`;
-          setEmbedCode(embedHtml);
+          const embedCode = `<div id="funnel-card-${data.id}"></div><script src="${window.location.origin}/embed.js" data-id="${data.id}"></script>`;
+          setEmbedHtml(embedCode);
         }
 
       } catch (error) {
@@ -174,16 +175,15 @@ export default function FunnelCustomizer() {
 
   // Auto-fill seller info from session if empty
   useEffect(() => {
-    if (session?.user && !sellerInfo.name && !loading) {
+    if (session?.user && !loading) {
       setSellerInfo(prev => ({
         ...prev,
-        name: session.user?.name || '',
-        email: session.user?.email || '',
-        avatar: session.user?.image || '',
-        // Keep existing values if any, specifically if we don't want to overwrite potentially non-empty bio/phone if they existed but name was empty (unlikely but safe)
+        name: prev.name || session.user?.name || '',
+        email: prev.email || session.user?.email || '',
+        avatar: session.user?.image || prev.avatar || '', // Always use session image as primary source
       }));
     }
-  }, [session, loading, sellerInfo.name]);
+  }, [session, loading]);
 
   // Show info toast when switching to product tab
   useEffect(() => {
@@ -265,8 +265,9 @@ export default function FunnelCustomizer() {
       // First save any pending changes
       await handleSave(true);
 
-      const shouldPublish = funnel?.status !== 'ACTIVE';
-      const action = shouldPublish ? 'publish' : 'unpublish';
+      const isCurrentlyPublished = funnel?.status === 'ACTIVE';
+      const shouldPublish = true; // Always publish when clicking the button
+      const action = isCurrentlyPublished ? 'update' : 'publish';
 
       const response = await fetch(`/api/funnels/${funnelId}/publish`, {
         method: 'POST',
@@ -283,14 +284,13 @@ export default function FunnelCustomizer() {
       setFunnel(data);
       setShareUrl(data.url ? `${window.location.origin}${data.url}` : '');
 
-      toast.success(shouldPublish
-        ? 'Funnel published successfully!'
-        : 'Funnel unpublished successfully'
+      toast.success(isCurrentlyPublished
+        ? 'Funnel updated successfully!'
+        : 'Funnel published successfully!'
       );
 
-      if (shouldPublish) {
-        setShowShareModal(true);
-      }
+      // Show share modal for both publish and update
+      setTimeout(() => setShowShareModal(true), 150);
     } catch (error) {
       console.error('Error publishing funnel:', error);
       const message = error instanceof Error ? error.message : 'Unknown error';
@@ -382,7 +382,12 @@ export default function FunnelCustomizer() {
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
                   Processing...
                 </>
-              ) : funnel?.status === 'ACTIVE' ? 'Unpublish' : (
+              ) : funnel?.status === 'ACTIVE' ? (
+                <>
+                  <RocketLaunchIcon className="w-4 h-4" />
+                  Update Funnel
+                </>
+              ) : (
                 <>
                   <RocketLaunchIcon className="w-4 h-4" />
                   Publish
@@ -562,6 +567,7 @@ export default function FunnelCustomizer() {
           <div className="flex-1 overflow-y-auto bg-gray-100 p-0 md:p-4">
             <div className="max-w-md mx-auto bg-white min-h-full shadow-lg md:rounded-xl overflow-hidden border-x md:border border-gray-200">
               <FunnelPreviewLayout
+                key={showMobilePreview ? 'mobile-preview' : 'hidden'}
                 funnel={{
                   ...funnel,
                   product: {
@@ -611,8 +617,8 @@ export default function FunnelCustomizer() {
                 {['Link', 'Embed Card', 'Smart Script'].map((tab) => (
                   <button
                     key={tab}
-                    onClick={() => setEmbedCode(tab)}
-                    className={`flex-1 py-4 text-sm font-medium border-b-2 transition-all ${embedCode === tab
+                    onClick={() => setSelectedTab(tab)}
+                    className={`flex-1 py-4 text-sm font-medium border-b-2 transition-all ${selectedTab === tab
                       ? 'border-purple-600 text-purple-600 bg-white'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                       }`}
@@ -623,7 +629,7 @@ export default function FunnelCustomizer() {
               </div>
 
               <div className="p-6 min-h-[300px]">
-                {embedCode === 'Link' && (
+                {selectedTab === 'Link' && (
                   <div className="space-y-6">
                     <div className="text-center py-6">
                       <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4 animate-bounce-slow">
@@ -657,7 +663,7 @@ export default function FunnelCustomizer() {
                   </div>
                 )}
 
-                {embedCode === 'Embed Card' && (
+                {selectedTab === 'Embed Card' && (
                   <div className="space-y-4">
                     <div className="bg-purple-50 rounded-lg p-4 mb-4">
                       <h4 className="text-sm font-semibold text-purple-900 mb-1">Product Card Embed</h4>
@@ -688,7 +694,7 @@ export default function FunnelCustomizer() {
                   </div>
                 )}
 
-                {embedCode === 'Smart Script' && (
+                {selectedTab === 'Smart Script' && (
                   <div className="space-y-4">
                     <div className="bg-indigo-50 rounded-lg p-4 mb-4">
                       <h4 className="text-sm font-semibold text-indigo-900 mb-1">🪄 Magic Auto-Convert</h4>
