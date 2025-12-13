@@ -4,6 +4,7 @@ import { Providers } from '@/components/providers';
 import GoogleAnalytics from '@/components/analytics/google-analytics';
 import FacebookPixel from '@/components/analytics/FacebookPixel';
 import RetentionManager from '@/components/retention/RetentionManager';
+import PageViewTracker from '@/components/PageViewTracker';
 import { generateSEOMetadata, generateWebsiteSchema, generateOrganizationSchema } from '@/utils/seo';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -87,6 +88,7 @@ export default function RootLayout({
         <Providers>
           <GoogleAnalytics />
           <FacebookPixel />
+          <PageViewTracker />
           <RetentionManager />
           {children}
         </Providers>

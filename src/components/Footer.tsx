@@ -12,7 +12,7 @@ export default function Footer() {
           <Link href="/product" className="text-gray-300 hover:text-purple-400 transition">Product</Link>
           <Link href="/features" className="text-gray-300 hover:text-purple-400 transition">Features</Link>
           <Link href="/pricing" className="text-gray-300 hover:text-purple-400 transition">Pricing</Link>
-          <Link href="/documentation" className="text-gray-300 hover:text-purple-400 transition">Documentation</Link>
+          <Link href="/docs" className="text-gray-300 hover:text-purple-400 transition">Documentation</Link>
           <Link href="/about" className="text-gray-300 hover:text-purple-400 transition">About</Link>
           <Link href="/contact" className="text-gray-300 hover:text-purple-400 transition">Contact</Link>
           <Link href="/blog" className="text-gray-300 hover:text-purple-400 transition">Blog</Link>

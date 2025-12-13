@@ -29,7 +29,18 @@
         // Create a container div
         const container = document.createElement('div');
         linkElement.parentNode.insertBefore(container, linkElement);
-        linkElement.style.display = 'none'; // Hide original link
+        
+        // Keep the original link visible and accessible for SEO compliance
+        // This ensures search engines and users see the same content (no cloaking)
+        // Style it to be visually integrated but still accessible
+        linkElement.style.display = 'inline-block';
+        linkElement.style.marginBottom = '8px';
+        linkElement.style.fontSize = '13px';
+        linkElement.style.color = '#6b7280';
+        linkElement.style.textDecoration = 'underline';
+        linkElement.style.textDecorationColor = '#d1d5db';
+        linkElement.setAttribute('rel', 'nofollow'); // Prevent link juice passing to embedded content
+        linkElement.setAttribute('aria-label', 'View embedded content');
 
         // Render iframe in container
         renderIframe(container, `${url}?embed=true`);

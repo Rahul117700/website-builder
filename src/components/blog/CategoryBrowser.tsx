@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
+import Link from 'next/link';
 import { MagnifyingGlassIcon, FunnelIcon, Squares2X2Icon } from '@heroicons/react/24/outline';
 
 interface Category {
@@ -35,7 +35,7 @@ export default function CategoryBrowser({ categories }: CategoryBrowserProps) {
           <span className="text-sm font-medium text-gray-600">{categories.length} Categories</span>
         </div>
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Browse by Category</h2>
-        <p className="text-gray-600 text-lg mb-8">Find exactly what you&apos;re looking for</p>
+        <p className="text-gray-600 text-lg mb-8">Find exactly what you're looking for</p>
         
         {/* Search Bar */}
         <div className="relative max-w-md mx-auto">
@@ -45,7 +45,7 @@ export default function CategoryBrowser({ categories }: CategoryBrowserProps) {
             placeholder="Search categories..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition-colors text-gray-900 placeholder-gray-400"
+            className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-gray-900 focus:outline-none transition-colors text-gray-900 placeholder-gray-400"
           />
         </div>
       </div>
@@ -115,4 +115,3 @@ export default function CategoryBrowser({ categories }: CategoryBrowserProps) {
     </section>
   );
 }
-

@@ -14,7 +14,8 @@ import {
   VideoCameraIcon,
   DocumentTextIcon,
   AcademicCapIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 
 export const metadata: Metadata = {

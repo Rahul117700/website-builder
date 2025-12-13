@@ -54,21 +54,27 @@ export async function GET(request: Request) {
     const totalVisits = pageStats.reduce((sum, stat) => sum + (stat._sum.visits || 0), 0);
     const totalUnique = pageStats.reduce((sum, stat) => sum + (stat._sum.uniqueVisitors || 0), 0);
 
-    // Popular pages
+    // Calculate number of days in the range
+    const daysInRange = Math.max(1, Math.ceil((new Date().getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
+
+    // Popular pages with average per day
     const topPages = pageStats.slice(0, 10).map(stat => ({
       page: stat.page,
       visits: stat._sum.visits || 0,
       uniqueVisitors: stat._sum.uniqueVisitors || 0,
+      avgPerDay: daysInRange > 0 ? Math.round((stat._sum.visits || 0) / daysInRange) : 0,
     }));
 
     return NextResponse.json({
       totalVisits,
       totalUnique,
       topPages,
+      daysInRange,
       pageStats: pageStats.map(stat => ({
         page: stat.page,
         visits: stat._sum.visits || 0,
         uniqueVisitors: stat._sum.uniqueVisitors || 0,
+        avgPerDay: daysInRange > 0 ? Math.round((stat._sum.visits || 0) / daysInRange) : 0,
       })),
       analytics,
     });

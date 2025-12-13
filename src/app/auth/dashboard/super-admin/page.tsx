@@ -166,25 +166,39 @@ export default function SuperAdminDashboard() {
           'Content-Type': 'application/json',
         }
       }).then(async (analyticsResponse) => {
-        if (analyticsResponse.ok) {
+      if (analyticsResponse.ok) {
           const additionalAnalytics = await analyticsResponse.json();
           console.log('Additional analytics data loaded:', additionalAnalytics);
+          console.log('Top users from API:', additionalAnalytics.analytics?.topUsers);
           
-          // Merge additional analytics with existing data
-          setAnalyticsData((prev: any) => ({
-            ...prev,
-            overview: {
-              ...prev?.overview,
-              activeFunnels: additionalAnalytics.overview?.activeFunnels || prev?.overview?.activeFunnels || 0,
-              totalFunnels: additionalAnalytics.overview?.totalFunnels || prev?.overview?.totalFunnels || 0,
-              totalProducts: additionalAnalytics.overview?.totalProducts || prev?.overview?.totalProducts || 0,
-            },
-            analytics: {
-              ...prev?.analytics,
-              recentFunnels: additionalAnalytics.analytics?.recentFunnels || [],
-              recentActivity: additionalAnalytics.analytics?.recentActivity || [],
-            }
-          }));
+          // Merge additional analytics with existing data - prioritize API data
+          setAnalyticsData((prev: any) => {
+            const merged = {
+              ...prev,
+              overview: {
+                ...prev?.overview,
+                ...additionalAnalytics.overview,
+                activeFunnels: additionalAnalytics.overview?.activeFunnels ?? prev?.overview?.activeFunnels ?? 0,
+                totalFunnels: additionalAnalytics.overview?.totalFunnels ?? prev?.overview?.totalFunnels ?? 0,
+                totalProducts: additionalAnalytics.overview?.totalProducts ?? prev?.overview?.totalProducts ?? 0,
+                totalRevenue: additionalAnalytics.overview?.totalRevenue ?? prev?.overview?.totalRevenue ?? 0,
+                activeUsers: additionalAnalytics.overview?.activeUsers ?? prev?.overview?.activeUsers ?? 0,
+                platformHealth: {
+                  ...prev?.overview?.platformHealth,
+                  ...additionalAnalytics.overview?.platformHealth,
+                }
+              },
+              analytics: {
+                ...prev?.analytics,
+                // Use API data if available, otherwise keep previous
+                topUsers: additionalAnalytics.analytics?.topUsers ?? prev?.analytics?.topUsers ?? [],
+                recentFunnels: additionalAnalytics.analytics?.recentFunnels ?? prev?.analytics?.recentFunnels ?? [],
+                recentActivity: additionalAnalytics.analytics?.recentActivity ?? prev?.analytics?.recentActivity ?? [],
+              }
+            };
+            console.log('Merged analytics data - topUsers:', merged.analytics.topUsers);
+            return merged;
+          });
         } else {
           console.error('Analytics API failed:', await analyticsResponse.text());
         }
@@ -619,13 +633,7 @@ export default function SuperAdminDashboard() {
                 </div>
                 
                 {/* Debug Info */}
-                <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-xs">
-                  <strong>Debug Info:</strong> 
-                  <br />Users in DB: {analyticsData?.overview?.totalUsers ?? 'undefined'}
-                  <br />Funnels: {analyticsData?.overview?.totalFunnels ?? 'undefined'}
-                  <br />Products: {analyticsData?.overview?.totalProducts ?? 'undefined'}
-                  <br />Analytics Data Loaded: {analyticsData ? 'Yes' : 'No'}
-                </div>
+           
                 
                 {loading ? (
                   <div className="text-center py-12">
@@ -726,26 +734,26 @@ export default function SuperAdminDashboard() {
                       <div className="space-y-3">
                         {analyticsData?.analytics?.recentActivity && analyticsData.analytics.recentActivity.length > 0 ? (
                           analyticsData.analytics.recentActivity.slice(0, 5).map((activity: any, index: number) => (
-                            <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">
+                          <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">
                                   {activity.description}
-                                </p>
-                                <p className="text-xs text-gray-500">
+                              </p>
+                              <p className="text-xs text-gray-500">
                                   {activity.user} • {new Date(activity.timestamp).toLocaleDateString()}
-                                </p>
-                              </div>
-                              <span className="text-xs text-green-600 font-medium">New</span>
+                              </p>
                             </div>
+                              <span className="text-xs text-green-600 font-medium">New</span>
+                          </div>
                           ))
                         ) : null}
                         {(!analyticsData?.analytics?.recentActivity || analyticsData.analytics.recentActivity.length === 0) && (
                           <div className="text-center py-6 text-gray-500 text-sm">
                             No recent activity yet
-                          </div>
-                        )}
                       </div>
+                        )}
                     </div>
+                  </div>
                   </div>
                 )}
               </div>
@@ -1224,7 +1232,7 @@ export default function SuperAdminDashboard() {
                                   <div className="text-sm text-gray-600">{page.uniqueVisitors?.toLocaleString()}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm text-gray-600">{Math.round(page.visits / 30)}</div>
+                                  <div className="text-sm text-gray-600">{page.avgPerDay?.toLocaleString() || Math.round((page.visits || 0) / 30)}</div>
                                 </td>
                               </tr>
                             ))}
@@ -1416,7 +1424,7 @@ export default function SuperAdminDashboard() {
                         <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400" />
                         <p className="mt-2 text-gray-600">No analytics data yet</p>
                         <p className="text-sm text-gray-500 mt-1">Data will appear as users create funnels</p>
-                      </div>
+                  </div>
                     )}
                   </div>
                 )}
