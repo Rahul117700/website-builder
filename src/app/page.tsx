@@ -1319,27 +1319,29 @@ export default function HomePage() {
                       }`}
                   >
                     <div className="h-full flex flex-col lg:flex-row">
-                      {/* Image Section - 50% - Unchanged */}
-                      <div className="w-full lg:w-1/2 h-48 sm:h-64 lg:h-full relative overflow-hidden">
-                        <img
-                          src={slide.image}
-                          alt={slide.title}
-                          className="w-full h-full object-cover"
-                          loading={index === 0 ? "eager" : "lazy"}
-                          style={{ display: 'block' }}
-                        />
-                        {/* Gradient Overlay */}
-                        <div className={`absolute inset-0 bg-gradient-to-br ${slide.gradient} opacity-20`}></div>
-                        {/* Category Badge */}
-                        <div className="absolute top-4 left-4">
-                          <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg">
-                            <span className="text-sm font-semibold text-gray-900">{slide.category}</span>
+                      {/* Image Section - 50% - Only render if image exists */}
+                      {slide.image && (
+                        <div className="w-full lg:w-1/2 h-48 sm:h-64 lg:h-full relative overflow-hidden">
+                          <img
+                            src={slide.image}
+                            alt={slide.title}
+                            className="w-full h-full object-cover"
+                            loading={index === 0 ? "eager" : "lazy"}
+                            style={{ display: 'block' }}
+                          />
+                          {/* Gradient Overlay */}
+                          <div className={`absolute inset-0 bg-gradient-to-br ${slide.gradient} opacity-20`}></div>
+                          {/* Category Badge */}
+                          <div className="absolute top-4 left-4">
+                            <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg">
+                              <span className="text-sm font-semibold text-gray-900">{slide.category}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      )}
 
-                      {/* Chart Section - 50% - Educational Graphs */}
-                      <div className="w-full lg:w-1/2 flex flex-col justify-start p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-50 to-white">
+                      {/* Chart Section - 50% (or full width if no image) - Educational Graphs */}
+                      <div className={`w-full ${slide.image ? 'lg:w-1/2' : ''} flex flex-col justify-start p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-50 to-white`}>
                         <div className="flex flex-col">
                           {/* Title */}
                           <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 leading-tight">
@@ -1353,7 +1355,7 @@ export default function HomePage() {
 
                           {/* Chart Container */}
                           <div className="mb-4">
-                            {chartType === 'revenue' && (
+                            {chartData && chartType === 'revenue' && (
                               <>
                                 <div className="mb-2">
                                   <div className="flex items-center justify-between mb-2">
@@ -1397,7 +1399,7 @@ export default function HomePage() {
                               </>
                             )}
 
-                            {chartType === 'category' && (
+                            {chartData && chartType === 'category' && (
                               <>
                                 <div className="mb-2">
                                   <div className="flex items-center justify-between mb-2">
@@ -1431,7 +1433,7 @@ export default function HomePage() {
                               </>
                             )}
 
-                            {chartType === 'sales' && (
+                            {chartData && chartType === 'sales' && (
                               <>
                                 <div className="mb-2">
                                   <div className="flex items-center justify-between mb-2">
@@ -1486,7 +1488,7 @@ export default function HomePage() {
                               </>
                             )}
 
-                            {chartType === 'live' && (
+                            {chartData && chartType === 'live' && (
                               <>
                                 <div className="mb-2">
                                   <div className="flex items-center justify-between mb-2">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import saleNotificationsData from '@/data/sale-notifications.json';
@@ -19,6 +19,23 @@ export default function SaleNotifications() {
   const [currentNotification, setCurrentNotification] = useState<SaleNotification | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
+  const showNextNotification = useCallback(() => {
+    // Get random notification from the list
+    const randomIndex = Math.floor(Math.random() * saleNotificationsData.length);
+    setCurrentNotification(saleNotificationsData[randomIndex] as SaleNotification);
+    setIsVisible(true);
+
+    // Hide notification after 8 seconds
+    setTimeout(() => {
+      setIsVisible(false);
+    }, 8000);
+
+    // Show next notification after 15-30 seconds (random interval)
+    setTimeout(() => {
+      showNextNotification();
+    }, Math.random() * 15000 + 15000);
+  }, []);
+
   useEffect(() => {
     // Show first notification after 5 seconds
     const initialTimer = setTimeout(() => {
@@ -26,29 +43,7 @@ export default function SaleNotifications() {
     }, 5000);
 
     return () => clearTimeout(initialTimer);
-  }, []);
-
-  const showNextNotification = () => {
-    // Get random notification from the list
-    const randomIndex = Math.floor(Math.random() * saleNotificationsData.length);
-    setCurrentNotification(saleNotificationsData[randomIndex] as SaleNotification);
-    setIsVisible(true);
-
-    // Hide notification after 8 seconds
-    const hideTimer = setTimeout(() => {
-      setIsVisible(false);
-    }, 8000);
-
-    // Show next notification after 15-30 seconds (random interval)
-    const nextTimer = setTimeout(() => {
-      showNextNotification();
-    }, Math.random() * 15000 + 15000);
-
-    return () => {
-      clearTimeout(hideTimer);
-      clearTimeout(nextTimer);
-    };
-  };
+  }, [showNextNotification]);
 
   const handleClose = () => {
     setIsVisible(false);
