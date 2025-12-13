@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 
 interface LogoProps {
   className?: string;
@@ -38,9 +37,8 @@ export default function Logo({
   };
   
   const dimensions = sizeMap[size];
-  // Use custom logo - SVG for better server compatibility
-  const logoSrc = '/logo.svg'; // Use SVG directly for better compatibility
-  const logoFallback = '/logo/logo.png'; // PNG as fallback
+  // Use custom logo from public/logo/logo.png (this path works on login page)
+  const logoSrc = '/logo/logo.png';
   
   const textStyles = textClassName || (
     variant === 'gradient' 
@@ -53,27 +51,21 @@ export default function Logo({
   const content = (
     <>
       <div className={className || ''} style={{ position: 'relative', height: `${dimensions.height}px`, width: `${dimensions.width}px` }}>
-        <Image 
+        {/* Use regular img tag for better server compatibility */}
+        <img 
           src={logoSrc} 
           alt="SellEarnDirect - Turn Traffic Into Revenue" 
           width={dimensions.width}
           height={dimensions.height}
-          quality={100}
-          priority
-          unoptimized
           className="object-contain transition-transform hover:scale-105"
           style={{ 
             imageRendering: 'crisp-edges',
             width: '100%',
-            height: '100%'
+            height: '100%',
+            maxWidth: '100%',
+            maxHeight: '100%'
           }}
-          onError={(e) => {
-            // Fallback to SVG logo if PNG fails
-            const img = e.currentTarget as HTMLImageElement;
-            if (!img.src.includes('.svg')) {
-              img.src = logoFallback;
-            }
-          }}
+          loading="eager"
         />
       </div>
       {/* Logo already contains the brand name, so we hide the text by default */}
