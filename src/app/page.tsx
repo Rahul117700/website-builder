@@ -34,7 +34,6 @@ import Logo from '@/components/Logo';
 import dynamic from 'next/dynamic';
 import { blogPosts } from '@/data/blogs';
 
-const ProductTour = dynamic(() => import('@/components/ProductTour'), { ssr: false });
 const SaleNotifications = dynamic(() => import('@/components/SaleNotifications'), { ssr: false });
 import {
   PlayIcon as PlayIconSolid,
@@ -254,28 +253,6 @@ export default function HomePage() {
     }
   }, [totalStorySlides, currentStorySlide]);
 
-  // Product tour state
-  const [runTour, setRunTour] = useState(false);
-
-  // Check for tour parameter and start tour
-  useEffect(() => {
-    if (!searchParams) return;
-
-    const tourParam = searchParams.get('tour');
-    if (tourParam === 'true') {
-      // Start the tour after a delay to ensure everything is loaded
-      setTimeout(() => {
-        setRunTour(true);
-      }, 1000);
-
-      // Remove the tour parameter from URL without triggering a page reload
-      if (typeof window !== 'undefined') {
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.delete('tour');
-        window.history.replaceState({}, '', newUrl.toString());
-      }
-    }
-  }, [searchParams]);
 
   // Three.js setup
   useEffect(() => {
@@ -2372,8 +2349,6 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* Product Tour */}
-      <ProductTour run={runTour} onFinish={() => setRunTour(false)} />
     </div>
   );
 }
