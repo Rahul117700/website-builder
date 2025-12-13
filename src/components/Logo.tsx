@@ -38,9 +38,9 @@ export default function Logo({
   };
   
   const dimensions = sizeMap[size];
-  // Use custom logo - Try PNG first, fallback to SVG
-  const logoSrc = '/logo/logo.png';
-  const logoFallback = '/logo.svg'; // SVG fallback
+  // Use custom logo - SVG for better server compatibility
+  const logoSrc = '/logo.svg'; // Use SVG directly for better compatibility
+  const logoFallback = '/logo/logo.png'; // PNG as fallback
   
   const textStyles = textClassName || (
     variant === 'gradient' 
