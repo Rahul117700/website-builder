@@ -36,6 +36,7 @@ import { blogPosts } from '@/data/blogs';
 
 const ProductTour = dynamic(() => import('@/components/ProductTour'), { ssr: false });
 const SaleNotifications = dynamic(() => import('@/components/SaleNotifications'), { ssr: false });
+const IndiaGlobe = dynamic(() => import('@/components/IndiaGlobe'), { ssr: false });
 import {
   PlayIcon as PlayIconSolid,
   ArrowRightIcon as ArrowRightIconSolid
@@ -71,7 +72,7 @@ export default function HomePage() {
 
   // Carousel state
   const [currentSlide, setCurrentSlide] = useState(0);
-  const totalSlides = 4;
+  const totalSlides = 5;
 
   // Chart data for earning education
   const revenueGrowthData = [
@@ -107,6 +108,16 @@ export default function HomePage() {
 
   // Main Carousel Categories Data
   const mainCarouselSlides = [
+    {
+      category: "India's Digital Marketplace",
+      title: "Trusted Across India",
+      description: "Join thousands of creators and entrepreneurs from Mumbai to Delhi, Bangalore to Kolkata. Build your digital business with India's fastest-growing platform.",
+      highlights: ["Pan-India Presence", "Real-time Sales", "Active Community", "Growing Network"],
+      image: null, // Will use IndiaGlobe component
+      gradient: "from-indigo-500 to-blue-600",
+      icon: "🇮🇳",
+      isGlobe: true
+    },
     {
       category: "Wellness / Education / Success",
       title: "Transform Lives Through Wellness",
@@ -1233,20 +1244,70 @@ export default function HomePage() {
             <div className="relative min-h-[550px] sm:min-h-[600px] overflow-hidden bg-white rounded-xl sm:rounded-2xl shadow-2xl border border-gray-200">
               {/* Carousel Slides */}
               {mainCarouselSlides.map((slide, index) => {
-                // Get chart data based on slide index
+                // Get chart data based on slide index (shifted by 1 due to globe slide)
                 let chartData, chartType;
-                if (index === 0) {
+                if (index === 1) {
                   chartData = revenueGrowthData;
                   chartType = 'revenue';
-                } else if (index === 1) {
+                } else if (index === 2) {
                   chartData = categoryEarningsData;
                   chartType = 'category';
-                } else if (index === 2) {
+                } else if (index === 3) {
                   chartData = salesGrowthData;
                   chartType = 'sales';
-                } else {
+                } else if (index === 4) {
                   chartData = liveTrackingData;
                   chartType = 'live';
+                }
+
+                // Special handling for globe slide (index 0)
+                if (slide.isGlobe) {
+                  return (
+                    <div
+                      key={index}
+                      className={`absolute inset-0 transition-all duration-700 ease-in-out ${currentSlide === index
+                        ? 'opacity-100 translate-x-0 z-10'
+                        : 'opacity-0 translate-x-full z-0'
+                        }`}
+                    >
+                      <div className="h-full flex flex-col lg:flex-row">
+                        {/* Globe Visualization - Full Width */}
+                        <div className="w-full h-full relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50">
+                          <IndiaGlobe />
+                          {/* Category Badge */}
+                          <div className="absolute top-4 left-4 z-20">
+                            <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg flex items-center gap-2">
+                              <span className="text-2xl">{slide.icon}</span>
+                              <span className="text-sm font-semibold text-gray-900">{slide.category}</span>
+                            </div>
+                          </div>
+                          
+                          {/* Title and Description Overlay */}
+                          <div className="absolute top-4 right-4 left-4 lg:left-auto lg:w-96 z-20">
+                            <div className="bg-white/95 backdrop-blur-sm rounded-xl p-6 shadow-2xl border border-indigo-100">
+                              <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-3 leading-tight">
+                                {slide.title}
+                              </h3>
+                              <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                                {slide.description}
+                              </p>
+                              {/* Highlights */}
+                              <div className="flex flex-wrap gap-2">
+                                {slide.highlights.map((highlight, i) => (
+                                  <span
+                                    key={i}
+                                    className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700 border border-indigo-200"
+                                  >
+                                    ✓ {highlight}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
                 }
 
                 return (

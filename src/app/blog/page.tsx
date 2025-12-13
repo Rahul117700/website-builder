@@ -1,8 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { blogPosts } from '@/data/blogs';
-import { CalendarIcon, ClockIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, ClockIcon } from '@heroicons/react/24/outline';
 import Header from '@/components/Header';
+import CategoryBrowser from '@/components/blog/CategoryBrowser';
 
 export const metadata: Metadata = {
   title: 'Blog - Sell Earn Direct | Learn How to Sell Digital Products Online',
@@ -17,8 +18,16 @@ export const metadata: Metadata = {
 
 export default function BlogPage() {
   const featuredPosts = blogPosts.filter(post => post.featured).slice(0, 3);
-  const recentPosts = blogPosts.slice(0, 12);
-  const categories = Array.from(new Set(blogPosts.map(post => post.category)));
+  
+  // Get categories with post counts
+  const categoryMap = blogPosts.reduce((acc, post) => {
+    acc[post.category] = (acc[post.category] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  
+  const categories = Object.entries(categoryMap)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count); // Sort by post count
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -94,21 +103,8 @@ export default function BlogPage() {
           </section>
         )}
 
-        {/* Categories */}
-        <section className="mb-12">
-            <h2 className="text-2xl font-bold text-black mb-6">Browse by Category</h2>
-          <div className="flex flex-wrap gap-3">
-            {categories.map((category) => (
-              <Link
-                key={category}
-                href={`/blog/category/${category.toLowerCase().replace(/\s+/g, '-')}`}
-                className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:border-purple-500 hover:text-purple-600 transition-colors text-black"
-              >
-                {category}
-              </Link>
-            ))}
-          </div>
-        </section>
+        {/* Categories - Interactive Component */}
+        <CategoryBrowser categories={categories} />
 
         {/* All Posts */}
         <section>
