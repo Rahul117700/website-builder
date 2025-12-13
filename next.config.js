@@ -109,6 +109,7 @@ const nextConfig = {
       ...(process.env.IMAGE_DOMAINS?.split(',').map(domain => domain.trim()) || []),
       ...(process.env.NEXTAUTH_URL ? [process.env.NEXTAUTH_URL.replace(/^https?:\/\//, '')] : [])
     ].filter(Boolean),
+    unoptimized: true, // Disable image optimization for better compatibility
   },
   
   async rewrites() {

@@ -38,8 +38,9 @@ export default function Logo({
   };
   
   const dimensions = sizeMap[size];
-  // Use custom logo from public/logo/logo.png
+  // Use custom logo - Try PNG first, fallback to SVG
   const logoSrc = '/logo/logo.png';
+  const logoFallback = '/logo.svg'; // SVG fallback
   
   const textStyles = textClassName || (
     variant === 'gradient' 
@@ -59,11 +60,19 @@ export default function Logo({
           height={dimensions.height}
           quality={100}
           priority
+          unoptimized
           className="object-contain transition-transform hover:scale-105"
           style={{ 
             imageRendering: 'crisp-edges',
             width: '100%',
             height: '100%'
+          }}
+          onError={(e) => {
+            // Fallback to SVG logo if PNG fails
+            const img = e.currentTarget as HTMLImageElement;
+            if (!img.src.includes('.svg')) {
+              img.src = logoFallback;
+            }
           }}
         />
       </div>

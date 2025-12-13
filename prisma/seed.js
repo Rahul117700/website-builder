@@ -598,7 +598,7 @@ async function main() {
       },
       {
         name: 'Consulting Services Funnel',
-        type: 'SERVICES',
+        type: 'CUSTOM',
         description: 'Professional services funnel for consultants, coaches, and service providers.',
         previewUrl: '/templates/consulting.jpg',
         isActive: true,
