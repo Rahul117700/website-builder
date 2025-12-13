@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     startDate.setDate(startDate.getDate() - days);
 
     // Fetch page analytics
-    const analytics = await prisma.pageAnalytics.findMany({
+    const analytics = await prisma.analytics.findMany({
       where: {
         date: {
           gte: startDate,
@@ -32,37 +32,40 @@ export async function GET(request: Request) {
     });
 
     // Group by page
-    const pageStats = await prisma.pageAnalytics.groupBy({
-      by: ['page'],
+    const pageStats = await prisma.analytics.groupBy({
+      by: ['pageUrl'],
       _sum: {
-        visits: true,
-        uniqueVisitors: true,
+        pageViews: true,
+        visitors: true,
       },
       where: {
         date: {
           gte: startDate,
         },
+        pageUrl: {
+          not: null,
+        },
       },
       orderBy: {
         _sum: {
-          visits: 'desc',
+          pageViews: 'desc',
         },
       },
     });
 
     // Total stats
-    const totalVisits = pageStats.reduce((sum, stat) => sum + (stat._sum.visits || 0), 0);
-    const totalUnique = pageStats.reduce((sum, stat) => sum + (stat._sum.uniqueVisitors || 0), 0);
+    const totalVisits = pageStats.reduce((sum, stat) => sum + (stat._sum.pageViews || 0), 0);
+    const totalUnique = pageStats.reduce((sum, stat) => sum + (stat._sum.visitors || 0), 0);
 
     // Calculate number of days in the range
     const daysInRange = Math.max(1, Math.ceil((new Date().getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
 
     // Popular pages with average per day
     const topPages = pageStats.slice(0, 10).map(stat => ({
-      page: stat.page,
-      visits: stat._sum.visits || 0,
-      uniqueVisitors: stat._sum.uniqueVisitors || 0,
-      avgPerDay: daysInRange > 0 ? Math.round((stat._sum.visits || 0) / daysInRange) : 0,
+      page: stat.pageUrl,
+      visits: stat._sum.pageViews || 0,
+      uniqueVisitors: stat._sum.visitors || 0,
+      avgPerDay: daysInRange > 0 ? Math.round((stat._sum.pageViews || 0) / daysInRange) : 0,
     }));
 
     return NextResponse.json({
@@ -71,10 +74,10 @@ export async function GET(request: Request) {
       topPages,
       daysInRange,
       pageStats: pageStats.map(stat => ({
-        page: stat.page,
-        visits: stat._sum.visits || 0,
-        uniqueVisitors: stat._sum.uniqueVisitors || 0,
-        avgPerDay: daysInRange > 0 ? Math.round((stat._sum.visits || 0) / daysInRange) : 0,
+        page: stat.pageUrl,
+        visits: stat._sum.pageViews || 0,
+        uniqueVisitors: stat._sum.visitors || 0,
+        avgPerDay: daysInRange > 0 ? Math.round((stat._sum.pageViews || 0) / daysInRange) : 0,
       })),
       analytics,
     });

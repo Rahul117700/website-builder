@@ -99,7 +99,6 @@ export async function GET(request: Request) {
         _count: {
           select: {
             funnels: true,
-            digitalProducts: true,
           }
         },
         funnels: {
@@ -172,7 +171,7 @@ export async function GET(request: Request) {
           name: user.name,
           email: user.email,
           funnels: user._count.funnels,
-          products: user._count.digitalProducts,
+          products: 0, // Digital products count removed - relation doesn't exist on User model
           revenue: userRevenue,
           conversionRate: conversionRate,
         };
