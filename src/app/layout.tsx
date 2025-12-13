@@ -88,7 +88,6 @@ export default function RootLayout({
           <GoogleAnalytics />
           <FacebookPixel />
           <RetentionManager />
-          <PageViewTracker />
           {children}
         </Providers>
       </body>
