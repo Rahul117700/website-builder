@@ -100,6 +100,49 @@ export default function SuperAdminDashboard() {
       if (usersResponse.ok) {
         const usersData = await usersResponse.json();
         setUsers(usersData.users);
+        
+        // Build analytics data from users response
+        const activeUsersCount = usersData.users.filter((u: any) => u.status === 'ACTIVE').length;
+        const totalFunnelsCount = usersData.users.reduce((sum: number, u: any) => sum + (u._count?.funnels || 0), 0);
+        const totalProductsCount = usersData.users.reduce((sum: number, u: any) => sum + (u._count?.digitalProducts || 0), 0);
+        
+        console.log('Calculated from users API:', {
+          totalUsers: usersData.users.length,
+          activeUsers: activeUsersCount,
+          totalFunnels: totalFunnelsCount,
+          totalProducts: totalProductsCount
+        });
+        
+        // Set analytics data immediately from users data
+        setAnalyticsData({
+          overview: {
+            totalUsers: usersData.users.length,
+            totalFunnels: totalFunnelsCount,
+            totalProducts: totalProductsCount,
+            activeFunnels: 0,
+            totalRevenue: 0,
+            activeUsers: activeUsersCount,
+            platformHealth: {
+              activeUsersRatio: usersData.users.length > 0 ? (activeUsersCount / usersData.users.length) * 100 : 0,
+              publishedFunnelsRatio: 0,
+              averageRevenuePerUser: 0,
+              conversionRate: 0,
+            }
+          },
+          analytics: {
+            topUsers: usersData.users.slice(0, 10).map((u: any) => ({
+              id: u.id,
+              name: u.name,
+              email: u.email,
+              funnels: u._count?.funnels || 0,
+              products: u._count?.digitalProducts || 0,
+              revenue: 0,
+              conversionRate: 0,
+            })),
+            recentFunnels: [],
+            recentActivity: [],
+          }
+        });
       } else {
         const errorData = await usersResponse.json();
         toast.error(`Users API error: ${errorData.error || 'Unknown error'}`);
@@ -116,37 +159,38 @@ export default function SuperAdminDashboard() {
         console.error('Plans API error:', errorData);
       }
 
-      // Load analytics data
-      const analyticsResponse = await fetch('/api/admin/analytics', {
+      // Load additional analytics data (funnels, activity) - run in background
+      fetch('/api/admin/analytics', {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         }
+      }).then(async (analyticsResponse) => {
+        if (analyticsResponse.ok) {
+          const additionalAnalytics = await analyticsResponse.json();
+          console.log('Additional analytics data loaded:', additionalAnalytics);
+          
+          // Merge additional analytics with existing data
+          setAnalyticsData((prev: any) => ({
+            ...prev,
+            overview: {
+              ...prev?.overview,
+              activeFunnels: additionalAnalytics.overview?.activeFunnels || prev?.overview?.activeFunnels || 0,
+              totalFunnels: additionalAnalytics.overview?.totalFunnels || prev?.overview?.totalFunnels || 0,
+              totalProducts: additionalAnalytics.overview?.totalProducts || prev?.overview?.totalProducts || 0,
+            },
+            analytics: {
+              ...prev?.analytics,
+              recentFunnels: additionalAnalytics.analytics?.recentFunnels || [],
+              recentActivity: additionalAnalytics.analytics?.recentActivity || [],
+            }
+          }));
+        } else {
+          console.error('Analytics API failed:', await analyticsResponse.text());
+        }
+      }).catch(error => {
+        console.error('Error loading additional analytics:', error);
       });
-      if (analyticsResponse.ok) {
-        const analyticsData = await analyticsResponse.json();
-        console.log('Analytics data loaded:', analyticsData);
-        setAnalyticsData(analyticsData);
-      } else {
-        console.error('Analytics API failed:', await analyticsResponse.text());
-        // Set empty data to prevent errors
-        setAnalyticsData({
-          overview: {
-            totalUsers: 0,
-            totalFunnels: 0,
-            totalProducts: 0,
-            activeFunnels: 0,
-            totalRevenue: 0,
-            activeUsers: 0,
-            platformHealth: {}
-          },
-          analytics: {
-            topUsers: [],
-            recentFunnels: [],
-            recentActivity: []
-          }
-        });
-      }
 
       // Load platform settings
       const settingsResponse = await fetch('/api/admin/settings');
