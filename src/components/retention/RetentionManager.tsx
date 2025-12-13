@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import ExitIntentPopup from './ExitIntentPopup';
 import EngagementNotifier from './EngagementNotifier';
-import SocialProof from './SocialProof';
+// SocialProof removed - flagged as deceptive content by Google Search Console
+// import SocialProof from './SocialProof';
 import NewsletterPrompt from './NewsletterPrompt';
 
 /**
@@ -74,8 +75,8 @@ export default function RetentionManager() {
       {/* Engagement Notifications - Only on public pages */}
       {!isDashboard && <EngagementNotifier />}
 
-      {/* Social Proof - Only on public pages */}
-      {!isDashboard && <SocialProof />}
+      {/* Social Proof removed - flagged as deceptive content by Google */}
+      {/* {!isDashboard && <SocialProof />} */}
 
       {/* Newsletter Prompt - Only on public pages */}
       {!isDashboard && <NewsletterPrompt />}

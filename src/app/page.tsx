@@ -34,7 +34,8 @@ import Logo from '@/components/Logo';
 import dynamic from 'next/dynamic';
 import { blogPosts } from '@/data/blogs';
 
-const SaleNotifications = dynamic(() => import('@/components/SaleNotifications'), { ssr: false });
+// SaleNotifications removed - flagged as deceptive content by Google Search Console
+// const SaleNotifications = dynamic(() => import('@/components/SaleNotifications'), { ssr: false });
 import {
   PlayIcon as PlayIconSolid,
   ArrowRightIcon as ArrowRightIconSolid
@@ -516,8 +517,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white overflow-hidden">
-      {/* Sale Notifications */}
-      <SaleNotifications />
+      {/* Sale Notifications removed - flagged as deceptive content by Google */}
       
       {/* Custom CSS for Marquee Animations and Carousel */}
       <style dangerouslySetInnerHTML={{
