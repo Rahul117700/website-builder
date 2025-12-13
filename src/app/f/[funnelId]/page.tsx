@@ -468,7 +468,7 @@ export default function PublicFunnelPage() {
   const fontFamily = customizations.fontFamily || 'Inter';
   const headline = customizations.headline || product?.name || funnel.name;
   const subheadline = customizations.subheadline || product?.description || funnel.description || 'Premium digital product';
-  const ctaText = customizations.cta || customizations.buttonText || 'Get Started Now';
+  const ctaText = customizations.cta || customizations.buttonText || 'Buy Now';
   const buttonColor = customizations.buttonColor || '#F4CE14';
   const previewImage = customizations.previewImage || product?.previewUrl || (funnel.template as any)?.previewUrl;
   const additionalImages = customizations.additionalImages || [];

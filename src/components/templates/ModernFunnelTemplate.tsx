@@ -61,7 +61,7 @@ export default function ModernFunnelTemplate({
 
     const headline = customizations.headline || productDetails.name || 'Amazing Digital Product';
     const subheadline = customizations.subheadline || productDetails.description || 'Get instant access to this premium digital product';
-    const cta = customizations.cta || 'Add to Cart';
+    const cta = customizations.cta || customizations.buttonText || 'Buy Now';
 
     const fileUrl = productDetails.fileUrl || '';
     const isVideoProduct = productDetails.type === 'VIDEO';
