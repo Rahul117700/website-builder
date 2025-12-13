@@ -11,20 +11,31 @@ export async function GET(request: Request) {
 
     // Check if user is super admin
     if (!session || session.user.role !== 'SUPER_ADMIN') {
+      console.error('Analytics API: Unauthorized access attempt');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    console.log('Analytics API: Fetching data for super admin');
+
     // Get counts
     const totalUsers = await prisma.user.count();
+    console.log('Total users:', totalUsers);
+    
     const totalFunnels = await prisma.funnel.count();
+    console.log('Total funnels:', totalFunnels);
+    
     const totalProducts = await prisma.digitalProduct.count();
+    console.log('Total products:', totalProducts);
+    
     const activeFunnels = await prisma.funnel.count({
       where: { status: 'ACTIVE' }
     });
+    console.log('Active funnels:', activeFunnels);
     
     const activeUsers = await prisma.user.count({
       where: { status: 'ACTIVE' }
     });
+    console.log('Active users:', activeUsers);
 
     // Get recent funnels with user info
     const recentFunnels = await prisma.funnel.findMany({
@@ -79,7 +90,7 @@ export async function GET(request: Request) {
     const publishedFunnelsRatio = totalFunnels > 0 ? (activeFunnels / totalFunnels) * 100 : 0;
     const activeUsersRatio = totalUsers > 0 ? (activeUsers / totalUsers) * 100 : 0;
 
-    return NextResponse.json({
+    const responseData = {
       overview: {
         totalUsers,
         totalFunnels,
@@ -115,7 +126,10 @@ export async function GET(request: Request) {
           user: funnel.user?.name || 'Unknown',
         })),
       }
-    });
+    };
+
+    console.log('Analytics API: Sending response:', JSON.stringify(responseData, null, 2));
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error('Error fetching analytics:', error);
     return NextResponse.json(
