@@ -34,14 +34,26 @@ export async function GET(request: NextRequest) {
     }
 
     // Get basic platform stats
-    const [totalUsers, totalFunnels, totalRevenue] = await Promise.all([
+    const [totalUsers, totalFunnels, totalProducts, activeFunnels, activeUsers, totalRevenue] = await Promise.all([
       prisma.user.count(),
       prisma.funnel.count(),
+      prisma.digitalProduct.count(),
+      prisma.funnel.count({ where: { status: 'ACTIVE' } }),
+      prisma.user.count({ where: { status: 'ACTIVE' } }),
       prisma.funnelOrder.aggregate({
         _sum: { amount: true },
         where: { status: 'COMPLETED' }
       })
     ]);
+
+    console.log('Health API - Platform Stats:', {
+      totalUsers,
+      totalFunnels,
+      totalProducts,
+      activeFunnels,
+      activeUsers,
+      totalRevenue: totalRevenue._sum.amount
+    });
 
     return NextResponse.json({
       status: 'healthy',
@@ -50,6 +62,9 @@ export async function GET(request: NextRequest) {
       platform: {
         totalUsers,
         totalFunnels,
+        totalProducts,
+        activeFunnels,
+        activeUsers,
         totalRevenue: totalRevenue._sum.amount || 0
       },
       timestamp: new Date().toISOString()

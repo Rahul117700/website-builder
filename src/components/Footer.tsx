@@ -9,12 +9,13 @@ export default function Footer() {
           <span className="text-gray-400">© {new Date().getFullYear()} All rights reserved.</span>
         </div>
         <nav className="flex flex-wrap justify-center gap-6 text-sm font-medium">
-          <Link href="/#features" className="text-gray-300 hover:text-purple-400 transition">Features</Link>
-          <Link href="/#templates" className="text-gray-300 hover:text-purple-400 transition">Templates</Link>
-          <Link href="/#pricing" className="text-gray-300 hover:text-purple-400 transition">Pricing</Link>
-          <Link href="/about" className="text-gray-300 hover:text-purple-400 transition">About Us</Link>
-          <Link href="/terms" className="text-gray-300 hover:text-purple-400 transition">Terms</Link>
-          <Link href="/privacy" className="text-gray-300 hover:text-purple-400 transition">Privacy</Link>
+          <Link href="/product" className="text-gray-300 hover:text-purple-400 transition">Product</Link>
+          <Link href="/features" className="text-gray-300 hover:text-purple-400 transition">Features</Link>
+          <Link href="/pricing" className="text-gray-300 hover:text-purple-400 transition">Pricing</Link>
+          <Link href="/documentation" className="text-gray-300 hover:text-purple-400 transition">Documentation</Link>
+          <Link href="/about" className="text-gray-300 hover:text-purple-400 transition">About</Link>
+          <Link href="/contact" className="text-gray-300 hover:text-purple-400 transition">Contact</Link>
+          <Link href="/blog" className="text-gray-300 hover:text-purple-400 transition">Blog</Link>
         </nav>
         <div className="flex gap-4 justify-center">
           <a href="https://github.com/" target="_blank" rel="noopener" className="text-gray-400 hover:text-white transition">

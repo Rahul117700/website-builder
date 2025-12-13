@@ -210,7 +210,28 @@ export default function SuperAdminDashboard() {
       const healthResponse = await fetch('/api/admin/health');
       if (healthResponse.ok) {
         const healthData = await healthResponse.json();
+        console.log('System health data loaded:', healthData);
         setSystemHealth(healthData);
+        
+        // Use system health data for overview if analytics data is not available
+        if (healthData.platform) {
+          setAnalyticsData((prev: any) => ({
+            overview: {
+              totalUsers: healthData.platform.totalUsers || prev?.overview?.totalUsers || 0,
+              totalFunnels: healthData.platform.totalFunnels || prev?.overview?.totalFunnels || 0,
+              totalProducts: healthData.platform.totalProducts || prev?.overview?.totalProducts || 0,
+              activeFunnels: healthData.platform.activeFunnels || prev?.overview?.activeFunnels || 0,
+              totalRevenue: healthData.platform.totalRevenue || prev?.overview?.totalRevenue || 0,
+              activeUsers: healthData.platform.activeUsers || prev?.overview?.activeUsers || 0,
+              platformHealth: prev?.overview?.platformHealth || {}
+            },
+            analytics: prev?.analytics || {
+              topUsers: [],
+              recentFunnels: [],
+              recentActivity: []
+            }
+          }));
+        }
       }
 
       // Load metrics
