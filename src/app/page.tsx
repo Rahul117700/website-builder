@@ -35,6 +35,7 @@ import dynamic from 'next/dynamic';
 import { blogPosts } from '@/data/blogs';
 
 const ProductTour = dynamic(() => import('@/components/ProductTour'), { ssr: false });
+const SaleNotifications = dynamic(() => import('@/components/SaleNotifications'), { ssr: false });
 import {
   PlayIcon as PlayIconSolid,
   ArrowRightIcon as ArrowRightIconSolid
@@ -538,6 +539,9 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white overflow-hidden">
+      {/* Sale Notifications */}
+      <SaleNotifications />
+      
       {/* Custom CSS for Marquee Animations and Carousel */}
       <style dangerouslySetInnerHTML={{
         __html: `

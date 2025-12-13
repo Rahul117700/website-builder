@@ -150,6 +150,8 @@
 - ✅ Code splitting
 - ✅ Lazy loading components
 - ✅ Database query optimization
+
+
 - ✅ Caching strategies
 - ✅ Static asset caching (31536000s)
 

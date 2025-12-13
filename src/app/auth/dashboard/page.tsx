@@ -1,6 +1,7 @@
 'use client';
 
 import DashboardLayout from '@/components/layouts/dashboard-layout';
+import DashboardOnboardingTour from '@/components/DashboardOnboardingTour';
 import { useState, useEffect, useRef } from 'react';
 import {
   ChartBarIcon,
@@ -279,6 +280,9 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout>
+      {/* Onboarding Tour */}
+      <DashboardOnboardingTour />
+      
       <div className="w-full h-screen m-0 p-4 sm:p-6 space-y-4 sm:space-y-6 bg-gray-50 overflow-y-auto">
         {/* Header */}
         <div ref={heroRef} data-tour="dashboard-header">
