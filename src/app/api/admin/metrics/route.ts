@@ -15,35 +15,25 @@ export async function GET(request: NextRequest) {
     // Get total users
     const totalUsers = await prisma.user.count();
 
-    // Get total revenue from transactions
-    const revenueData = await prisma.transaction.aggregate({
-      where: {
-        status: 'COMPLETED'
-      },
-      _sum: {
-        amount: true
-      }
-    });
-
-    // Get active sites
-    const activeSites = await prisma.site.count({
+    // Get total funnels
+    const totalFunnels = await prisma.funnel.count();
+    
+    // Get active funnels
+    const activeFunnels = await prisma.funnel.count({
       where: {
         status: 'ACTIVE'
       }
     });
 
-    // Get total instances
-    const totalInstances = await prisma.instance.count();
-
-    // Get allocated instances
-    const allocatedInstances = await prisma.instance.count({
+    // Get total products
+    const totalProducts = await prisma.digitalProduct.count();
+    
+    // Get newsletter subscribers
+    const totalSubscribers = await prisma.newsletterSubscription.count({
       where: {
-        status: 'ALLOCATED'
+        status: 'ACTIVE'
       }
     });
-
-    // Get total domains
-    const totalDomains = await prisma.domain.count();
 
     // Get recent users (last 30 days)
     const thirtyDaysAgo = new Date();
@@ -57,32 +47,25 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Get recent revenue (last 30 days)
-    const recentRevenue = await prisma.transaction.aggregate({
+    // Get recent funnels (last 30 days)
+    const recentFunnels = await prisma.funnel.count({
       where: {
-        status: 'COMPLETED',
         createdAt: {
           gte: thirtyDaysAgo
         }
-      },
-      _sum: {
-        amount: true
       }
     });
 
-    // Calculate conversion rate (simplified)
-    const conversionRate = totalUsers > 0 ? (recentUsers / totalUsers) * 100 : 0;
-
     const summary = {
       totalUsers,
-      totalRevenue: revenueData._sum.amount || 0,
-      recentRevenue: recentRevenue._sum.amount || 0,
-      activeSites,
-      totalInstances,
-      allocatedInstances,
-      totalDomains,
+      totalFunnels,
+      totalProducts,
+      activeFunnels,
+      totalSubscribers,
       recentUsers,
-      conversionRate: Math.round(conversionRate * 10) / 10
+      recentFunnels,
+      totalRevenue: 0, // Placeholder - add order tracking later
+      conversionRate: totalUsers > 0 ? Math.round((recentUsers / totalUsers) * 100 * 10) / 10 : 0
     };
 
     return NextResponse.json({ summary });

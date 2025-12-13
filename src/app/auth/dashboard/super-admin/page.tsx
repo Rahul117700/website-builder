@@ -181,7 +181,7 @@ export default function SuperAdminDashboard() {
   const loadPageAnalytics = async () => {
     try {
       setAnalyticsLoading(true);
-      const response = await fetch('/api/admin/analytics?days=30');
+      const response = await fetch('/api/admin/page-analytics?days=30');
       if (response.ok) {
         const data = await response.json();
         setPageAnalytics(data);
@@ -495,7 +495,12 @@ export default function SuperAdminDashboard() {
               <div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-6">Platform Overview</h3>
                 
-                {analyticsData?.overview ? (
+                {loading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading platform data...</p>
+                  </div>
+                ) : (
                   <div className="space-y-6">
                     {/* Key Metrics Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 sm:gap-6">
@@ -503,7 +508,7 @@ export default function SuperAdminDashboard() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-blue-100 text-sm">Total Users</p>
-                            <p className="text-2xl sm:text-3xl font-bold">{analyticsData.overview.totalUsers}</p>
+                            <p className="text-2xl sm:text-3xl font-bold">{analyticsData?.overview?.totalUsers || 0}</p>
                           </div>
                           <UsersIcon className="h-8 w-8 text-blue-200" />
                         </div>
@@ -513,7 +518,7 @@ export default function SuperAdminDashboard() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-indigo-100 text-sm">Total Revenue</p>
-                            <p className="text-2xl sm:text-3xl font-bold">₹{analyticsData.overview.totalRevenue.toLocaleString()}</p>
+                            <p className="text-2xl sm:text-3xl font-bold">₹{(analyticsData?.overview?.totalRevenue || 0).toLocaleString()}</p>
                           </div>
                           <CreditCardIcon className="h-8 w-8 text-indigo-200" />
                         </div>
@@ -522,8 +527,8 @@ export default function SuperAdminDashboard() {
                       <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 sm:p-6 text-white">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-green-100 text-sm">Subscription Revenue</p>
-                            <p className="text-2xl sm:text-3xl font-bold">₹{analyticsData.overview.subscriptionRevenue.toLocaleString()}</p>
+                            <p className="text-green-100 text-sm">Total Products</p>
+                            <p className="text-2xl sm:text-3xl font-bold">{analyticsData?.overview?.totalProducts || 0}</p>
                           </div>
                           <CreditCardIcon className="h-8 w-8 text-green-200" />
                         </div>
@@ -532,8 +537,8 @@ export default function SuperAdminDashboard() {
                       <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl p-4 sm:p-6 text-white">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-emerald-100 text-sm">Transaction Revenue</p>
-                            <p className="text-2xl sm:text-3xl font-bold">₹{analyticsData.overview.transactionRevenue.toLocaleString()}</p>
+                            <p className="text-emerald-100 text-sm">Active Funnels</p>
+                            <p className="text-2xl sm:text-3xl font-bold">{analyticsData?.overview?.activeFunnels || 0}</p>
                           </div>
                           <ChartBarIcon className="h-8 w-8 text-emerald-200" />
                         </div>
@@ -543,7 +548,7 @@ export default function SuperAdminDashboard() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-purple-100 text-sm">Total Funnels</p>
-                            <p className="text-2xl sm:text-3xl font-bold">{analyticsData.overview.totalFunnels}</p>
+                            <p className="text-2xl sm:text-3xl font-bold">{analyticsData?.overview?.totalFunnels || 0}</p>
                           </div>
                           <ChartBarIcon className="h-8 w-8 text-purple-200" />
                         </div>
@@ -553,7 +558,7 @@ export default function SuperAdminDashboard() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-orange-100 text-sm">Active Users</p>
-                            <p className="text-2xl sm:text-3xl font-bold">{analyticsData.overview.activeUsers}</p>
+                            <p className="text-2xl sm:text-3xl font-bold">{analyticsData?.overview?.activeUsers || 0}</p>
                           </div>
                           <CheckCircleIcon className="h-8 w-8 text-orange-200" />
                         </div>
@@ -565,19 +570,19 @@ export default function SuperAdminDashboard() {
                       <h4 className="text-lg font-semibold text-gray-900 mb-4">Platform Health</h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-green-600">{analyticsData.overview.platformHealth?.activeUsersRatio?.toFixed(1) || 0}%</p>
+                          <p className="text-2xl font-bold text-green-600">{analyticsData?.overview?.platformHealth?.activeUsersRatio?.toFixed(1) || 0}%</p>
                           <p className="text-sm text-gray-600">Active Users</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-blue-600">{analyticsData.overview.platformHealth?.publishedFunnelsRatio?.toFixed(1) || 0}%</p>
+                          <p className="text-2xl font-bold text-blue-600">{analyticsData?.overview?.platformHealth?.publishedFunnelsRatio?.toFixed(1) || 0}%</p>
                           <p className="text-sm text-gray-600">Published Funnels</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-purple-600">₹{analyticsData.overview.platformHealth?.averageRevenuePerUser?.toFixed(0) || 0}</p>
+                          <p className="text-2xl font-bold text-purple-600">₹{analyticsData?.overview?.platformHealth?.averageRevenuePerUser?.toFixed(0) || 0}</p>
                           <p className="text-sm text-gray-600">Avg Revenue/User</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-orange-600">{analyticsData.overview.platformHealth?.conversionRate?.toFixed(1) || 0}%</p>
+                          <p className="text-2xl font-bold text-orange-600">{analyticsData?.overview?.platformHealth?.conversionRate?.toFixed(1) || 0}%</p>
                           <p className="text-sm text-gray-600">Conversion Rate</p>
                         </div>
                       </div>
@@ -587,7 +592,7 @@ export default function SuperAdminDashboard() {
                     <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
                       <h4 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h4>
                       <div className="space-y-3">
-                        {analyticsData.analytics?.recentActivity?.slice(0, 5).map((activity: any, index: number) => (
+                        {analyticsData?.analytics?.recentActivity?.slice(0, 5).map((activity: any, index: number) => (
                           <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
                             <div>
                               <p className="text-sm font-medium text-gray-900">
@@ -600,13 +605,13 @@ export default function SuperAdminDashboard() {
                             <span className="text-xs text-green-600 font-medium">Completed</span>
                           </div>
                         ))}
+                        {(!analyticsData?.analytics?.recentActivity || analyticsData.analytics.recentActivity.length === 0) && (
+                          <div className="text-center py-6 text-gray-500 text-sm">
+                            No recent activity yet
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading platform overview...</p>
                   </div>
                 )}
               </div>
@@ -1143,7 +1148,12 @@ export default function SuperAdminDashboard() {
               <div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-6">Detailed Analytics</h3>
                 
-                {analyticsData ? (
+                {loading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading analytics data...</p>
+                  </div>
+                ) : (
                   <div className="space-y-6">
                     {/* Top Performing Users */}
                     <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
@@ -1160,13 +1170,13 @@ export default function SuperAdminDashboard() {
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
-                            {analyticsData.analytics?.topUsers?.slice(0, 10).map((user: any) => (
+                            {analyticsData?.analytics?.topUsers?.slice(0, 10).map((user: any) => (
                               <tr key={user.id}>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="flex items-center">
                                     <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
                                       <span className="text-purple-600 font-medium text-sm">
-                                        {user.name?.charAt(0) || user.email.charAt(0)}
+                                        {user.name?.charAt(0) || user.email?.charAt(0) || 'U'}
                                       </span>
                                     </div>
                                     <div className="ml-4">
@@ -1176,16 +1186,16 @@ export default function SuperAdminDashboard() {
                                   </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  ₹{user.metrics?.totalRevenue?.toLocaleString() || 0}
+                                  ₹{user.revenue?.toLocaleString() || 0}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {user.metrics?.publishedFunnels || 0}/{user.metrics?.totalFunnels || 0}
+                                  {user.funnels || 0}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {user.metrics?.conversionRate?.toFixed(2) || 0}%
+                                  {user.conversionRate?.toFixed(2) || 0}%
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {user.metrics?.totalProducts || 0}
+                                  {user.products || 0}
                                 </td>
                               </tr>
                             ))}
@@ -1210,30 +1220,30 @@ export default function SuperAdminDashboard() {
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
-                            {analyticsData.analytics?.topFunnels?.slice(0, 10).map((funnel: any) => (
+                            {analyticsData?.analytics?.recentFunnels?.slice(0, 10).map((funnel: any) => (
                               <tr key={funnel.id}>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="text-sm font-medium text-gray-900">{funnel.name}</div>
                                   <div className="text-sm text-gray-500">{new Date(funnel.createdAt).toLocaleDateString()}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm text-gray-900">{funnel.user?.name || 'Unknown'}</div>
-                                  <div className="text-sm text-gray-500">{funnel.user?.email}</div>
+                                  <div className="text-sm text-gray-900">{funnel.userName || 'Unknown'}</div>
+                                  <div className="text-sm text-gray-500">{funnel.userEmail}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  ₹{funnel.revenue?.toLocaleString() || 0}
+                                  ₹{funnel.productPrice?.toLocaleString() || 0}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {funnel.visitors?.toLocaleString() || 0}
+                                  0
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {funnel.conversions?.toLocaleString() || 0}
+                                  0
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                    funnel.published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                                    funnel.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                                   }`}>
-                                    {funnel.published ? 'Published' : 'Draft'}
+                                    {funnel.status}
                                   </span>
                                 </td>
                               </tr>
@@ -1265,11 +1275,15 @@ export default function SuperAdminDashboard() {
                         </div>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading analytics data...</p>
+                    
+                    {/* No data message */}
+                    {(!analyticsData?.analytics?.topUsers || analyticsData.analytics.topUsers.length === 0) && (
+                      <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+                        <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400" />
+                        <p className="mt-2 text-gray-600">No analytics data yet</p>
+                        <p className="text-sm text-gray-500 mt-1">Data will appear as users create funnels</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
