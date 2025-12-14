@@ -1,7 +1,6 @@
 import './globals.css';
 import { Inter } from 'next/font/google';
 import { Providers } from '@/components/providers';
-import GoogleAnalytics from '@/components/analytics/google-analytics';
 import FacebookPixel from '@/components/analytics/FacebookPixel';
 import RetentionManager from '@/components/retention/RetentionManager';
 import PageViewTracker from '@/components/PageViewTracker';
@@ -62,6 +61,19 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Google tag (gtag.js) */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-KMVVHTV8MX"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-KMVVHTV8MX');
+            `,
+          }}
+        />
+
         {/* Structured Data */}
         <script
           type="application/ld+json"
@@ -86,7 +98,6 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} font-sans`}>
         <Providers>
-          <GoogleAnalytics />
           <FacebookPixel />
           <PageViewTracker />
           <RetentionManager />
