@@ -853,6 +853,26 @@ export default function FunnelsDashboard() {
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.log('Error response:', errorData);
+        
+        // Check if payment gateway needs to be configured
+        if (errorData.requiresRazorpaySetup) {
+          toast.error(
+            <div>
+              <p className="font-semibold">Payment Gateway Required</p>
+              <p className="text-sm">{errorData.message || 'Please configure Razorpay to receive payments'}</p>
+            </div>,
+            { 
+              duration: 6000,
+              icon: '💳',
+            }
+          );
+          // Redirect to Razorpay setup after showing the message
+          setTimeout(() => {
+            window.location.href = errorData.setupUrl || '/auth/dashboard/razorpay-setup';
+          }, 2000);
+          return;
+        }
+        
         if (errorData.requiresUpgrade && errorData.error === 'Free tier limit reached') {
           // Show upgrade modal
           console.log('Showing upgrade modal');

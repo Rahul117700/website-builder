@@ -115,3 +115,4 @@ export default function CategoryBrowser({ categories }: CategoryBrowserProps) {
     </section>
   );
 }
+

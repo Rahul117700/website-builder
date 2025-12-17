@@ -72,6 +72,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
+    // Check if payment is configured (user Razorpay config or platform config)
+    const userRazorpayConfig = await prisma.razorpayConfig.findFirst({
+      where: { 
+        userId: user.id,
+        isActive: true 
+      }
+    });
+
+    const platformRazorpayConfig = await prisma.platformRazorpayConfig.findFirst({
+      where: { isActive: true }
+    });
+
+    // Check env variables as fallback
+    const hasEnvRazorpay = process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET;
+
+    if (!userRazorpayConfig && !platformRazorpayConfig && !hasEnvRazorpay) {
+      return NextResponse.json({ 
+        error: 'Payment gateway not configured',
+        message: 'Please configure your Razorpay payment gateway in Settings → Razorpay Setup before creating funnels. This is required to receive payments from customers.',
+        requiresRazorpaySetup: true,
+        setupUrl: '/auth/dashboard/razorpay-setup'
+      }, { status: 403 });
+    }
+
     // Check user's subscription status
     const activeSubscription = await prisma.userSubscription.findFirst({
       where: {

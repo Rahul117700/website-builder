@@ -44,14 +44,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get platform Razorpay config
-    const platformConfig = await prisma.platformRazorpayConfig.findFirst({
+    // Get platform Razorpay config from database or fallback to env variables
+    let platformConfig = await prisma.platformRazorpayConfig.findFirst({
       where: { isActive: true }
     });
 
+    // If no config in database, create one from environment variables
+    if (!platformConfig && process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+      console.log('Creating platform Razorpay config from environment variables...');
+      platformConfig = await prisma.platformRazorpayConfig.create({
+        data: {
+          keyId: process.env.RAZORPAY_KEY_ID,
+          keySecret: process.env.RAZORPAY_KEY_SECRET,
+          accountId: process.env.RAZORPAY_ACCOUNT_ID || 'platform',
+          webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET,
+          environment: process.env.NODE_ENV === 'production' ? 'live' : 'test',
+          isActive: true
+        }
+      });
+      console.log('✅ Platform Razorpay config created successfully');
+    }
+
     if (!platformConfig) {
       return NextResponse.json(
-        { error: 'Payment system not configured' },
+        { error: 'Payment system not configured. Please add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to your environment variables.' },
         { status: 500 }
       );
     }
