@@ -144,6 +144,11 @@ const nextConfig = {
   experimental: {
     serverActions: true,
   },
+  
+  // Configure for large file uploads (500MB)
+  serverRuntimeConfig: {
+    maxFileSize: 500 * 1024 * 1024, // 500MB
+  },
 };
 
 module.exports = nextConfig;

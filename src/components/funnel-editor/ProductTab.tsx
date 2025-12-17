@@ -147,7 +147,52 @@ export default function ProductTab({
     };
 
     return (
-        <div className="space-y-4" data-tour="product-tab">
+        <>
+            {/* Upload Progress Overlay */}
+            {uploadingFile && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
+                    <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 animate-scale-in">
+                        <div className="text-center">
+                            {/* Animated Upload Icon */}
+                            <div className="relative mb-6">
+                                <div className="animate-spin rounded-full h-20 w-20 border-4 border-purple-200 border-t-purple-600 mx-auto"></div>
+                                <ArrowUpTrayIcon className="w-10 h-10 text-purple-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+                            </div>
+
+                            {/* Upload Status */}
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Uploading Product</h3>
+                            <p className="text-sm text-gray-600 mb-4">Please wait while we upload your file...</p>
+
+                            {/* Progress Bar */}
+                            <div className="mb-4">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm font-medium text-gray-700">Progress</span>
+                                    <span className="text-sm font-bold text-purple-600">{uploadProgress}%</span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                                    <div
+                                        className="bg-gradient-to-r from-purple-600 to-pink-600 h-3 rounded-full transition-all duration-300 ease-out"
+                                        style={{ width: `${uploadProgress}%` }}
+                                    ></div>
+                                </div>
+                            </div>
+
+                            {/* File Info */}
+                            {productDetails.file && (
+                                <div className="mt-4 p-3 bg-purple-50 rounded-lg">
+                                    <p className="text-xs text-gray-600 mb-1">Uploading:</p>
+                                    <p className="text-sm font-medium text-gray-900 truncate">{productDetails.name}</p>
+                                </div>
+                            )}
+
+                            {/* Don't close warning */}
+                            <p className="text-xs text-gray-500 mt-4">⚠️ Please don't close this window</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="space-y-4" data-tour="product-tab">
             <div>
                 <label className="block text-sm font-medium text-black mb-2">
                     Product Name <span className="text-red-500">*</span>
@@ -268,26 +313,13 @@ export default function ProductTab({
                             if (fileInput) fileInput.click();
                         }}
                     >
-                        {uploadingFile ? (
-                            <div className="text-center w-full">
-                                <div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-200 border-t-purple-600 mx-auto mb-2"></div>
-                                <p className="text-xs font-medium text-purple-700">Uploading... {uploadProgress}%</p>
-                                <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
-                                    <div
-                                        className="bg-purple-600 h-1.5 rounded-full transition-all duration-300"
-                                        style={{ width: `${uploadProgress}%` }}
-                                    ></div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center">
-                                <ArrowUpTrayIcon className="w-8 h-8 text-gray-400 mb-2" />
-                                <p className="text-xs font-medium text-black">Click to upload file</p>
-                                <p className="text-xs text-black font-semibold text-green-600">Max 500MB (Videos Supported!)</p>
-                                <p className="text-xs text-gray-500 mt-1">ZIP, PDF, Images, Videos, Documents</p>
-                                <p className="text-xs text-gray-400 mt-1">Supported: .mp4, .webm, .avi, .mov, .zip, .pdf, .jpg, .png</p>
-                            </div>
-                        )}
+                        <div className="flex flex-col items-center justify-center">
+                            <ArrowUpTrayIcon className="w-8 h-8 text-gray-400 mb-2" />
+                            <p className="text-xs font-medium text-black">Click to upload file</p>
+                            <p className="text-xs text-black font-semibold text-green-600">Max 500MB (Videos Supported!)</p>
+                            <p className="text-xs text-gray-500 mt-1">ZIP, PDF, Images, Videos, Documents</p>
+                            <p className="text-xs text-gray-400 mt-1">Supported: .mp4, .webm, .avi, .mov, .zip, .pdf, .jpg, .png</p>
+                        </div>
                         <input
                             type="file"
                             className="hidden"
@@ -300,5 +332,6 @@ export default function ProductTab({
                 )}
             </div>
         </div >
+        </>
     );
 }

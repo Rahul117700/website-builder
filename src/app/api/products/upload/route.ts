@@ -8,6 +8,10 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { uploadFileWithFallback, hasS3Credentials, getUploadStatusMessage } from '@/lib/s3';
 
+// Configure route for large file uploads
+export const runtime = 'nodejs';
+export const maxDuration = 300; // 5 minutes
+
 // POST /api/products/upload - Upload digital product file
 export async function POST(request: NextRequest) {
   try {
