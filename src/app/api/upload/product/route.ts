@@ -37,9 +37,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Validate file size (max 100MB for products)
-    if (file.size > 100 * 1024 * 1024) {
-      return NextResponse.json({ error: 'File size must be less than 100MB' }, { status: 400 });
+    // Validate file size (max 500MB for products)
+    if (file.size > 500 * 1024 * 1024) {
+      return NextResponse.json({ error: 'File size must be less than 500MB' }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();

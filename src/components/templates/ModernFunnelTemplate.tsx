@@ -64,7 +64,7 @@ export default function ModernFunnelTemplate({
     const cta = customizations.cta || customizations.buttonText || 'Buy Now';
 
     const fileUrl = productDetails.fileUrl || '';
-    const isVideoProduct = productDetails.type === 'VIDEO';
+    const isVideoProduct = productDetails.type === 'VIDEOS' || productDetails.type === 'VIDEO';
     const previewImage = customizations.previewImage || '';
 
     const showCountdown = customizations.showCountdown && customizations.countdownDate;

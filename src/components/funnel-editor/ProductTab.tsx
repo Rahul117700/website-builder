@@ -68,8 +68,12 @@ export default function ProductTab({
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // File size validation (500MB limit)
+        const fileSize = file.size / (1024 * 1024); // Convert to MB
         if (file.size > 500 * 1024 * 1024) {
-            toast.error('File must be less than 500MB');
+            toast.error(`File size is ${fileSize.toFixed(2)}MB. Maximum allowed is 500MB. Please compress or reduce the file size.`, {
+                duration: 5000,
+            });
             return;
         }
 
@@ -279,8 +283,9 @@ export default function ProductTab({
                             <div className="flex flex-col items-center justify-center">
                                 <ArrowUpTrayIcon className="w-8 h-8 text-gray-400 mb-2" />
                                 <p className="text-xs font-medium text-black">Click to upload file</p>
-                                <p className="text-xs text-black">Max 500MB</p>
+                                <p className="text-xs text-black font-semibold text-green-600">Max 500MB (Videos Supported!)</p>
                                 <p className="text-xs text-gray-500 mt-1">ZIP, PDF, Images, Videos, Documents</p>
+                                <p className="text-xs text-gray-400 mt-1">Supported: .mp4, .webm, .avi, .mov, .zip, .pdf, .jpg, .png</p>
                             </div>
                         )}
                         <input

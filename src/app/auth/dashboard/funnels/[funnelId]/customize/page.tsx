@@ -77,6 +77,7 @@ export default function FunnelCustomizer() {
   const [selectedTab, setSelectedTab] = useState('Link'); // Tab selection
   const [embedHtml, setEmbedHtml] = useState(''); // Actual embed code
   const [showMobilePreview, setShowMobilePreview] = useState(false);
+  const [mobileViewMode, setMobileViewMode] = useState<'edit' | 'preview'>('edit'); // For floating button toggle
   const [publishing, setPublishing] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
@@ -338,15 +339,6 @@ export default function FunnelCustomizer() {
           </div>
 
           <div className="flex items-center justify-end gap-3 w-full md:w-auto">
-            {/* Mobile Preview Toggle */}
-            <button
-              onClick={() => setShowMobilePreview(true)}
-              className="lg:hidden p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-              title="Preview Funnel"
-            >
-              <EyeIcon className="w-5 h-5" />
-            </button>
-
             {/* View Live Button */}
             {funnel?.status === 'ACTIVE' && funnel?.url && (
               <a
@@ -400,8 +392,10 @@ export default function FunnelCustomizer() {
         {/* Main Content Area */}
         <div className="flex flex-col lg:flex-row items-stretch justify-between flex-1 overflow-hidden relative">
 
-          {/* Left Sidebar - Editor */}
-          <div className="w-full lg:w-[400px] flex flex-col h-full bg-white border-r border-gray-200 z-10 shadow-sm shrink-0">
+          {/* Left Sidebar - Editor (Hidden on mobile when in preview mode) */}
+          <div className={`w-full lg:w-[400px] flex flex-col h-full bg-white border-r border-gray-200 z-10 shadow-sm shrink-0 ${
+            mobileViewMode === 'preview' ? 'hidden lg:flex' : 'flex'
+          }`}>
             {/* Tabs Navigation */}
             <div className="flex border-b border-gray-200 overflow-x-auto scrollbar-hide shrink-0">
               {tabs.map((tab) => {
@@ -485,9 +479,11 @@ export default function FunnelCustomizer() {
             </div>
           </div>
 
-          {/* Preview Panel - Desktop (Hidden on mobile) */}
+          {/* Preview Panel - Shows on mobile when mobileViewMode is 'preview', always shows on desktop */}
           {showPreview && (
-            <div className="hidden lg:flex flex-1 overflow-y-auto bg-gray-100 p-4 h-full relative flex-col no-scrollbar" data-tour="preview-panel">
+            <div className={`flex-1 overflow-y-auto bg-gray-100 p-4 h-full relative flex-col no-scrollbar ${
+              mobileViewMode === 'preview' ? 'flex' : 'hidden lg:flex'
+            }`} data-tour="preview-panel">
               <div className={`mx-auto transition-all duration-300 ${previewMode === 'mobile' ? 'w-[375px]' :
                 previewMode === 'tablet' ? 'w-[768px]' : 'w-full'
                 }`}>
@@ -546,52 +542,27 @@ export default function FunnelCustomizer() {
               </div>
             </div>
           )}
+
+          {/* Floating Toggle Button - Mobile Only - Centered at Bottom */}
+          <button
+            onClick={() => setMobileViewMode(mobileViewMode === 'preview' ? 'edit' : 'preview')}
+            className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 bg-purple-600 text-white rounded-full shadow-lg hover:bg-purple-700 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
+            title={mobileViewMode === 'preview' ? 'Show Edit Panel' : 'Show Preview'}
+          >
+            {mobileViewMode === 'preview' ? (
+              <>
+                <PaintBrushIcon className="w-5 h-5" />
+                <span className="text-sm font-semibold">Edit Options</span>
+              </>
+            ) : (
+              <>
+                <EyeIcon className="w-5 h-5" />
+                <span className="text-sm font-semibold">Preview Funnel</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
-
-      {/* Mobile Preview Modal */}
-      {showMobilePreview && (
-        <div className="fixed inset-0 bg-white z-[100] flex flex-col animate-slide-up">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white shrink-0">
-            <h3 className="font-bold text-gray-900 flex items-center gap-2">
-              <EyeIcon className="w-5 h-5 text-purple-600" />
-              Mobile Preview
-            </h3>
-            <button
-              onClick={() => setShowMobilePreview(false)}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <XMarkIcon className="w-6 h-6 text-gray-500" />
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto bg-gray-100 p-0 md:p-4">
-            <div className="max-w-md mx-auto bg-white min-h-full shadow-lg md:rounded-xl overflow-hidden border-x md:border border-gray-200">
-              <FunnelPreviewLayout
-                key={showMobilePreview ? 'mobile-preview' : 'hidden'}
-                funnel={{
-                  ...funnel,
-                  product: {
-                    ...productDetails,
-                    fileUrl: productDetails.fileUrl,
-                    name: productDetails.name,
-                    description: productDetails.description,
-                    price: productDetails.price,
-                    type: productDetails.type,
-                  },
-                }}
-                customizations={customizations}
-                sellerInfo={sellerInfo}
-                productDetails={{
-                  ...productDetails,
-                  fileUrl: productDetails.fileUrl,
-                }}
-                previewMode="mobile"
-                isPreview={true}
-              />
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Share Modal */}
       {showShareModal && (
