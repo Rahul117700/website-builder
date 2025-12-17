@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile, mkdir, unlink } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { uploadFileWithFallback, hasS3Credentials, getUploadStatusMessage } from '@/lib/s3';
@@ -88,6 +88,57 @@ export async function POST(request: NextRequest) {
     console.error('Error uploading profile image:', error);
     return NextResponse.json(
       { error: 'Failed to upload profile image', details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Get current image URL
+    const currentImageUrl = user.image;
+
+    // Delete file from local storage if it exists
+    if (currentImageUrl && currentImageUrl.startsWith('/uploads/profile-images/')) {
+      try {
+        const filePath = join(process.cwd(), 'public', currentImageUrl);
+        if (existsSync(filePath)) {
+          await unlink(filePath);
+        }
+      } catch (deleteError) {
+        console.error('Error deleting file:', deleteError);
+        // Continue even if file deletion fails
+      }
+    }
+
+    // Update user's profile image URL to null in the database
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { image: null },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Profile image removed successfully',
+    });
+  } catch (error) {
+    console.error('Error removing profile image:', error);
+    return NextResponse.json(
+      { error: 'Failed to remove profile image', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

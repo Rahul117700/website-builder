@@ -1,0 +1,8 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Black background with rounded corners -->
+  <rect width="128" height="128" rx="24" fill="#000000"/>
+  
+  <!-- SED text in white, centered -->
+  <text x="64" y="82" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#FFFFFF" text-anchor="middle">SED</text>
+</svg>
+

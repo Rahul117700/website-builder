@@ -80,10 +80,13 @@ export default function SettingsPage() {
           imageUrl = imageUrl.replace('/public', '');
         }
         
+        // Add cache-busting for image preview
+        const imagePreview = imageUrl ? `${imageUrl}?t=${Date.now()}` : '';
+        
         setUserName(profileData.name || '');
         setUserEmail(profileData.email || '');
         setUserImage(imageUrl);
-        setUserImagePreview(imageUrl);
+        setUserImagePreview(imagePreview);
         setUserPhone(profileData.phone || '');
         setUserWebsite(profileData.website || '');
         setUserRole(profileData.role || 'USER');
@@ -151,8 +154,11 @@ export default function SettingsPage() {
           imageUrl = imageUrl.replace('/public', '');
         }
         
+        // Add cache-busting timestamp for immediate preview
+        const cacheBuster = `?t=${Date.now()}`;
+        
         setUserImage(imageUrl);
-        setUserImagePreview(imageUrl);
+        setUserImagePreview(imageUrl + cacheBuster);
         setProfileImageUploadMessage({ 
           type: 'success', 
           text: data.message || 'Profile image uploaded successfully!' 
@@ -177,6 +183,50 @@ export default function SettingsPage() {
         text: 'Failed to upload profile image. Please try again.' 
       });
       setUserImagePreview(userImage);
+    } finally {
+      setUploadingProfileImage(false);
+    }
+  };
+
+  const handleRemoveProfileImage = async () => {
+    if (!confirm('Are you sure you want to remove your profile image?')) {
+      return;
+    }
+
+    try {
+      setUploadingProfileImage(true);
+      setProfileImageUploadMessage(null);
+
+      const response = await fetch('/api/upload/profile-image', {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setUserImage('');
+        setUserImagePreview('');
+        setProfileImageUploadMessage({ 
+          type: 'success', 
+          text: 'Profile image removed successfully!' 
+        });
+        
+        // Reload profile
+        setTimeout(() => {
+          loadUserProfile();
+        }, 500);
+      } else {
+        setProfileImageUploadMessage({ 
+          type: 'error', 
+          text: data.error || 'Failed to remove profile image' 
+        });
+      }
+    } catch (error) {
+      console.error('Error removing profile image:', error);
+      setProfileImageUploadMessage({ 
+        type: 'error', 
+        text: 'Failed to remove profile image. Please try again.' 
+      });
     } finally {
       setUploadingProfileImage(false);
     }
@@ -454,19 +504,31 @@ export default function SettingsPage() {
                           </div>
                           {/* File Input */}
                           <div className="flex-1">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleProfileImageUpload}
-                              disabled={uploadingProfileImage}
-                              className="block w-full text-sm text-gray-500
-                                file:mr-4 file:py-2 file:px-4
-                                file:rounded-full file:border-0
-                                file:text-sm file:font-semibold
-                                file:bg-purple-50 file:text-purple-700
-                                hover:file:bg-purple-100
-                                disabled:opacity-50 disabled:cursor-not-allowed"
-                            />
+                            <div className="flex gap-2 items-start">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleProfileImageUpload}
+                                disabled={uploadingProfileImage}
+                                className="block flex-1 text-sm text-gray-500
+                                  file:mr-4 file:py-2 file:px-4
+                                  file:rounded-full file:border-0
+                                  file:text-sm file:font-semibold
+                                  file:bg-purple-50 file:text-purple-700
+                                  hover:file:bg-purple-100
+                                  disabled:opacity-50 disabled:cursor-not-allowed"
+                              />
+                              {userImagePreview && (
+                                <button
+                                  onClick={handleRemoveProfileImage}
+                                  disabled={uploadingProfileImage}
+                                  className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-full hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                  title="Remove profile image"
+                                >
+                                  Remove
+                                </button>
+                              )}
+                            </div>
                             {profileImageUploadMessage && (
                               <p className={`mt-2 text-sm ${profileImageUploadMessage.type === 'error' ? 'text-red-600' : 'text-green-600'}`}>
                                 {profileImageUploadMessage.text}

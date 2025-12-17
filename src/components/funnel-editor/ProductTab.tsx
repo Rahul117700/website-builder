@@ -27,6 +27,7 @@ export default function ProductTab({
     const [uploadingFile, setUploadingFile] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [deletingFile, setDeletingFile] = useState(false);
 
     const handleAiGenerate = async (type: string, currentContent: string) => {
         if (!productDetails.name) {
@@ -143,6 +144,46 @@ export default function ProductTab({
         } finally {
             setUploadingFile(false);
             setUploadProgress(0);
+        }
+    };
+
+    const handleRemoveProductFile = async () => {
+        if (!confirm('Are you sure you want to remove this product file? This will delete the file from storage.')) {
+            return;
+        }
+
+        try {
+            setDeletingFile(true);
+
+            // Get the file URL to delete
+            const fileUrl = productDetails.fileUrl;
+
+            if (fileUrl) {
+                // Call API to delete the file
+                const response = await fetch('/api/products/delete-file', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fileUrl }),
+                });
+
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    console.error('Delete error:', error);
+                    toast.error(`Failed to delete file: ${error.error || 'Unknown error'}`);
+                    return;
+                }
+
+                toast.success('Product file deleted successfully!');
+            }
+
+            // Clear the product details
+            setProductDetails({ ...productDetails, fileUrl: '', file: null });
+            setRefreshKey((prev: number) => prev + 1);
+        } catch (error) {
+            console.error('Error deleting product file:', error);
+            toast.error('Failed to delete product file. Please try again.');
+        } finally {
+            setDeletingFile(false);
         }
     };
 
@@ -294,10 +335,18 @@ export default function ProductTab({
                                 </div>
                             </div>
                             <button
-                                onClick={() => setProductDetails({ ...productDetails, fileUrl: '', file: null })}
-                                className="px-2 py-1 text-xs text-red-600 hover:bg-red-100 rounded transition-colors"
+                                onClick={handleRemoveProductFile}
+                                disabled={deletingFile}
+                                className="px-2 py-1 text-xs text-red-600 hover:bg-red-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                             >
-                                Remove
+                                {deletingFile ? (
+                                    <>
+                                        <div className="w-3 h-3 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                                        Deleting...
+                                    </>
+                                ) : (
+                                    'Remove'
+                                )}
                             </button>
                         </div>
                         <p className="text-xs text-green-700 flex items-center gap-1">

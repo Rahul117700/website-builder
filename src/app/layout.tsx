@@ -13,30 +13,33 @@ export const dynamic = 'force-dynamic';       // disable full-route cache
 export const revalidate = 0;                  // disable ISR
 export const fetchCache = 'force-no-store';   // disable fetch cache
 
-export const metadata = generateSEOMetadata({
-  title: 'Create & Sell Digital Products Online',
-  description: 'Build beautiful sales funnels and sell digital products online with ease. Create high-converting landing pages, process payments with Razorpay, and track analytics. No coding required!',
-  keywords: [
-    'digital products',
-    'sales funnel builder',
-    'online selling platform',
-    'ecommerce',
-    'creator economy',
-    'sell ebooks',
-    'sell courses',
-    'sell videos',
-    'sell code',
-    'sell software',
-    'landing page builder',
-    'payment integration',
-    'Razorpay',
-    'India ecommerce',
-    'digital marketplace',
-  ],
-  image: '/logo/logo.png',
-  url: '/',
-  type: 'website',
-});
+export const metadata = {
+  ...generateSEOMetadata({
+    title: 'Create & Sell Digital Products Online',
+    description: 'Build beautiful sales funnels and sell digital products online with ease. Create high-converting landing pages, process payments with Razorpay, and track analytics. No coding required!',
+    keywords: [
+      'digital products',
+      'sales funnel builder',
+      'online selling platform',
+      'ecommerce',
+      'creator economy',
+      'sell ebooks',
+      'sell courses',
+      'sell videos',
+      'sell code',
+      'sell software',
+      'landing page builder',
+      'payment integration',
+      'Razorpay',
+      'India ecommerce',
+      'digital marketplace',
+    ],
+    image: '/logo/logo.png',
+    url: '/',
+    type: 'website',
+  }),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
+};
 
 export default function RootLayout({
   children,

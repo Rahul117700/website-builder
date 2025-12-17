@@ -1,34 +1,7 @@
-<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Modern minimal design with single gradient -->
-  <defs>
-    <linearGradient id="modernGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
-    </linearGradient>
-  </defs>
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Black background -->
+  <rect width="32" height="32" rx="6" fill="#000000"/>
   
-  <!-- Rounded square background -->
-  <rect x="4" y="4" width="56" height="56" rx="12" fill="url(#modernGradient)"/>
-  
-  <!-- Modern "S" letter combined with upward arrow -->
-  <path d="M 24 18 L 40 18 C 42 18 44 20 44 22 C 44 24 42 26 40 26 L 28 26 C 26 26 24 28 24 30 C 24 32 26 34 28 34 L 40 34 C 42 34 44 36 44 38 C 44 40 42 42 40 42 L 24 42" 
-        stroke="white" 
-        stroke-width="4" 
-        stroke-linecap="round" 
-        stroke-linejoin="round"
-        fill="none"/>
-  
-  <!-- Upward trending arrow accent -->
-  <g transform="translate(38, 14)">
-    <path d="M 0 8 L 8 0 L 16 8" 
-          stroke="white" 
-          stroke-width="3" 
-          stroke-linecap="round" 
-          stroke-linejoin="round"
-          fill="none"/>
-    <line x1="8" y1="0" x2="8" y2="12" 
-          stroke="white" 
-          stroke-width="3" 
-          stroke-linecap="round"/>
-  </g>
+  <!-- SED text in white -->
+  <text x="16" y="21" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#FFFFFF" text-anchor="middle">SED</text>
 </svg>
