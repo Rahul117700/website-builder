@@ -17,12 +17,12 @@ export default function PricingPage() {
       setLoading(true);
       setError(null);
       try {
-        const plansRes = await fetch('/api/plans');
+        const plansRes = await fetch('/api/user/plans');
         const plansData = await plansRes.json();
-        setPlans(Array.isArray(plansData) ? plansData : []);
-        const subRes = await fetch('/api/subscription');
+        setPlans(plansData.plans || []);
+        const subRes = await fetch('/api/user/subscriptions');
         const subData = await subRes.json();
-        setCurrentPlan(subData?.plan || null);
+        setCurrentPlan(subData?.activeSubscription?.plan || null);
       } catch (err: any) {
         setError(err.message || 'Failed to load pricing');
       } finally {
@@ -45,7 +45,7 @@ export default function PricingPage() {
         if (!data.success) throw new Error(data.error || 'Failed to activate free plan');
         toast.success('Free plan activated!');
         // Refresh current plan
-        fetch('/api/subscription').then(res => res.json()).then(subData => setCurrentPlan(subData?.plan || null));
+        fetch('/api/user/subscriptions').then(res => res.json()).then(subData => setCurrentPlan(subData?.activeSubscription?.plan || null));
         return;
       }
       // Paid plan: payment flow
@@ -74,7 +74,7 @@ export default function PricingPage() {
         order_id: data.id,
         handler: function (response: any) {
           toast.success('Payment successful! Payment ID: ' + response.razorpay_payment_id);
-          fetch('/api/subscription').then(res => res.json()).then(subData => setCurrentPlan(subData?.plan || null));
+          fetch('/api/user/subscriptions').then(res => res.json()).then(subData => setCurrentPlan(subData?.activeSubscription?.plan || null));
         },
         prefill: {},
         theme: { color: '#8b5cf6' },
@@ -105,7 +105,7 @@ export default function PricingPage() {
           {currentPlan ? (
             <div className="mb-4 p-4 rounded-lg bg-primary-50 dark:bg-primary-900/20">
               <div className="font-semibold text-primary-600 dark:text-primary-400">{currentPlan.name}</div>
-              <div className="text-gray-700 dark:text-gray-200">₹{currentPlan.price}/{currentPlan.interval}</div>
+              <div className="text-gray-700 dark:text-gray-200">{currentPlan.currency}{currentPlan.price}/{currentPlan.duration} days</div>
               <div className="text-gray-500 dark:text-gray-400 text-sm">{currentPlan.description}</div>
             </div>
           ) : (
@@ -132,29 +132,26 @@ export default function PricingPage() {
                   btnColor = 'bg-sky-600 hover:bg-sky-700';
                   iconColor = 'text-sky-600';
                 }
+                const period = plan.duration === 365 ? 'year' : plan.duration === 30 ? 'month' : `${plan.duration} days`;
+                
                 return (
                   <div key={plan.id} className={`relative flex flex-col h-full min-h-[480px] max-w-xs mx-auto rounded-2xl shadow-lg transition-transform duration-200 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 hover:scale-105 hover:shadow-2xl p-8 ${currentPlan && currentPlan.id === plan.id ? 'ring-2 ring-purple-500' : ''}`}> 
                     {badge}
                     <div className={`mb-4 text-5xl ${iconColor}`}><Icon fontSize="inherit" /></div>
                     <div className="font-extrabold text-xl mb-1 text-center w-full">{plan.name}</div>
-                    <div className="text-4xl font-black mb-1 text-center w-full">{plan.price === 0 ? 'Free' : `₹${plan.price}`}</div>
-                    <div className="text-gray-500 dark:text-gray-400 mb-4 text-center w-full">per {plan.interval}</div>
+                    <div className="text-4xl font-black mb-1 text-center w-full">{plan.price === 0 ? 'Free' : `${plan.currency}${plan.price}`}</div>
+                    <div className="text-gray-500 dark:text-gray-400 mb-4 text-center w-full">per {period}</div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 text-center">{plan.description || ''}</p>
                     <ul className="mb-4 text-base text-gray-700 dark:text-gray-300 list-disc list-inside text-left w-full px-2">
-                      {(() => {
-                        const features: string[] = [];
-                        if (plan.unlimitedWebsites) {
-                          features.push('Unlimited Websites');
-                        } else if (plan.numberOfWebsites) {
-                          features.push(`${plan.numberOfWebsites} Website${plan.numberOfWebsites === 1 ? '' : 's'}`);
-                        }
-                        if (plan.supportLevel) features.push(`${plan.supportLevel} Support`);
-                        if (plan.customDomain) features.push('Custom Domain');
-                        if (plan.advancedAnalytics) features.push('Advanced Analytics');
-                        if (plan.customIntegrations) features.push('Custom Integrations');
-                        if (plan.teamManagement) features.push('Team Management');
-                        if (plan.communityAccess) features.push('Community Access');
-                        return features.map(f => <li key={f}>{f}</li>);
-                      })()}
+                      {plan.features && plan.features.length > 0 ? (
+                        plan.features.map((f: string) => <li key={f}>{f}</li>)
+                      ) : (
+                        <>
+                          <li>{plan.maxFunnels === -1 ? 'Unlimited' : plan.maxFunnels} Funnels</li>
+                          <li>{plan.maxProducts === -1 ? 'Unlimited' : plan.maxProducts} Products</li>
+                          {plan.maxCustomDomains > 0 && <li>{plan.maxCustomDomains} Custom Domain{plan.maxCustomDomains > 1 ? 's' : ''}</li>}
+                        </>
+                      )}
                     </ul>
                     <div className="flex-grow" />
                     <button className={`w-full py-3 mt-4 rounded-xl font-bold shadow transition-colors text-white text-lg ${btnColor} ${currentPlan && currentPlan.id === plan.id ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : ''}`} disabled={currentPlan && currentPlan.id === plan.id} onClick={() => handleUpgrade(plan)}>
