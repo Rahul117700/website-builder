@@ -656,9 +656,12 @@ export default function SuperAdminDashboard() {
                       
                       <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl p-4 sm:p-6 text-white">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-indigo-100 text-sm">Total Revenue</p>
-                            <p className="text-2xl sm:text-3xl font-bold">₹{(analyticsData?.overview?.totalRevenue || 0).toLocaleString()}</p>
+                          <div className="flex-1">
+                            <p className="text-indigo-100 text-sm">Subscription Revenue</p>
+                            <p className="text-2xl sm:text-3xl font-bold">₹{(analyticsData?.overview?.subscriptionRevenue || 0).toLocaleString()}</p>
+                            <div className="mt-1 text-xs text-indigo-100">
+                              {analyticsData?.overview?.activeSubscriptions || 0} active · {analyticsData?.overview?.totalSubscriptions || 0} total
+                            </div>
                           </div>
                           <CreditCardIcon className="h-8 w-8 text-indigo-200" />
                         </div>
@@ -666,11 +669,14 @@ export default function SuperAdminDashboard() {
                       
                       <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 sm:p-6 text-white">
                         <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-green-100 text-sm">Total Products</p>
-                            <p className="text-2xl sm:text-3xl font-bold">{analyticsData?.overview?.totalProducts || 0}</p>
+                          <div className="flex-1">
+                            <p className="text-green-100 text-sm">Product Sales</p>
+                            <p className="text-2xl sm:text-3xl font-bold">₹{(analyticsData?.overview?.transactionRevenue || 0).toLocaleString()}</p>
+                            <div className="mt-1 text-xs text-green-100">
+                              From {analyticsData?.overview?.totalProducts || 0} products
+                            </div>
                           </div>
-                          <CreditCardIcon className="h-8 w-8 text-green-200" />
+                          <ArrowTrendingUpIcon className="h-8 w-8 text-green-200" />
                         </div>
                       </div>
                       

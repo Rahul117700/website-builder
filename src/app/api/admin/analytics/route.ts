@@ -53,7 +53,30 @@ export async function GET(request: Request) {
     const completedOrders = allOrders.filter(order => 
       order.status && order.status.toUpperCase() === 'COMPLETED'
     );
-    const totalRevenue = completedOrders.reduce((sum, order) => sum + order.amount, 0);
+    const transactionRevenue = completedOrders.reduce((sum, order) => sum + order.amount, 0);
+
+    // Calculate subscription revenue
+    const subscriptionPayments = await prisma.userSubscription.findMany({
+      select: {
+        amount: true,
+        status: true,
+      }
+    });
+    const subscriptionRevenue = subscriptionPayments.reduce((sum, sub) => sum + sub.amount, 0);
+    const activeSubscriptions = subscriptionPayments.filter(sub => sub.status === 'ACTIVE').length;
+    const totalSubscriptions = subscriptionPayments.length;
+
+    // Total platform revenue
+    const totalRevenue = transactionRevenue + subscriptionRevenue;
+
+    console.log('Revenue calculation:', {
+      transactionRevenue,
+      subscriptionRevenue,
+      totalRevenue,
+      orderCount: completedOrders.length,
+      subscriptionCount: totalSubscriptions,
+      activeSubscriptions
+    });
 
     // Calculate platform-wide conversion metrics
     const totalViews = await prisma.funnelAnalytics.count({
@@ -204,8 +227,10 @@ export async function GET(request: Request) {
         activeFunnels,
         publishedFunnels,
         totalRevenue: totalRevenue,
-        subscriptionRevenue: 0, // Can be added later if subscription model is implemented
-        transactionRevenue: totalRevenue, // All revenue is from transactions currently
+        subscriptionRevenue: subscriptionRevenue,
+        transactionRevenue: transactionRevenue,
+        activeSubscriptions: activeSubscriptions,
+        totalSubscriptions: totalSubscriptions,
         activeUsers,
         platformHealth: {
           activeUsersRatio,
