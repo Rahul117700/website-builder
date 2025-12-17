@@ -1,0 +1,29 @@
+# ============================================
+# MARKETING AUTOMATION - Copy this to your .env file
+# ============================================
+
+# Dev.to API Key (Required - Easy to get!)
+# Get from: https://dev.to/settings/extensions
+DEVTO_API_KEY=your_devto_api_key_here
+
+# Hashnode API Key & Publication ID (Required)
+# Get from: https://hashnode.com/settings/developer
+HASHNODE_API_KEY=your_hashnode_api_key_here
+HASHNODE_PUBLICATION_ID=your_hashnode_publication_id
+
+# WordPress (Optional - only if you have WordPress blog)
+WORDPRESS_URL=https://yourblog.wordpress.com
+WORDPRESS_USERNAME=your_wordpress_username
+WORDPRESS_APP_PASSWORD=xxxx_xxxx_xxxx_xxxx
+
+# Configuration
+POST_INTERVAL_HOURS=24
+ENABLED_PLATFORMS=devto,hashnode
+
+# ============================================
+# NOTE: Medium API is no longer available for new users
+# If you already have a Medium API key, you can add it:
+# MEDIUM_API_KEY=your_existing_medium_token
+# ENABLED_PLATFORMS=medium,devto,hashnode
+# ============================================
+

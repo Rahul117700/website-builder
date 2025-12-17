@@ -20,7 +20,10 @@
     "test:report": "playwright show-report",
     "test:funnel": "playwright test tests/funnel-complete.spec.ts --project=chromium",
     "test:funnel:ui": "playwright test tests/funnel-complete.spec.ts --ui",
-    "seed:test": "node scripts/seed-test-funnel.js"
+    "seed:test": "node scripts/seed-test-funnel.js",
+    "marketing:post": "node scripts/auto-post-marketing.js",
+    "marketing:schedule": "node scripts/schedule-marketing-posts.js",
+    "marketing:setup": "bash scripts/setup-marketing-automation.sh"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.937.0",
