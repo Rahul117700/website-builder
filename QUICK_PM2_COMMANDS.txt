@@ -1,0 +1,82 @@
+═══════════════════════════════════════════════════════════════
+  MARKETING AUTOMATION - PM2 QUICK COMMANDS
+═══════════════════════════════════════════════════════════════
+
+📦 SETUP (One-time)
+═══════════════════════════════════════════════════════════════
+
+cd ~/website-builder
+npm install axios dotenv
+
+
+🚀 START MARKETING AUTOMATION
+═══════════════════════════════════════════════════════════════
+
+pm2 start scripts/schedule-marketing-posts.js --name "marketing-automation"
+pm2 save
+
+
+📊 CHECK STATUS
+═══════════════════════════════════════════════════════════════
+
+pm2 list
+pm2 info marketing-automation
+pm2 logs marketing-automation
+
+
+🔄 RESTART (After changing .env or code)
+═══════════════════════════════════════════════════════════════
+
+pm2 restart marketing-automation
+
+
+🛑 STOP
+═══════════════════════════════════════════════════════════════
+
+pm2 stop marketing-automation
+
+
+🗑️ DELETE
+═══════════════════════════════════════════════════════════════
+
+pm2 delete marketing-automation
+
+
+📝 VIEW LOGS
+═══════════════════════════════════════════════════════════════
+
+# Real-time logs
+pm2 logs marketing-automation
+
+# Last 50 lines
+pm2 logs marketing-automation --lines 50
+
+# Only errors
+pm2 logs marketing-automation --err
+
+
+💾 VIEW POSTING HISTORY
+═══════════════════════════════════════════════════════════════
+
+cat scripts/marketing-posts-log.json
+cat scripts/posted-articles.json
+
+
+🔍 MONITOR
+═══════════════════════════════════════════════════════════════
+
+pm2 monit
+
+
+═══════════════════════════════════════════════════════════════
+  COMPLETE SETUP IN 3 COMMANDS
+═══════════════════════════════════════════════════════════════
+
+1. pm2 start scripts/schedule-marketing-posts.js --name "marketing-automation"
+2. pm2 save
+3. pm2 logs marketing-automation
+
+═══════════════════════════════════════════════════════════════
+
+Need detailed help? See: PM2_MARKETING_SETUP.md
+
