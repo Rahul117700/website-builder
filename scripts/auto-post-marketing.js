@@ -62,7 +62,7 @@ const contentTemplates = [
   {
     title: "How to Build and Sell Your First Digital Product in India",
     category: "tutorial",
-    keywords: ["digital products", "online business", "India", "passive income"],
+    keywords: ["digitalproducts", "onlinebusiness", "india", "passiveincome"],
     content: `
 Are you a creator, educator, or entrepreneur looking to monetize your knowledge? Building and selling digital products is one of the best ways to create passive income in 2024.
 
@@ -114,7 +114,7 @@ Building a digital product business doesn't require technical skills. With the r
   {
     title: "5 Reasons Why Sales Funnels Are Essential for Digital Product Creators",
     category: "marketing",
-    keywords: ["sales funnel", "conversion", "digital marketing", "online sales"],
+    keywords: ["salesfunnel", "conversion", "digitalmarketing", "onlinesales"],
     content: `
 If you're selling digital products, you need a sales funnel. Here's why.
 
@@ -171,7 +171,7 @@ Ready to boost your sales with a professional funnel?
   {
     title: "Complete Guide to Accepting Payments for Digital Products in India",
     category: "guide",
-    keywords: ["payment gateway", "Razorpay", "digital payments", "India"],
+    keywords: ["razorpay", "payments", "india", "ecommerce"],
     content: `
 Accepting online payments in India has become easier than ever. Here's your complete guide.
 
@@ -242,7 +242,7 @@ Don't let payment complexity stop you from selling online.
   {
     title: "How I Built a ₹1 Lakh/Month Digital Product Business (No Tech Skills Required)",
     category: "case-study",
-    keywords: ["success story", "passive income", "side hustle", "case study"],
+    keywords: ["entrepreneur", "passiveincome", "sidehustle", "india"],
     content: `
 A year ago, I had an idea but no technical skills. Today, I'm making ₹1+ lakh monthly selling digital products. Here's my story.
 
@@ -410,29 +410,32 @@ async function postToHashnode(article) {
   try {
     console.log('Posting to Hashnode...');
     
-    const mutation = `
-      mutation CreatePost($input: CreateStoryInput!) {
-        createPublicationStory(input: $input) {
-          post {
-            slug
-            url
-          }
-        }
-      }
-    `;
-
+    // Updated Hashnode GraphQL API endpoint
     const response = await axios.post(
-      'https://api.hashnode.com/',
+      'https://gql.hashnode.com/',
       {
-        query: mutation,
+        query: `
+          mutation PublishPost($input: PublishPostInput!) {
+            publishPost(input: $input) {
+              post {
+                id
+                slug
+                url
+              }
+            }
+          }
+        `,
         variables: {
           input: {
             title: article.title,
             contentMarkdown: article.content,
-            tags: article.keywords.map(k => ({ name: k })),
-            isPartOfPublication: {
-              publicationId: CONFIG.apiKeys.hashnodePublicationId
-            }
+            tags: article.keywords.slice(0, 5).map(tag => ({
+              slug: tag.toLowerCase().replace(/\s+/g, '-'),
+              name: tag
+            })),
+            publicationId: CONFIG.apiKeys.hashnodePublicationId,
+            // Optional: add canonical URL
+            // canonicalUrl: CONFIG.platform.url
           }
         }
       },
@@ -444,7 +447,11 @@ async function postToHashnode(article) {
       }
     );
 
-    const url = response.data.data.createPublicationStory.post.url;
+    if (response.data.errors) {
+      throw new Error(JSON.stringify(response.data.errors));
+    }
+
+    const url = response.data.data.publishPost.post.url;
     console.log('✅ Posted to Hashnode:', url);
     return { success: true, url };
   } catch (error) {
@@ -501,9 +508,7 @@ async function publishContent() {
   console.log('🔑 Checking API keys...');
   const missingKeys = [];
   
-  if (CONFIG.enabledPlatforms.includes('medium') && !CONFIG.apiKeys.medium) {
-    missingKeys.push('MEDIUM_API_KEY');
-  }
+  // Skip Medium validation since it's not available anymore
   if (CONFIG.enabledPlatforms.includes('devto') && !CONFIG.apiKeys.devto) {
     missingKeys.push('DEVTO_API_KEY');
   }
