@@ -1,7 +1,7 @@
 'use client';
 
 import DashboardLayout from '@/components/layouts/dashboard-layout';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import {
@@ -16,7 +16,7 @@ import {
   XMarkIcon,
   CheckCircleIcon,
   InformationCircleIcon,
-  ExclamationCircleIcon
+  ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import FunnelPreviewLayout from '@/components/FunnelPreviewLayout';
@@ -81,6 +81,33 @@ export default function FunnelCustomizer() {
   const [publishing, setPublishing] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
+  // Helper function to calculate completion status
+  const getCompletionStatus = () => {
+    const checks = {
+      design: {
+        completed: !!(customizations.headline && customizations.subheadline),
+        label: 'Design & Content',
+        fields: ['Headline', 'Subheadline']
+      },
+      product: {
+        completed: !!(productDetails.name && productDetails.price && productDetails.fileUrl),
+        label: 'Product Details',
+        fields: ['Product Name', 'Price', 'File Upload']
+      },
+      seller: {
+        completed: !!(sellerInfo.name && sellerInfo.email),
+        label: 'Seller Info',
+        fields: ['Seller Name', 'Email']
+      }
+    };
+    
+    const totalSteps = Object.keys(checks).length;
+    const completedSteps = Object.values(checks).filter(c => c.completed).length;
+    const percentage = Math.round((completedSteps / totalSteps) * 100);
+    
+    return { checks, totalSteps, completedSteps, percentage };
+  };
+
   const [customizations, setCustomizations] = useState({
     primaryColor: '#8B5CF6',
     secondaryColor: '#EC4899',
@@ -125,24 +152,14 @@ export default function FunnelCustomizer() {
   useEffect(() => {
     if (hasFetched.current) return;
     hasFetched.current = true;
-
-    const fetchFunnel = async () => {
+    const fetchData = async () => {
       try {
         const response = await fetch(`/api/funnels/${funnelId}`);
         if (!response.ok) throw new Error('Failed to fetch funnel');
         const data = await response.json();
-
         setFunnel(data);
-
-        // Populate state from fetched data
-        if (data.customizations) {
-          setCustomizations(prev => ({ ...prev, ...data.customizations }));
-        }
-
-        if (data.sellerInfo) {
-          setSellerInfo(prev => ({ ...prev, ...data.sellerInfo }));
-        }
-
+        if (data.customizations) setCustomizations(prev => ({ ...prev, ...data.customizations }));
+        if (data.sellerInfo) setSellerInfo(prev => ({ ...prev, ...data.sellerInfo }));
         if (data.product) {
           setProductDetails(prev => ({
             ...prev,
@@ -153,14 +170,7 @@ export default function FunnelCustomizer() {
             fileUrl: data.product.fileUrl || '',
           }));
         }
-
-        if (data.url) {
-          setShareUrl(`${window.location.origin}${data.url}`);
-          // Generate embed code
-          const embedCode = `<div id="funnel-card-${data.id}"></div><script src="${window.location.origin}/embed.js" data-id="${data.id}"></script>`;
-          setEmbedHtml(embedCode);
-        }
-
+        if (data.url) setShareUrl(window.location.origin + data.url);
       } catch (error) {
         console.error('Error fetching funnel:', error);
         toast.error('Failed to load funnel data');
@@ -168,21 +178,13 @@ export default function FunnelCustomizer() {
         setLoading(false);
       }
     };
-
-    if (funnelId) {
-      fetchFunnel();
-    }
+    if (funnelId) fetchData();
   }, [funnelId]);
 
   // Auto-fill seller info from session if empty
   useEffect(() => {
     if (session?.user && !loading) {
-      setSellerInfo(prev => ({
-        ...prev,
-        name: prev.name || session.user?.name || '',
-        email: prev.email || session.user?.email || '',
-        avatar: session.user?.image || prev.avatar || '', // Always use session image as primary source
-      }));
+      setSellerInfo(prev => ({ ...prev, name: prev.name || session.user?.name || '', email: prev.email || session.user?.email || '', avatar: session.user?.image || prev.avatar || '' }));
     }
   }, [session, loading]);
 
@@ -190,14 +192,9 @@ export default function FunnelCustomizer() {
   useEffect(() => {
     if (activeTab === 'product') {
       toast('Complete all required fields marked with * to publish your funnel. You must upload a product file before publishing.', {
-        icon: 'ℹ️',
+        icon: '\u2139\uFE0F',
         duration: 5000,
-        style: {
-          border: '1px solid #BFDBFE',
-          padding: '16px',
-          color: '#1E40AF',
-          background: '#EFF6FF',
-        },
+        style: { border: '1px solid #BFDBFE', padding: '16px', color: '#1E40AF', background: '#EFF6FF' },
       });
     }
   }, [activeTab]);
@@ -205,25 +202,14 @@ export default function FunnelCustomizer() {
   const handleSave = async (silent = false) => {
     try {
       if (!silent) setSaving(true);
-
       const response = await fetch(`/api/funnels/${funnelId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customizations,
-          sellerInfo,
-          product: {
-            ...productDetails,
-            price: parseFloat(productDetails.price) || 0,
-          }
-        }),
+        body: JSON.stringify({ customizations, sellerInfo, product: { ...productDetails, price: parseFloat(productDetails.price) || 0 } }),
       });
-
       if (!response.ok) throw new Error('Failed to save');
-
       const updatedFunnel = await response.json();
       setFunnel(updatedFunnel);
-
       if (!silent) {
         toast.success('Changes saved successfully');
         setRefreshKey(prev => prev + 1);
@@ -236,61 +222,71 @@ export default function FunnelCustomizer() {
     }
   };
 
-  const validateFunnel = () => {
-    const errors: string[] = [];
+  // Memoized validation - recalculates only when dependencies change
+  const validationResult = useMemo(() => {
+    const errors = [];
+    const missingFields = [];
+    
+    // Product validation
+    if (!productDetails.name) missingFields.push('Product Name');
+    if (!productDetails.price) missingFields.push('Product Price');
+    if (!productDetails.fileUrl) missingFields.push('Product File Upload');
+    if (!productDetails.name || !productDetails.price || !productDetails.fileUrl) errors.push('product');
+    
+    // Seller validation
+    if (!sellerInfo.name) missingFields.push('Seller Name');
+    if (!sellerInfo.email) missingFields.push('Seller Email');
+    if (!sellerInfo.name || !sellerInfo.email) errors.push('seller');
+    
+    return { isValid: errors.length === 0, missingFields, errorTabs: errors };
+  }, [productDetails.name, productDetails.price, productDetails.fileUrl, sellerInfo.name, sellerInfo.email]);
 
-    // Product Validation
-    if (!productDetails.name || !productDetails.price || !productDetails.fileUrl) {
-      errors.push('product');
-    }
-
-    // Seller Validation
-    if (!sellerInfo.name || !sellerInfo.email) {
-      errors.push('seller');
-    }
-
-    setValidationErrors(errors);
-    return errors.length === 0;
-  };
+  // Update validation errors whenever validation result changes
+  useEffect(() => {
+    setValidationErrors(validationResult.errorTabs);
+  }, [validationResult]);
 
   const handlePublish = async () => {
-    if (!validateFunnel()) {
-      toast.error('Please complete all required fields before publishing', {
-        icon: '⚠️',
-      });
+    if (!validationResult.isValid) {
+      const missingFieldsList = validationResult.missingFields.join(', ');
+      toast.error(
+        <div>
+          <div className="font-semibold mb-1">Cannot publish - Missing required fields:</div>
+          <div className="text-sm">{missingFieldsList}</div>
+        </div>,
+        { 
+          icon: '⚠️',
+          duration: 6000,
+        }
+      );
+      
+      // Auto-switch to the first tab with errors
+      if (validationResult.errorTabs.includes('product')) {
+        setActiveTab('product');
+      } else if (validationResult.errorTabs.includes('seller')) {
+        setActiveTab('seller');
+      }
       return;
     }
-
     try {
       setPublishing(true);
-      // First save any pending changes
       await handleSave(true);
-
       const isCurrentlyPublished = funnel?.status === 'ACTIVE';
-      const shouldPublish = true; // Always publish when clicking the button
+      const shouldPublish = true;
       const action = isCurrentlyPublished ? 'update' : 'publish';
-
       const response = await fetch(`/api/funnels/${funnelId}/publish`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ publish: shouldPublish }),
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || `Failed to ${action} funnel`);
       }
-
       const data = await response.json();
       setFunnel(data);
       setShareUrl(data.url ? `${window.location.origin}${data.url}` : '');
-
-      toast.success(isCurrentlyPublished
-        ? 'Funnel updated successfully!'
-        : 'Funnel published successfully!'
-      );
-
-      // Show share modal for both publish and update
+      toast.success(isCurrentlyPublished ? 'Funnel updated successfully!' : 'Funnel published successfully!');
       setTimeout(() => setShowShareModal(true), 150);
     } catch (error) {
       console.error('Error publishing funnel:', error);
@@ -301,13 +297,16 @@ export default function FunnelCustomizer() {
     }
   };
 
+  // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
+      <DashboardLayout>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
+          </div>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
@@ -360,34 +359,148 @@ export default function FunnelCustomizer() {
               Save Draft
             </button>
 
-            <button
-              onClick={handlePublish}
-              disabled={publishing || saving}
-              className={`flex items-center justify-center gap-2 px-6 py-2 text-sm font-medium text-white rounded-lg shadow-sm transition-all flex-1 md:flex-none ${publishing || saving ? 'bg-gray-400 cursor-not-allowed' :
-                funnel?.status === 'ACTIVE'
-                  ? 'bg-yellow-500 hover:bg-yellow-600'
-                  : 'bg-purple-600 hover:bg-purple-700 hover:shadow-md'
-                }`}
-            >
-              {publishing ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  Processing...
-                </>
-              ) : funnel?.status === 'ACTIVE' ? (
-                <>
-                  <RocketLaunchIcon className="w-4 h-4" />
-                  Update Funnel
-                </>
-              ) : (
-                <>
-                  <RocketLaunchIcon className="w-4 h-4" />
-                  Publish
-                </>
-              )}
-            </button>
+            {/* Smart Publish Button with Validation Feedback */}
+            {(() => {
+              const canPublish = validationResult.isValid;
+              
+              return (
+                <div className="relative group flex-1 md:flex-none">
+                  <button
+                    onClick={handlePublish}
+                    disabled={publishing || saving || !canPublish}
+                    className={`w-full flex items-center justify-center gap-2 px-6 py-2 text-sm font-medium text-white rounded-lg shadow-sm transition-all ${
+                      publishing || saving
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : !canPublish
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : funnel?.status === 'ACTIVE'
+                        ? 'bg-yellow-500 hover:bg-yellow-600'
+                        : 'bg-purple-600 hover:bg-purple-700 hover:shadow-md'
+                    }`}
+                  >
+                    {publishing ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        Processing...
+                      </>
+                    ) : funnel?.status === 'ACTIVE' ? (
+                      <>
+                        <RocketLaunchIcon className="w-4 h-4" />
+                        Update Funnel
+                      </>
+                    ) : (
+                      <>
+                        <RocketLaunchIcon className="w-4 h-4" />
+                        Publish
+                      </>
+                    )}
+                  </button>
+                  
+                  {/* Tooltip for missing fields */}
+                  {!canPublish && !publishing && !saving && (
+                    <div className="hidden md:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
+                      <div className="font-semibold mb-1">Missing required fields:</div>
+                      <div>{validationResult.missingFields.slice(0, 3).join(', ')}</div>
+                      {validationResult.missingFields.length > 3 && (
+                        <div className="text-gray-300">+{validationResult.missingFields.length - 3} more...</div>
+                      )}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
+                        <div className="border-4 border-transparent border-t-gray-900"></div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         </div>
+
+        {/* Progress Indicator Bar */}
+        {(() => {
+          const status = getCompletionStatus();
+          const isReadyToPublish = status.percentage === 100;
+          
+          return (
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-100 px-4 py-3 shrink-0">
+              <div className="max-w-7xl mx-auto">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  {/* Progress Info */}
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="shrink-0">
+                      {isReadyToPublish ? (
+                        <CheckCircleIcon className="w-6 h-6 text-green-500" />
+                      ) : (
+                        <div className="relative w-6 h-6">
+                          <svg className="transform -rotate-90" viewBox="0 0 24 24">
+                            <circle
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              fill="none"
+                              stroke="#E5E7EB"
+                              strokeWidth="3"
+                            />
+                            <circle
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              fill="none"
+                              stroke="#8B5CF6"
+                              strokeWidth="3"
+                              strokeDasharray={`${2 * Math.PI * 10}`}
+                              strokeDashoffset={`${2 * Math.PI * 10 * (1 - status.percentage / 100)}`}
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                          <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-purple-600">
+                            {status.percentage}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-gray-900 text-sm">
+                          {isReadyToPublish ? '✅ Ready to Publish!' : 'Setup Progress'}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          ({status.completedSteps} of {status.totalSteps} sections complete)
+                        </span>
+                      </div>
+                      
+                      {!isReadyToPublish && (
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          {Object.entries(status.checks).map(([key, check]: [string, any]) => (
+                            <span
+                              key={key}
+                              className={`text-xs px-2 py-0.5 rounded-full border ${
+                                check.completed
+                                  ? 'bg-green-50 text-green-700 border-green-200'
+                                  : 'bg-orange-50 text-orange-700 border-orange-200'
+                              }`}
+                            >
+                              {check.completed ? '✓' : '○'} {check.label}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Quick Tips */}
+                  {!isReadyToPublish && (
+                    <div className="flex items-center gap-2 text-xs text-gray-600 bg-white px-3 py-2 rounded-lg border border-gray-200">
+                      <InformationCircleIcon className="w-4 h-4 text-blue-500 shrink-0" />
+                      <span className="hidden sm:inline">Complete all sections to publish your funnel</span>
+                      <span className="sm:hidden">Fill all required fields</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Main Content Area */}
         <div className="flex flex-col lg:flex-row items-stretch justify-between flex-1 overflow-hidden relative">

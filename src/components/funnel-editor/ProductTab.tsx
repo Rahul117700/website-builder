@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     ShoppingBagIcon,
     InformationCircleIcon,
     CheckCircleIcon,
     ArrowUpTrayIcon,
     XMarkIcon,
-    SparklesIcon
+    SparklesIcon,
+    GlobeAltIcon,
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import { getPopularCurrencies, SUPPORTED_CURRENCIES, detectCurrencyFromLocation } from '@/lib/currency';
 
 interface ProductTabProps {
     productDetails: any;
@@ -28,6 +30,21 @@ export default function ProductTab({
     const [uploadProgress, setUploadProgress] = useState(0);
     const [isGenerating, setIsGenerating] = useState(false);
     const [deletingFile, setDeletingFile] = useState(false);
+    const [detectedCurrency, setDetectedCurrency] = useState<string | null>(null);
+
+    // Detect user's currency on component mount
+    useEffect(() => {
+        const detectCurrency = async () => {
+            const currency = await detectCurrencyFromLocation();
+            setDetectedCurrency(currency);
+            
+            // If product doesn't have a currency set, use detected one
+            if (!productDetails.currency) {
+                setProductDetails({ ...productDetails, currency });
+            }
+        };
+        detectCurrency();
+    }, []);
 
     const handleAiGenerate = async (type: string, currentContent: string) => {
         if (!productDetails.name) {
@@ -92,7 +109,7 @@ export default function ProductTab({
             formData.append('name', productDetails.name);
             formData.append('description', productDetails.description);
             formData.append('price', productDetails.price);
-            formData.append('currency', 'INR');
+            formData.append('currency', productDetails.currency || 'INR');
 
             // Simulate progress for better UX
             const progressInterval = setInterval(() => {
@@ -233,6 +250,42 @@ export default function ProductTab({
                 </div>
             )}
 
+            {/* Helpful Guidance Banner */}
+            <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                    <InformationCircleIcon className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                        <h3 className="text-sm font-semibold text-gray-900 mb-1">📦 Product Setup Guide</h3>
+                        <ul className="text-xs text-gray-700 space-y-1">
+                            <li className="flex items-center gap-2">
+                                <span className={productDetails.name ? "text-green-600" : "text-orange-600"}>
+                                    {productDetails.name ? "✓" : "1."}
+                                </span>
+                                Enter your product name
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className={productDetails.price ? "text-green-600" : "text-orange-600"}>
+                                    {productDetails.price ? "✓" : "2."}
+                                </span>
+                                Set the price in your preferred currency
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className={productDetails.fileUrl ? "text-green-600" : "text-orange-600"}>
+                                    {productDetails.fileUrl ? "✓" : "3."}
+                                </span>
+                                Upload your digital product file (up to 500MB)
+                            </li>
+                        </ul>
+                        {productDetails.name && productDetails.price && productDetails.fileUrl && (
+                            <p className="mt-2 text-xs font-medium text-green-700 flex items-center gap-1">
+                                <CheckCircleIcon className="w-4 h-4" />
+                                Product section complete! Ready to publish.
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </div>
+
             <div className="space-y-4" data-tour="product-tab">
             <div>
                 <label className="block text-sm font-medium text-black mb-2">
@@ -276,19 +329,53 @@ export default function ProductTab({
                 <p className="text-xs text-black mt-1">{productDetails.description.length}/500</p>
             </div>
 
-            <div>
-                <label className="block text-sm font-medium text-black mb-2">
-                    Price (INR) <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-black font-medium">₹</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-black mb-2">
+                        Currency <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                        <select
+                            value={productDetails.currency || 'INR'}
+                            onChange={(e) => setProductDetails({ ...productDetails, currency: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm text-black appearance-none pr-10"
+                        >
+                            <optgroup label="Popular Currencies">
+                                {getPopularCurrencies().map((curr) => (
+                                    <option key={curr.code} value={curr.code}>
+                                        {curr.symbol} {curr.code} - {curr.name}
+                                    </option>
+                                ))}
+                            </optgroup>
+                            <optgroup label="All Currencies">
+                                {SUPPORTED_CURRENCIES.filter(c => !c.popular).map((curr) => (
+                                    <option key={curr.code} value={curr.code}>
+                                        {curr.symbol} {curr.code} - {curr.name}
+                                    </option>
+                                ))}
+                            </optgroup>
+                        </select>
+                        <GlobeAltIcon className="w-5 h-5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                    {detectedCurrency && productDetails.currency !== detectedCurrency && (
+                        <p className="text-xs text-blue-600 mt-1">
+                            💡 Detected: {detectedCurrency}
+                        </p>
+                    )}
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-black mb-2">
+                        Price <span className="text-red-500">*</span>
+                    </label>
                     <input
                         type="number"
                         value={productDetails.price}
                         onChange={(e) => setProductDetails({ ...productDetails, price: e.target.value })}
-                        className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm text-black"
-                        placeholder="99"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm text-black"
+                        placeholder="0.00"
                         min="0"
+                        step="0.01"
                     />
                 </div>
             </div>

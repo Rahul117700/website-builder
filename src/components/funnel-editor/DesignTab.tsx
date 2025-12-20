@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PaintBrushIcon, ArrowUpTrayIcon, XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline';
+import { PaintBrushIcon, ArrowUpTrayIcon, XMarkIcon, PhotoIcon, InformationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
 interface DesignTabProps {
@@ -26,6 +26,8 @@ export default function DesignTab({
 
         try {
             setUploadingImage(true);
+            toast.loading('Uploading image...', { id: 'image-upload' });
+            
             const formData = new FormData();
             formData.append('file', file);
 
@@ -37,13 +39,14 @@ export default function DesignTab({
             if (response.ok) {
                 const data = await response.json();
                 setCustomizations({ ...customizations, [field]: data.url });
-                toast.success('Image uploaded successfully!');
+                toast.success('Image uploaded successfully! Check the preview.', { id: 'image-upload' });
             } else {
-                toast.error('Failed to upload image');
+                const errorData = await response.json();
+                toast.error(errorData.error || 'Failed to upload image', { id: 'image-upload' });
             }
         } catch (error) {
             console.error('Error uploading image:', error);
-            toast.error('Failed to upload image');
+            toast.error('Failed to upload image', { id: 'image-upload' });
         } finally {
             setUploadingImage(false);
         }
@@ -51,6 +54,34 @@ export default function DesignTab({
 
     return (
         <div className="space-y-8 pb-8" data-tour="design-tab">
+            {/* Helpful Guidance Banner */}
+            <div className="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                    <InformationCircleIcon className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                        <h3 className="text-sm font-semibold text-gray-900 mb-1">🎨 Design Tips</h3>
+                        <ul className="text-xs text-gray-700 space-y-1">
+                            <li className="flex items-center gap-2">
+                                <span className="text-indigo-600">💡</span>
+                                Choose colors that match your brand
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className={customizations.previewImage ? "text-green-600" : "text-indigo-600"}>
+                                    {customizations.previewImage ? "✓" : "💡"}
+                                </span>
+                                Upload a cover image (optional but recommended)
+                            </li>
+                        </ul>
+                        {customizations.previewImage && (
+                            <p className="mt-2 text-xs font-medium text-green-700 flex items-center gap-1">
+                                <CheckCircleIcon className="w-4 h-4" />
+                                Cover image added! Check the preview on the right.
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </div>
+
             {/* 1. Color Theme Selection */}
             <section>
                 <div className="flex items-center justify-between mb-4">

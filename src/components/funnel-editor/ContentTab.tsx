@@ -4,7 +4,9 @@ import {
     SparklesIcon,
     ClockIcon,
     StarIcon,
-    TagIcon
+    TagIcon,
+    InformationCircleIcon,
+    CheckCircleIcon
 } from '@heroicons/react/24/outline';
 
 interface ContentTabProps {
@@ -18,6 +20,36 @@ export default function ContentTab({
 }: ContentTabProps) {
     return (
         <div className="space-y-6" data-tour="content-tab">
+            {/* Helpful Guidance Banner */}
+            <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                    <InformationCircleIcon className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                        <h3 className="text-sm font-semibold text-gray-900 mb-1">✍️ Content Tips</h3>
+                        <ul className="text-xs text-gray-700 space-y-1">
+                            <li className="flex items-center gap-2">
+                                <span className={customizations.headline ? "text-green-600" : "text-blue-600"}>
+                                    {customizations.headline ? "✓" : "💡"}
+                                </span>
+                                Create a compelling headline (recommended)
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className={customizations.subheadline ? "text-green-600" : "text-blue-600"}>
+                                    {customizations.subheadline ? "✓" : "💡"}
+                                </span>
+                                Add a subheadline to explain your offer (recommended)
+                            </li>
+                        </ul>
+                        {customizations.headline && customizations.subheadline && (
+                            <p className="mt-2 text-xs font-medium text-green-700 flex items-center gap-1">
+                                <CheckCircleIcon className="w-4 h-4" />
+                                Great! Your content looks good.
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </div>
+
             {/* Headlines */}
             <div>
                 <h3 className="text-sm font-medium text-black mb-3">Hero Section</h3>

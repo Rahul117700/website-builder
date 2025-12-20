@@ -296,30 +296,39 @@ export default function PlansPage() {
 
                 {/* Features */}
                 <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      {plan.maxFunnels === -1 ? 'Unlimited' : plan.maxFunnels} Funnels
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      {plan.maxProducts === -1 ? 'Unlimited' : plan.maxProducts} Products
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">
-                      {plan.maxCustomDomains === 0 ? 'No' : plan.maxCustomDomains} Custom Domains
-                    </span>
-                  </div>
-                  {plan.features && Array.isArray(plan.features) && plan.features.map((feature, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-gray-700">
-                      <CheckIcon className="h-5 w-5 text-green-500" />
-                      <span>{feature}</span>
-                    </div>
-                  ))}
+                  {/* Show custom features from database if they exist */}
+                  {plan.features && Array.isArray(plan.features) && plan.features.length > 0 ? (
+                    plan.features.map((feature, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-gray-700">
+                        <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" />
+                        <span className="text-sm sm:text-base">{feature}</span>
+                      </div>
+                    ))
+                  ) : (
+                    // Default features if none configured
+                    <>
+                      <div className="flex items-center gap-2 text-gray-700">
+                        <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" />
+                        <span className="text-sm sm:text-base">
+                          {plan.maxFunnels === -1 ? 'Unlimited' : plan.maxFunnels} Funnels
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-700">
+                        <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" />
+                        <span className="text-sm sm:text-base">
+                          {plan.maxProducts === -1 ? 'Unlimited' : plan.maxProducts} Products
+                        </span>
+                      </div>
+                      {plan.maxCustomDomains > 0 && (
+                        <div className="flex items-center gap-2 text-gray-700">
+                          <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" />
+                          <span className="text-sm sm:text-base">
+                            {plan.maxCustomDomains} Custom Domain{plan.maxCustomDomains > 1 ? 's' : ''}
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
 
                 {/* CTA Button */}
