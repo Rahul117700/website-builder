@@ -488,14 +488,21 @@ export default function SettingsPage() {
                             {userImagePreview ? (
                               <img 
                                 src={userImagePreview} 
-                                alt="Profile Preview" 
+                                alt="" 
                                 className="w-full h-full object-cover" 
+                                onError={(e) => {
+                                  console.error('Image failed to load:', userImagePreview);
+                                  // Show fallback icon on error
+                                  const currentTarget = e.currentTarget as HTMLImageElement;
+                                  currentTarget.style.display = 'none';
+                                }}
                               />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <UserIcon className="w-12 h-12 text-gray-400" />
+                            ) : null}
+                            {!userImagePreview || userImagePreview === '' ? (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                <UserIcon className="w-12 h-12" />
                               </div>
-                            )}
+                            ) : null}
                             {uploadingProfileImage && (
                               <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
                                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
