@@ -55,6 +55,7 @@ import { gsap } from 'gsap';
 import toast from 'react-hot-toast';
 import { LineChart, Line, AreaChart, Area, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 import UpgradeModal from '@/components/modals/UpgradeModal';
+import RazorpayRequiredModal from '@/components/modals/RazorpayRequiredModal';
 
 interface FunnelTemplate {
   id: string;
@@ -468,6 +469,11 @@ export default function FunnelsDashboard() {
     limit?: number;
   } | null>(null);
 
+  // Razorpay modal state
+  const [showRazorpayModal, setShowRazorpayModal] = useState(false);
+  const [hasRazorpayConfig, setHasRazorpayConfig] = useState(false);
+  const [checkingRazorpay, setCheckingRazorpay] = useState(true);
+
   // Subscription state
   const [subscriptionData, setSubscriptionData] = useState<any>(null);
   const [loadingSubscription, setLoadingSubscription] = useState(true);
@@ -492,6 +498,7 @@ export default function FunnelsDashboard() {
     loadFunnels();
     loadTemplates();
     loadSubscriptionData();
+    checkRazorpayConfig();
   }, []);
 
   const loadSubscriptionData = async () => {
@@ -506,6 +513,20 @@ export default function FunnelsDashboard() {
       console.error('Error loading subscription data:', error);
     } finally {
       setLoadingSubscription(false);
+    }
+  };
+
+  const checkRazorpayConfig = async () => {
+    try {
+      setCheckingRazorpay(true);
+      const response = await fetch('/api/razorpay-config');
+      const data = await response.json();
+      setHasRazorpayConfig(data.hasConfig || false);
+    } catch (error) {
+      console.error('Error checking Razorpay config:', error);
+      setHasRazorpayConfig(false);
+    } finally {
+      setCheckingRazorpay(false);
     }
   };
 
@@ -856,20 +877,8 @@ export default function FunnelsDashboard() {
         
         // Check if payment gateway needs to be configured
         if (errorData.requiresRazorpaySetup) {
-          toast.error(
-            <div>
-              <p className="font-semibold">Payment Gateway Required</p>
-              <p className="text-sm">{errorData.message || 'Please configure Razorpay to receive payments'}</p>
-            </div>,
-            { 
-              duration: 6000,
-              icon: '💳',
-            }
-          );
-          // Redirect to Razorpay setup after showing the message
-          setTimeout(() => {
-            window.location.href = errorData.setupUrl || '/auth/dashboard/razorpay-setup';
-          }, 2000);
+          setShowCreateModal(false);
+          setShowRazorpayModal(true);
           return;
         }
         
@@ -1176,6 +1185,65 @@ export default function FunnelsDashboard() {
             Sell New Product
           </button>
         </div>
+
+        {/* Razorpay Configuration Banner - Only show when NOT configured */}
+        {!checkingRazorpay && !hasRazorpayConfig && (
+          <div className="relative overflow-hidden rounded-2xl p-6 sm:p-8 shadow-2xl bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 mb-6">
+            <div className="absolute top-0 right-0 -mt-4 -mr-4 w-40 h-40 bg-white opacity-10 rounded-full"></div>
+            <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-32 h-32 bg-white opacity-10 rounded-full"></div>
+            
+            <div className="relative z-10">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                <div className="flex-1">
+                  <div className="inline-flex items-center px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full mb-3">
+                    <BoltIcon className="h-4 w-4 text-white mr-2" />
+                    <span className="text-xs font-semibold text-white uppercase">⚠️ PAYMENT SETUP REQUIRED</span>
+                  </div>
+                  
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+                    💳 Connect Razorpay to Receive Payments!
+                  </h2>
+                  
+                  <p className="text-base sm:text-lg text-white/90 mb-3">
+                    <strong>Important:</strong> You need to connect your Razorpay account to receive payments from customers. All money goes <strong>directly to YOUR bank account</strong>!
+                  </p>
+                  
+                  <div className="flex flex-wrap items-center gap-4 mb-4">
+                    <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-2 rounded-lg">
+                      <CheckCircleIcon className="h-5 w-5 text-white mr-2" />
+                      <span className="text-sm text-white font-medium">Direct to Your Account</span>
+                    </div>
+                    <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-2 rounded-lg">
+                      <CheckCircleIcon className="h-5 w-5 text-white mr-2" />
+                      <span className="text-sm text-white font-medium">Instant Settlements</span>
+                    </div>
+                    <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-2 rounded-lg">
+                      <CheckCircleIcon className="h-5 w-5 text-white mr-2" />
+                      <span className="text-sm text-white font-medium">Zero Platform Fees</span>
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm text-white/80 flex items-start">
+                    <SparklesIcon className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Without Razorpay, you won't be able to create products or receive any payments from your customers.</span>
+                  </p>
+                </div>
+                
+                <div className="flex-shrink-0">
+                  <Link
+                    href="/auth/dashboard/razorpay-setup"
+                    className="group inline-flex items-center px-6 py-3 bg-white text-red-600 rounded-xl font-bold text-base hover:bg-gray-50 transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-105"
+                  >
+                    <BanknotesIcon className="h-5 w-5 mr-2" />
+                    Connect Razorpay Now
+                    <ArrowTrendingUpIcon className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <p className="text-xs text-white/90 text-center mt-2 font-medium">⚡ Takes only 2 minutes to setup</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Enhanced Search and Filter Section */}
         <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-200 shadow-lg p-6 mb-6">
@@ -1932,6 +2000,12 @@ export default function FunnelsDashboard() {
             </div>
           </div>
         )}
+        
+        {/* Razorpay Required Modal */}
+        <RazorpayRequiredModal
+          isOpen={showRazorpayModal}
+          onClose={() => setShowRazorpayModal(false)}
+        />
       </div>
     </DashboardLayout>
   );

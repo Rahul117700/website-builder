@@ -314,6 +314,32 @@ export default function FunnelCustomizer() {
     }
   };
 
+  const handleUnpublish = async () => {
+    try {
+      setPublishing(true);
+      const response = await fetch(`/api/funnels/${funnelId}/publish`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publish: false }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to unpublish funnel');
+      }
+      const data = await response.json();
+      setFunnel(data);
+      toast.success('✅ Funnel unpublished successfully! Your funnel is now private.', {
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Error unpublishing funnel:', error);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Failed to unpublish: ${message}`);
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -388,54 +414,83 @@ export default function FunnelCustomizer() {
             {/* Smart Publish Button with Validation Feedback */}
             {(() => {
               const canPublish = validationResult.isValid;
+              const isPublished = funnel?.status === 'ACTIVE';
               
               return (
-                <div className="relative group flex-1 md:flex-none">
-                  <button
-                    onClick={handlePublish}
-                    disabled={publishing || saving || !canPublish}
-                    className={`w-full flex items-center justify-center gap-2 px-6 py-2 text-sm font-medium text-white rounded-lg shadow-sm transition-all ${
-                      publishing || saving
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : !canPublish
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : funnel?.status === 'ACTIVE'
-                        ? 'bg-yellow-500 hover:bg-yellow-600'
-                        : 'bg-purple-600 hover:bg-purple-700 hover:shadow-md'
-                    }`}
-                  >
-                    {publishing ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                        Processing...
-                      </>
-                    ) : funnel?.status === 'ACTIVE' ? (
-                      <>
-                        <RocketLaunchIcon className="w-4 h-4" />
-                        Update Funnel
-                      </>
-                    ) : (
-                      <>
-                        <RocketLaunchIcon className="w-4 h-4" />
-                        Publish
-                      </>
-                    )}
-                  </button>
-                  
-                  {/* Tooltip for missing fields */}
-                  {!canPublish && !publishing && !saving && (
-                    <div className="hidden md:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
-                      <div className="font-semibold mb-1">Missing required fields:</div>
-                      <div>{validationResult.missingFields.slice(0, 3).join(', ')}</div>
-                      {validationResult.missingFields.length > 3 && (
-                        <div className="text-gray-300">+{validationResult.missingFields.length - 3} more...</div>
+                <>
+                  {/* Unpublish Button (shown when published) */}
+                  {isPublished && (
+                    <button
+                      onClick={handleUnpublish}
+                      disabled={publishing || saving}
+                      className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition-all ${
+                        publishing || saving
+                          ? 'bg-gray-400 text-white cursor-not-allowed'
+                          : 'bg-white text-red-600 border-2 border-red-600 hover:bg-red-50 hover:shadow-md'
+                      }`}
+                      title="Make funnel private"
+                    >
+                      {publishing ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                        </>
+                      ) : (
+                        <>
+                          <EyeIcon className="w-4 h-4" />
+                          Unpublish
+                        </>
                       )}
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
-                        <div className="border-4 border-transparent border-t-gray-900"></div>
-                      </div>
-                    </div>
+                    </button>
                   )}
-                </div>
+                  
+                  {/* Publish/Update Button */}
+                  <div className="relative group flex-1 md:flex-none">
+                    <button
+                      onClick={handlePublish}
+                      disabled={publishing || saving || !canPublish}
+                      className={`w-full flex items-center justify-center gap-2 px-6 py-2 text-sm font-medium text-white rounded-lg shadow-sm transition-all ${
+                        publishing || saving
+                          ? 'bg-gray-400 cursor-not-allowed'
+                          : !canPublish
+                          ? 'bg-gray-400 cursor-not-allowed'
+                          : isPublished
+                          ? 'bg-yellow-500 hover:bg-yellow-600'
+                          : 'bg-purple-600 hover:bg-purple-700 hover:shadow-md'
+                      }`}
+                    >
+                      {publishing ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                          Processing...
+                        </>
+                      ) : isPublished ? (
+                        <>
+                          <RocketLaunchIcon className="w-4 h-4" />
+                          Update Funnel
+                        </>
+                      ) : (
+                        <>
+                          <RocketLaunchIcon className="w-4 h-4" />
+                          Publish
+                        </>
+                      )}
+                    </button>
+                    
+                    {/* Tooltip for missing fields */}
+                    {!canPublish && !publishing && !saving && (
+                      <div className="hidden md:block absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg">
+                        <div className="font-semibold mb-1">Missing required fields:</div>
+                        <div>{validationResult.missingFields.slice(0, 3).join(', ')}</div>
+                        {validationResult.missingFields.length > 3 && (
+                          <div className="text-gray-300">+{validationResult.missingFields.length - 3} more...</div>
+                        )}
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
+                          <div className="border-4 border-transparent border-t-gray-900"></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
               );
             })()}
           </div>

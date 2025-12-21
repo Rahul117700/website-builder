@@ -398,19 +398,19 @@ export default function PublicFunnelPage() {
             <ul className="text-left space-y-3 mb-6">
               <li className="flex items-start gap-3">
                 <CheckCircleIcon className="h-6 w-6 text-green-600 mt-0.5 flex-shrink-0" />
-                <span><strong>Unlimited Visitors</strong> - No more limits on your funnels</span>
+                <span className="text-gray-900"><strong>Unlimited Visitors</strong> - No more limits on your funnels</span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircleIcon className="h-6 w-6 text-green-600 mt-0.5 flex-shrink-0" />
-                <span><strong>Unlimited Funnels</strong> - Create as many as you need</span>
+                <span className="text-gray-900"><strong>Unlimited Funnels</strong> - Create as many as you need</span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircleIcon className="h-6 w-6 text-green-600 mt-0.5 flex-shrink-0" />
-                <span><strong>Advanced Analytics</strong> - Track everything in detail</span>
+                <span className="text-gray-900"><strong>Advanced Analytics</strong> - Track everything in detail</span>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircleIcon className="h-6 w-6 text-green-600 mt-0.5 flex-shrink-0" />
-                <span><strong>Priority Support</strong> - Get help when you need it</span>
+                <span className="text-gray-900"><strong>Priority Support</strong> - Get help when you need it</span>
               </li>
             </ul>
             <a
