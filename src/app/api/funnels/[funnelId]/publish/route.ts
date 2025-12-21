@@ -79,8 +79,7 @@ export async function POST(
       data: {
         status: publish ? 'ACTIVE' : 'DRAFT',
         published: publish,
-        url: publish ? `/f/${funnelId}/${slug}` : null,
-        publishedAt: publish ? new Date() : null
+        url: publish ? `/f/${funnelId}/${slug}` : null
       },
       include: {
         template: true,
@@ -93,7 +92,7 @@ export async function POST(
       await prisma.userNotification.create({
         data: {
           userId: session.user.id,
-          type: 'FUNNEL_PUBLISHED',
+          type: 'SUCCESS',
           title: 'Funnel Published Successfully! 🎉',
           message: `Your funnel "${funnel.name}" is now live and ready to accept payments.`,
           metadata: {

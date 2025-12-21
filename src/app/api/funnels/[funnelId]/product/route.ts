@@ -35,6 +35,7 @@ export async function POST(
     // Update or create product
     let product;
     if (funnel.product) {
+      // Update existing product
       product = await prisma.digitalProduct.update({
         where: { id: funnel.product.id },
         data: {
@@ -44,14 +45,22 @@ export async function POST(
         },
       });
     } else {
+      // Create new product
       product = await prisma.digitalProduct.create({
         data: {
           name,
           description,
           price: parseFloat(price),
-          funnelId: resolvedParams.funnelId,
           userId: session.user.id,
           type: 'EBOOK', // Default, will be updated on file upload
+        },
+      });
+
+      // Link product to funnel
+      await prisma.funnel.update({
+        where: { id: resolvedParams.funnelId },
+        data: {
+          productId: product.id,
         },
       });
     }

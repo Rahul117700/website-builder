@@ -14,7 +14,6 @@ import {
   XMarkIcon,
   PresentationChartLineIcon,
   EnvelopeIcon,
-  EyeIcon,
   ArrowTrendingUpIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
@@ -64,10 +63,6 @@ export default function SuperAdminDashboard() {
   const [subscribers, setSubscribers] = useState<any[]>([]);
   const [subscriberStats, setSubscriberStats] = useState<any>(null);
   const [subscriberFilter, setSubscriberFilter] = useState('ACTIVE');
-  
-  // Page analytics state
-  const [pageAnalytics, setPageAnalytics] = useState<any>(null);
-  const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -294,31 +289,6 @@ export default function SuperAdminDashboard() {
     }
   };
   
-  const loadPageAnalytics = async () => {
-    try {
-      setAnalyticsLoading(true);
-      const response = await fetch('/api/admin/page-analytics?days=30', {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Page analytics data loaded:', data);
-        setPageAnalytics(data);
-      } else {
-        console.error('Page Analytics API failed:', await response.text());
-        setPageAnalytics({ totalVisits: 0, totalUnique: 0, topPages: [], pageStats: [] });
-      }
-    } catch (error) {
-      console.error('Error loading page analytics:', error);
-      setPageAnalytics({ totalVisits: 0, totalUnique: 0, topPages: [], pageStats: [] });
-    } finally {
-      setAnalyticsLoading(false);
-    }
-  };
-
   const toggleUserStatus = async (userId: string, currentStatus: string) => {
     try {
       const newStatus = currentStatus === 'ACTIVE' ? 'DISABLED' : 'ACTIVE';
@@ -586,11 +556,10 @@ export default function SuperAdminDashboard() {
           <div className="border-b border-gray-200">
             <nav className="flex overflow-x-auto scrollbar-hide px-2 sm:px-3 md:px-6">
               <div className="flex space-x-2 sm:space-x-4 md:space-x-8 min-w-max">
-                {[
+                {                [
                   { id: 'overview', name: 'Overview', fullName: 'Platform Overview', icon: ChartBarIcon },
                   { id: 'users', name: 'Users', fullName: 'User Management', icon: UsersIcon },
                   { id: 'subscribers', name: 'Subscribers', fullName: 'Newsletter Subscribers', icon: EnvelopeIcon },
-                  { id: 'site-analytics', name: 'Site Analytics', fullName: 'Site Analytics', icon: EyeIcon },
                   { id: 'plans', name: 'Plans', fullName: 'Subscription Plans', icon: CreditCardIcon },
                   { id: 'analytics', name: 'Analytics', fullName: 'Detailed Analytics', icon: PresentationChartLineIcon },
                   { id: 'settings', name: 'Settings', fullName: 'Platform Settings', icon: Cog6ToothIcon },
@@ -1129,165 +1098,6 @@ export default function SuperAdminDashboard() {
                     </div>
                   )}
                 </div>
-              </div>
-            )}
-
-            {/* Site Analytics Tab */}
-            {activeTab === 'site-analytics' && (
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold text-gray-900">Site Analytics & Page Views</h3>
-                  <button
-                    onClick={loadPageAnalytics}
-                    disabled={analyticsLoading}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center disabled:opacity-50"
-                  >
-                    {analyticsLoading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                        Loading...
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Refresh
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                {pageAnalytics ? (
-                  <div className="space-y-6">
-                    {/* Summary Stats */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-blue-100 text-sm">Total Page Views</p>
-                            <p className="text-4xl font-bold">{pageAnalytics.totalVisits?.toLocaleString()}</p>
-                            <p className="text-blue-100 text-xs mt-2">Last 30 days</p>
-                          </div>
-                          <EyeIcon className="h-16 w-16 opacity-30" />
-                        </div>
-                      </div>
-                      
-                      <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-purple-100 text-sm">Unique Visitors</p>
-                            <p className="text-4xl font-bold">{pageAnalytics.totalUnique?.toLocaleString()}</p>
-                            <p className="text-purple-100 text-xs mt-2">Last 30 days</p>
-                          </div>
-                          <UsersIcon className="h-16 w-16 opacity-30" />
-                        </div>
-                      </div>
-                      
-                      <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-6 text-white">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-green-100 text-sm">Top Pages</p>
-                            <p className="text-4xl font-bold">{pageAnalytics.topPages?.length || 0}</p>
-                            <p className="text-green-100 text-xs mt-2">Most visited</p>
-                          </div>
-                          <ChartBarIcon className="h-16 w-16 opacity-30" />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Top Pages Table */}
-                    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                      <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                        <h4 className="text-lg font-semibold text-gray-900">Top 10 Most Visited Pages</h4>
-                      </div>
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Page URL</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Visits</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unique Visitors</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg per Day</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {pageAnalytics.topPages?.map((page: any, index: number) => (
-                              <tr key={index} className="hover:bg-gray-50">
-                                <td className="px-6 py-4">
-                                  <div className="flex items-center">
-                                    <div className="flex-shrink-0 h-8 w-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                                      <span className="text-purple-600 font-bold text-sm">{index + 1}</span>
-                                    </div>
-                                    <div>
-                                      <div className="text-sm font-medium text-gray-900">{page.page}</div>
-                                      <div className="text-xs text-gray-500">
-                                        {page.page === '/' ? 'Homepage' :
-                                         page.page === '/auth/dashboard' ? 'Dashboard' :
-                                         page.page.startsWith('/blog') ? 'Blog' :
-                                         page.page.startsWith('/f/') ? 'Product Page' :
-                                         'Other'}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm font-bold text-gray-900">{page.visits?.toLocaleString()}</div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm text-gray-600">{page.uniqueVisitors?.toLocaleString()}</div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm text-gray-600">{page.avgPerDay?.toLocaleString() || Math.round((page.visits || 0) / 30)}</div>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                      
-                      {(!pageAnalytics.topPages || pageAnalytics.topPages.length === 0) && (
-                        <div className="text-center py-12">
-                          <EyeIcon className="mx-auto h-12 w-12 text-gray-400" />
-                          <p className="mt-2 text-gray-600">No page analytics data yet</p>
-                          <p className="text-sm text-gray-500 mt-1">Data will appear as users visit your site</p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Page Breakdown */}
-                    <div className="bg-white border border-gray-200 rounded-xl p-6">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-4">Page Category Breakdown</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {[
-                          { label: 'Homepage', page: '/', color: 'blue' },
-                          { label: 'Dashboard', page: '/auth/dashboard', color: 'purple' },
-                          { label: 'Blog Pages', page: '/blog', color: 'green', prefix: true },
-                          { label: 'Product Pages', page: '/f/', color: 'orange', prefix: true },
-                        ].map((category) => {
-                          const visits = pageAnalytics.pageStats
-                            ?.filter((stat: any) => category.prefix ? stat.page.startsWith(category.page) : stat.page === category.page)
-                            .reduce((sum: number, stat: any) => sum + (stat.visits || 0), 0) || 0;
-                          
-                          return (
-                            <div key={category.label} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                              <div className="flex items-center">
-                                <div className={`w-3 h-3 rounded-full bg-${category.color}-500 mr-3`}></div>
-                                <span className="text-sm font-medium text-gray-700">{category.label}</span>
-                              </div>
-                              <span className="text-lg font-bold text-gray-900">{visits.toLocaleString()}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading analytics data...</p>
-                  </div>
-                )}
               </div>
             )}
 
