@@ -2,8 +2,9 @@
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { CheckIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
+import { detectCountryFromBrowser, getCurrencyForCountry, formatPrice, getSupportedCurrencies } from '@/lib/geo-pricing';
 
 interface SubscriptionPlan {
   id: string;
@@ -18,19 +19,58 @@ interface SubscriptionPlan {
   maxCustomDomains: number;
   priority: number;
   isActive: boolean;
+  displayPrice?: number;
+  displayCurrency?: string;
+  displaySymbol?: string;
+  supportedCurrencies?: string[];
+  regionalPricing?: any;
 }
 
 export default function PricingPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [detectedCurrency, setDetectedCurrency] = useState<string>('INR');
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('INR');
+  const [detecting, setDetecting] = useState(true);
 
   useEffect(() => {
-    loadPlans();
+    detectUserCurrency();
   }, []);
+
+  useEffect(() => {
+    if (!detecting) {
+      loadPlans();
+    }
+  }, [selectedCurrency, detecting]);
+
+  const detectUserCurrency = async () => {
+    try {
+      // Try to get from localStorage first
+      const savedCurrency = localStorage.getItem('preferredCurrency');
+      if (savedCurrency) {
+        setDetectedCurrency(savedCurrency);
+        setSelectedCurrency(savedCurrency);
+        setDetecting(false);
+        return;
+      }
+
+      // Detect from location
+      const countryCode = await detectCountryFromBrowser();
+      const { currency } = getCurrencyForCountry(countryCode);
+      setDetectedCurrency(currency);
+      setSelectedCurrency(currency);
+    } catch (error) {
+      console.error('Error detecting currency:', error);
+      setDetectedCurrency('INR');
+      setSelectedCurrency('INR');
+    } finally {
+      setDetecting(false);
+    }
+  };
 
   const loadPlans = async () => {
     try {
-      const response = await fetch('/api/user/plans');
+      const response = await fetch(`/api/user/plans?currency=${selectedCurrency}`);
       if (response.ok) {
         const data = await response.json();
         setPlans(data.plans || []);
@@ -40,6 +80,12 @@ export default function PricingPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCurrencyChange = (newCurrency: string) => {
+    setSelectedCurrency(newCurrency);
+    localStorage.setItem('preferredCurrency', newCurrency);
+    setLoading(true);
   };
 
   const getPeriod = (duration: number) => {
@@ -60,12 +106,34 @@ export default function PricingPage() {
     return plan.priority === maxPriority && maxPriority > 0;
   };
 
-  if (loading) {
+  const getDisplayPrice = (plan: SubscriptionPlan) => {
+    if (plan.displaySymbol) {
+      return plan.displaySymbol;
+    }
+    return formatPrice(plan.displayPrice || plan.price, plan.displayCurrency || plan.currency);
+  };
+
+  // Get all unique currencies from all plans
+  const getAllSupportedCurrencies = () => {
+    const currencies = new Set<string>();
+    plans.forEach(plan => {
+      currencies.add(plan.currency);
+      if (plan.supportedCurrencies) {
+        plan.supportedCurrencies.forEach(curr => currencies.add(curr));
+      }
+    });
+    return Array.from(currencies);
+  };
+
+  if (loading || detecting) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <Header />
         <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            {detecting && <p className="text-gray-600">Detecting your location...</p>}
+          </div>
         </div>
         <Footer />
       </div>
@@ -82,9 +150,30 @@ export default function PricingPage() {
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
             Simple, Transparent Pricing
           </h1>
-          <p className="text-xl text-purple-100 max-w-3xl mx-auto">
+          <p className="text-xl text-purple-100 max-w-3xl mx-auto mb-6">
             Choose the plan that fits your needs. Upgrade or downgrade anytime.
           </p>
+          
+          {/* Currency Switcher */}
+          {getAllSupportedCurrencies().length > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <GlobeAltIcon className="h-5 w-5 text-purple-200" />
+              <select
+                value={selectedCurrency}
+                onChange={(e) => handleCurrencyChange(e.target.value)}
+                className="bg-white/10 backdrop-blur-sm text-white border border-white/20 rounded-lg px-4 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-white/50"
+              >
+                {getAllSupportedCurrencies().map((curr) => (
+                  <option key={curr} value={curr} className="text-gray-900">
+                    {curr}
+                  </option>
+                ))}
+              </select>
+              <span className="text-sm text-purple-200">
+                Showing prices in {selectedCurrency}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -105,7 +194,8 @@ export default function PricingPage() {
             {plans.map((plan) => {
               const popular = isPopular(plan);
               const period = getPeriod(plan.duration);
-              const cta = getCTA(plan.price);
+              const cta = getCTA(plan.displayPrice || plan.price);
+              const displayPrice = getDisplayPrice(plan);
               
               return (
                 <div
@@ -124,7 +214,7 @@ export default function PricingPage() {
                     <p className="text-gray-600 text-sm mb-6">{plan.description || 'Choose this plan to get started'}</p>
                     <div className="mb-6">
                       <div className="flex items-baseline">
-                        <span className="text-4xl font-bold text-gray-900">{plan.currency} {plan.price}</span>
+                        <span className="text-4xl font-bold text-gray-900">{displayPrice}</span>
                         <span className="text-gray-600 ml-2">/{period}</span>
                       </div>
                     </div>

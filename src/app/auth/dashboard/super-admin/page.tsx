@@ -38,6 +38,7 @@ export default function SuperAdminDashboard() {
     name: '',
     description: '',
     price: '',
+    currency: 'INR',
     duration: '',
     maxFunnels: '',
     maxProducts: '',
@@ -379,6 +380,7 @@ export default function SuperAdminDashboard() {
         name: newPlan.name,
         description: newPlan.description || '',
         price: parseFloat(newPlan.price),
+        currency: newPlan.currency || 'INR',
         duration: parseInt(newPlan.duration),
         maxFunnels: newPlan.maxFunnels === 'unlimited' ? -1 : parseInt(newPlan.maxFunnels || '0'),
         maxProducts: newPlan.maxProducts === 'unlimited' ? -1 : parseInt(newPlan.maxProducts || '0'),
@@ -404,6 +406,7 @@ export default function SuperAdminDashboard() {
           name: '',
           description: '',
           price: '',
+          currency: 'INR',
           duration: '',
           maxFunnels: '',
           maxProducts: '',
@@ -434,6 +437,7 @@ export default function SuperAdminDashboard() {
         name: selectedPlan.name,
         description: selectedPlan.description || '',
         price: parseFloat(selectedPlan.price),
+        currency: selectedPlan.currency || 'INR',
         duration: parseInt(selectedPlan.duration),
         maxFunnels: selectedPlan.maxFunnels === 'unlimited' ? -1 : parseInt(selectedPlan.maxFunnels || '0'),
         maxProducts: selectedPlan.maxProducts === 'unlimited' ? -1 : parseInt(selectedPlan.maxProducts || '0'),
@@ -946,9 +950,30 @@ export default function SuperAdminDashboard() {
 
                       <div className="mb-4">
                         <div className="text-2xl sm:text-3xl font-bold text-purple-600">
-                          ₹{plan.price}
+                          {plan.currency === 'USD' && '$'}
+                          {plan.currency === 'EUR' && '€'}
+                          {plan.currency === 'GBP' && '£'}
+                          {plan.currency === 'INR' && '₹'}
+                          {plan.currency === 'AUD' && 'A$'}
+                          {plan.currency === 'CAD' && 'C$'}
+                          {plan.currency === 'SGD' && 'S$'}
+                          {plan.currency === 'AED' && 'د.إ'}
+                          {plan.currency === 'BRL' && 'R$'}
+                          {plan.currency === 'MXN' && '$'}
+                          {plan.currency === 'JPY' && '¥'}
+                          {plan.currency === 'CNY' && '¥'}
+                          {plan.currency === 'PHP' && '₱'}
+                          {plan.currency === 'THB' && '฿'}
+                          {plan.currency === 'VND' && '₫'}
+                          {!['USD', 'EUR', 'GBP', 'INR', 'AUD', 'CAD', 'SGD', 'AED', 'BRL', 'MXN', 'JPY', 'CNY', 'PHP', 'THB', 'VND'].includes(plan.currency) && plan.currency + ' '}
+                          {plan.price}
                         </div>
-                        <div className="text-sm text-gray-600">per {plan.duration} days</div>
+                        <div className="text-sm text-gray-600">
+                          per {plan.duration} days
+                          <span className="ml-2 text-xs bg-gray-100 px-2 py-0.5 rounded-full">
+                            {plan.currency || 'INR'}
+                          </span>
+                        </div>
                       </div>
 
                       <div className="space-y-2 mb-4 text-sm">
@@ -1786,6 +1811,7 @@ export default function SuperAdminDashboard() {
                         name: '',
                         description: '',
                         price: '',
+                        currency: 'INR',
                         duration: '',
                         maxFunnels: '',
                         maxProducts: '',
@@ -1800,6 +1826,30 @@ export default function SuperAdminDashboard() {
                 </div>
                 
                 <div className="space-y-4">
+                  {/* Pricing Guide Banner */}
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-sm font-semibold text-gray-900 mb-1">💡 Pricing Tips</h4>
+                        <p className="text-xs text-gray-700 mb-2">
+                          Recommended prices by region: <strong>India ₹199-499</strong>, <strong>USA $9-29</strong>, <strong>UK £7-24</strong>, <strong>EU €9-29</strong>
+                        </p>
+                        <a 
+                          href="/PRICING_GUIDE_BY_COUNTRY.md" 
+                          target="_blank"
+                          className="text-xs text-blue-600 hover:text-blue-700 font-medium underline"
+                        >
+                          📊 View Complete Pricing Guide for All Countries →
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Plan Name</label>
@@ -1812,14 +1862,119 @@ export default function SuperAdminDashboard() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Price (₹)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Currency
+                        <span className="text-xs text-gray-500 ml-1">(Choose target market)</span>
+                      </label>
+                      <select
+                        value={newPlan.currency || 'INR'}
+                        onChange={(e) => setNewPlan({...newPlan, currency: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
+                      >
+                        <optgroup label="🔥 Most Popular">
+                          <option value="INR">🇮🇳 Indian Rupee (₹ INR)</option>
+                          <option value="USD">🇺🇸 US Dollar ($ USD)</option>
+                          <option value="EUR">🇪🇺 Euro (€ EUR)</option>
+                          <option value="GBP">🇬🇧 British Pound (£ GBP)</option>
+                        </optgroup>
+                        <optgroup label="Asia Pacific">
+                          <option value="AUD">🇦🇺 Australian Dollar (A$ AUD)</option>
+                          <option value="SGD">🇸🇬 Singapore Dollar (S$ SGD)</option>
+                          <option value="HKD">🇭🇰 Hong Kong Dollar (HK$ HKD)</option>
+                          <option value="JPY">🇯🇵 Japanese Yen (¥ JPY)</option>
+                          <option value="CNY">🇨🇳 Chinese Yuan (¥ CNY)</option>
+                          <option value="KRW">🇰🇷 South Korean Won (₩ KRW)</option>
+                          <option value="NZD">🇳🇿 New Zealand Dollar (NZ$ NZD)</option>
+                          <option value="PHP">🇵🇭 Philippine Peso (₱ PHP)</option>
+                          <option value="IDR">🇮🇩 Indonesian Rupiah (Rp IDR)</option>
+                          <option value="THB">🇹🇭 Thai Baht (฿ THB)</option>
+                          <option value="MYR">🇲🇾 Malaysian Ringgit (RM MYR)</option>
+                          <option value="VND">🇻🇳 Vietnamese Dong (₫ VND)</option>
+                          <option value="PKR">🇵🇰 Pakistani Rupee (₨ PKR)</option>
+                          <option value="BDT">🇧🇩 Bangladeshi Taka (৳ BDT)</option>
+                          <option value="LKR">🇱🇰 Sri Lankan Rupee (Rs LKR)</option>
+                        </optgroup>
+                        <optgroup label="Americas">
+                          <option value="CAD">🇨🇦 Canadian Dollar (C$ CAD)</option>
+                          <option value="BRL">🇧🇷 Brazilian Real (R$ BRL)</option>
+                          <option value="MXN">🇲🇽 Mexican Peso ($ MXN)</option>
+                          <option value="ARS">🇦🇷 Argentine Peso ($ ARS)</option>
+                          <option value="CLP">🇨🇱 Chilean Peso ($ CLP)</option>
+                          <option value="COP">🇨🇴 Colombian Peso ($ COP)</option>
+                          <option value="PEN">🇵🇪 Peruvian Sol (S/ PEN)</option>
+                        </optgroup>
+                        <optgroup label="Europe">
+                          <option value="CHF">🇨🇭 Swiss Franc (CHF)</option>
+                          <option value="SEK">🇸🇪 Swedish Krona (kr SEK)</option>
+                          <option value="NOK">🇳🇴 Norwegian Krone (kr NOK)</option>
+                          <option value="DKK">🇩🇰 Danish Krone (kr DKK)</option>
+                          <option value="PLN">🇵🇱 Polish Złoty (zł PLN)</option>
+                          <option value="CZK">🇨🇿 Czech Koruna (Kč CZK)</option>
+                          <option value="HUF">🇭🇺 Hungarian Forint (Ft HUF)</option>
+                          <option value="RON">🇷🇴 Romanian Leu (lei RON)</option>
+                          <option value="TRY">🇹🇷 Turkish Lira (₺ TRY)</option>
+                          <option value="RUB">🇷🇺 Russian Ruble (₽ RUB)</option>
+                        </optgroup>
+                        <optgroup label="Middle East & Africa">
+                          <option value="AED">🇦🇪 UAE Dirham (د.إ AED)</option>
+                          <option value="SAR">🇸🇦 Saudi Riyal (﷼ SAR)</option>
+                          <option value="ZAR">🇿🇦 South African Rand (R ZAR)</option>
+                          <option value="ILS">🇮🇱 Israeli Shekel (₪ ILS)</option>
+                          <option value="EGP">🇪🇬 Egyptian Pound (E£ EGP)</option>
+                          <option value="NGN">🇳🇬 Nigerian Naira (₦ NGN)</option>
+                          <option value="KES">🇰🇪 Kenyan Shilling (KSh KES)</option>
+                        </optgroup>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Price
+                        <span className="text-xs text-gray-500 ml-1">(in selected currency)</span>
+                      </label>
                       <input
                         type="number"
+                        step="0.01"
                         value={newPlan.price}
                         onChange={(e) => setNewPlan({...newPlan, price: e.target.value})}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
-                        placeholder="999"
+                        placeholder={newPlan.currency === 'USD' ? '9.99' : newPlan.currency === 'INR' ? '199' : '9.99'}
                       />
+                      {newPlan.currency && (
+                        <p className="text-xs text-gray-600 mt-1">
+                          {newPlan.currency === 'INR' && '💡 Tip: ₹199-499 converts well in India'}
+                          {newPlan.currency === 'USD' && '💡 Tip: $9-29 is sweet spot for US'}
+                          {newPlan.currency === 'EUR' && '💡 Tip: €9-29 works best in Europe'}
+                          {newPlan.currency === 'GBP' && '💡 Tip: £7-24 is optimal for UK'}
+                          {newPlan.currency === 'AUD' && '💡 Tip: A$12-39 recommended'}
+                          {newPlan.currency === 'CAD' && '💡 Tip: C$12-39 recommended'}
+                          {newPlan.currency === 'BRL' && '💡 Tip: R$29-79 works well'}
+                          {newPlan.currency === 'MXN' && '💡 Tip: $149-399 recommended'}
+                          {newPlan.currency === 'SGD' && '💡 Tip: S$12-32 optimal'}
+                          {newPlan.currency === 'AED' && '💡 Tip: د.إ33-88 recommended'}
+                          {!['INR', 'USD', 'EUR', 'GBP', 'AUD', 'CAD', 'BRL', 'MXN', 'SGD', 'AED'].includes(newPlan.currency) && '💡 Check pricing guide for this currency'}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Duration (days)</label>
+                      <select
+                        value={newPlan.duration}
+                        onChange={(e) => setNewPlan({...newPlan, duration: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
+                      >
+                        <option value="">Select duration...</option>
+                        <option value="30">30 Days (Monthly)</option>
+                        <option value="60">60 Days (2 Months)</option>
+                        <option value="90">90 Days (Quarterly)</option>
+                        <option value="180">180 Days (6 Months)</option>
+                        <option value="365">365 Days (Annual)</option>
+                      </select>
+                      <p className="text-xs text-gray-600 mt-1">
+                        💡 Tip: Offer 15-35% discount for longer durations
+                      </p>
                     </div>
                   </div>
                   
@@ -1910,6 +2065,7 @@ export default function SuperAdminDashboard() {
                         name: '',
                         description: '',
                         price: '',
+                        currency: 'INR',
                         duration: '',
                         maxFunnels: '',
                         maxProducts: '',
@@ -1952,6 +2108,30 @@ export default function SuperAdminDashboard() {
                 </div>
                 
                 <div className="space-y-4">
+                  {/* Pricing Guide Banner */}
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-sm font-semibold text-gray-900 mb-1">💡 Pricing Tips</h4>
+                        <p className="text-xs text-gray-700 mb-2">
+                          Recommended prices by region: <strong>India ₹199-499</strong>, <strong>USA $9-29</strong>, <strong>UK £7-24</strong>, <strong>EU €9-29</strong>
+                        </p>
+                        <a 
+                          href="/PRICING_GUIDE_BY_COUNTRY.md" 
+                          target="_blank"
+                          className="text-xs text-blue-600 hover:text-blue-700 font-medium underline"
+                        >
+                          📊 View Complete Pricing Guide for All Countries →
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Plan Name</label>
@@ -1960,16 +2140,122 @@ export default function SuperAdminDashboard() {
                         value={selectedPlan.name}
                         onChange={(e) => setSelectedPlan({...selectedPlan, name: e.target.value})}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
+                        placeholder="e.g., Starter, Professional, Business"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Price (₹)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Currency
+                        <span className="text-xs text-gray-500 ml-1">(Choose target market)</span>
+                      </label>
+                      <select
+                        value={selectedPlan.currency || 'INR'}
+                        onChange={(e) => setSelectedPlan({...selectedPlan, currency: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
+                      >
+                        <optgroup label="🔥 Most Popular">
+                          <option value="INR">🇮🇳 Indian Rupee (₹ INR)</option>
+                          <option value="USD">🇺🇸 US Dollar ($ USD)</option>
+                          <option value="EUR">🇪🇺 Euro (€ EUR)</option>
+                          <option value="GBP">🇬🇧 British Pound (£ GBP)</option>
+                        </optgroup>
+                        <optgroup label="Asia Pacific">
+                          <option value="AUD">🇦🇺 Australian Dollar (A$ AUD)</option>
+                          <option value="SGD">🇸🇬 Singapore Dollar (S$ SGD)</option>
+                          <option value="HKD">🇭🇰 Hong Kong Dollar (HK$ HKD)</option>
+                          <option value="JPY">🇯🇵 Japanese Yen (¥ JPY)</option>
+                          <option value="CNY">🇨🇳 Chinese Yuan (¥ CNY)</option>
+                          <option value="KRW">🇰🇷 South Korean Won (₩ KRW)</option>
+                          <option value="NZD">🇳🇿 New Zealand Dollar (NZ$ NZD)</option>
+                          <option value="PHP">🇵🇭 Philippine Peso (₱ PHP)</option>
+                          <option value="IDR">🇮🇩 Indonesian Rupiah (Rp IDR)</option>
+                          <option value="THB">🇹🇭 Thai Baht (฿ THB)</option>
+                          <option value="MYR">🇲🇾 Malaysian Ringgit (RM MYR)</option>
+                          <option value="VND">🇻🇳 Vietnamese Dong (₫ VND)</option>
+                          <option value="PKR">🇵🇰 Pakistani Rupee (₨ PKR)</option>
+                          <option value="BDT">🇧🇩 Bangladeshi Taka (৳ BDT)</option>
+                          <option value="LKR">🇱🇰 Sri Lankan Rupee (Rs LKR)</option>
+                        </optgroup>
+                        <optgroup label="Americas">
+                          <option value="CAD">🇨🇦 Canadian Dollar (C$ CAD)</option>
+                          <option value="BRL">🇧🇷 Brazilian Real (R$ BRL)</option>
+                          <option value="MXN">🇲🇽 Mexican Peso ($ MXN)</option>
+                          <option value="ARS">🇦🇷 Argentine Peso ($ ARS)</option>
+                          <option value="CLP">🇨🇱 Chilean Peso ($ CLP)</option>
+                          <option value="COP">🇨🇴 Colombian Peso ($ COP)</option>
+                          <option value="PEN">🇵🇪 Peruvian Sol (S/ PEN)</option>
+                        </optgroup>
+                        <optgroup label="Europe">
+                          <option value="CHF">🇨🇭 Swiss Franc (CHF)</option>
+                          <option value="SEK">🇸🇪 Swedish Krona (kr SEK)</option>
+                          <option value="NOK">🇳🇴 Norwegian Krone (kr NOK)</option>
+                          <option value="DKK">🇩🇰 Danish Krone (kr DKK)</option>
+                          <option value="PLN">🇵🇱 Polish Złoty (zł PLN)</option>
+                          <option value="CZK">🇨🇿 Czech Koruna (Kč CZK)</option>
+                          <option value="HUF">🇭🇺 Hungarian Forint (Ft HUF)</option>
+                          <option value="RON">🇷🇴 Romanian Leu (lei RON)</option>
+                          <option value="TRY">🇹🇷 Turkish Lira (₺ TRY)</option>
+                          <option value="RUB">🇷🇺 Russian Ruble (₽ RUB)</option>
+                        </optgroup>
+                        <optgroup label="Middle East & Africa">
+                          <option value="AED">🇦🇪 UAE Dirham (د.إ AED)</option>
+                          <option value="SAR">🇸🇦 Saudi Riyal (﷼ SAR)</option>
+                          <option value="ZAR">🇿🇦 South African Rand (R ZAR)</option>
+                          <option value="ILS">🇮🇱 Israeli Shekel (₪ ILS)</option>
+                          <option value="EGP">🇪🇬 Egyptian Pound (E£ EGP)</option>
+                          <option value="NGN">🇳🇬 Nigerian Naira (₦ NGN)</option>
+                          <option value="KES">🇰🇪 Kenyan Shilling (KSh KES)</option>
+                        </optgroup>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Price
+                        <span className="text-xs text-gray-500 ml-1">(in selected currency)</span>
+                      </label>
                       <input
                         type="number"
+                        step="0.01"
                         value={selectedPlan.price}
                         onChange={(e) => setSelectedPlan({...selectedPlan, price: e.target.value})}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
+                        placeholder={selectedPlan.currency === 'INR' ? '199' : selectedPlan.currency === 'USD' ? '9' : '9'}
                       />
+                      {selectedPlan.currency && (
+                        <p className="text-xs text-gray-600 mt-1">
+                          {selectedPlan.currency === 'INR' && '💡 Tip: ₹199-499 converts well in India'}
+                          {selectedPlan.currency === 'USD' && '💡 Tip: $9-29 is sweet spot for US'}
+                          {selectedPlan.currency === 'EUR' && '💡 Tip: €9-29 works best in Europe'}
+                          {selectedPlan.currency === 'GBP' && '💡 Tip: £7-24 is optimal for UK'}
+                          {selectedPlan.currency === 'AUD' && '💡 Tip: A$12-39 recommended'}
+                          {selectedPlan.currency === 'CAD' && '💡 Tip: C$12-39 recommended'}
+                          {selectedPlan.currency === 'BRL' && '💡 Tip: R$29-79 works well'}
+                          {selectedPlan.currency === 'MXN' && '💡 Tip: $149-399 recommended'}
+                          {selectedPlan.currency === 'SGD' && '💡 Tip: S$12-32 optimal'}
+                          {selectedPlan.currency === 'AED' && '💡 Tip: د.إ33-88 recommended'}
+                          {!['INR', 'USD', 'EUR', 'GBP', 'AUD', 'CAD', 'BRL', 'MXN', 'SGD', 'AED'].includes(selectedPlan.currency) && '💡 Check pricing guide for this currency'}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Duration (days)</label>
+                      <select
+                        value={selectedPlan.duration}
+                        onChange={(e) => setSelectedPlan({...selectedPlan, duration: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
+                      >
+                        <option value="30">30 Days (Monthly)</option>
+                        <option value="60">60 Days (2 Months)</option>
+                        <option value="90">90 Days (Quarterly)</option>
+                        <option value="180">180 Days (6 Months)</option>
+                        <option value="365">365 Days (Annual)</option>
+                      </select>
+                      <p className="text-xs text-gray-600 mt-1">
+                        💡 Tip: Offer 15-35% discount for longer durations
+                      </p>
                     </div>
                   </div>
                   

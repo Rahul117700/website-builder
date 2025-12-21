@@ -25,7 +25,7 @@ export default function TrialExpiredOverlay({
   const router = useRouter();
 
   const handleUpgrade = () => {
-    router.push('/auth/dashboard/pricing');
+    router.push('/auth/dashboard/plans');
   };
 
   return (

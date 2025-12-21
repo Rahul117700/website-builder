@@ -863,14 +863,21 @@ export default function FunnelsDashboard() {
         setSelectedTemplate(null);
         setNewFunnelName('');
         setNewFunnelDescription('');
-        toast.success('🎉 Product created successfully!', {
-          duration: 3000,
+        
+        // Show success toast
+        toast.success('🎉 Product created successfully! Opening editor...', {
+          duration: 2000,
           icon: '✅',
           style: {
             background: '#10B981',
             color: '#fff',
           },
         });
+        
+        // Auto-redirect to edit page after a short delay
+        setTimeout(() => {
+          window.location.href = `/auth/dashboard/funnels/${newFunnel.id}/customize`;
+        }, 800);
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.log('Error response:', errorData);
@@ -916,10 +923,15 @@ export default function FunnelsDashboard() {
         setSelectedTemplate(null);
         setNewFunnelName('');
         setNewFunnelDescription('');
-        toast.success('🎉 Product created successfully!', {
-          duration: 3000,
+        toast.success('🎉 Product created successfully! Opening editor...', {
+          duration: 2000,
           icon: '✅',
         });
+        
+        // Auto-redirect to edit page
+        setTimeout(() => {
+          window.location.href = `/auth/dashboard/funnels/${mockFunnel.id}/customize`;
+        }, 800);
       }
     } catch (error) {
       console.error('Error creating funnel:', error);
@@ -949,6 +961,11 @@ export default function FunnelsDashboard() {
       setSelectedTemplate(null);
       setNewFunnelName('');
       setNewFunnelDescription('');
+      
+      // Auto-redirect to edit page even on error fallback
+      setTimeout(() => {
+        window.location.href = `/auth/dashboard/funnels/${mockFunnel.id}/customize`;
+      }, 800);
     }
   };
 
@@ -1420,6 +1437,38 @@ export default function FunnelsDashboard() {
           </div>
         </div>
 
+        {/* Helpful Banner for Draft Funnels */}
+        {filteredAndSortedFunnels.some(f => f.status === 'DRAFT') && (
+          <div data-banner="edit-help" className="mb-6 bg-gradient-to-r from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-xl p-5 shadow-sm">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 p-3 bg-purple-100 rounded-xl">
+                <LightBulbIcon className="h-6 w-6 text-purple-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  ✏️ Need to Edit Your Funnel?
+                </h3>
+                <p className="text-sm text-gray-700 mb-3">
+                  Click the <strong className="text-purple-700">purple edit button (✏️)</strong> on any funnel card below to customize it. You can add products, set prices, upload files, and design your sales page!
+                </p>
+                <div className="flex items-center gap-2 text-sm text-purple-700 font-medium">
+                  <PencilIcon className="h-4 w-4" />
+                  <span>Look for the purple edit button → It will open the funnel editor</span>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  const banner = document.querySelector('[data-banner="edit-help"]');
+                  if (banner) banner.remove();
+                }}
+                className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Funnels Grid */}
         <div ref={funnelsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredAndSortedFunnels.map((funnel) => (
@@ -1613,13 +1662,21 @@ export default function FunnelsDashboard() {
                       >
                         <EyeIcon className="h-5 w-5" />
                       </button>
+                      
+                      {/* EDIT BUTTON - Made more prominent */}
                       <button
                         onClick={() => window.location.href = `/auth/dashboard/funnels/${funnel.id}/customize`}
-                        className="p-3 text-gray-600 hover:text-white hover:bg-gray-600 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md"
-                        title="Edit Funnel"
+                        className="relative p-3 text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 group"
+                        title="Edit & Customize Your Funnel"
                       >
                         <PencilIcon className="h-5 w-5" />
+                        {/* Tooltip */}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-xl">
+                          ✏️ Click to Edit Funnel
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></div>
+                        </div>
                       </button>
+                      
                       <button
                         onClick={() => {
                           const url = `${window.location.origin}/f/${funnel.id}`;
