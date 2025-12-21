@@ -299,6 +299,8 @@ export default function DashboardPage() {
           <div className={`relative overflow-hidden rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl ${
             subscriptionData?.hasActivePlan
               ? 'bg-gradient-to-r from-purple-600 to-pink-600'
+              : subscriptionData?.trial?.isActive
+              ? 'bg-gradient-to-r from-blue-500 to-cyan-500'
               : 'bg-gradient-to-r from-orange-500 to-red-500'
           }`}>
             <div className="relative z-10">
@@ -307,7 +309,11 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-2 mb-2">
                     <CreditCardIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                     <h3 className="text-lg sm:text-xl font-bold text-white">
-                      {subscriptionData?.hasActivePlan ? 'Active Subscription' : 'No Active Plan'}
+                      {subscriptionData?.hasActivePlan 
+                        ? 'Active Subscription' 
+                        : subscriptionData?.trial?.isActive
+                        ? '🎉 Free Trial Active'
+                        : 'Trial Expired - Upgrade Required'}
                     </h3>
                   </div>
                   {subscriptionData?.hasActivePlan ? (
@@ -332,23 +338,43 @@ export default function DashboardPage() {
                         </span>
                       </div>
                     </>
-                  ) : (
+                  ) : subscriptionData?.trial?.isActive ? (
                     <div>
-                      <p className="text-white/90 text-sm sm:text-base mb-3">
-                        🎁 <strong>Free Tier:</strong> Create 1 funnel with 100 visitors limit
+                      <p className="text-white/90 text-sm sm:text-base mb-2">
+                        <strong>{subscriptionData.trial.daysRemaining} days remaining</strong> in your free trial
                       </p>
-                      <p className="text-white/80 text-xs sm:text-sm mb-2">
-                        Upgrade to unlock unlimited funnels, unlimited visitors, and advanced features!
+                      <p className="text-white/80 text-xs sm:text-sm mb-3">
+                        Create funnels, sell products, and explore all features for free! Upgrade before {new Date(subscriptionData.trial.expiryDate).toLocaleDateString()} to keep your funnels live.
                       </p>
                       <div className="flex flex-wrap gap-2 mt-2">
                         <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
-                          ⚡ 1 Funnel (Free)
+                          🎉 {subscriptionData.trial.daysRemaining} days left
                         </span>
                         <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
-                          👥 100 Visitors Limit
+                          ⚡ Full Access
                         </span>
                         <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
-                          🚀 Upgrade for Unlimited
+                          🚀 No Credit Card
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-white/90 text-sm sm:text-base mb-3">
+                        ⚠️ <strong>Your trial has expired!</strong> Your funnels are currently unavailable to visitors.
+                      </p>
+                      <p className="text-white/80 text-xs sm:text-sm mb-2">
+                        Upgrade now to reactivate your funnels and continue selling!
+                      </p>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                          ⏰ Trial Ended
+                        </span>
+                        <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                          🔒 Funnels Locked
+                        </span>
+                        <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                          💎 Upgrade to Unlock
                         </span>
                       </div>
                     </div>
@@ -356,10 +382,12 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex-shrink-0">
                   <Link
-                    href="/auth/dashboard/plans"
+                    href="/auth/dashboard/pricing"
                     className="inline-flex items-center justify-center w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-white text-purple-600 rounded-lg sm:rounded-xl font-bold hover:bg-gray-50 transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
                   >
-                    {subscriptionData?.hasActivePlan ? 'Manage Plan' : 'View Plans'}
+                    {subscriptionData?.hasActivePlan ? 'Manage Plan' : 
+                     subscriptionData?.trial?.isActive ? 'Upgrade Early' : 
+                     'Upgrade Now'}
                     <ArrowTrendingUpIcon className="h-4 w-4 ml-2" />
                   </Link>
                 </div>

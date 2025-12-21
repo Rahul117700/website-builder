@@ -252,9 +252,6 @@ export default function SuperAdminDashboard() {
       
       // Load newsletter subscribers
       await loadSubscribers();
-      
-      // Load page analytics
-      await loadPageAnalytics();
 
     } catch (error) {
       console.error('Error loading dashboard data:', error);

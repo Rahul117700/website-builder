@@ -20,7 +20,7 @@ export async function POST(
       include: {
         user: {
           include: {
-            subscription: true
+            subscriptions: true
           }
         }
       }
@@ -35,8 +35,11 @@ export async function POST(
 
     // Check visitor limits for free tier users
     if (event === 'VIEW') {
-      const subscription = funnel.user.subscription;
-      const isFreeTier = !subscription || subscription.status !== 'ACTIVE';
+      // Check if user has an active subscription
+      const activeSubscription = funnel.user.subscriptions?.find(
+        sub => sub.status === 'ACTIVE' && sub.endDate > new Date()
+      );
+      const isFreeTier = !activeSubscription;
 
       if (isFreeTier) {
         // Count unique views (visitors)

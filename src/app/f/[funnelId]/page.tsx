@@ -114,6 +114,15 @@ export default function PublicFunnelPage() {
       const response = await fetch(`/api/funnels/${funnelId}/public`);
 
       if (!response.ok) {
+        const errorData = await response.json();
+        
+        // Handle trial expired
+        if (errorData.trialExpired) {
+          setError('Trial Expired');
+          setLoading(false);
+          return;
+        }
+        
         if (response.status === 404) {
           setError('Funnel not found');
         } else {
@@ -421,6 +430,37 @@ export default function PublicFunnelPage() {
   }
 
   if (error || !funnel) {
+    // Special handling for trial expired
+    if (error === 'Trial Expired') {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center p-4">
+          <div className="max-w-2xl w-full bg-white rounded-2xl shadow-2xl p-8 md:p-12 text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-orange-400 to-red-500 rounded-full mb-6">
+              <ClockIcon className="h-10 w-10 text-white" />
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Funnel Temporarily Unavailable
+            </h1>
+            <p className="text-lg text-gray-600 mb-6">
+              The owner's free trial period has ended. This funnel will be back online once they upgrade to a paid plan.
+            </p>
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 border-2 border-purple-200">
+              <p className="text-gray-700 font-medium">
+                Are you the owner of this funnel? 
+              </p>
+              <a
+                href="/auth/dashboard/pricing"
+                className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-lg font-bold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl"
+              >
+                <RocketLaunchIcon className="h-5 w-5" />
+                View Plans & Upgrade
+              </a>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
         <div className="text-center">

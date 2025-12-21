@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { getTrialStatus, canAccessFeatures } from '@/lib/trial';
 
 const prisma = new PrismaClient();
 
@@ -25,6 +26,10 @@ export async function GET(
             id: true,
             name: true,
             email: true,
+            createdAt: true,
+          },
+          include: {
+            subscriptions: true,
           }
         }
       }
@@ -41,6 +46,22 @@ export async function GET(
     if (!funnel.published || funnel.status !== 'ACTIVE') {
       return NextResponse.json(
         { error: 'Funnel is not published or is inactive' },
+        { status: 403 }
+      );
+    }
+
+    // Check owner's trial status
+    const trialStatus = getTrialStatus(funnel.user as any);
+    const hasAccess = canAccessFeatures(trialStatus);
+
+    if (!hasAccess) {
+      return NextResponse.json(
+        { 
+          error: 'Trial expired',
+          trialExpired: true,
+          ownerName: funnel.user.name,
+          message: 'The owner of this funnel needs to upgrade their plan'
+        },
         { status: 403 }
       );
     }

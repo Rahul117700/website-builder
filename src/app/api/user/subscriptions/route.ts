@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PrismaClient } from '@prisma/client';
+import { getTrialStatus } from '@/lib/trial';
 
 const prisma = new PrismaClient();
 
@@ -63,10 +64,19 @@ export async function GET(request: NextRequest) {
       ? Math.ceil((activeSubscription.endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
       : 0;
 
+    // Get trial status
+    const trialStatus = getTrialStatus(user as any);
+
     return NextResponse.json({
       hasActivePlan,
       activeSubscription,
       subscriptionHistory,
+      trial: {
+        isActive: trialStatus.isTrialActive,
+        isExpired: trialStatus.isTrialExpired,
+        daysRemaining: trialStatus.trialDaysRemaining,
+        expiryDate: trialStatus.trialExpiryDate,
+      },
       usage: {
         funnels: funnelCount,
         products: productCount,

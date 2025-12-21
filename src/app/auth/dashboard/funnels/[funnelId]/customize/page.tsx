@@ -24,6 +24,8 @@ import DesignTab from '@/components/funnel-editor/DesignTab';
 import ContentTab from '@/components/funnel-editor/ContentTab';
 import SellerTab from '@/components/funnel-editor/SellerTab';
 import ProductTab from '@/components/funnel-editor/ProductTab';
+import TrialExpiredOverlay from '@/components/TrialExpiredOverlay';
+import { getTrialStatus, canAccessFeatures } from '@/lib/trial';
 
 interface FunnelData {
   id: string;
@@ -80,6 +82,8 @@ export default function FunnelCustomizer() {
   const [mobileViewMode, setMobileViewMode] = useState<'edit' | 'preview'>('edit'); // For floating button toggle
   const [publishing, setPublishing] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [showTrialExpired, setShowTrialExpired] = useState(false);
+  const [trialStatus, setTrialStatus] = useState<any>(null);
 
   // Helper function to calculate completion status
   const getCompletionStatus = () => {
@@ -154,6 +158,19 @@ export default function FunnelCustomizer() {
     hasFetched.current = true;
     const fetchData = async () => {
       try {
+        // Check user trial status first
+        const userResponse = await fetch('/api/user/profile');
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          const status = getTrialStatus(userData);
+          setTrialStatus(status);
+          
+          // Show overlay if trial expired and no subscription
+          if (status.isTrialExpired) {
+            setShowTrialExpired(true);
+          }
+        }
+
         const response = await fetch(`/api/funnels/${funnelId}`);
         if (!response.ok) throw new Error('Failed to fetch funnel');
         const data = await response.json();
@@ -312,6 +329,15 @@ export default function FunnelCustomizer() {
 
   return (
     <DashboardLayout>
+      {/* Trial Expired Overlay */}
+      {showTrialExpired && trialStatus && (
+        <TrialExpiredOverlay 
+          daysExpired={Math.abs(trialStatus.trialDaysRemaining)}
+          userName={session?.user?.name || undefined}
+          allowClose={false}
+        />
+      )}
+
       <div className="h-[calc(100vh-64px)] flex flex-col bg-gray-50 overflow-hidden">
         {/* Top Bar */}
         <div className="bg-white border-b border-gray-200 px-4 py-3 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 shrink-0 z-20">
