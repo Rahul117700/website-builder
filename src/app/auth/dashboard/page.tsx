@@ -382,7 +382,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex-shrink-0">
                   <Link
-                    href="/auth/dashboard/pricing"
+                    href="/auth/dashboard/plans"
                     className="inline-flex items-center justify-center w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-white text-purple-600 rounded-lg sm:rounded-xl font-bold hover:bg-gray-50 transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
                   >
                     {subscriptionData?.hasActivePlan ? 'Manage Plan' : 
