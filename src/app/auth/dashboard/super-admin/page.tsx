@@ -764,7 +764,11 @@ export default function SuperAdminDashboard() {
                           </tr>
                         ) : (
                           users.map((user: any) => (
-                            <tr key={user.id} className="hover:bg-gray-50">
+                            <tr 
+                              key={user.id} 
+                              className="hover:bg-purple-50 cursor-pointer transition-colors"
+                              onClick={() => router.push(`/auth/dashboard/super-admin/user/${user.id}`)}
+                            >
                               <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                                 <div className="flex items-center">
                                   <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-full flex items-center justify-center">
@@ -848,7 +852,10 @@ export default function SuperAdminDashboard() {
                               </td>
                               <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm font-medium space-x-1 sm:space-x-2">
                                 <button
-                                  onClick={() => toggleUserStatus(user.id, user.status)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleUserStatus(user.id, user.status);
+                                  }}
                                   className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                                     user.status === 'ACTIVE' 
                                       ? 'bg-red-100 text-red-800 hover:bg-red-200' 
@@ -859,7 +866,10 @@ export default function SuperAdminDashboard() {
                                 </button>
                                 {user.role !== 'SUPER_ADMIN' && (
                                   <button
-                                    onClick={() => assignPlanToUser(user.id)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      assignPlanToUser(user.id);
+                                    }}
                                     className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium hover:bg-blue-200 transition-colors"
                                   >
                                     {user.subscriptions && user.subscriptions.length > 0 ? 'Extend Plan' : 'Assign Plan'}
