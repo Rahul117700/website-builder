@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { getTrialStatus, canAccessFeatures } from '@/lib/trial';
 
 const prisma = new PrismaClient();
 
@@ -21,17 +20,7 @@ export async function GET(
       include: {
         template: true,
         product: true,
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            createdAt: true,
-          },
-          include: {
-            subscriptions: true,
-          }
-        }
+        user: true
       }
     });
 
@@ -50,21 +39,8 @@ export async function GET(
       );
     }
 
-    // Check owner's trial status
-    const trialStatus = getTrialStatus(funnel.user as any);
-    const hasAccess = canAccessFeatures(trialStatus);
-
-    if (!hasAccess) {
-      return NextResponse.json(
-        { 
-          error: 'Trial expired',
-          trialExpired: true,
-          ownerName: funnel.user.name,
-          message: 'The owner of this funnel needs to upgrade their plan'
-        },
-        { status: 403 }
-      );
-    }
+    // In freemium model, all users (free and paid) can show their funnels
+    // No trial expiry check - free tier gets 1 funnel forever
 
     // Return funnel data including userId for related products
     return NextResponse.json({

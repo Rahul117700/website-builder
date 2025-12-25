@@ -33,38 +33,8 @@ export async function POST(
       );
     }
 
-    // Check visitor limits for free tier users
-    if (event === 'VIEW') {
-      // Check if user has an active subscription
-      const activeSubscription = funnel.user.subscriptions?.find(
-        sub => sub.status === 'ACTIVE' && sub.endDate > new Date()
-      );
-      const isFreeTier = !activeSubscription;
-
-      if (isFreeTier) {
-        // Count unique views (visitors)
-        const visitorCount = await prisma.funnelAnalytics.count({
-          where: {
-            funnelId: funnelId,
-            event: 'VIEW'
-          }
-        });
-
-        const FREE_TIER_VISITOR_LIMIT = 100;
-
-        if (visitorCount >= FREE_TIER_VISITOR_LIMIT) {
-          return NextResponse.json(
-            {
-              error: 'Visitor limit reached',
-              requiresUpgrade: true,
-              currentVisitors: visitorCount,
-              limit: FREE_TIER_VISITOR_LIMIT
-            },
-            { status: 403 }
-          );
-        }
-      }
-    }
+    // No visitor limits - free tier users can get unlimited visitors
+    // (This was removed to allow free tier users to test their funnels properly)
 
     // Create analytics entry
     const analyticsEntry = await prisma.funnelAnalytics.create({

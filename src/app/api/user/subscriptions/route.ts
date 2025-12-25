@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PrismaClient } from '@prisma/client';
-import { getTrialStatus } from '@/lib/trial';
+import { getUserTier, FREE_TIER_LIMITS } from '@/lib/features';
 
 const prisma = new PrismaClient();
 
@@ -64,24 +64,25 @@ export async function GET(request: NextRequest) {
       ? Math.ceil((activeSubscription.endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
       : 0;
 
-    // Get trial status
-    const trialStatus = getTrialStatus(user as any);
+    // Get user tier (freemium model)
+    const userTier = getUserTier(subscriptionHistory);
+    const isFree = userTier.tier === 'free';
 
     return NextResponse.json({
       hasActivePlan,
       activeSubscription,
       subscriptionHistory,
-      trial: {
-        isActive: trialStatus.isTrialActive,
-        isExpired: trialStatus.isTrialExpired,
-        daysRemaining: trialStatus.trialDaysRemaining,
-        expiryDate: trialStatus.trialExpiryDate,
+      tier: {
+        name: userTier.tier,
+        planName: userTier.planName,
+        isFree: isFree,
+        limits: userTier.limits
       },
       usage: {
         funnels: funnelCount,
         products: productCount,
-        maxFunnels: activeSubscription?.plan.maxFunnels || 0,
-        maxProducts: activeSubscription?.plan.maxProducts || 0,
+        maxFunnels: hasActivePlan ? (activeSubscription?.plan.maxFunnels || 0) : FREE_TIER_LIMITS.maxFunnels,
+        maxProducts: hasActivePlan ? (activeSubscription?.plan.maxProducts || 0) : FREE_TIER_LIMITS.maxProducts,
         daysRemaining
       }
     });

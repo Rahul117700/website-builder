@@ -24,8 +24,8 @@ import DesignTab from '@/components/funnel-editor/DesignTab';
 import ContentTab from '@/components/funnel-editor/ContentTab';
 import SellerTab from '@/components/funnel-editor/SellerTab';
 import ProductTab from '@/components/funnel-editor/ProductTab';
-import TrialExpiredOverlay from '@/components/TrialExpiredOverlay';
-import { getTrialStatus, canAccessFeatures } from '@/lib/trial';
+import PremiumFeatureModal from '@/components/modals/PremiumFeatureModal';
+import { getUserTier, PREMIUM_FEATURES } from '@/lib/features';
 
 interface FunnelData {
   id: string;
@@ -82,8 +82,9 @@ export default function FunnelCustomizer() {
   const [mobileViewMode, setMobileViewMode] = useState<'edit' | 'preview'>('edit'); // For floating button toggle
   const [publishing, setPublishing] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [showTrialExpired, setShowTrialExpired] = useState(false);
-  const [trialStatus, setTrialStatus] = useState<any>(null);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [premiumFeature, setPremiumFeature] = useState<keyof typeof PREMIUM_FEATURES | null>(null);
+  const [userTier, setUserTier] = useState<any>(null);
 
   // Helper function to calculate completion status
   const getCompletionStatus = () => {
@@ -158,17 +159,14 @@ export default function FunnelCustomizer() {
     hasFetched.current = true;
     const fetchData = async () => {
       try {
-        // Check user trial status first
+        // Check user profile and get tier
         const userResponse = await fetch('/api/user/profile');
         if (userResponse.ok) {
           const userData = await userResponse.json();
-          const status = getTrialStatus(userData);
-          setTrialStatus(status);
           
-          // Show overlay if trial expired and no subscription
-          if (status.isTrialExpired) {
-            setShowTrialExpired(true);
-          }
+          // Get user tier for feature restrictions
+          const tier = getUserTier(userData.user.subscriptions || []);
+          setUserTier(tier);
         }
 
         const response = await fetch(`/api/funnels/${funnelId}`);
@@ -355,12 +353,15 @@ export default function FunnelCustomizer() {
 
   return (
     <DashboardLayout>
-      {/* Trial Expired Overlay */}
-      {showTrialExpired && trialStatus && (
-        <TrialExpiredOverlay 
-          daysExpired={Math.abs(trialStatus.trialDaysRemaining)}
-          userName={session?.user?.name || undefined}
-          allowClose={false}
+      {/* Premium Feature Modal */}
+      {premiumFeature && (
+        <PremiumFeatureModal
+          isOpen={showPremiumModal}
+          onClose={() => {
+            setShowPremiumModal(false);
+            setPremiumFeature(null);
+          }}
+          featureName={premiumFeature}
         />
       )}
 
@@ -495,6 +496,28 @@ export default function FunnelCustomizer() {
             })()}
           </div>
         </div>
+
+        {/* Free Tier Banner */}
+        {userTier && userTier.tier === 'free' && (
+          <div className="bg-gradient-to-r from-yellow-50 to-amber-50 border-b border-yellow-200 px-4 py-2 shrink-0">
+            <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-900">
+                  🆓 Free Tier - Some features are limited
+                </span>
+                <span className="text-xs text-gray-600 hidden sm:inline">
+                  Upgrade to unlock videos, custom CSS, and more!
+                </span>
+              </div>
+              <button
+                onClick={() => router.push('/auth/dashboard/plans')}
+                className="text-xs font-semibold text-purple-600 hover:text-purple-700 hover:underline"
+              >
+                View Plans →
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Progress Indicator Bar */}
         {(() => {

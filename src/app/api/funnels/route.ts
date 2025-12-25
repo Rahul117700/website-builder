@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PrismaClient } from '@prisma/client';
+import { canCreateFunnel } from '@/lib/features';
 
 const prisma = new PrismaClient();
 
@@ -96,34 +97,25 @@ export async function POST(request: NextRequest) {
       }, { status: 403 });
     }
 
-    // Check user's subscription status
-    const activeSubscription = await prisma.userSubscription.findFirst({
-      where: {
-        userId: user.id,
-        status: 'ACTIVE',
-        endDate: {
-          gte: new Date()
-        }
-      },
-      include: {
-        plan: true
-      }
+    // Check user's funnel creation limits
+    const userFunnels = await prisma.funnel.findMany({
+      where: { userId: user.id }
     });
 
-    // If no active subscription, check if user already has a funnel (free tier: 1 funnel max)
-    if (!activeSubscription) {
-      const existingFunnels = await prisma.funnel.findMany({
-        where: { userId: user.id }
-      });
+    const userSubscriptions = await prisma.userSubscription.findMany({
+      where: { userId: user.id },
+      include: { plan: true }
+    });
 
-      if (existingFunnels.length >= 1) {
-        return NextResponse.json({ 
-          error: 'Free tier limit reached',
-          message: 'You can only create 1 funnel on the free tier. Upgrade to a plan to create unlimited funnels!',
-          requiresUpgrade: true,
-          upgradeUrl: '/auth/dashboard/plans'
-        }, { status: 403 });
-      }
+    const { canCreate, reason } = canCreateFunnel(userFunnels.length, userSubscriptions);
+
+    if (!canCreate) {
+      return NextResponse.json({ 
+        error: 'Funnel limit reached',
+        message: reason || 'Upgrade to create more funnels',
+        requiresUpgrade: true,
+        upgradeUrl: '/auth/dashboard/plans'
+      }, { status: 403 });
     }
 
     // Verify template exists if provided
