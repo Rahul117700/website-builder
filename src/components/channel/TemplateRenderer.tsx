@@ -1,7 +1,7 @@
 'use client';
 
 import { Channel, ChannelTemplate, ChannelProductType } from '@prisma/client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import {
@@ -117,6 +117,25 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<string>('newest');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Default cover images from Pexels
+  const defaultCoverImages = [
+    'https://images.pexels.com/photos/9754/mountains-clouds-forest-fog.jpg',
+    'https://images.pexels.com/photos/552785/pexels-photo-552785.jpeg',
+    'https://images.pexels.com/photos/2444429/pexels-photo-2444429.jpeg'
+  ];
+
+  // Get cover image with fallback to random default
+  // Use channel ID as seed to ensure same channel always gets same default image
+  const getCoverImage = useMemo(() => {
+    if (channel.coverImage) {
+      return channel.coverImage;
+    }
+    // Use channel ID to deterministically select a default image
+    const channelIdHash = channel.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const imageIndex = channelIdHash % defaultCoverImages.length;
+    return defaultCoverImages[imageIndex];
+  }, [channel.coverImage, channel.id]);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedType, setSelectedType] = useState<string>('all');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -637,14 +656,12 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
         {/* Hero Section */}
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
           {/* Background */}
-          {channel.coverImage && (
-            <div 
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${channel.coverImage})` }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"></div>
-            </div>
-          )}
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${getCoverImage})` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"></div>
+          </div>
           
           {/* Content */}
           <div className="relative z-10 text-center px-4 sm:px-6 md:px-8 w-full">
@@ -2283,19 +2300,15 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
           <div className="relative flex-1 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] mb-8 sm:mb-12 md:mb-20">
             {/* Background Image */}
             <div className="absolute inset-0 rounded-none sm:rounded-2xl md:rounded-3xl overflow-hidden mx-0 sm:mx-4 md:mx-6 lg:mx-8">
-              {channel.coverImage ? (
-                <div 
-                  className="absolute inset-0"
-                  style={{
-                    backgroundImage: `url(${channel.coverImage})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                  }}
-                />
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600" />
-              )}
+              <div 
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `url(${getCoverImage})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                }}
+              />
               <div className="absolute inset-0 bg-black/20" />
             </div>
 
@@ -3614,15 +3627,11 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
 
         {/* Full-Screen Hero */}
         <section className="relative h-screen flex items-center justify-center overflow-hidden">
-          {channel.coverImage ? (
-            <img
-              src={channel.coverImage}
-              alt="Hero"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"></div>
-          )}
+          <img
+            src={getCoverImage}
+            alt="Hero"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
           <div className="absolute inset-0 bg-black/40"></div>
           <div className="relative z-10 text-center text-white px-4 sm:px-6 md:px-8 w-full">
             <h2 className="text-4xl sm:text-5xl md:text-7xl font-bold mb-6 leading-tight">{channel.name}</h2>
@@ -3719,15 +3728,13 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                 Explore More
               </button>
             </div>
-            {channel.coverImage && (
-              <div className="rounded-3xl overflow-hidden">
-                <img
-                  src={channel.coverImage}
-                  alt="Hero"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
+            <div className="rounded-3xl overflow-hidden">
+              <img
+                src={getCoverImage}
+                alt="Hero"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </section>
 
@@ -4153,16 +4160,14 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
           
           {/* Cover Image */}
-          {channel.coverImage && (
-            <div className="absolute inset-0">
-              <img
-                src={channel.coverImage}
-                alt="Cover"
-                className="w-full h-full object-cover opacity-20"
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white"></div>
-            </div>
-          )}
+          <div className="absolute inset-0">
+            <img
+              src={getCoverImage}
+              alt="Cover"
+              className="w-full h-full object-cover opacity-20"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white"></div>
+          </div>
 
           {/* Content */}
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">

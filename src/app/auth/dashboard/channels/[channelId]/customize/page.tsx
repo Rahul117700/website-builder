@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
@@ -57,7 +58,7 @@ export default function ChannelEditorPage() {
   const [showPublishSuccessModal, setShowPublishSuccessModal] = useState(false);
   const [publishedChannelSlug, setPublishedChannelSlug] = useState<string | null>(null);
 
-  // Close publishing modal when clicking outside
+  // Close publishing modal when clicking outside and prevent body scroll
   useEffect(() => {
     const handleClickOutside = (event: Event) => {
       if (showPublishingModal) {
@@ -69,11 +70,17 @@ export default function ChannelEditorPage() {
     };
 
     if (showPublishingModal) {
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('touchstart', handleClickOutside);
+    } else {
+      // Restore body scroll when modal is closed
+      document.body.style.overflow = '';
     }
 
     return () => {
+      document.body.style.overflow = '';
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
     };
@@ -497,38 +504,50 @@ export default function ChannelEditorPage() {
               <span className="sm:hidden">Publish</span>
             </button>
 
-            {/* Publishing Options Modal - All Screen Sizes */}
-            {showPublishingModal && (
+            {/* Publishing Options Modal - All Screen Sizes - Rendered via Portal */}
+            {showPublishingModal && typeof window !== 'undefined' && createPortal(
               <>
                 {/* Backdrop */}
                 <div
-                  className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-                  style={{ zIndex: 9998 }}
+                  className="fixed inset-0 bg-black/70 backdrop-blur-md transition-opacity"
+                  style={{ 
+                    zIndex: 99999,
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: '100vw',
+                    height: '100vh'
+                  }}
                   onClick={() => setShowPublishingModal(false)}
                 />
                 {/* Modal - Centered Modal Style */}
                 <div 
                   className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden publishing-modal-container animate-in fade-in zoom-in duration-200" 
                   style={{ 
-                    zIndex: 9999,
+                    zIndex: 100000,
                     width: 'calc(100vw - 2rem)',
                     maxWidth: '28rem',
                     maxHeight: 'calc(100vh - 4rem)',
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
+                    position: 'fixed',
+                    backgroundColor: 'white',
+                    isolation: 'isolate'
                   }}
                   onClick={(e) => e.stopPropagation()}
                 >
                     {/* Publishing Options Header */}
-                    <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white flex-shrink-0">
+                    <div className="px-6 py-5 border-b border-gray-200 bg-white flex-shrink-0 relative z-10">
                       <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0 flex-1">
-                          <h3 className="text-lg font-bold text-gray-900 break-words">Publishing Options</h3>
-                          <p className="text-sm text-gray-500 mt-1.5 break-words">Manage your channel publishing settings</p>
+                        <div className="min-w-0 flex-1 relative z-10">
+                          <h3 className="text-lg font-bold text-gray-900 break-words relative z-10">Publishing Options</h3>
+                          <p className="text-sm text-gray-500 mt-1.5 break-words relative z-10">Manage your channel publishing settings</p>
                         </div>
                         <button
                           onClick={() => setShowPublishingModal(false)}
-                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0 relative z-10"
                           aria-label="Close"
                         >
                           <XMarkIcon className="h-5 w-5 text-gray-500" />
@@ -537,7 +556,7 @@ export default function ChannelEditorPage() {
                     </div>
 
                     {/* Scrollable Content */}
-                    <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar-light" style={{ minHeight: 0 }}>
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar-light bg-white relative z-10" style={{ minHeight: 0 }}>
                       {/* Preview Link - More Prominent */}
                       <div className="px-6 py-4 border-b border-gray-100">
                         <label className="block text-sm font-semibold text-gray-700 mb-3 break-words">
@@ -699,6 +718,7 @@ export default function ChannelEditorPage() {
                     </div>
                   </div>
                 </>
+              , document.body
             )}
 
             {/* Template Switcher - Hidden on mobile */}
@@ -1105,6 +1125,8 @@ export default function ChannelEditorPage() {
         .publishing-modal-container {
           word-wrap: break-word;
           overflow-wrap: break-word;
+          background-color: white !important;
+          isolation: isolate;
         }
         .publishing-modal-container * {
           max-width: 100%;
@@ -1116,6 +1138,10 @@ export default function ChannelEditorPage() {
           word-wrap: break-word;
           overflow-wrap: break-word;
           hyphens: auto;
+        }
+        /* Ensure modal backdrop covers everything */
+        body:has(.publishing-modal-container) {
+          overflow: hidden;
         }
         @keyframes fade-in {
           from {
