@@ -42,6 +42,9 @@ export default function ProductPage() {
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
+  const [selectedQuality, setSelectedQuality] = useState<string>('auto');
+  const [showQualityMenu, setShowQualityMenu] = useState(false);
+  const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
   
   // Reviews and Comments
   const [reviews, setReviews] = useState<any[]>([]);
@@ -502,28 +505,122 @@ export default function ProductPage() {
           <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%' }}>
             {canAccess ? (
               videoSource ? (
-                <video
-                  src={videoSource}
-                  controls
-                  autoPlay
-                  className="absolute top-0 left-0 w-full h-full rounded-lg"
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)}
-                  onError={(e) => {
-                    console.error('Video playback error:', e);
-                    console.error('Video source:', videoSource);
-                  }}
-                  onLoadStart={() => {
-                    console.log('Video loading started:', videoSource);
-                  }}
-                  onLoadedData={() => {
-                    console.log('Video loaded successfully:', videoSource);
-                  }}
-                  style={{ objectFit: 'contain' }}
-                >
-                  <source src={videoSource} type={product.fileType || 'video/mp4'} />
-                  Your browser does not support the video tag.
-                </video>
+                <div className="absolute inset-0">
+                  <video
+                    ref={(el) => {
+                      if (el) setVideoElement(el);
+                    }}
+                    src={videoSource}
+                    controls
+                    autoPlay
+                    className="w-full h-full rounded-lg"
+                    onPlay={() => setIsPlaying(true)}
+                    onPause={() => setIsPlaying(false)}
+                    onError={(e) => {
+                      console.error('Video playback error:', e);
+                      console.error('Video source:', videoSource);
+                    }}
+                    onLoadStart={() => {
+                      console.log('Video loading started:', videoSource);
+                    }}
+                    onLoadedData={() => {
+                      console.log('Video loaded successfully:', videoSource);
+                    }}
+                    style={{ objectFit: 'contain' }}
+                  >
+                    <source src={videoSource} type={product.fileType || 'video/mp4'} />
+                    Your browser does not support the video tag.
+                  </video>
+                  
+                  {/* Quality Selector - YouTube-style */}
+                  <div className="absolute bottom-16 right-4 z-10">
+                    <div className="relative">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowQualityMenu(!showQualityMenu);
+                        }}
+                        onBlur={() => {
+                          // Delay closing to allow menu clicks
+                          setTimeout(() => setShowQualityMenu(false), 200);
+                        }}
+                        className="px-3 py-1.5 bg-black/70 hover:bg-black/90 text-white text-sm font-medium rounded flex items-center gap-2 transition-colors backdrop-blur-sm"
+                        title="Quality"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        <span>{selectedQuality === 'auto' ? 'Auto' : selectedQuality}</span>
+                        <svg 
+                          className={`w-4 h-4 transition-transform ${showQualityMenu ? 'rotate-180' : ''}`} 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      
+                      {showQualityMenu && (
+                        <div className="absolute bottom-full right-0 mb-2 bg-black/95 rounded-lg overflow-hidden shadow-xl min-w-[140px] backdrop-blur-sm border border-white/10">
+                          {[
+                            { label: 'Auto', value: 'auto', description: 'Recommended' },
+                            { label: '1080p', value: '1080p', description: 'HD' },
+                            { label: '720p', value: '720p', description: 'HD' },
+                            { label: '480p', value: '480p', description: 'SD' },
+                            { label: '360p', value: '360p', description: 'SD' },
+                            { label: '240p', value: '240p', description: 'Low' },
+                          ].map((option) => (
+                            <button
+                              key={option.value}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedQuality(option.value);
+                                setShowQualityMenu(false);
+                                
+                                // For now, all qualities use the same source
+                                // In future, this can be enhanced to switch between different quality URLs
+                                if (videoElement) {
+                                  // Pause and reload video when quality changes
+                                  const wasPlaying = !videoElement.paused;
+                                  const currentTime = videoElement.currentTime;
+                                  
+                                  // In future implementation:
+                                  // videoElement.src = getQualityUrl(option.value);
+                                  // For now, just reload the same source
+                                  videoElement.load();
+                                  
+                                  if (wasPlaying) {
+                                    videoElement.play().then(() => {
+                                      videoElement.currentTime = currentTime;
+                                    });
+                                  } else {
+                                    videoElement.currentTime = currentTime;
+                                  }
+                                }
+                              }}
+                              className={`w-full px-4 py-2.5 text-left text-sm text-white hover:bg-white/10 transition-colors flex items-center justify-between ${
+                                selectedQuality === option.value ? 'bg-white/20' : ''
+                              }`}
+                            >
+                              <div className="flex flex-col">
+                                <span className="font-medium">{option.label}</span>
+                                {option.description && (
+                                  <span className="text-xs text-white/70">{option.description}</span>
+                                )}
+                              </div>
+                              {selectedQuality === option.value && (
+                                <svg className="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
@@ -963,6 +1060,27 @@ export default function ProductPage() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                             </svg>
                             My Channels
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowUserMenu(false);
+                              router.push('/');
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105"
+                            style={{
+                              backgroundColor: 'transparent',
+                              color: textColor,
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${primaryColor}10`}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            <span className="flex-1 text-left">Want to Create your own channel ? click here</span>
+                            <svg className="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
                           </button>
                           <button
                             onClick={async () => {

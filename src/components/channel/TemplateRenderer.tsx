@@ -654,7 +654,7 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
     return (
       <div className="min-h-screen bg-white">
         {/* Hero Section */}
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
+        <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
           {/* Background */}
           <div 
             className="absolute inset-0 bg-cover bg-center"
@@ -2292,7 +2292,7 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
           </div>
 
           {/* Hero Image Section with Overlays */}
-          <div className="relative flex-1 min-h-[400px] sm:min-h-[500px] md:min-h-[600px] mb-8 sm:mb-12 md:mb-20">
+          <div className="relative flex-1 min-h-[200px] sm:min-h-[250px] md:min-h-[300px] mb-4 sm:mb-6 md:mb-10">
             {/* Background Image */}
             <div className="absolute inset-0 rounded-none sm:rounded-2xl md:rounded-3xl overflow-hidden mx-0 sm:mx-4 md:mx-6 lg:mx-8">
               <div 
@@ -2362,7 +2362,15 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
                       <div className="flex flex-col">
-                        <span className="text-sm sm:text-base font-bold text-gray-900">{channel.totalViews || 0}</span>
+                        <span className="text-sm sm:text-base font-bold text-gray-900">
+                          {(() => {
+                            // Calculate total views from all products' viewCount for accuracy
+                            const totalViews = allProducts?.reduce((sum: number, p: any) => {
+                              return sum + (Number(p.viewCount) || 0);
+                            }, 0) || 0;
+                            return totalViews;
+                          })()}
+                        </span>
                         <span className="text-xs text-gray-600">views</span>
                       </div>
                     </div>
@@ -3606,7 +3614,7 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
         </header>
 
         {/* Full-Screen Hero */}
-        <section className="relative h-screen flex items-center justify-center overflow-hidden">
+        <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
           <img
             src={getCoverImage}
             alt="Hero"
