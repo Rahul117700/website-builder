@@ -509,13 +509,33 @@ export default function ProductPage() {
                   className="absolute top-0 left-0 w-full h-full rounded-lg"
                   onPlay={() => setIsPlaying(true)}
                   onPause={() => setIsPlaying(false)}
+                  onError={(e) => {
+                    console.error('Video playback error:', e);
+                    console.error('Video source:', videoSource);
+                  }}
+                  onLoadStart={() => {
+                    console.log('Video loading started:', videoSource);
+                  }}
+                  onLoadedData={() => {
+                    console.log('Video loaded successfully:', videoSource);
+                  }}
                   style={{ objectFit: 'contain' }}
-                />
+                >
+                  <source src={videoSource} type={product.fileType || 'video/mp4'} />
+                  Your browser does not support the video tag.
+                </video>
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
                     <VideoCameraIcon className="h-16 w-16 text-gray-600 mx-auto mb-4" />
                     <p className="text-gray-400">Video not available</p>
+                    <p className="text-gray-500 text-sm mt-2">No video URL found</p>
+                    {product.fileUrl && (
+                      <p className="text-gray-500 text-xs mt-1">File URL: {product.fileUrl}</p>
+                    )}
+                    {product.videoUrl && (
+                      <p className="text-gray-500 text-xs mt-1">Video URL: {product.videoUrl}</p>
+                    )}
                   </div>
                 </div>
               )
@@ -1440,41 +1460,75 @@ export default function ProductPage() {
               <p className="text-sm text-gray-500">No other products available</p>
             ) : (
             <div className="space-y-3">
-                {relatedProducts.map((relatedProduct: any) => (
-                  <div
-                    key={relatedProduct.id}
-                    onClick={() => router.push(`/channel/${params?.slug}/products/${relatedProduct.id}`)}
-                    className="flex gap-3 cursor-pointer hover:bg-gray-100 rounded-lg p-2 transition-colors"
-                  >
-                    {relatedProduct.previewImage ? (
-                      <div className="relative w-32 sm:w-40 h-20 sm:h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
-                        <img
-                          src={relatedProduct.previewImage}
-                          alt={relatedProduct.title}
-                          className="w-full h-full object-cover"
-                        />
-                        {(relatedProduct.type === 'VIDEO' || relatedProduct.type === 'VIDEOS') && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <PlayIcon className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
-                          </div>
-                        )}
+                {relatedProducts.map((relatedProduct: any) => {
+                  // Check if user can access this related product
+                  const canAccessRelated = isOwner || !relatedProduct.isSubscriberOnly || !channel?.subscriptionEnabled || hasActiveSubscription;
+                  
+                  const handleRelatedProductClick = () => {
+                    if (canAccessRelated) {
+                      router.push(`/channel/${params?.slug}/products/${relatedProduct.id}`);
+                    } else {
+                      // Show subscription modal if they don't have access
+                      setShowSubscriptionModal(true);
+                    }
+                  };
+                  
+                  return (
+                    <div
+                      key={relatedProduct.id}
+                      onClick={handleRelatedProductClick}
+                      className={`flex gap-3 rounded-lg p-2 transition-colors ${
+                        canAccessRelated 
+                          ? 'cursor-pointer hover:bg-gray-100' 
+                          : 'cursor-not-allowed opacity-75 hover:bg-gray-50'
+                      }`}
+                    >
+                      {relatedProduct.previewImage ? (
+                        <div className="relative w-32 sm:w-40 h-20 sm:h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200">
+                          <img
+                            src={relatedProduct.previewImage}
+                            alt={relatedProduct.title}
+                            className="w-full h-full object-cover"
+                          />
+                          {(relatedProduct.type === 'VIDEO' || relatedProduct.type === 'VIDEOS') && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <PlayIcon className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                            </div>
+                          )}
+                          {!canAccessRelated && (
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                              <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="relative w-32 sm:w-40 h-20 sm:h-24 flex-shrink-0 rounded-lg bg-gray-200 flex items-center justify-center">
+                          {getContentIcon(relatedProduct.type)}
+                          {!canAccessRelated && (
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
+                              <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xs sm:text-sm font-semibold text-gray-900 line-clamp-2 mb-1">
+                          {relatedProduct.title}
+                        </h3>
+                        <p className="text-xs text-gray-600 mb-1">{channel.name}</p>
+                        <p className="text-xs text-gray-600">
+                          {relatedProduct.viewCount || 0} views {!canAccessRelated && relatedProduct.isSubscriberOnly && channel?.subscriptionEnabled && (
+                            <span className="text-orange-600 font-semibold">• Subscribe to access</span>
+                          )}
+                        </p>
                       </div>
-                    ) : (
-                      <div className="w-32 sm:w-40 h-20 sm:h-24 flex-shrink-0 rounded-lg bg-gray-200 flex items-center justify-center">
-                        {getContentIcon(relatedProduct.type)}
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-xs sm:text-sm font-semibold text-gray-900 line-clamp-2 mb-1">
-                        {relatedProduct.title}
-                      </h3>
-                      <p className="text-xs text-gray-600 mb-1">{channel.name}</p>
-                      <p className="text-xs text-gray-600">
-                        {relatedProduct.viewCount || 0} views • {formatPrice(Number(relatedProduct.price), relatedProduct.currency)}
-                      </p>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               )}
           </div>

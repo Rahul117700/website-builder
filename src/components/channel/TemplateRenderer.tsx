@@ -758,11 +758,6 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                         </p>
                       )}
                       <div className="flex items-center justify-between">
-                        {!channel.subscriptionEnabled && (
-                          <span className="text-2xl font-bold text-purple-600">
-                            ₹{product.price}
-                          </span>
-                        )}
                         {channel.subscriptionEnabled && getSubscribeButtonText() ? (
                           <button 
                             onClick={() => !isOwner && setShowSubscriptionModal(true)}
@@ -2881,7 +2876,7 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                     </svg>
-                                    <span className="font-medium">{formatViewCount(product.viewCount || 0)}</span>
+                                    <span className="font-medium">{formatViewCount(Number(product.viewCount) || 0)}</span>
                                   </div>
                                   
                                   {/* Star Rating */}
@@ -2924,11 +2919,6 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                               </div>
                               <div className="pt-3 sm:pt-4 border-t border-gray-100">
                                 <div className="flex items-center justify-between mb-3">
-                                  {!channel.subscriptionEnabled && (
-                                    <span className="text-lg sm:text-2xl font-bold text-gray-900">
-                                      {formatPrice(Number(product.price), product.currency)}
-                                    </span>
-                                  )}
                                   {session?.user && (
                                     <div className="flex items-center gap-2">
                                       <button
@@ -3139,7 +3129,7 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                               </svg>
-                              <span className="font-medium">{formatViewCount(product.viewCount || 0)}</span>
+                              <span className="font-medium">{formatViewCount(Number(product.viewCount) || 0)}</span>
                             </div>
                             
                             {/* Star Rating */}
@@ -3180,17 +3170,10 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                             })()}
                           </div>
 
-                          {/* Footer with Price, Actions, and Button - Mobile Optimized */}
+                          {/* Footer with Actions, and Button - Mobile Optimized */}
                           <div className="mt-auto pt-3 border-t border-gray-100">
-                            {/* Price and Action Buttons Row */}
+                            {/* Action Buttons Row */}
                             <div className="flex items-center justify-between mb-3">
-                              {!channel.subscriptionEnabled && (
-                                <div className="flex flex-col">
-                                  <span className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
-                                    {formatPrice(Number(product.price), product.currency)}
-                                  </span>
-                                </div>
-                              )}
                               {session?.user && (
                                 <div className="flex items-center gap-2">
                                   <button
@@ -3586,9 +3569,6 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                     )}
                     <div className="p-3 sm:p-4">
                       <h3 className="text-sm font-medium text-gray-900 mb-1 line-clamp-2">{product.title}</h3>
-                      {!channel.subscriptionEnabled && (
-                        <p className="text-lg font-bold text-gray-900">₹{product.price}</p>
-                      )}
                     </div>
                   </div>
                 ))}
@@ -3672,9 +3652,6 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                       </div>
                     )}
                     <h4 className="text-lg font-semibold text-gray-900 mb-2">{product.title}</h4>
-                    {!channel.subscriptionEnabled && (
-                      <p className="text-xl font-bold text-gray-900">₹{product.price}</p>
-                    )}
                   </div>
                 ))}
               </div>
@@ -3760,9 +3737,6 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                         <p className="text-sm text-gray-600 mb-4">{product.description}</p>
                       )}
                       <div className="flex items-center justify-between">
-                        {!channel.subscriptionEnabled && (
-                          <span className="text-2xl font-bold text-gray-900">₹{product.price}</span>
-                        )}
                         {!isOwner && channel.subscriptionEnabled && getSubscribeButtonText() && (
                           <button 
                             onClick={() => setShowSubscriptionModal(true)}
@@ -3830,7 +3804,6 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                       <p className="text-gray-600 mb-4">{channel.products[0].description}</p>
                     )}
                     <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold">₹{channel.products[0].price}</span>
                       <button className="px-6 py-3 bg-gray-900 text-white font-semibold rounded hover:bg-gray-800">
                         View Details
                       </button>
@@ -3850,9 +3823,6 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                         />
                       )}
                       <h3 className="text-xl font-bold text-gray-900 mb-2">{product.title}</h3>
-                      {!channel.subscriptionEnabled && (
-                        <p className="text-lg font-semibold text-gray-900">₹{product.price}</p>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -3999,12 +3969,6 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                       )}
 
                       <div className="flex items-center justify-between">
-                        {!channel.subscriptionEnabled && (
-                          <span className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                            {formatPrice(Number(product.price), product.currency)}
-                          </span>
-                        )}
-
                         {canAccess ? (
                           <button
                             onClick={(e) => {
@@ -4118,9 +4082,6 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                         <p className="text-gray-600 mb-4 text-sm">{product.description}</p>
                       )}
                       <div className="flex items-center justify-between">
-                        {!channel.subscriptionEnabled && (
-                          <span className="text-2xl font-bold text-orange-600">₹{product.price}</span>
-                        )}
                         <button className="px-4 py-2 bg-orange-600 text-white rounded-lg font-semibold text-sm hover:bg-orange-700 transition-colors">
                           Enroll Now
                         </button>
@@ -4327,13 +4288,6 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                         </p>
                       )}
                       <div className="flex items-center justify-between">
-                        {!channel.subscriptionEnabled && (
-                          <div>
-                            <span className="text-2xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                              ₹{product.price}
-                            </span>
-                          </div>
-                        )}
                         {!isOwner && channel.subscriptionEnabled && getSubscribeButtonText() && (
                           <button 
                             onClick={() => setShowSubscriptionModal(true)}

@@ -54,6 +54,7 @@ export async function POST(
     }
 
     let fileUrl: string | null = null;
+    let videoUrl: string | null = null;
     let fileType: string | null = null;
     let fileSize: number | null = null;
     let uploadResult: any = null;
@@ -119,6 +120,11 @@ export async function POST(
       fileUrl = uploadResult.url;
       fileType = file.type;
       fileSize = file.size;
+      
+      // For video files, also set videoUrl
+      if (file.type.startsWith('video/')) {
+        videoUrl = uploadResult.url;
+      }
     }
 
     // Parse tags
@@ -167,6 +173,7 @@ export async function POST(
         price: isFree ? 0 : parseFloat(price),
         currency,
         fileUrl,
+        videoUrl, // Set videoUrl for video files
         fileType,
         fileSize,
         tags: tagsArray,
