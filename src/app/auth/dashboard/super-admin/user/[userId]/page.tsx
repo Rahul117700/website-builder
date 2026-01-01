@@ -31,17 +31,40 @@ export default function SuperAdminUserView() {
     setError('');
     
     fetch(`/api/admin/users/${userId}`)
-      .then(r => {
-        if (!r.ok) throw new Error('Failed to fetch user');
+      .then(async r => {
+        if (!r.ok) {
+          const errorData = await r.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Failed to fetch user');
+        }
         return r.json();
       })
       .then(data => {
-        setUser(data.user);
+        console.log('[User Detail Page] Full API response:', data);
+        console.log('[User Detail Page] User data:', {
+          userId: data.user?.id,
+          email: data.user?.email,
+          channelsCount: data.user?.channels?.length || 0,
+          _countChannels: data.user?._count?.channels || 0,
+          hasChannelsArray: Array.isArray(data.user?.channels),
+          channels: data.user?.channels?.map((c: any) => ({ 
+            id: c.id, 
+            name: c.name, 
+            slug: c.slug,
+            productsCount: c.products?.length || 0,
+            _countProducts: c._count?.products || 0
+          })) || []
+        });
+        
+        if (data.user) {
+          setUser(data.user);
+        } else {
+          throw new Error('User data not found in response');
+        }
       })
       .catch((err) => {
-        console.error('Error loading user:', err);
-        setError('Failed to load user data');
-        toast.error('Failed to load user data');
+        console.error('[User Detail Page] Error loading user:', err);
+        setError(err.message || 'Failed to load user data');
+        toast.error(err.message || 'Failed to load user data');
       })
       .finally(() => setLoading(false));
   }, [userId]);
@@ -144,8 +167,8 @@ export default function SuperAdminUserView() {
           <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-blue-100">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 mb-1">Total Funnels</p>
-                <p className="text-3xl font-bold text-blue-600">{user._count?.funnels || 0}</p>
+                <p className="text-sm text-gray-600 mb-1">Total Channels</p>
+                <p className="text-3xl font-bold text-blue-600">{user._count?.channels || 0}</p>
               </div>
               <ChartBarIcon className="h-12 w-12 text-blue-400" />
             </div>
@@ -155,7 +178,9 @@ export default function SuperAdminUserView() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 mb-1">Total Products</p>
-                <p className="text-3xl font-bold text-green-600">{user._count?.products || 0}</p>
+                <p className="text-3xl font-bold text-green-600">
+                  {user.channels?.reduce((sum: number, ch: any) => sum + (ch._count?.products || 0), 0) || 0}
+                </p>
               </div>
               <ShoppingCartIcon className="h-12 w-12 text-green-400" />
             </div>
@@ -227,165 +252,149 @@ export default function SuperAdminUserView() {
           </div>
         )}
 
-        {/* Funnels Section */}
+        {/* Channels Section */}
         <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-blue-100">
           <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-            <DocumentTextIcon className="h-6 w-6 mr-2 text-blue-600" />
-            Funnels ({user.funnels?.length || 0})
+            <ChartBarIcon className="h-6 w-6 mr-2 text-blue-600" />
+            Channels ({user.channels?.length || 0})
           </h2>
           
-          {user.funnels && user.funnels.length > 0 ? (
+          {user.channels && user.channels.length > 0 ? (
             <div className="space-y-4">
-              {user.funnels.map((funnel: any) => (
-                <div 
-                  key={funnel.id} 
-                  className="border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">{funnel.name}</h3>
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          funnel.status === 'ACTIVE' 
-                            ? 'bg-green-100 text-green-800' 
-                            : funnel.status === 'DRAFT'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}>
-                          {funnel.status}
-                        </span>
-                        {funnel.published && (
-                          <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                            <CheckCircleIcon className="h-3 w-3 mr-1" />
-                            Published
+              {user.channels.map((channel: any) => {
+                const channelUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://sellearndirect.com'}/channel/${channel.slug}`;
+                const totalViews = channel.products?.reduce((sum: number, p: any) => sum + (p.viewCount || 0), 0) || 0;
+                
+                return (
+                  <div 
+                    key={channel.id} 
+                    className="border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h3 className="text-lg font-semibold text-gray-900">{channel.name}</h3>
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            channel.status === 'ACTIVE' 
+                              ? 'bg-green-100 text-green-800' 
+                              : channel.status === 'DRAFT'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {channel.status}
                           </span>
-                        )}
-                      </div>
-                      
-                      {funnel.description && (
-                        <p className="text-sm text-gray-600 mb-2">{funnel.description}</p>
-                      )}
-                      
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                        <div className="flex items-center">
-                          <ClockIcon className="h-4 w-4 mr-1" />
-                          Created: {new Date(funnel.createdAt).toLocaleDateString()}
+                          {channel.published && (
+                            <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                              <CheckCircleIcon className="h-3 w-3 mr-1" />
+                              Published
+                            </span>
+                          )}
                         </div>
-                        {funnel.product && (
+                        
+                        {channel.description && (
+                          <p className="text-sm text-gray-600 mb-2">{channel.description}</p>
+                        )}
+                        
+                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                          <div className="flex items-center">
+                            <ClockIcon className="h-4 w-4 mr-1" />
+                            Created: {new Date(channel.createdAt).toLocaleDateString()}
+                          </div>
+                          {channel.template && (
+                            <div className="flex items-center">
+                              <DocumentTextIcon className="h-4 w-4 mr-1" />
+                              Template: {channel.template.name}
+                            </div>
+                          )}
                           <div className="flex items-center">
                             <ShoppingCartIcon className="h-4 w-4 mr-1" />
-                            Product: {funnel.product.name}
+                            Products: {channel._count?.products || 0}
                           </div>
-                        )}
-                        {funnel.template && (
                           <div className="flex items-center">
-                            <DocumentTextIcon className="h-4 w-4 mr-1" />
-                            Template: {funnel.template.name}
+                            <UserCircleIcon className="h-4 w-4 mr-1" />
+                            Subscribers: {channel._count?.subscribers || 0}
                           </div>
-                        )}
-                        <div className="flex items-center">
-                          <EyeIcon className="h-4 w-4 mr-1" />
-                          Views: {funnel._count?.analytics || 0}
+                          <div className="flex items-center">
+                            <EyeIcon className="h-4 w-4 mr-1" />
+                            Total Views: {totalViews}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Funnel Links */}
-                  <div className="mt-3 pt-3 border-t border-gray-200">
-                    <p className="text-xs font-medium text-gray-700 mb-2 flex items-center">
-                      <LinkIcon className="h-4 w-4 mr-1" />
-                      Funnel Link:
-                    </p>
-                    <div className="flex items-center space-x-2">
-                      <div className="flex-1 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
-                        <code className="text-sm text-blue-600 break-all">
-                          {`${process.env.NEXT_PUBLIC_APP_URL || 'https://sellearndirect.com'}/f/${funnel.id}`}
-                        </code>
-                      </div>
-                      <button
-                        onClick={() => copyToClipboard(`${process.env.NEXT_PUBLIC_APP_URL || 'https://sellearndirect.com'}/f/${funnel.id}`)}
-                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                      >
-                        Copy
-                      </button>
-                      {funnel.published && funnel.status === 'ACTIVE' && (
-                        <a
-                          href={`${process.env.NEXT_PUBLIC_APP_URL || 'https://sellearndirect.com'}/f/${funnel.id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                        >
-                          View
-                        </a>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Product Details */}
-                  {funnel.product && (
+                    {/* Channel Link */}
                     <div className="mt-3 pt-3 border-t border-gray-200">
-                      <p className="text-xs font-medium text-gray-700 mb-2">Product Details:</p>
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div>
-                          <span className="text-gray-500">Price:</span>
-                          <span className="ml-2 font-medium text-gray-900">
-                            {funnel.product.currency} {funnel.product.price.toLocaleString()}
-                          </span>
+                      <p className="text-xs font-medium text-gray-700 mb-2 flex items-center">
+                        <LinkIcon className="h-4 w-4 mr-1" />
+                        Channel Link:
+                      </p>
+                      <div className="flex items-center space-x-2">
+                        <div className="flex-1 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
+                          <code className="text-sm text-blue-600 break-all">
+                            {channelUrl}
+                          </code>
                         </div>
-                        <div>
-                          <span className="text-gray-500">Type:</span>
-                          <span className="ml-2 font-medium text-gray-900">{funnel.product.type}</span>
-                        </div>
+                        <button
+                          onClick={() => copyToClipboard(channelUrl)}
+                          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                        >
+                          Copy
+                        </button>
+                        {channel.published && channel.status === 'ACTIVE' && (
+                          <a
+                            href={channelUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                          >
+                            View
+                          </a>
+                        )}
                       </div>
                     </div>
-                  )}
-                </div>
-              ))}
+
+                    {/* Channel Products */}
+                    {channel.products && channel.products.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <p className="text-xs font-medium text-gray-700 mb-2">Products in this channel:</p>
+                        <div className="space-y-2">
+                          {channel.products.map((product: any) => (
+                            <div key={product.id} className="bg-gray-50 rounded-lg p-3 flex items-center justify-between">
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-gray-900">{product.title}</p>
+                                <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                                  <span>Views: {product.viewCount || 0}</span>
+                                  {product.price && (
+                                    <span>Price: ₹{typeof product.price === 'object' && 'toNumber' in product.price ? product.price.toNumber() : product.price}</span>
+                                  )}
+                                  {product.type && (
+                                    <span className="capitalize">Type: {product.type}</span>
+                                  )}
+                                </div>
+                              </div>
+                              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                product.published 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {product.published ? 'Published' : 'Draft'}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12">
-              <DocumentTextIcon className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500">No funnels created yet</p>
+              <ChartBarIcon className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+              <p className="text-gray-500">No channels created yet</p>
             </div>
           )}
         </div>
-
-        {/* Products Section */}
-        {user.products && user.products.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-xl p-6 mt-6 border-2 border-green-100">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-              <ShoppingCartIcon className="h-6 w-6 mr-2 text-green-600" />
-              Products ({user.products.length})
-            </h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {user.products.map((product: any) => (
-                    <tr key={product.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{product.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {product.currency} {product.price.toLocaleString()}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{product.type}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {new Date(product.createdAt).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
       </div>
     </DashboardLayout>
   );

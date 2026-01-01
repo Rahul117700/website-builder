@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
           // Include counts
           _count: {
             select: {
-              funnels: true,
+              channels: true,
               products: true,
               transactions: true
             }

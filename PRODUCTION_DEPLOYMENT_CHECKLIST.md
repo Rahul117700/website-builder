@@ -9,14 +9,34 @@ npx prisma generate
 This generates the Prisma Client based on your schema. This is automatically run during `npm run build`, but you should run it manually to ensure it's up to date.
 
 ### 2. **Apply Database Migrations** (CRITICAL - Required)
+
+**If your database already has data (existing production database):**
+
+```bash
+# First, baseline your existing database to mark migrations as applied
+npx prisma migrate resolve --applied 20250710180321_init
+npx prisma migrate resolve --applied 20250710183955_add_multifile_code_to_page
+# ... repeat for all existing migrations that are already in your database
+```
+
+**OR use the easier approach - Push schema directly (if migrations are out of sync):**
+
+```bash
+# This will sync your schema with the database without creating migrations
+npx prisma db push
+```
+
+**If your database is empty or you want to apply all migrations:**
+
 ```bash
 # For production, use migrate deploy (doesn't create new migrations)
 npx prisma migrate deploy
 ```
 
 **⚠️ IMPORTANT:** 
+- If you get `P3005` error (database schema is not empty), you need to baseline your database
+- `prisma db push` is safer for existing databases - it syncs schema without migration history
 - `prisma migrate deploy` applies all pending migrations without creating new ones
-- This is safe for production and won't prompt for migration names
 - Make sure your production `DATABASE_URL` is set correctly in `.env`
 
 ### 3. **Verify Database Schema** (Optional but Recommended)

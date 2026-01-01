@@ -21,21 +21,21 @@ export async function GET(request: Request) {
     const totalUsers = await prisma.user.count();
     console.log('Total users:', totalUsers);
     
-    const totalFunnels = await prisma.funnel.count();
-    console.log('Total funnels:', totalFunnels);
+    const totalChannels = await prisma.channel.count();
+    console.log('Total channels:', totalChannels);
     
     const totalProducts = await prisma.digitalProduct.count();
     console.log('Total products:', totalProducts);
     
-    const activeFunnels = await prisma.funnel.count({
+    const activeChannels = await prisma.channel.count({
       where: { status: 'ACTIVE' }
     });
-    console.log('Active funnels:', activeFunnels);
+    console.log('Active channels:', activeChannels);
     
-    const publishedFunnels = await prisma.funnel.count({
+    const publishedChannels = await prisma.channel.count({
       where: { published: true }
     });
-    console.log('Published funnels:', publishedFunnels);
+    console.log('Published channels:', publishedChannels);
     
     const activeUsers = await prisma.user.count({
       where: { status: 'ACTIVE' }
@@ -96,8 +96,8 @@ export async function GET(request: Request) {
     const averageRevenuePerUser = activeUsers > 0 ? totalRevenue / activeUsers : 0;
     console.log('Average revenue per user:', averageRevenuePerUser);
 
-    // Get recent funnels with user info
-    const recentFunnels = await prisma.funnel.findMany({
+    // Get recent channels with user info
+    const recentChannels = await prisma.channel.findMany({
       take: 10,
       orderBy: { createdAt: 'desc' },
       include: {
@@ -107,24 +107,24 @@ export async function GET(request: Request) {
             email: true,
           }
         },
-        product: {
+        _count: {
           select: {
-            name: true,
-            price: true,
+            products: true,
+            subscribers: true,
           }
         }
       }
     });
 
-    // Get all users with their basic counts and funnels
+    // Get all users with their basic counts and channels
     const allUsers = await prisma.user.findMany({
       include: {
         _count: {
           select: {
-            funnels: true,
+            channels: true,
           }
         },
-        funnels: {
+        channels: {
           select: {
             id: true,
           }
@@ -132,71 +132,60 @@ export async function GET(request: Request) {
       }
     });
 
-    // Calculate revenue and conversion rate for each user
+    // Calculate revenue and metrics for each user
     const usersWithMetrics = await Promise.all(
       allUsers.map(async (user) => {
-        // Get all funnel IDs for this user
-        const userFunnelIds = user.funnels.map(f => f.id);
+        // Get all channel IDs for this user
+        const userChannelIds = user.channels.map(c => c.id);
 
         let userRevenue = 0;
-        let userViews = 0;
-        let userConversions = 0;
+        let userSubscribers = 0;
 
-        // Only query if user has funnels
-        if (userFunnelIds.length > 0) {
-          // Query completed orders directly for this user's funnels
-          const userCompletedOrders = await prisma.funnelOrder.findMany({
+        // Only query if user has channels
+        if (userChannelIds.length > 0) {
+          // Get active subscriptions for this user's channels
+          const channelSubscriptions = await prisma.channelSubscription.findMany({
             where: {
-              funnelId: {
-                in: userFunnelIds
+              channelId: {
+                in: userChannelIds
               },
-              status: {
-                in: ['COMPLETED', 'completed', 'Completed'] // Handle different case variations
+              status: 'ACTIVE',
+              endDate: {
+                gt: new Date()
               }
             },
             select: {
               amount: true,
-              id: true,
             }
           });
 
-          // Calculate total revenue
-          userRevenue = userCompletedOrders.reduce((sum, order) => sum + (order.amount || 0), 0);
-          userConversions = userCompletedOrders.length;
-
-          // Query views for this user's funnels
-          userViews = await prisma.funnelAnalytics.count({
-            where: {
-              funnelId: {
-                in: userFunnelIds
-              },
-              event: {
-                in: ['VIEW', 'view', 'View']
-              }
-            }
+          // Calculate total revenue from subscriptions
+          channelSubscriptions.forEach(sub => {
+            const amount = typeof sub.amount === 'object' && 'toNumber' in sub.amount
+              ? sub.amount.toNumber()
+              : typeof sub.amount === 'string'
+              ? parseFloat(sub.amount)
+              : Number(sub.amount || 0);
+            userRevenue += amount;
           });
+          userSubscribers = channelSubscriptions.length;
         }
 
-        // Calculate conversion rate
-        const conversionRate = userViews > 0 ? (userConversions / userViews) * 100 : 0;
-
-        // Debug logging for ALL users to see what's happening
+        // Debug logging
         console.log(`User ${user.email} (${user.id}):`);
-        console.log(`  - Funnels: ${user._count.funnels}`);
-        console.log(`  - Funnel IDs: [${userFunnelIds.join(', ')}]`);
-        console.log(`  - Completed orders: ${userConversions}`);
+        console.log(`  - Channels: ${user._count.channels}`);
+        console.log(`  - Channel IDs: [${userChannelIds.join(', ')}]`);
+        console.log(`  - Active subscribers: ${userSubscribers}`);
         console.log(`  - Revenue: ₹${userRevenue}`);
-        console.log(`  - Views: ${userViews}`);
-        console.log(`  - Conversion rate: ${conversionRate.toFixed(2)}%`);
 
         return {
           id: user.id,
           name: user.name,
           email: user.email,
-          funnels: user._count.funnels,
-          products: 0, // Digital products count removed - relation doesn't exist on User model
+          channels: user._count.channels,
+          products: 0,
           revenue: userRevenue,
-          conversionRate: conversionRate,
+          conversionRate: 0, // Not applicable for channels
         };
       })
     );
@@ -212,20 +201,20 @@ export async function GET(request: Request) {
 
     console.log('Top users summary:');
     formattedTopUsers.forEach((user, index) => {
-      console.log(`${index + 1}. ${user.email}: ₹${user.revenue} (${user.funnels} funnels)`);
+      console.log(`${index + 1}. ${user.email}: ₹${user.revenue} (${user.channels} channels)`);
     });
     
     // Calculate some basic metrics
-    const publishedFunnelsRatio = totalFunnels > 0 ? (publishedFunnels / totalFunnels) * 100 : 0;
+    const publishedChannelsRatio = totalChannels > 0 ? (publishedChannels / totalChannels) * 100 : 0;
     const activeUsersRatio = totalUsers > 0 ? (activeUsers / totalUsers) * 100 : 0;
 
     const responseData = {
       overview: {
         totalUsers,
-        totalFunnels,
+        totalChannels,
         totalProducts,
-        activeFunnels,
-        publishedFunnels,
+        activeChannels,
+        publishedChannels,
         totalRevenue: totalRevenue,
         subscriptionRevenue: subscriptionRevenue,
         transactionRevenue: transactionRevenue,
@@ -234,28 +223,29 @@ export async function GET(request: Request) {
         activeUsers,
         platformHealth: {
           activeUsersRatio,
-          publishedFunnelsRatio,
+          publishedChannelsRatio,
           averageRevenuePerUser: averageRevenuePerUser,
           conversionRate: platformConversionRate,
         }
       },
       analytics: {
         topUsers: formattedTopUsers,
-        recentFunnels: recentFunnels.map(funnel => ({
-          id: funnel.id,
-          name: funnel.name,
-          userName: funnel.user?.name || 'Unknown',
-          userEmail: funnel.user?.email,
-          productName: funnel.product?.name,
-          productPrice: funnel.product?.price,
-          status: funnel.status,
-          createdAt: funnel.createdAt,
+        recentChannels: recentChannels.map(channel => ({
+          id: channel.id,
+          name: channel.name,
+          userName: channel.user?.name || 'Unknown',
+          userEmail: channel.user?.email,
+          productsCount: channel._count?.products || 0,
+          subscribersCount: channel._count?.subscribers || 0,
+          status: channel.status,
+          published: channel.published,
+          createdAt: channel.createdAt,
         })),
-        recentActivity: recentFunnels.slice(0, 5).map(funnel => ({
-          type: 'funnel_created',
-          description: `${funnel.user?.name || 'User'} created funnel "${funnel.name}"`,
-          timestamp: funnel.createdAt,
-          user: funnel.user?.name || 'Unknown',
+        recentActivity: recentChannels.slice(0, 5).map(channel => ({
+          type: 'channel_created',
+          description: `${channel.user?.name || 'User'} created channel "${channel.name}"`,
+          timestamp: channel.createdAt,
+          user: channel.user?.name || 'Unknown',
         })),
       }
     };

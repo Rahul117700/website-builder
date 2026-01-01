@@ -99,13 +99,13 @@ export default function SuperAdminDashboard() {
         
         // Build analytics data from users response
         const activeUsersCount = usersData.users.filter((u: any) => u.status === 'ACTIVE').length;
-        const totalFunnelsCount = usersData.users.reduce((sum: number, u: any) => sum + (u._count?.funnels || 0), 0);
+        const totalChannelsCount = usersData.users.reduce((sum: number, u: any) => sum + (u._count?.channels || 0), 0);
         const totalProductsCount = usersData.users.reduce((sum: number, u: any) => sum + (u._count?.digitalProducts || 0), 0);
         
         console.log('Calculated from users API:', {
           totalUsers: usersData.users.length,
           activeUsers: activeUsersCount,
-          totalFunnels: totalFunnelsCount,
+          totalChannels: totalChannelsCount,
           totalProducts: totalProductsCount
         });
         
@@ -113,14 +113,14 @@ export default function SuperAdminDashboard() {
         setAnalyticsData({
           overview: {
             totalUsers: usersData.users.length,
-            totalFunnels: totalFunnelsCount,
+            totalChannels: totalChannelsCount,
             totalProducts: totalProductsCount,
-            activeFunnels: 0,
+            activeChannels: 0,
             totalRevenue: 0,
             activeUsers: activeUsersCount,
             platformHealth: {
               activeUsersRatio: usersData.users.length > 0 ? (activeUsersCount / usersData.users.length) * 100 : 0,
-              publishedFunnelsRatio: 0,
+              publishedChannelsRatio: 0,
               averageRevenuePerUser: 0,
               conversionRate: 0,
             }
@@ -130,12 +130,12 @@ export default function SuperAdminDashboard() {
               id: u.id,
               name: u.name,
               email: u.email,
-              funnels: u._count?.funnels || 0,
+              channels: u._count?.channels || 0,
               products: u._count?.digitalProducts || 0,
               revenue: 0,
               conversionRate: 0,
             })),
-            recentFunnels: [],
+            recentChannels: [],
             recentActivity: [],
           }
         });
@@ -174,8 +174,8 @@ export default function SuperAdminDashboard() {
               overview: {
                 ...prev?.overview,
                 ...additionalAnalytics.overview,
-                activeFunnels: additionalAnalytics.overview?.activeFunnels ?? prev?.overview?.activeFunnels ?? 0,
-                totalFunnels: additionalAnalytics.overview?.totalFunnels ?? prev?.overview?.totalFunnels ?? 0,
+                activeChannels: additionalAnalytics.overview?.activeChannels ?? prev?.overview?.activeChannels ?? 0,
+                totalChannels: additionalAnalytics.overview?.totalChannels ?? prev?.overview?.totalChannels ?? 0,
                 totalProducts: additionalAnalytics.overview?.totalProducts ?? prev?.overview?.totalProducts ?? 0,
                 totalRevenue: additionalAnalytics.overview?.totalRevenue ?? prev?.overview?.totalRevenue ?? 0,
                 activeUsers: additionalAnalytics.overview?.activeUsers ?? prev?.overview?.activeUsers ?? 0,
@@ -188,7 +188,7 @@ export default function SuperAdminDashboard() {
                 ...prev?.analytics,
                 // Use API data if available, otherwise keep previous
                 topUsers: additionalAnalytics.analytics?.topUsers ?? prev?.analytics?.topUsers ?? [],
-                recentFunnels: additionalAnalytics.analytics?.recentFunnels ?? prev?.analytics?.recentFunnels ?? [],
+                recentChannels: additionalAnalytics.analytics?.recentChannels ?? prev?.analytics?.recentChannels ?? [],
                 recentActivity: additionalAnalytics.analytics?.recentActivity ?? prev?.analytics?.recentActivity ?? [],
               }
             };
@@ -228,16 +228,16 @@ export default function SuperAdminDashboard() {
           setAnalyticsData((prev: any) => ({
             overview: {
               totalUsers: healthData.platform.totalUsers || prev?.overview?.totalUsers || 0,
-              totalFunnels: healthData.platform.totalFunnels || prev?.overview?.totalFunnels || 0,
+              totalChannels: healthData.platform.totalChannels || prev?.overview?.totalChannels || 0,
               totalProducts: healthData.platform.totalProducts || prev?.overview?.totalProducts || 0,
-              activeFunnels: healthData.platform.activeFunnels || prev?.overview?.activeFunnels || 0,
+              activeChannels: healthData.platform.activeChannels || prev?.overview?.activeChannels || 0,
               totalRevenue: healthData.platform.totalRevenue || prev?.overview?.totalRevenue || 0,
               activeUsers: healthData.platform.activeUsers || prev?.overview?.activeUsers || 0,
               platformHealth: prev?.overview?.platformHealth || {}
             },
             analytics: prev?.analytics || {
               topUsers: [],
-              recentFunnels: [],
+              recentChannels: [],
               recentActivity: []
             }
           }));
@@ -653,8 +653,8 @@ export default function SuperAdminDashboard() {
                       <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl p-4 sm:p-6 text-white">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-emerald-100 text-sm">Active Funnels</p>
-                            <p className="text-2xl sm:text-3xl font-bold">{analyticsData?.overview?.activeFunnels || 0}</p>
+                            <p className="text-emerald-100 text-sm">Active Channels</p>
+                            <p className="text-2xl sm:text-3xl font-bold">{analyticsData?.overview?.activeChannels || 0}</p>
                           </div>
                           <ChartBarIcon className="h-8 w-8 text-emerald-200" />
                         </div>
@@ -663,8 +663,8 @@ export default function SuperAdminDashboard() {
                       <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 sm:p-6 text-white">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-purple-100 text-sm">Total Funnels</p>
-                            <p className="text-2xl sm:text-3xl font-bold">{analyticsData?.overview?.totalFunnels || 0}</p>
+                            <p className="text-purple-100 text-sm">Total Channels</p>
+                            <p className="text-2xl sm:text-3xl font-bold">{analyticsData?.overview?.totalChannels || 0}</p>
                           </div>
                           <ChartBarIcon className="h-8 w-8 text-purple-200" />
                         </div>
@@ -690,8 +690,8 @@ export default function SuperAdminDashboard() {
                           <p className="text-sm text-gray-600">Active Users</p>
                         </div>
                         <div className="text-center">
-                          <p className="text-2xl font-bold text-blue-600">{analyticsData?.overview?.platformHealth?.publishedFunnelsRatio?.toFixed(1) || 0}%</p>
-                          <p className="text-sm text-gray-600">Published Funnels</p>
+                          <p className="text-2xl font-bold text-blue-600">{analyticsData?.overview?.platformHealth?.publishedChannelsRatio?.toFixed(1) || 0}%</p>
+                          <p className="text-sm text-gray-600">Published Channels</p>
                         </div>
                         <div className="text-center">
                           <p className="text-2xl font-bold text-purple-600">₹{analyticsData?.overview?.platformHealth?.averageRevenuePerUser?.toFixed(0) || 0}</p>
@@ -846,7 +846,7 @@ export default function SuperAdminDashboard() {
                               </td>
                               <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
                                 <div>
-                                  <div>{user._count?.funnels || 0} funnels</div>
+                                  <div>{user._count?.channels || 0} channels</div>
                                   <div>{user._count?.products || 0} products</div>
                                 </div>
                               </td>
@@ -1152,7 +1152,7 @@ export default function SuperAdminDashboard() {
                             <tr>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Funnels</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Channels</th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Conversion Rate</th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Products</th>
                             </tr>
@@ -1177,7 +1177,7 @@ export default function SuperAdminDashboard() {
                                   ₹{user.revenue?.toLocaleString() || 0}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {user.funnels || 0}
+                                  {user.channels || 0}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                   {user.conversionRate?.toFixed(2) || 0}%
@@ -1192,47 +1192,48 @@ export default function SuperAdminDashboard() {
                       </div>
                     </div>
 
-                    {/* Top Performing Funnels */}
+                    {/* Top Performing Channels */}
                     <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6">
-                      <h4 className="text-lg font-semibold text-gray-900 mb-4">Top Performing Funnels</h4>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4">Top Performing Channels</h4>
                       <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
                           <thead className="bg-gray-50">
                             <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Funnel</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Channel</th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Visitors</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Conversions</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Products</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subscribers</th>
                               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
-                            {analyticsData?.analytics?.recentFunnels?.slice(0, 10).map((funnel: any) => (
-                              <tr key={funnel.id}>
+                            {analyticsData?.analytics?.recentChannels?.slice(0, 10).map((channel: any) => (
+                              <tr key={channel.id}>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm font-medium text-gray-900">{funnel.name}</div>
-                                  <div className="text-sm text-gray-500">{new Date(funnel.createdAt).toLocaleDateString()}</div>
+                                  <div className="text-sm font-medium text-gray-900">{channel.name}</div>
+                                  <div className="text-sm text-gray-500">{new Date(channel.createdAt).toLocaleDateString()}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="text-sm text-gray-900">{funnel.userName || 'Unknown'}</div>
-                                  <div className="text-sm text-gray-500">{funnel.userEmail}</div>
+                                  <div className="text-sm text-gray-900">{channel.userName || 'Unknown'}</div>
+                                  <div className="text-sm text-gray-500">{channel.userEmail}</div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  ₹{funnel.productPrice?.toLocaleString() || 0}
+                                  {channel.productsCount || 0}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  0
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  0
+                                  {channel.subscribersCount || 0}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                    funnel.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                                    channel.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                                   }`}>
-                                    {funnel.status}
+                                    {channel.status}
                                   </span>
+                                  {channel.published && (
+                                    <span className="ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                      Published
+                                    </span>
+                                  )}
                                 </td>
                               </tr>
                             ))}
@@ -1269,7 +1270,7 @@ export default function SuperAdminDashboard() {
                       <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
                         <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400" />
                         <p className="mt-2 text-gray-600">No analytics data yet</p>
-                        <p className="text-sm text-gray-500 mt-1">Data will appear as users create funnels</p>
+                        <p className="text-sm text-gray-500 mt-1">Data will appear as users create channels</p>
                   </div>
                     )}
                   </div>
@@ -1633,8 +1634,8 @@ export default function SuperAdminDashboard() {
                           <p className="text-sm text-gray-600">Total Users</p>
                         </div>
                         <div className="text-center p-4 bg-gray-50 rounded-lg">
-                          <p className="text-2xl font-bold text-green-600">{systemHealth.platform?.totalFunnels || 0}</p>
-                          <p className="text-sm text-gray-600">Total Funnels</p>
+                          <p className="text-2xl font-bold text-green-600">{systemHealth.platform?.totalChannels || 0}</p>
+                          <p className="text-sm text-gray-600">Total Channels</p>
                         </div>
                         <div className="text-center p-4 bg-gray-50 rounded-lg">
                           <p className="text-2xl font-bold text-purple-600">₹{systemHealth.platform?.totalRevenue?.toLocaleString() || 0}</p>
