@@ -491,11 +491,30 @@ export default function ProductPage() {
     }
   };
 
+  // Helper function to normalize video URL
+  const normalizeVideoUrl = (url: string | null | undefined): string | null => {
+    if (!url) return null;
+    
+    // If URL is already absolute, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    
+    // If URL starts with /, it's a relative URL - make it absolute
+    if (url.startsWith('/')) {
+      return typeof window !== 'undefined' ? `${window.location.origin}${url}` : url;
+    }
+    
+    // Otherwise, assume it's a relative URL and prepend the origin
+    return typeof window !== 'undefined' ? `${window.location.origin}/${url}` : url;
+  };
+
   const renderContent = () => {
     if (!product) return null;
 
     const productType = product.type?.toUpperCase() || '';
-    const videoSource = product.videoUrl || product.fileUrl;
+    const rawVideoSource = product.videoUrl || product.fileUrl;
+    const videoSource = normalizeVideoUrl(rawVideoSource);
     const fileUrl = product.fileUrl;
     const canAccess = isOwner || !product.isSubscriberOnly || !channel?.subscriptionEnabled || hasActiveSubscription;
 
@@ -513,18 +532,41 @@ export default function ProductPage() {
                     src={videoSource}
                     controls
                     autoPlay
+                    playsInline
+                    muted={false}
+                    preload="metadata"
                     className="w-full h-full rounded-lg"
                     onPlay={() => setIsPlaying(true)}
                     onPause={() => setIsPlaying(false)}
                     onError={(e) => {
                       console.error('Video playback error:', e);
                       console.error('Video source:', videoSource);
+                      const video = e.currentTarget;
+                      console.error('Video error details:', {
+                        error: video.error,
+                        networkState: video.networkState,
+                        readyState: video.readyState,
+                        src: video.src,
+                      });
                     }}
                     onLoadStart={() => {
                       console.log('Video loading started:', videoSource);
                     }}
                     onLoadedData={() => {
                       console.log('Video loaded successfully:', videoSource);
+                    }}
+                    onLoadedMetadata={(e) => {
+                      console.log('Video metadata loaded:', {
+                        duration: e.currentTarget.duration,
+                        videoWidth: e.currentTarget.videoWidth,
+                        videoHeight: e.currentTarget.videoHeight,
+                      });
+                    }}
+                    onCanPlay={() => {
+                      console.log('Video can play');
+                    }}
+                    onCanPlayThrough={() => {
+                      console.log('Video can play through');
                     }}
                     style={{ objectFit: 'contain' }}
                   >
