@@ -352,14 +352,29 @@ export default function ChannelEditorPage() {
         method: 'POST',
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        toast.error(error.message || 'Failed to publish');
+        toast.error(data.error || data.message || 'Failed to publish');
         return;
       }
 
+      const publishedChannel = data.channel;
+      
       toast.success('🎉 Channel published successfully!');
-      router.push('/auth/dashboard/channels');
+      
+      // Redirect to the published channel page
+      if (publishedChannel?.slug) {
+        router.push(`/channel/${publishedChannel.slug}`);
+      } else {
+        // Fallback: reload channel to get slug, then redirect
+        await loadChannel();
+        if (channel?.slug) {
+          router.push(`/channel/${channel.slug}`);
+        } else {
+          router.push('/auth/dashboard/channels');
+        }
+      }
     } catch (error) {
       console.error('Error publishing:', error);
       toast.error('Failed to publish channel');
@@ -421,7 +436,7 @@ export default function ChannelEditorPage() {
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-3 sm:px-4 py-2 sm:py-3 shrink-0">
+      <header className="bg-white border-b border-gray-200 px-3 sm:px-4 py-2 sm:py-3 shrink-0 relative" style={{ zIndex: 1 }}>
         {/* Top Row - Title and Actions */}
         <div className="flex items-center justify-between gap-2 mb-2 sm:mb-0">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
@@ -453,171 +468,220 @@ export default function ChannelEditorPage() {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            {/* Mobile Menu Button - Show on mobile only */}
-            <div className="md:hidden relative mobile-menu-container">
+            {/* Publishing Options Dropdown - Mobile Only */}
+            <div className="md:hidden">
               <button
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors touch-manipulation"
-                aria-label="Menu"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors touch-manipulation text-sm font-medium text-gray-700 relative z-10"
+                aria-label="Publishing Options"
               >
-                <Bars3Icon className="h-5 w-5 text-gray-700" />
+                <span>Publishing Options</span>
+                <ChevronDownIcon className={`h-4 w-4 transition-transform ${showMobileMenu ? 'rotate-180' : ''}`} />
               </button>
+            </div>
 
-              {/* Mobile Dropdown Menu */}
-              {showMobileMenu && (
-                <>
-                  {/* Backdrop */}
-                  <div
-                    className="fixed inset-0 bg-black/20 z-40"
-                    onClick={() => setShowMobileMenu(false)}
-                  />
-                  {/* Menu */}
-                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-50 py-2 max-h-[calc(100vh-120px)] overflow-y-auto mobile-menu-container">
-                    {/* Template Switcher */}
-                    <div className="px-3 py-2 border-b border-gray-100">
-                      <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                        Template
-                      </label>
-                      <select
-                        value={channel.templateId || ''}
-                        onChange={async (e) => {
-                          const newTemplateId = e.target.value;
-                          if (!newTemplateId) return;
-                          
-                          handleChannelUpdate({ templateId: newTemplateId });
-                          
-                          try {
-                            setSaving(true);
-                            const response = await fetch(`/api/channels/${channelId}`, {
-                              method: 'PUT',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ ...channel, templateId: newTemplateId }),
-                            });
-
-                            if (!response.ok) {
-                              throw new Error('Failed to save template change');
-                            }
-
-                            setLastSaved(new Date());
-                            setHasChanges(false);
-                            await loadChannel();
-                            toast.success('Template changed successfully!');
-                            setShowMobileMenu(false);
-                          } catch (error) {
-                            console.error('Error saving template:', error);
-                            toast.error('Failed to change template');
-                          } finally {
-                            setSaving(false);
-                          }
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                      >
-                        <option value="">Select Template</option>
-                        {templates.map((template) => (
-                          <option key={template.id} value={template.id}>
-                            {template.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Device Preview Toggle */}
-                    <div className="px-3 py-2 border-b border-gray-100">
-                      <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                        Preview Size
-                      </label>
-                      <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+            {/* Mobile Dropdown Menu - Rendered outside header stacking context */}
+            {showMobileMenu && (
+              <>
+                {/* Backdrop */}
+                <div
+                  className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+                  style={{ zIndex: 9998 }}
+                  onClick={() => setShowMobileMenu(false)}
+                />
+                {/* Menu - Centered Modal Style */}
+                <div 
+                  className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden mobile-menu-container" 
+                  style={{ 
+                    zIndex: 9999,
+                    width: 'calc(100vw - 2rem)',
+                    maxWidth: '24rem',
+                    maxHeight: 'calc(100vh - 4rem)',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}
+                >
+                    {/* Publishing Options Header */}
+                    <div className="px-5 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white flex-shrink-0">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-base font-bold text-gray-900">Publishing Options</h3>
+                          <p className="text-xs text-gray-500 mt-1">Manage your channel publishing settings</p>
+                        </div>
                         <button
-                          onClick={() => {
-                            setDevicePreview('desktop');
-                            setShowMobileMenu(false);
-                          }}
-                          className={`flex-1 p-2 rounded transition-colors touch-manipulation ${
-                            devicePreview === 'desktop' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
-                          }`}
-                          title="Desktop view"
-                        >
-                          <ComputerDesktopIcon className="h-4 w-4 text-gray-700 mx-auto" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setDevicePreview('tablet');
-                            setShowMobileMenu(false);
-                          }}
-                          className={`flex-1 p-2 rounded transition-colors touch-manipulation ${
-                            devicePreview === 'tablet' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
-                          }`}
-                          title="Tablet view"
-                        >
-                          <DeviceTabletIcon className="h-4 w-4 text-gray-700 mx-auto" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setDevicePreview('mobile');
-                            setShowMobileMenu(false);
-                          }}
-                          className={`flex-1 p-2 rounded transition-colors touch-manipulation ${
-                            devicePreview === 'mobile' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
-                          }`}
-                          title="Mobile view"
-                        >
-                          <DevicePhoneMobileIcon className="h-4 w-4 text-gray-700 mx-auto" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Preview Link */}
-                    <Link
-                      href={`/channel/${channel.slug}`}
-                      target="_blank"
-                      onClick={() => setShowMobileMenu(false)}
-                      className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
-                    >
-                      <EyeIcon className="h-4 w-4" />
-                      <span>Preview Channel</span>
-                    </Link>
-
-                    {/* Publish or Connect Razorpay */}
-                    {checkingPayment ? (
-                      <div className="px-3 py-2">
-                        <button
-                          disabled
-                          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed text-sm font-bold"
-                        >
-                          <ArrowPathIcon className="h-4 w-4 animate-spin" />
-                          <span>Checking...</span>
-                        </button>
-                      </div>
-                    ) : hasRazorpayConfig ? (
-                      <button
-                        onClick={() => {
-                          handlePublish();
-                          setShowMobileMenu(false);
-                        }}
-                        className="w-full mx-3 mb-2 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all text-sm font-bold shadow-lg touch-manipulation active:scale-95"
-                      >
-                        <RocketLaunchIcon className="h-4 w-4" />
-                        <span>Publish Channel</span>
-                      </button>
-                    ) : (
-                      <div className="px-3 py-2 space-y-2">
-                        <Link
-                          href="/auth/dashboard/razorpay-setup"
                           onClick={() => setShowMobileMenu(false)}
-                          className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all text-sm font-bold shadow-lg touch-manipulation active:scale-95"
+                          className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                          aria-label="Close"
                         >
-                          <CreditCardIcon className="h-4 w-4" />
-                          <span>Connect Razorpay</span>
-                        </Link>
-                        <p className="text-xs text-gray-500 text-center">
-                          After connecting, you'll be able to publish your channel
-                        </p>
+                          <XMarkIcon className="h-5 w-5 text-gray-500" />
+                        </button>
                       </div>
-                    )}
+                    </div>
+
+                    {/* Scrollable Content */}
+                    <div className="flex-1 overflow-y-auto">
+                      {/* Preview Link - More Prominent */}
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                          Preview Channel
+                        </label>
+                        <Link
+                          href={`/channel/${channel.slug}`}
+                          target="_blank"
+                          onClick={() => setShowMobileMenu(false)}
+                          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium touch-manipulation active:scale-95"
+                        >
+                          <EyeIcon className="h-4 w-4" />
+                          <span>Open Preview in New Tab</span>
+                        </Link>
+                      </div>
+
+                      {/* Template Switcher */}
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                          Template
+                        </label>
+                        <select
+                          value={channel.templateId || ''}
+                          onChange={async (e) => {
+                            const newTemplateId = e.target.value;
+                            if (!newTemplateId) return;
+                            
+                            handleChannelUpdate({ templateId: newTemplateId });
+                            
+                            try {
+                              setSaving(true);
+                              const response = await fetch(`/api/channels/${channelId}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ ...channel, templateId: newTemplateId }),
+                              });
+
+                              if (!response.ok) {
+                                throw new Error('Failed to save template change');
+                              }
+
+                              setLastSaved(new Date());
+                              setHasChanges(false);
+                              await loadChannel();
+                              toast.success('Template changed successfully!');
+                              setShowMobileMenu(false);
+                            } catch (error) {
+                              console.error('Error saving template:', error);
+                              toast.error('Failed to change template');
+                            } finally {
+                              setSaving(false);
+                            }
+                          }}
+                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-gray-900 focus:border-transparent touch-manipulation"
+                        >
+                          <option value="">Select Template</option>
+                          {templates.map((template) => (
+                            <option key={template.id} value={template.id}>
+                              {template.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Device Preview Toggle */}
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                          Preview Size
+                        </label>
+                        <div className="flex items-center gap-1.5 bg-gray-100 p-1.5 rounded-lg">
+                          <button
+                            onClick={() => {
+                              setDevicePreview('desktop');
+                              setShowMobileMenu(false);
+                            }}
+                            className={`flex-1 p-2.5 rounded-md transition-all touch-manipulation active:scale-95 ${
+                              devicePreview === 'desktop' 
+                                ? 'bg-white shadow-md border-2 border-gray-300' 
+                                : 'hover:bg-gray-200'
+                            }`}
+                            title="Desktop view"
+                          >
+                            <ComputerDesktopIcon className={`h-5 w-5 mx-auto ${
+                              devicePreview === 'desktop' ? 'text-gray-900' : 'text-gray-600'
+                            }`} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setDevicePreview('tablet');
+                              setShowMobileMenu(false);
+                            }}
+                            className={`flex-1 p-2.5 rounded-md transition-all touch-manipulation active:scale-95 ${
+                              devicePreview === 'tablet' 
+                                ? 'bg-white shadow-md border-2 border-gray-300' 
+                                : 'hover:bg-gray-200'
+                            }`}
+                            title="Tablet view"
+                          >
+                            <DeviceTabletIcon className={`h-5 w-5 mx-auto ${
+                              devicePreview === 'tablet' ? 'text-gray-900' : 'text-gray-600'
+                            }`} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setDevicePreview('mobile');
+                              setShowMobileMenu(false);
+                            }}
+                            className={`flex-1 p-2.5 rounded-md transition-all touch-manipulation active:scale-95 ${
+                              devicePreview === 'mobile' 
+                                ? 'bg-white shadow-md border-2 border-gray-300' 
+                                : 'hover:bg-gray-200'
+                            }`}
+                            title="Mobile view"
+                          >
+                            <DevicePhoneMobileIcon className={`h-5 w-5 mx-auto ${
+                              devicePreview === 'mobile' ? 'text-gray-900' : 'text-gray-600'
+                            }`} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Publish or Connect Razorpay - Always Visible, Last Priority */}
+                      <div className="px-4 py-4 bg-gradient-to-br from-gray-50 to-white border-t border-gray-200">
+                        {checkingPayment ? (
+                          <button
+                            disabled
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed text-sm font-bold"
+                          >
+                            <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                            <span>Checking Payment Setup...</span>
+                          </button>
+                        ) : hasRazorpayConfig ? (
+                          <button
+                            onClick={() => {
+                              handlePublish();
+                              setShowMobileMenu(false);
+                            }}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all text-sm font-bold shadow-lg touch-manipulation active:scale-95"
+                          >
+                            <RocketLaunchIcon className="h-5 w-5" />
+                            <span>Publish Channel</span>
+                          </button>
+                        ) : (
+                          <div className="space-y-2">
+                            <Link
+                              href="/auth/dashboard/razorpay-setup"
+                              onClick={() => setShowMobileMenu(false)}
+                              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all text-sm font-bold shadow-lg touch-manipulation active:scale-95"
+                            >
+                              <CreditCardIcon className="h-5 w-5" />
+                              <span>Connect Razorpay to Publish</span>
+                            </Link>
+                            <p className="text-xs text-gray-500 text-center px-2">
+                              After connecting, you'll be able to publish your channel
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </>
-              )}
-            </div>
+            )}
 
             {/* Template Switcher - Hidden on mobile */}
             <div className="hidden lg:block">
@@ -708,39 +772,41 @@ export default function ChannelEditorPage() {
               <span className="hidden md:inline">Preview</span>
             </Link>
 
-            {/* Publish Button or Connect Razorpay Button */}
-            {checkingPayment ? (
-              <div className="flex flex-col items-end gap-1">
+            {/* Publish Button or Connect Razorpay Button - Hidden on mobile (shown in dropdown) */}
+            <div className="hidden md:block">
+              {checkingPayment ? (
+                <div className="flex flex-col items-end gap-1">
+                  <button
+                    disabled
+                    className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed text-xs sm:text-sm font-bold touch-manipulation"
+                  >
+                    <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                    <span className="hidden sm:inline">Checking...</span>
+                  </button>
+                </div>
+              ) : hasRazorpayConfig ? (
                 <button
-                  disabled
-                  className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed text-xs sm:text-sm font-bold touch-manipulation"
+                  onClick={handlePublish}
+                  className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all text-xs sm:text-sm font-bold shadow-lg touch-manipulation active:scale-95"
                 >
-                  <ArrowPathIcon className="h-4 w-4 animate-spin" />
-                  <span className="hidden sm:inline">Checking...</span>
+                  <RocketLaunchIcon className="h-4 w-4" />
+                  <span className="hidden sm:inline">Publish</span>
                 </button>
-              </div>
-            ) : hasRazorpayConfig ? (
-              <button
-                onClick={handlePublish}
-                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all text-xs sm:text-sm font-bold shadow-lg touch-manipulation active:scale-95"
-              >
-                <RocketLaunchIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Publish</span>
-              </button>
-            ) : (
-              <div className="flex flex-col items-end gap-1">
-                <Link
-                  href="/auth/dashboard/razorpay-setup"
-                  className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all text-xs sm:text-sm font-bold shadow-lg touch-manipulation active:scale-95"
-                >
-                  <CreditCardIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">Connect Razorpay</span>
-                </Link>
-                <p className="text-xs text-gray-500 text-right pr-1">
-                  After connecting, you'll be able to publish your channel
-                </p>
-              </div>
-            )}
+              ) : (
+                <div className="flex flex-col items-end gap-1">
+                  <Link
+                    href="/auth/dashboard/razorpay-setup"
+                    className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all text-xs sm:text-sm font-bold shadow-lg touch-manipulation active:scale-95"
+                  >
+                    <CreditCardIcon className="h-4 w-4" />
+                    <span className="hidden sm:inline">Connect Razorpay</span>
+                  </Link>
+                  <p className="text-xs text-gray-500 text-right pr-1">
+                    After connecting, you'll be able to publish your channel
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

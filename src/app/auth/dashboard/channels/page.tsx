@@ -127,6 +127,13 @@ export default function ChannelsDashboard() {
     loadSubscriptionStatus();
   }, []);
 
+  // Auto-select first template when templates load and modal is open
+  useEffect(() => {
+    if (showCreateModal && templates.length > 0 && !selectedTemplate) {
+      setSelectedTemplate(templates[0]);
+    }
+  }, [showCreateModal, templates, selectedTemplate]);
+
   const loadSubscriptionStatus = async () => {
     try {
       setLoadingSubscription(true);
@@ -185,15 +192,17 @@ export default function ChannelsDashboard() {
   };
 
   const handleCreateChannel = async () => {
-    // Auto-select template if not already selected (shouldn't happen, but safety check)
-    if (!selectedTemplate && templates.length > 0) {
-      setSelectedTemplate(templates[0]);
+    // Auto-select template if not already selected (safety check)
+    let templateToUse = selectedTemplate;
+    if (!templateToUse && templates.length > 0) {
+      templateToUse = templates[0];
+      setSelectedTemplate(templateToUse);
     }
 
     // Validation
-    if (!selectedTemplate) {
-      toast.error('⚠️ Template not available. Please try again.', {
-        duration: 3000,
+    if (!templateToUse) {
+      toast.error('⚠️ Template not available. Please wait for templates to load and try again.', {
+        duration: 4000,
         icon: '⚠️',
       });
       return;
@@ -231,7 +240,7 @@ export default function ChannelsDashboard() {
         body: JSON.stringify({
           name: newChannelName,
           description: newChannelDescription,
-          templateId: selectedTemplate.id,
+          templateId: templateToUse.id,
         }),
       });
 
@@ -436,13 +445,14 @@ export default function ChannelsDashboard() {
             {canAccess ? (
               <button
                 onClick={() => {
-                  // Auto-select the first template (Minimalist) when opening modal
+                  // Auto-select the first template when opening modal
                   if (templates.length > 0) {
                     setSelectedTemplate(templates[0]);
                   }
                   setShowCreateModal(true);
                 }}
-                className="group relative px-6 py-2.5 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl font-bold transition-all duration-300 transform hover:scale-105"
+                disabled={loadingSubscription || templates.length === 0}
+                className="group relative px-6 py-2.5 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl font-bold transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 <div className="flex items-center gap-2">
                   <PlusIcon className="h-5 w-5" />
@@ -714,13 +724,14 @@ export default function ChannelsDashboard() {
             {!searchTerm && !statusFilter && (
               <button
                 onClick={() => {
-                  // Auto-select the first template (Minimalist) when opening modal
+                  // Auto-select the first template when opening modal
                   if (templates.length > 0) {
                     setSelectedTemplate(templates[0]);
                   }
                   setShowCreateModal(true);
                 }}
-                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-gray-900 to-black text-white rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105"
+                disabled={loadingSubscription || templates.length === 0}
+                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-gray-900 to-black text-white rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 <PlusIcon className="h-6 w-6" />
                 <span>Create Your Channel</span>
@@ -755,6 +766,24 @@ export default function ChannelsDashboard() {
               </div>
 
               <div className="p-4 space-y-4">
+                {/* Template Loading Indicator */}
+                {templates.length === 0 && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-sm text-blue-800">Loading templates...</p>
+                  </div>
+                )}
+
+                {/* Template Selected Indicator */}
+                {selectedTemplate && templates.length > 0 && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
+                    <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                    <p className="text-sm text-green-800">
+                      Template selected: <span className="font-semibold">{selectedTemplate.name}</span>
+                    </p>
+                  </div>
+                )}
+
                 {/* Channel Details - Always show since we auto-select template */}
                 <div className="space-y-4">
                   <div>
@@ -815,7 +844,7 @@ export default function ChannelsDashboard() {
                     </button>
                     <button
                       onClick={handleCreateChannel}
-                      disabled={!newChannelName.trim() || !selectedTemplate || creating}
+                      disabled={!newChannelName.trim() || !selectedTemplate || creating || templates.length === 0}
                       className="flex-1 px-4 py-2 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg text-sm font-bold hover:from-gray-800 hover:to-gray-900 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {creating ? (
