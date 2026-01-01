@@ -18,6 +18,7 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -42,17 +43,38 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
 
   const handleProductUpload = async (formData: FormData) => {
     setUploading(true);
+    setUploadProgress(10); // Start progress
+    
     try {
+      // Simulate progress for better UX (since fetch doesn't support progress events)
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          // Gradually increase progress, but cap at 90% until upload completes
+          if (prev < 90) {
+            return Math.min(prev + 5, 90);
+          }
+          return prev;
+        });
+      }, 300);
+
       const response = await fetch(`/api/channels/${channel.id}/products/upload`, {
         method: 'POST',
         body: formData,
       });
+
+      clearInterval(progressInterval);
+      setUploadProgress(95); // Almost done
 
       const result = await response.json();
 
       if (!response.ok) {
         throw new Error(result.error || 'Failed to upload product');
       }
+      
+      setUploadProgress(100); // Complete
+      
+      // Small delay to show 100% before closing
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       // Refresh products list
       const productsResponse = await fetch(`/api/channels/${channel.id}/products`);
@@ -62,6 +84,7 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
       }
 
       setShowUploadModal(false);
+      setUploadProgress(0);
       // Show success modal
       setShowSuccessModal(true);
     } catch (error) {
@@ -69,6 +92,7 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
       const errorMsg = error instanceof Error ? error.message : 'Failed to upload product';
       setErrorMessage(errorMsg);
       setShowErrorModal(true);
+      setUploadProgress(0);
     } finally {
       setUploading(false);
     }
@@ -213,9 +237,13 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
       {showUploadModal && (
         <ProductUploadModal
           isOpen={showUploadModal}
-          onClose={() => setShowUploadModal(false)}
+          onClose={() => {
+            setShowUploadModal(false);
+            setUploadProgress(0);
+          }}
           onUpload={handleProductUpload}
           uploading={uploading}
+          uploadProgress={uploadProgress}
           channel={channel}
         />
       )}
@@ -271,12 +299,14 @@ function ProductUploadModal({
   onClose,
   onUpload,
   uploading,
+  uploadProgress,
   channel,
 }: {
   isOpen: boolean;
   onClose: () => void;
   onUpload: (formData: FormData) => void;
   uploading: boolean;
+  uploadProgress: number;
   channel: any;
 }) {
   const [formData, setFormData] = useState({
@@ -482,32 +512,94 @@ function ProductUploadModal({
             <label className="block text-sm font-medium mb-2 text-gray-700">
               Product File
             </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+            <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+              uploading 
+                ? 'border-purple-500 bg-purple-50' 
+                : 'border-gray-300 hover:border-gray-400'
+            }`}>
               <input
                 type="file"
                 id="file-upload"
                 onChange={handleFileChange}
                 className="hidden"
                 accept=".zip,.pdf,.jpg,.jpeg,.png,.mp4,.avi,.mov,.webm,.doc,.docx,.txt,.json,.js,.css,.html"
+                disabled={uploading}
               />
               <label
                 htmlFor="file-upload"
-                className="cursor-pointer flex flex-col items-center gap-2"
+                className={`flex flex-col items-center gap-2 ${uploading ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}`}
               >
-                <CloudArrowUpIcon className="w-12 h-12 text-gray-400" />
-                <span className="text-sm text-gray-600 font-medium">
-                  {file ? file.name : 'Click to upload or drag and drop'}
-                </span>
-                {file && (
-                  <span className="text-xs text-gray-500">
-                    Size: {(file.size / 1024 / 1024).toFixed(2)} MB
-                  </span>
+                {uploading ? (
+                  <>
+                    <div className="relative w-16 h-16">
+                      <svg className="transform -rotate-90 w-16 h-16">
+                        <circle
+                          cx="32"
+                          cy="32"
+                          r="28"
+                          stroke="#e5e7eb"
+                          strokeWidth="4"
+                          fill="none"
+                        />
+                        <circle
+                          cx="32"
+                          cy="32"
+                          r="28"
+                          stroke="#9333ea"
+                          strokeWidth="4"
+                          fill="none"
+                          strokeDasharray={`${2 * Math.PI * 28}`}
+                          strokeDashoffset={`${2 * Math.PI * 28 * (1 - uploadProgress / 100)}`}
+                          strokeLinecap="round"
+                          className="transition-all duration-300"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-xs font-bold text-purple-600">{uploadProgress}%</span>
+                      </div>
+                    </div>
+                    <span className="text-sm text-purple-700 font-semibold">
+                      Uploading video...
+                    </span>
+                    <span className="text-xs text-purple-600">
+                      Please don't close this window
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <CloudArrowUpIcon className="w-12 h-12 text-gray-400" />
+                    <span className="text-sm text-gray-600 font-medium">
+                      {file ? file.name : 'Click to upload or drag and drop'}
+                    </span>
+                    {file && (
+                      <span className="text-xs text-gray-500">
+                        Size: {(file.size / 1024 / 1024).toFixed(2)} MB
+                      </span>
+                    )}
+                    <span className="text-xs text-gray-500">
+                      Max 500MB (Videos Supported!)
+                    </span>
+                  </>
                 )}
-                <span className="text-xs text-gray-500">
-                  Max 500MB
-                </span>
               </label>
-              {preview && (
+              
+              {/* Upload Progress Bar */}
+              {uploading && (
+                <div className="mt-4 w-full">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs font-medium text-gray-700">Upload Progress</span>
+                    <span className="text-xs font-bold text-purple-600">{uploadProgress}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-300 ease-out"
+                      style={{ width: `${uploadProgress}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+              
+              {preview && !uploading && (
                 <div className="mt-4">
                   <img src={preview} alt="Preview" className="max-w-full max-h-48 rounded-lg mx-auto" />
                 </div>

@@ -6,6 +6,9 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { prisma } from '@/lib/prisma';
 
+export const runtime = 'nodejs';
+export const maxDuration = 600; // 10 minutes for large video uploads
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

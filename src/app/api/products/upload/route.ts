@@ -10,7 +10,7 @@ import { uploadFileWithFallback, hasS3Credentials, getUploadStatusMessage } from
 
 // Configure route for large file uploads
 export const runtime = 'nodejs';
-export const maxDuration = 300; // 5 minutes
+export const maxDuration = 600; // 10 minutes
 
 // POST /api/products/upload - Upload digital product file
 export async function POST(request: NextRequest) {

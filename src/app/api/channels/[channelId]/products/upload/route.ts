@@ -9,7 +9,7 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 
 export const runtime = 'nodejs';
-export const maxDuration = 300; // 5 minutes
+export const maxDuration = 600; // 10 minutes
 
 // POST /api/channels/[channelId]/products/upload - Upload product file
 export async function POST(

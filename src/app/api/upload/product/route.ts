@@ -6,6 +6,9 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { uploadFileWithFallback, hasS3Credentials, getUploadStatusMessage } from '@/lib/s3';
 
+export const runtime = 'nodejs';
+export const maxDuration = 600; // 10 minutes for large file uploads
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
