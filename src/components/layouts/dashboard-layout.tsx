@@ -104,6 +104,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }, [session?.user?.id, pathname]);
 
+  const [unreadCount, setUnreadCount] = useState(0);
+
   useEffect(() => {
     let socket: Socket | undefined;
     if (session?.user?.id) {
@@ -114,6 +116,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           const notificationsArray = Array.isArray(data) ? data : (data.notifications || []);
           setNotifications(notificationsArray);
           setLastNotificationCount(notificationsArray.length);
+          // Set unread count from API response
+          const unread = data.unreadCount !== undefined ? data.unreadCount : notificationsArray.filter((n: any) => !n.read).length;
+          setUnreadCount(unread);
+          console.log('[Notifications] Loaded:', notificationsArray.length, 'notifications,', unread, 'unread');
         })
         .catch(error => console.error('Error fetching notifications:', error));
       
@@ -132,6 +138,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         socket.on('notification', (notification) => {
           console.log('Received real-time notification:', notification);
           setNotifications(prev => [notification, ...prev]);
+          setUnreadCount(prev => prev + 1);
+          setLastNotificationCount(prev => prev + 1);
           // Play notification sound for new notifications
           setPlayNotificationSound(true);
         });
@@ -164,18 +172,26 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         const response = await fetch('/api/notifications');
         const data = await response.json();
         const notificationsArray = Array.isArray(data) ? data : (data.notifications || []);
+        const unread = data.unreadCount !== undefined ? data.unreadCount : notificationsArray.filter((n: any) => !n.read).length;
+        
+        // Update unread count
+        setUnreadCount(unread);
         
         // Check if there are new notifications
         if (notificationsArray.length > lastNotificationCount) {
           const newNotifications = notificationsArray.slice(0, notificationsArray.length - lastNotificationCount);
-          console.log('Found new notifications via polling:', newNotifications);
+          console.log('[Notifications] Found new notifications via polling:', newNotifications.length);
           
-          // Add new notifications to the beginning
-          setNotifications(prev => [...newNotifications, ...prev]);
+          // Update notifications list
+          setNotifications(notificationsArray);
           setLastNotificationCount(notificationsArray.length);
           
           // Play sound for new notifications
           setPlayNotificationSound(true);
+        } else if (notificationsArray.length !== lastNotificationCount) {
+          // Update notifications even if count is same (might have been marked as read)
+          setNotifications(notificationsArray);
+          setLastNotificationCount(notificationsArray.length);
         }
       } catch (error) {
         console.error('Error polling notifications:', error);
@@ -222,11 +238,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         description: 'View your sales overview and key metrics'
       },
       { 
-        name: 'My Funnels', 
-        href: '/auth/dashboard/funnels', 
+        name: 'My Channels', 
+        href: '/auth/dashboard/channels', 
         icon: RocketLaunchIcon as any, 
-        current: pathname?.startsWith('/auth/dashboard/funnels'),
-        description: 'Manage your products and sales pages'
+        current: pathname?.startsWith('/auth/dashboard/channels'),
+        description: 'Manage your channels and content'
       },
       { 
         name: 'Analytics', 
@@ -279,7 +295,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const baseNavigation = [...navigation];
     
     if (session?.user?.role === 'SUPER_ADMIN') {
-      // Insert Super Admin after Dashboard but before My Funnels
+      // Insert Super Admin after Dashboard but before My Channels
       const superAdminItem = {
         name: 'Super Admin',
         href: '/auth/dashboard/super-admin',
@@ -316,7 +332,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  // unreadCount is now managed via state, calculated from API response
 
   // Mark notification as read
   const handleMarkAsRead = async (id: string) => {
@@ -327,6 +343,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         body: JSON.stringify({ notificationIds: [id] }),
       });
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (err) {
       console.error('Error marking notification as read:', err);
     }
@@ -341,6 +358,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         headers: { 'Content-Type': 'application/json' },
       });
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
     } catch (err) {
       console.error('Error marking all notifications as read:', err);
     } finally {
@@ -414,10 +432,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <Link
                         key={item.name}
                         href={item.href}
-                        data-tour={item.name === 'My Funnels' ? 'funnels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
+                        data-tour={item.name === 'My Channels' ? 'channels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
                         className={`group relative flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                           item.current
-                            ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
+                            ? 'bg-gradient-to-r from-gray-900 to-black text-white shadow-lg shadow-gray-900/50'
                             : 'text-gray-700 hover:bg-white hover:text-gray-900 hover:shadow-sm'
                         }`}
                       >
@@ -425,7 +443,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                           className={`h-5 w-5 mr-3 ${
                             item.current
                               ? 'text-white'
-                              : 'text-gray-400 group-hover:text-purple-600'
+                              : 'text-gray-600 group-hover:text-gray-900'
                           }`}
                           aria-hidden="true"
                         />
@@ -440,10 +458,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <Link
                         key={item.name}
                         href={item.href}
-                        data-tour={item.name === 'My Funnels' ? 'funnels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
+                        data-tour={item.name === 'My Channels' ? 'channels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
                         className={`group relative flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                           item.current
-                            ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
+                            ? 'bg-gradient-to-r from-gray-900 to-black text-white shadow-lg shadow-gray-900/50'
                             : 'text-gray-700 hover:bg-white hover:text-gray-900 hover:shadow-sm'
                         }`}
                       >
@@ -451,7 +469,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                           className={`h-5 w-5 mr-3 ${
                             item.current
                               ? 'text-white'
-                              : 'text-gray-400 group-hover:text-purple-600'
+                              : 'text-gray-600 group-hover:text-gray-900'
                           }`}
                           aria-hidden="true"
                         />
@@ -470,8 +488,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     onClick={() => setShowNotifications(!showNotifications)}
                     className={`p-2.5 rounded-xl transition-all duration-200 relative ${
                       showNotifications 
-                        ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-purple-500 hover:to-indigo-600 hover:text-white'
+                        ? 'bg-white text-gray-900 shadow-lg' 
+                        : 'bg-gray-100 text-gray-600 hover:bg-white hover:text-gray-900'
                     }`}
                     title="Notifications"
                   >
@@ -549,7 +567,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {isSidebarCollapsed && !isSidebarHovered && (
         <button
           onClick={() => setIsSidebarCollapsed(false)}
-          className="absolute top-4 right-0 z-10 w-6 h-6 bg-purple-500 text-white rounded-l-lg flex items-center justify-center hover:bg-purple-600 transition-colors shadow-lg"
+          className="absolute top-4 right-0 z-10 w-6 h-6 bg-gray-900 text-white rounded-l-lg flex items-center justify-center hover:bg-black transition-colors shadow-lg"
           title="Expand sidebar"
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -565,14 +583,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {isSidebarCollapsed && !isSidebarHovered ? (
                   // Collapsed Logo - Show a modern icon design
                   <div className="relative">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-white/20">
+                    <div className="w-12 h-12 bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-2xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-white/10">
                       <div className="relative">
                         <span className="text-white font-bold text-xl tracking-tight">S</span>
                         <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full border border-white/30"></div>
                       </div>
                     </div>
                     {/* Subtle glow effect */}
-                    <div className="absolute inset-0 w-12 h-12 bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 rounded-2xl opacity-20 blur-md -z-10"></div>
+                    <div className="absolute inset-0 w-12 h-12 bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-2xl opacity-20 blur-md -z-10"></div>
                   </div>
                 ) : (
                   // Expanded Logo - Show full logo with modern styling
@@ -591,7 +609,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     </div>
                     <button
                       onClick={toggleSidebarCollapse}
-                      className="hidden lg:flex p-2 rounded-xl text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-all duration-200 ml-2 group"
+                      className="hidden lg:flex p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200 ml-2 group"
                       aria-label="Collapse sidebar"
                       title="Collapse sidebar"
                     >
@@ -612,10 +630,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <Link
                         key={item.name}
                         href={item.href}
-                        data-tour={item.name === 'My Funnels' ? 'funnels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
+                        data-tour={item.name === 'My Channels' ? 'channels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
                         className={`group relative flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                           item.current
-                            ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
+                            ? 'bg-gradient-to-r from-gray-900 to-black text-white shadow-lg shadow-gray-900/50'
                             : 'text-gray-700 hover:bg-white hover:text-gray-900 hover:shadow-sm'
                         }`}
                       >
@@ -623,7 +641,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                           className={`h-5 w-5 mr-3 ${
                             item.current
                               ? 'text-white'
-                              : 'text-gray-400 group-hover:text-purple-600'
+                              : 'text-gray-600 group-hover:text-gray-900'
                           }`}
                           aria-hidden="true"
                         />
@@ -638,10 +656,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <Link
                         key={item.name}
                         href={item.href}
-                        data-tour={item.name === 'My Funnels' ? 'funnels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
+                        data-tour={item.name === 'My Channels' ? 'channels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
                         className={`group relative flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                           item.current
-                            ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
+                            ? 'bg-gradient-to-r from-gray-900 to-black text-white shadow-lg shadow-gray-900/50'
                             : 'text-gray-700 hover:bg-white hover:text-gray-900 hover:shadow-sm'
                         }`}
                       >
@@ -649,7 +667,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                           className={`h-5 w-5 mr-3 ${
                             item.current
                               ? 'text-white'
-                              : 'text-gray-400 group-hover:text-purple-600'
+                              : 'text-gray-600 group-hover:text-gray-900'
                           }`}
                           aria-hidden="true"
                         />
@@ -659,14 +677,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   </div>
 
                   {/* Notifications Button */}
-                  <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl p-3 shadow-lg">
+                  <div className="bg-white rounded-2xl p-3 shadow-lg border-2 border-gray-200">
                     <button
                       onClick={() => setShowNotifications(true)}
-                      className="group relative flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 w-full text-white hover:bg-white hover:text-purple-600 hover:shadow-xl"
+                      className="group relative flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 w-full text-gray-900 hover:bg-gray-100 hover:shadow-xl"
                     >
                       <div className="relative">
                         <BellIcon
-                          className="h-5 w-5 mr-3 text-white group-hover:text-purple-600"
+                          className="h-5 w-5 mr-3 text-gray-600 group-hover:text-gray-900"
                           aria-hidden="true"
                         />
                         {unreadCount > 0 && (
@@ -693,7 +711,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         href={item.href}
                         className={`flex items-center justify-center p-3 rounded-xl transition-all duration-200 ${
                           item.current
-                            ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
+                            ? 'bg-gradient-to-r from-gray-900 to-black text-white shadow-lg'
                             : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                         }`}
                         title={item.name}
@@ -711,7 +729,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         onClick={() => setShowNotifications(true)}
                         className={`flex items-center justify-center p-3 rounded-xl transition-all duration-200 w-full ${
                           showNotifications 
-                            ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg' 
+                            ? 'bg-white text-gray-900 shadow-lg' 
                             : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                         } hover:shadow-xl hover:scale-105`}
                         title="Notifications"
@@ -741,8 +759,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     onClick={() => setShowNotifications(!showNotifications)}
                     className={`p-2.5 rounded-xl transition-all duration-200 relative ${
                       showNotifications 
-                        ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gradient-to-r hover:from-purple-500 hover:to-indigo-600 hover:text-white'
+                        ? 'bg-white text-gray-900 shadow-lg' 
+                        : 'bg-gray-100 text-gray-600 hover:bg-white hover:text-gray-900'
                     }`}
                     title="Notifications"
                   >
@@ -887,16 +905,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="flex min-h-full items-center justify-center p-2 sm:p-4">
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-auto transform transition-all max-h-[90vh] flex flex-col">
               {/* Header - Mobile Optimized */}
-              <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-t-2xl flex-shrink-0">
+              <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-white rounded-t-2xl flex-shrink-0">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="p-2 bg-purple-100 rounded-xl flex-shrink-0">
-                      <BellIcon className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
+                    <div className="p-2 bg-gray-900 rounded-xl flex-shrink-0">
+                      <BellIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">Notifications & Activity</h3>
                       {unreadCount > 0 && (
-                        <p className="text-xs sm:text-sm text-purple-600 font-medium">{unreadCount} unread notifications</p>
+                        <p className="text-xs sm:text-sm text-gray-900 font-medium">{unreadCount} unread notifications</p>
                       )}
                     </div>
                   </div>
@@ -905,7 +923,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     {notifications.length > 0 && unreadCount > 0 && (
                       <button
                         onClick={handleMarkAllAsRead}
-                        className="hidden sm:block px-3 py-2 text-xs sm:text-sm font-semibold text-purple-700 bg-purple-100 rounded-lg hover:bg-purple-200 transition-colors"
+                        className="hidden sm:block px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-black transition-colors"
                       >
                         Mark all as read
                       </button>
@@ -925,7 +943,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <div className="sm:hidden mt-3 pt-3 border-t border-gray-200">
                     <button
                       onClick={handleMarkAllAsRead}
-                      className="w-full px-4 py-2 text-sm font-semibold text-purple-700 bg-purple-100 rounded-lg hover:bg-purple-200 transition-colors touch-manipulation"
+                      className="w-full px-4 py-2 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-black transition-colors touch-manipulation"
                     >
                       Mark all as read
                     </button>
@@ -949,30 +967,30 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <div 
                         key={activity.id} 
                         className={`p-3 sm:p-4 hover:bg-gray-50 transition-colors cursor-pointer touch-manipulation ${
-                          !activity.read ? 'bg-purple-50 border-l-4 border-purple-400' : 'bg-white'
+                          !activity.read ? 'bg-gray-50 border-l-4 border-gray-900' : 'bg-white'
                         }`}
                         onClick={() => !activity.read && handleMarkAsRead(activity.id)}
                       >
                         <div className="flex items-start gap-3">
                           {/* Icon */}
                           <div className={`p-2 rounded-lg flex-shrink-0 ${
-                            activity.category === 'SALE' ? 'bg-green-100' : 'bg-purple-100'
+                            activity.category === 'SALE' ? 'bg-green-100' : 'bg-gray-900'
                           }`}>
                             {activity.category === 'SALE' && <BanknotesIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />}
-                            {activity.category === 'PAYMENT' && <CreditCardIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />}
-                            {activity.category === 'SITE' && <GlobeAltIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />}
-                            {activity.category === 'COMMUNITY' && <ChatBubbleLeftIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />}
-                            {activity.category === 'SYSTEM' && <BellIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />}
+                            {activity.category === 'PAYMENT' && <CreditCardIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
+                            {activity.category === 'SITE' && <GlobeAltIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
+                            {activity.category === 'COMMUNITY' && <ChatBubbleLeftIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
+                            {activity.category === 'SYSTEM' && <BellIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
                             {/* Fallback to old type-based icons if category doesn't match */}
-                            {!activity.category && activity.type === 'site' && <GlobeAltIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />}
-                            {!activity.category && activity.type === 'template' && <SparklesIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />}
-                            {!activity.category && activity.type === 'booking' && <CubeIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />}
-                            {!activity.category && activity.type === 'submission' && <InboxArrowDownIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />}
-                            {!activity.category && activity.type === 'domain' && <GlobeAltIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />}
-                            {!activity.category && activity.type === 'comment' && <ChatBubbleLeftIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />}
-                            {!activity.category && activity.type === 'like' && <HeartIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />}
-                            {!activity.category && activity.type === 'plan' && <CreditCardIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />}
-                            {!activity.category && activity.type === 'publish' && <GlobeAltIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-600" />}
+                            {!activity.category && activity.type === 'site' && <GlobeAltIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
+                            {!activity.category && activity.type === 'template' && <SparklesIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
+                            {!activity.category && activity.type === 'booking' && <CubeIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
+                            {!activity.category && activity.type === 'submission' && <InboxArrowDownIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
+                            {!activity.category && activity.type === 'domain' && <GlobeAltIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
+                            {!activity.category && activity.type === 'comment' && <ChatBubbleLeftIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
+                            {!activity.category && activity.type === 'like' && <HeartIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
+                            {!activity.category && activity.type === 'plan' && <CreditCardIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
+                            {!activity.category && activity.type === 'publish' && <GlobeAltIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
                           </div>
                           
                           {/* Content */}
@@ -992,7 +1010,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                               {/* Unread indicator */}
                               {!activity.read && (
                                 <div className="flex-shrink-0 mt-1">
-                                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                  <div className="w-2 h-2 bg-gray-900 rounded-full"></div>
                                 </div>
                               )}
                             </div>
@@ -1006,7 +1024,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                 <span className={`px-2 py-1 text-xs font-medium rounded-full self-start ${
                                   activity.category === 'SALE' 
                                     ? 'bg-green-100 text-green-700' 
-                                    : 'bg-purple-100 text-purple-700'
+                                    : 'bg-gray-900 text-white'
                                 }`}>
                                   {activity.category}
                                 </span>
@@ -1039,7 +1057,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Tour Trigger Button */}
       <button
         onClick={() => setRunDashboardTour(true)}
-        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-3 rounded-full shadow-lg hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 hover:scale-105"
+        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-gray-900 to-black text-white p-3 rounded-full shadow-lg hover:from-gray-800 hover:to-gray-900 transition-all duration-200 hover:scale-105"
         title="Start Dashboard Tour"
       >
         <QuestionMarkCircleIcon className="h-6 w-6" />

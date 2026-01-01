@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 import { EyeIcon, EyeSlashIcon, CheckIcon } from '@heroicons/react/24/outline';
 import Logo from '@/components/Logo';
@@ -15,6 +15,8 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get('callbackUrl') || '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,8 +43,8 @@ export default function SignUpPage() {
         return;
       }
       
-      // Registration successful, redirect to signin
-      router.push('/auth/signin?signup=success');
+      // Registration successful, redirect to signin with callbackUrl
+      router.push(`/auth/signin?signup=success&callbackUrl=${encodeURIComponent(callbackUrl)}`);
     } catch (err) {
       setError('Something went wrong. Please try again.');
       setLoading(false);
@@ -88,7 +90,7 @@ export default function SignUpPage() {
               type="button"
               className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               style={{ backgroundColor: '#ffffff' }}
-              onClick={() => window.location.href = '/api/auth/signin/google'}
+              onClick={() => window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`}
             >
               <FaGoogle className="w-5 h-5 text-red-500" />
               Continue with Google
@@ -97,7 +99,7 @@ export default function SignUpPage() {
               type="button"
               className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               style={{ backgroundColor: '#ffffff' }}
-              onClick={() => window.location.href = '/api/auth/signin/github'}
+              onClick={() => window.location.href = `/api/auth/signin/github?callbackUrl=${encodeURIComponent(callbackUrl)}`}
             >
               <FaGithub className="w-5 h-5" />
               Continue with GitHub
@@ -262,12 +264,12 @@ export default function SignUpPage() {
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-600">
               Already have an account?{' '}
-              <Link 
-                href="/auth/signin" 
-                className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
-              >
-                Sign in
-              </Link>
+                <Link 
+                  href={`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+                  className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
+                >
+                  Sign in
+                </Link>
             </p>
           </div>
         </div>

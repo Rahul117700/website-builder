@@ -1,6 +1,6 @@
 import { User } from '@prisma/client';
 
-export const TRIAL_DAYS = 1;
+export const TRIAL_DAYS = 7;
 
 export interface TrialStatus {
   isTrialActive: boolean;

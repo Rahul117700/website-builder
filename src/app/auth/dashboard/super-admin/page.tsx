@@ -864,17 +864,15 @@ export default function SuperAdminDashboard() {
                                 >
                                   {user.status === 'ACTIVE' ? 'Disable' : 'Enable'}
                                 </button>
-                                {user.role !== 'SUPER_ADMIN' && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      assignPlanToUser(user.id);
-                                    }}
-                                    className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium hover:bg-blue-200 transition-colors"
-                                  >
-                                    {user.subscriptions && user.subscriptions.length > 0 ? 'Extend Plan' : 'Assign Plan'}
-                                  </button>
-                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    assignPlanToUser(user.id);
+                                  }}
+                                  className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium hover:bg-blue-200 transition-colors"
+                                >
+                                  {user.subscriptions && user.subscriptions.length > 0 ? 'Extend Plan' : 'Assign Plan'}
+                                </button>
                               </td>
                             </tr>
                           ))

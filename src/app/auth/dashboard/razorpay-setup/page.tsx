@@ -391,8 +391,8 @@ export default function RazorpaySetupPage() {
                   1
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">🎨 Create Your First Funnel (2 minutes)</h4>
-                  <p className="text-gray-600 text-sm">Pick a beautiful template and customize it with your product details</p>
+                  <h4 className="font-semibold text-gray-900 mb-1">🎨 Create Your First Channel (2 minutes)</h4>
+                  <p className="text-gray-600 text-sm">Pick a beautiful template and customize it with your channel details</p>
                 </div>
               </div>
               <div className="flex items-start gap-4 bg-white rounded-lg p-4 border border-green-200">
@@ -400,8 +400,8 @@ export default function RazorpaySetupPage() {
                   2
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">📦 Upload Your Product (1 minute)</h4>
-                  <p className="text-gray-600 text-sm">Upload your course, ebook, software, or any digital product</p>
+                  <h4 className="font-semibold text-gray-900 mb-1">📦 Add Products to Your Channel (1 minute)</h4>
+                  <p className="text-gray-600 text-sm">Add your videos, courses, documents, or any digital content to your channel</p>
                 </div>
               </div>
               <div className="flex items-start gap-4 bg-white rounded-lg p-4 border border-green-200">
@@ -410,7 +410,7 @@ export default function RazorpaySetupPage() {
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-900 mb-1">🚀 Publish & Start Earning!</h4>
-                  <p className="text-gray-600 text-sm">Share your funnel link on social media and watch the sales come in!</p>
+                  <p className="text-gray-600 text-sm">Share your channel link on social media and watch the sales come in!</p>
                 </div>
               </div>
             </div>
@@ -423,11 +423,11 @@ export default function RazorpaySetupPage() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
             <button
-              onClick={() => router.push('/auth/dashboard/funnels')}
+              onClick={() => router.push('/auth/dashboard/channels')}
               className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <RocketLaunchIcon className="h-6 w-6" />
-              Create Your First Funnel
+              Create Your First Channel
             </button>
             <button
               onClick={() => router.push('/auth/dashboard')}

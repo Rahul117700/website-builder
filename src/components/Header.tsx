@@ -65,6 +65,7 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
             >
               Features
             </Link>
+            <Link href="/docs" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Docs</Link>
             <Link href="/blog" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Blog</Link>
             <Link href="/about" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">About</Link>
             <Link href="/contact" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Contact</Link>
@@ -185,6 +186,7 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
             >
               Features
             </Link>
+            <Link href="/docs" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Docs</Link>
             <Link href="/blog" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Blog</Link>
             <Link href="/about" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">About</Link>
             <Link href="/contact" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Contact</Link>

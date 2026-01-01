@@ -5,7 +5,7 @@ export interface NotificationData {
   title: string;
   message: string;
   type: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR';
-  category: 'COMMUNITY' | 'SYSTEM' | 'PAYMENT' | 'SITE';
+  category: 'COMMUNITY' | 'SYSTEM' | 'PAYMENT' | 'SITE' | 'SALE';
   metadata?: Record<string, any>;
 }
 

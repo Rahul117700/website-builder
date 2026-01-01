@@ -1,8 +1,8 @@
 'use client';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import toast, { Toaster } from 'react-hot-toast';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
@@ -15,6 +15,8 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get('callbackUrl') || '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +34,11 @@ export default function SignInPage() {
       toast.error(res.error);
     } else if (res?.ok) {
       toast.success('Signed in successfully!');
-      router.push('/');
+      // Small delay to ensure session is set
+      setTimeout(() => {
+        router.push(callbackUrl);
+        router.refresh();
+      }, 100);
     }
     setLoading(false);
   };
@@ -66,7 +72,7 @@ export default function SignInPage() {
                 type="button"
                 className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 style={{ backgroundColor: '#ffffff' }}
-                onClick={() => signIn('google', { callbackUrl: '/' })}
+                onClick={() => signIn('google', { callbackUrl })}
               >
                 <FaGoogle className="w-5 h-5 text-red-500" />
                 Continue with Google
@@ -75,7 +81,7 @@ export default function SignInPage() {
                 type="button"
                 className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 style={{ backgroundColor: '#ffffff' }}
-                onClick={() => signIn('github', { callbackUrl: '/' })}
+                onClick={() => signIn('github', { callbackUrl })}
               >
                 <FaGithub className="w-5 h-5" />
                 Continue with GitHub
@@ -191,7 +197,7 @@ export default function SignInPage() {
               <p className="text-sm text-gray-600">
                 Don&apos;t have an account?{' '}
                 <Link 
-                  href="/auth/signup" 
+                  href={`/auth/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`}
                   className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
                 >
                   Sign up for free

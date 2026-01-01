@@ -171,8 +171,8 @@ export default function PlansPage() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="w-full h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <div className="w-full h-screen flex items-center justify-center bg-gray-50">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-gray-900"></div>
         </div>
       </DashboardLayout>
     );
@@ -180,35 +180,35 @@ export default function PlansPage() {
 
   return (
     <DashboardLayout>
-      <div className="w-full h-screen p-4 sm:p-6 bg-gray-50 overflow-y-auto">
+      <div className="w-full h-screen p-3 sm:p-4 bg-gray-50 overflow-y-auto">
         {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Subscription Plans</h1>
-          <p className="text-sm sm:text-base text-gray-600">Choose the perfect plan for your business</p>
+        <div className="mb-4">
+          <h1 className="text-xl font-bold text-gray-900 mb-1">Subscription Plans</h1>
+          <p className="text-xs text-gray-600">Choose the perfect plan for your business</p>
         </div>
 
         {/* Success Stories */}
-        <div className="mb-8 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 text-center">Join Thousands of Success Stories</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mb-4 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg p-3 border border-emerald-200">
+          <h2 className="text-sm font-bold text-gray-900 mb-2 text-center">Join Thousands of Success Stories</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600 mb-1">₹75,000</div>
-              <p className="text-sm text-gray-600 italic">"Made this in just 3 weeks using the Starter plan!"</p>
-              <p className="text-xs text-gray-500 mt-1">- Amit S., Digital Marketer</p>
+              <div className="text-lg font-bold text-emerald-600 mb-0.5">₹75,000</div>
+              <p className="text-[10px] text-gray-600 italic">"Made this in just 3 weeks using the Starter plan!"</p>
+              <p className="text-[10px] text-gray-500 mt-0.5">- Amit S., Digital Marketer</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600 mb-1">₹1,20,000</div>
-              <p className="text-sm text-gray-600 italic">"First month with zero technical knowledge!"</p>
-              <p className="text-xs text-gray-500 mt-1">- Priya K., Course Creator</p>
+              <div className="text-lg font-bold text-emerald-600 mb-0.5">₹1,20,000</div>
+              <p className="text-[10px] text-gray-600 italic">"First month with zero technical knowledge!"</p>
+              <p className="text-[10px] text-gray-500 mt-0.5">- Priya K., Course Creator</p>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600 mb-1">₹2,50,000</div>
-              <p className="text-sm text-gray-600 italic">"Now making this monthly consistently!"</p>
-              <p className="text-xs text-gray-500 mt-1">- Meera G., Affiliate Marketer</p>
+              <div className="text-lg font-bold text-emerald-600 mb-0.5">₹2,50,000</div>
+              <p className="text-[10px] text-gray-600 italic">"Now making this monthly consistently!"</p>
+              <p className="text-[10px] text-gray-500 mt-0.5">- Meera G., Affiliate Marketer</p>
             </div>
           </div>
-          <div className="mt-4 text-center">
-            <p className="text-sm text-green-700 font-medium">
+          <div className="mt-2 text-center">
+            <p className="text-xs text-emerald-700 font-medium">
               🎯 <strong>Average user makes ₹85,000/month</strong> within 90 days of joining
             </p>
           </div>
@@ -216,34 +216,34 @@ export default function PlansPage() {
 
         {/* Current Subscription Status */}
         {subscriptionData?.hasActivePlan && (
-          <div className="mb-6 sm:mb-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white">
-            <div className="flex flex-col gap-4">
+          <div className="mb-4 bg-gradient-to-r from-gray-900 via-slate-900 to-black rounded-lg p-3 text-white border border-gray-800">
+            <div className="flex flex-col gap-3">
               <div>
-                <h3 className="text-lg sm:text-xl font-bold mb-2">Current Plan</h3>
-                <p className="text-xl sm:text-2xl font-bold mb-1">
+                <h3 className="text-sm font-bold mb-1.5">Current Plan</h3>
+                <p className="text-lg font-bold mb-1">
                   {subscriptionData.activeSubscription.plan.name}
                 </p>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-white/90">
-                  <div className="flex items-center gap-2">
-                    <ClockIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <span className="text-sm sm:text-base">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 text-white/90">
+                  <div className="flex items-center gap-1.5">
+                    <ClockIcon className="h-3.5 w-3.5" />
+                    <span className="text-xs">
                       Expires: {new Date(subscriptionData.activeSubscription.endDate).toLocaleDateString()}
                     </span>
                   </div>
-                  <span className="text-sm sm:text-base">
+                  <span className="text-xs">
                     ({subscriptionData.usage.daysRemaining} days remaining)
                   </span>
                 </div>
-                <div className="mt-4 flex flex-col sm:flex-row gap-4">
-                  <div className="bg-white/20 rounded-lg px-3 sm:px-4 py-2 flex-1">
-                    <div className="text-xs sm:text-sm opacity-90">Funnels Used</div>
-                    <div className="text-base sm:text-lg font-bold">
+                <div className="mt-2 flex flex-col sm:flex-row gap-2">
+                  <div className="bg-white/10 rounded-lg px-3 py-1.5 flex-1 border border-white/20">
+                    <div className="text-[10px] opacity-90">Funnels Used</div>
+                    <div className="text-sm font-bold">
                       {subscriptionData.usage.funnels} / {subscriptionData.usage.maxFunnels === -1 ? '∞' : subscriptionData.usage.maxFunnels}
                     </div>
                   </div>
-                  <div className="bg-white/20 rounded-lg px-3 sm:px-4 py-2 flex-1">
-                    <div className="text-xs sm:text-sm opacity-90">Products Used</div>
-                    <div className="text-base sm:text-lg font-bold">
+                  <div className="bg-white/10 rounded-lg px-3 py-1.5 flex-1 border border-white/20">
+                    <div className="text-[10px] opacity-90">Products Used</div>
+                    <div className="text-sm font-bold">
                       {subscriptionData.usage.products} / {subscriptionData.usage.maxProducts === -1 ? '∞' : subscriptionData.usage.maxProducts}
                     </div>
                   </div>
@@ -254,75 +254,75 @@ export default function PlansPage() {
         )}
 
         {/* Plans Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {plans.map((plan, index) => (
             <div
               key={plan.id}
-              className={`relative bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-105 ${
-                index === 1 ? 'border-2 sm:border-4 border-purple-600' : ''
+              className={`relative bg-white rounded-lg border overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] ${
+                index === 1 ? 'border-2 border-gray-900 shadow-lg' : 'border-gray-200'
               }`}
             >
               {/* Popular Badge */}
               {index === 1 && (
-                <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 sm:px-4 py-1 rounded-bl-xl sm:rounded-bl-2xl">
+                <div className="absolute top-0 right-0 bg-gradient-to-r from-gray-900 to-black text-white px-3 py-0.5 rounded-bl-lg">
                   <div className="flex items-center gap-1">
-                    <SparklesIcon className="h-3 w-3 sm:h-4 sm:w-4" />
-                    <span className="text-xs sm:text-sm font-bold">POPULAR</span>
+                    <SparklesIcon className="h-3 w-3" />
+                    <span className="text-[10px] font-bold">POPULAR</span>
                   </div>
                 </div>
               )}
 
-              <div className="p-4 sm:p-6">
+              <div className="p-3">
                 {/* Plan Name */}
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
-                <p className="text-sm sm:text-base text-gray-600 mb-4">{plan.description}</p>
+                <h3 className="text-base font-bold text-gray-900 mb-1">{plan.name}</h3>
+                <p className="text-xs text-gray-600 mb-3">{plan.description}</p>
 
                 {/* Price */}
-                <div className="mb-4 sm:mb-6">
+                <div className="mb-3">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl sm:text-4xl font-bold text-purple-600">
+                    <span className="text-2xl font-bold text-gray-900">
                       ₹{plan.price}
                     </span>
-                    <span className="text-sm sm:text-base text-gray-600">
+                    <span className="text-xs text-gray-600">
                       /{plan.duration === 365 ? 'year' : `${plan.duration} days`}
                     </span>
                   </div>
                   {plan.duration === 365 && (
-                    <div className="text-xs text-green-600 font-medium mt-1">
+                    <div className="text-[10px] text-emerald-600 font-medium mt-0.5">
                       Save 20% with annual billing
                     </div>
                   )}
                 </div>
 
                 {/* Features */}
-                <div className="space-y-2 sm:space-y-3 mb-4 sm:mb-6">
+                <div className="space-y-1.5 mb-3">
                   {/* Show custom features from database if they exist */}
                   {plan.features && Array.isArray(plan.features) && plan.features.length > 0 ? (
                     plan.features.map((feature, idx) => (
-                      <div key={idx} className="flex items-center gap-2 text-gray-700">
-                        <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" />
-                        <span className="text-sm sm:text-base">{feature}</span>
+                      <div key={idx} className="flex items-center gap-1.5 text-gray-700">
+                        <CheckIcon className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
+                        <span className="text-xs">{feature}</span>
                       </div>
                     ))
                   ) : (
                     // Default features if none configured
                     <>
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" />
-                        <span className="text-sm sm:text-base">
+                      <div className="flex items-center gap-1.5 text-gray-700">
+                        <CheckIcon className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
+                        <span className="text-xs">
                           {plan.maxFunnels === -1 ? 'Unlimited' : plan.maxFunnels} Funnels
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" />
-                        <span className="text-sm sm:text-base">
+                      <div className="flex items-center gap-1.5 text-gray-700">
+                        <CheckIcon className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
+                        <span className="text-xs">
                           {plan.maxProducts === -1 ? 'Unlimited' : plan.maxProducts} Products
                         </span>
                       </div>
                       {plan.maxCustomDomains > 0 && (
-                        <div className="flex items-center gap-2 text-gray-700">
-                          <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 flex-shrink-0" />
-                          <span className="text-sm sm:text-base">
+                        <div className="flex items-center gap-1.5 text-gray-700">
+                          <CheckIcon className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
+                          <span className="text-xs">
                             {plan.maxCustomDomains} Custom Domain{plan.maxCustomDomains > 1 ? 's' : ''}
                           </span>
                         </div>
@@ -335,17 +335,17 @@ export default function PlansPage() {
                 <button
                   onClick={() => handlePurchase(plan.id)}
                   disabled={purchasing === plan.id || (subscriptionData?.hasActivePlan && subscriptionData.activeSubscription.planId === plan.id)}
-                  className={`w-full py-2 sm:py-3 px-4 sm:px-6 rounded-lg sm:rounded-xl font-bold text-sm sm:text-base text-white transition-all duration-200 ${
+                  className={`w-full py-2 px-4 rounded-lg font-bold text-xs text-white transition-all duration-200 ${
                     subscriptionData?.hasActivePlan && subscriptionData.activeSubscription.planId === plan.id
                       ? 'bg-gray-400 cursor-not-allowed'
                       : index === 1
-                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
-                      : 'bg-purple-600 hover:bg-purple-700'
+                      ? 'bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900'
+                      : 'bg-gray-900 hover:bg-black'
                   }`}
                 >
                   {purchasing === plan.id ? (
                     <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                     </div>
                   ) : subscriptionData?.hasActivePlan && subscriptionData.activeSubscription.planId === plan.id ? (
                     'Current Plan'
@@ -360,8 +360,8 @@ export default function PlansPage() {
 
         {/* No Plans Message */}
         {plans.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">No subscription plans available at the moment.</p>
+          <div className="text-center py-8">
+            <p className="text-gray-600 text-sm">No subscription plans available at the moment.</p>
           </div>
         )}
       </div>

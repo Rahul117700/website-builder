@@ -36,6 +36,14 @@ model User {
   transactions         Transaction[]
   notifications        UserNotification[]    @relation("UserNotifications")
   subscriptions        UserSubscription[]
+  channels             Channel[]
+  channelSubscriptions ChannelSubscription[] @relation("UserChannelSubscriptions")
+  channelPurchases     ProductPurchase[]     @relation("UserProductPurchases")
+  productReviews       ProductReview[]       @relation("ProductReviews")
+  productComments      ProductComment[]      @relation("ProductComments")
+  productLikes         ProductLike[]         @relation("ProductLikes")
+  playlists            Playlist[]            @relation("UserPlaylists")
+  savedProducts        ProductSave[]         @relation("UserSavedProducts")
 
   @@map("User")
 }
@@ -480,9 +488,9 @@ model SubscriptionPlan {
   id               String             @id @default(cuid())
   name             String
   description      String?
-  price            Float              // Base price (INR)
+  price            Float // Base price (INR)
   currency         String             @default("INR") // Base currency
-  regionalPricing  Json?              // Stores {USD: 9, EUR: 9, GBP: 7, ...}
+  regionalPricing  Json? // Stores {USD: 9, EUR: 9, GBP: 7, ...}
   duration         Int
   features         Json
   isActive         Boolean            @default(true)
@@ -723,4 +731,344 @@ enum NewsletterStatus {
   UNSUBSCRIBED
   BOUNCED
   SPAM
+}
+
+// ============================================
+// 🎬 CHANNEL SYSTEM (YouTube-Style Platform)
+// ============================================
+
+model Channel {
+  id             String  @id @default(cuid())
+  userId         String
+  name           String
+  slug           String  @unique
+  description    String? @db.Text
+  welcomeMessage String? @db.Text
+
+  // Visual branding
+  coverImage   String?
+  profileImage String?
+  theme        Json? // Color scheme, fonts
+
+  // Template
+  templateId     String
+  template       ChannelTemplate @relation(fields: [templateId], references: [id])
+  customizations Json?
+
+  // Monetization
+  subscriptionPrice    Decimal?
+  subscriptionCurrency String   @default("INR")
+  subscriptionEnabled  Boolean  @default(false)
+
+  // SEO & Discovery
+  tags     String[]
+  category String?
+
+  // Analytics
+  totalViews       Int     @default(0)
+  totalSubscribers Int     @default(0)
+  totalRevenue     Decimal @default(0)
+
+  // Status
+  status    ChannelStatus @default(DRAFT)
+  published Boolean       @default(false)
+
+  // Relations
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products    ChannelProduct[]
+  subscribers ChannelSubscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([slug])
+  @@index([status])
+  @@map("channels")
+}
+
+model ChannelTemplate {
+  id           String  @id @default(cuid())
+  name         String
+  description  String? @db.Text
+  category     String // Tech, Education, Creative, Business, Minimal
+  previewImage String?
+
+  // Template structure
+  layout       Json // Layout configuration
+  sections     Json // Available sections
+  defaultTheme Json // Default colors, fonts
+
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
+  isPremium Boolean @default(false)
+
+  channels Channel[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("channel_templates")
+}
+
+model ChannelProduct {
+  id        String @id @default(cuid())
+  channelId String
+
+  title       String
+  description String?            @db.Text
+  type        ChannelProductType
+
+  // Pricing
+  price    Decimal
+  currency String  @default("INR")
+
+  // Access control
+  isSubscriberOnly Boolean @default(false)
+  isFree           Boolean @default(false)
+
+  // File/Content
+  fileUrl       String?
+  fileType      String?
+  fileSize      Int?
+  downloadLimit Int? // Max downloads per purchase
+
+  // For videos
+  videoUrl      String?
+  videoDuration Int? // in seconds
+  videoProvider String? // youtube, vimeo, custom
+
+  // Preview
+  previewImage String?
+  previewText  String? @db.Text
+
+  // SEO
+  slug String?
+  tags String[]
+
+  // Analytics
+  viewCount     Int @default(0)
+  purchaseCount Int @default(0)
+  likeCount     Int @default(0)
+
+  // Status
+  status    ChannelProductStatus @default(DRAFT)
+  published Boolean              @default(false)
+
+  // Relations
+  channel       Channel           @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  purchases     ProductPurchase[]
+  reviews       ProductReview[]
+  comments      ProductComment[]
+  likes         ProductLike[]
+  playlistItems PlaylistItem[]
+  saves         ProductSave[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([channelId])
+  @@index([status])
+  @@index([published])
+  @@map("channel_products")
+}
+
+model ChannelSubscription {
+  id        String @id @default(cuid())
+  channelId String
+  userId    String
+
+  // Subscription details
+  status    ChannelSubscriptionStatus
+  startDate DateTime                  @default(now())
+  endDate   DateTime
+  autoRenew Boolean                   @default(true)
+
+  // Payment
+  amount          Decimal
+  currency        String
+  paymentId       String?
+  razorpayOrderId String?
+
+  // Relations
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user    User    @relation("UserChannelSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([channelId, userId])
+  @@index([userId])
+  @@index([status])
+  @@map("channel_subscriptions")
+}
+
+model ProductPurchase {
+  id        String @id @default(cuid())
+  productId String
+  userId    String
+
+  amount          Decimal
+  currency        String
+  paymentId       String
+  razorpayOrderId String?
+  status          ProductPurchaseStatus
+
+  // Download tracking
+  downloadCount  Int       @default(0)
+  lastDownloadAt DateTime?
+
+  product ChannelProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User           @relation("UserProductPurchases", fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([productId, userId])
+  @@index([userId])
+  @@index([status])
+  @@map("product_purchases")
+}
+
+model ProductReview {
+  id        String   @id @default(cuid())
+  productId String
+  userId    String
+  rating    Int // 1-5 stars
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product ChannelProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User           @relation("ProductReviews", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+  @@index([productId])
+  @@index([userId])
+  @@map("product_reviews")
+}
+
+model ProductComment {
+  id        String   @id @default(cuid())
+  productId String
+  userId    String
+  content   String   @db.Text
+  parentId  String? // For nested replies
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product ChannelProduct   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User             @relation("ProductComments", fields: [userId], references: [id], onDelete: Cascade)
+  parent  ProductComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies ProductComment[] @relation("CommentReplies")
+
+  @@index([productId])
+  @@index([userId])
+  @@index([parentId])
+  @@map("product_comments")
+}
+
+model ProductLike {
+  id        String   @id @default(cuid())
+  productId String
+  userId    String
+  createdAt DateTime @default(now())
+
+  product ChannelProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User           @relation("ProductLikes", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+  @@index([productId])
+  @@index([userId])
+  @@map("product_likes")
+}
+
+// ============================================
+// 🎬 CHANNEL SYSTEM ENUMS
+// ============================================
+
+enum ChannelStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum ChannelProductType {
+  EBOOK
+  COURSE
+  VIDEO
+  AUDIO
+  SOFTWARE
+  TEMPLATE
+  CODE
+  DOCUMENT
+  BUNDLE
+  OTHER
+}
+
+enum ChannelProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum ChannelSubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  PAUSED
+}
+
+enum ProductPurchaseStatus {
+  COMPLETED
+  REFUNDED
+  FAILED
+  PENDING
+}
+
+model Playlist {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  userId      String
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  User           @relation("UserPlaylists", fields: [userId], references: [id], onDelete: Cascade)
+  items PlaylistItem[]
+
+  @@index([userId])
+  @@map("playlists")
+}
+
+model PlaylistItem {
+  id         String   @id @default(cuid())
+  playlistId String
+  productId  String
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  playlist Playlist       @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  product  ChannelProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, productId])
+  @@index([playlistId])
+  @@index([productId])
+  @@map("playlist_items")
+}
+
+model ProductSave {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User           @relation("UserSavedProducts", fields: [userId], references: [id], onDelete: Cascade)
+  product ChannelProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+  @@map("product_saves")
 }

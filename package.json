@@ -21,6 +21,7 @@
     "test:funnel": "playwright test tests/funnel-complete.spec.ts --project=chromium",
     "test:funnel:ui": "playwright test tests/funnel-complete.spec.ts --ui",
     "seed:test": "node scripts/seed-test-funnel.js",
+    "seed:channel-templates": "npx ts-node prisma/seed-channel-templates.ts",
     "marketing:post": "node scripts/auto-post-marketing.js",
     "marketing:schedule": "node scripts/schedule-marketing-posts.js",
     "marketing:setup": "bash scripts/setup-marketing-automation.sh"
