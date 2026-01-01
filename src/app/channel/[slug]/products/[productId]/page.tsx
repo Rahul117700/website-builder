@@ -45,6 +45,7 @@ export default function ProductPage() {
   const [selectedQuality, setSelectedQuality] = useState<string>('auto');
   const [showQualityMenu, setShowQualityMenu] = useState(false);
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
+  const [normalizedVideoUrl, setNormalizedVideoUrl] = useState<string | null>(null);
   
   // Reviews and Comments
   const [reviews, setReviews] = useState<any[]>([]);
@@ -509,12 +510,65 @@ export default function ProductPage() {
     return typeof window !== 'undefined' ? `${window.location.origin}/${url}` : url;
   };
 
+  // Effect to normalize video URL when product changes
+  useEffect(() => {
+    if (!product) {
+      setNormalizedVideoUrl(null);
+      return;
+    }
+
+    const productType = product.type?.toUpperCase() || '';
+    if (productType !== 'VIDEO' && productType !== 'VIDEOS') {
+      setNormalizedVideoUrl(null);
+      return;
+    }
+
+    const rawVideoSource = product.videoUrl || product.fileUrl;
+    if (!rawVideoSource) {
+      setNormalizedVideoUrl(null);
+      return;
+    }
+
+    const normalizedUrl = normalizeVideoUrl(rawVideoSource);
+    setNormalizedVideoUrl(normalizedUrl);
+  }, [product]);
+
+  // Effect to handle video loading and retry
+  useEffect(() => {
+    if (!videoElement || !normalizedVideoUrl) return;
+
+    // Set video source if it's different
+    if (videoElement.src !== normalizedVideoUrl) {
+      videoElement.src = normalizedVideoUrl;
+      videoElement.load();
+    }
+
+    // Try to play video (may be blocked by browser autoplay policy)
+    const tryPlay = async () => {
+      try {
+        await videoElement.play();
+      } catch (error) {
+        // Autoplay was prevented - this is normal, user can click play
+        console.log('Autoplay prevented, user interaction required');
+      }
+    };
+
+    // Try to play when video can play
+    const handleCanPlay = () => {
+      tryPlay();
+    };
+
+    videoElement.addEventListener('canplay', handleCanPlay);
+
+    return () => {
+      videoElement.removeEventListener('canplay', handleCanPlay);
+    };
+  }, [videoElement, normalizedVideoUrl]);
+
   const renderContent = () => {
     if (!product) return null;
 
     const productType = product.type?.toUpperCase() || '';
-    const rawVideoSource = product.videoUrl || product.fileUrl;
-    const videoSource = normalizeVideoUrl(rawVideoSource);
     const fileUrl = product.fileUrl;
     const canAccess = isOwner || !product.isSubscriberOnly || !channel?.subscriptionEnabled || hasActiveSubscription;
 
@@ -523,13 +577,13 @@ export default function ProductPage() {
         <div className="w-full bg-black px-2 sm:px-4 py-2 sm:py-4">
           <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%' }}>
             {canAccess ? (
-              videoSource ? (
+              normalizedVideoUrl ? (
                 <div className="absolute inset-0">
                   <video
                     ref={(el) => {
                       if (el) setVideoElement(el);
                     }}
-                    src={videoSource}
+                    src={normalizedVideoUrl}
                     controls
                     autoPlay
                     playsInline
@@ -540,20 +594,22 @@ export default function ProductPage() {
                     onPause={() => setIsPlaying(false)}
                     onError={(e) => {
                       console.error('Video playback error:', e);
-                      console.error('Video source:', videoSource);
+                      console.error('Video source:', normalizedVideoUrl);
                       const video = e.currentTarget;
                       console.error('Video error details:', {
                         error: video.error,
                         networkState: video.networkState,
                         readyState: video.readyState,
                         src: video.src,
+                        errorCode: video.error?.code,
+                        errorMessage: video.error?.message,
                       });
                     }}
                     onLoadStart={() => {
-                      console.log('Video loading started:', videoSource);
+                      console.log('Video loading started:', normalizedVideoUrl);
                     }}
                     onLoadedData={() => {
-                      console.log('Video loaded successfully:', videoSource);
+                      console.log('Video loaded successfully:', normalizedVideoUrl);
                     }}
                     onLoadedMetadata={(e) => {
                       console.log('Video metadata loaded:', {
@@ -570,7 +626,7 @@ export default function ProductPage() {
                     }}
                     style={{ objectFit: 'contain' }}
                   >
-                    <source src={videoSource} type={product.fileType || 'video/mp4'} />
+                    <source src={normalizedVideoUrl} type={product.fileType || 'video/mp4'} />
                     Your browser does not support the video tag.
                   </video>
                   
