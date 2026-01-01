@@ -22,7 +22,8 @@ import {
   CreditCardIcon,
   Cog6ToothIcon,
   Bars3Icon,
-  ChevronDownIcon,
+  ClipboardDocumentIcon,
+  LinkIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
 import BasicInfoTab from '@/components/channel-editor/BasicInfoTab';
@@ -52,20 +53,22 @@ export default function ChannelEditorPage() {
   const [completionKey, setCompletionKey] = useState(0);
   const [hasRazorpayConfig, setHasRazorpayConfig] = useState(false);
   const [checkingPayment, setCheckingPayment] = useState(true);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showPublishingModal, setShowPublishingModal] = useState(false);
+  const [showPublishSuccessModal, setShowPublishSuccessModal] = useState(false);
+  const [publishedChannelSlug, setPublishedChannelSlug] = useState<string | null>(null);
 
-  // Close mobile menu when clicking outside
+  // Close publishing modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: Event) => {
-      if (showMobileMenu) {
+      if (showPublishingModal) {
         const target = event.target as HTMLElement;
-        if (!target.closest('.mobile-menu-container')) {
-          setShowMobileMenu(false);
+        if (!target.closest('.publishing-modal-container')) {
+          setShowPublishingModal(false);
         }
       }
     };
 
-    if (showMobileMenu) {
+    if (showPublishingModal) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('touchstart', handleClickOutside);
     }
@@ -74,7 +77,21 @@ export default function ChannelEditorPage() {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
     };
-  }, [showMobileMenu]);
+  }, [showPublishingModal]);
+
+  // Copy channel link to clipboard
+  const copyChannelLink = async () => {
+    if (publishedChannelSlug) {
+      const channelUrl = `${window.location.origin}/channel/${publishedChannelSlug}`;
+      try {
+        await navigator.clipboard.writeText(channelUrl);
+        toast.success('Channel link copied to clipboard!');
+      } catch (error) {
+        console.error('Failed to copy:', error);
+        toast.error('Failed to copy link');
+      }
+    }
+  };
 
   useEffect(() => {
     if (channelId) {
@@ -361,20 +378,21 @@ export default function ChannelEditorPage() {
 
       const publishedChannel = data.channel;
       
-      toast.success('🎉 Channel published successfully!');
+      // Close publishing modal
+      setShowPublishingModal(false);
       
-      // Redirect to the published channel page
+      // Show success modal
       if (publishedChannel?.slug) {
-        router.push(`/channel/${publishedChannel.slug}`);
+        setPublishedChannelSlug(publishedChannel.slug);
       } else {
-        // Fallback: reload channel to get slug, then redirect
+        // Fallback: reload channel to get slug
         await loadChannel();
         if (channel?.slug) {
-          router.push(`/channel/${channel.slug}`);
-        } else {
-          router.push('/auth/dashboard/channels');
+          setPublishedChannelSlug(channel.slug);
         }
       }
+      
+      setShowPublishSuccessModal(true);
     } catch (error) {
       console.error('Error publishing:', error);
       toast.error('Failed to publish channel');
@@ -468,49 +486,49 @@ export default function ChannelEditorPage() {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-            {/* Publishing Options Dropdown - Mobile Only */}
-            <div className="md:hidden">
-              <button
-                onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors touch-manipulation text-sm font-medium text-gray-700 relative z-10"
-                aria-label="Publishing Options"
-              >
-                <span>Publishing Options</span>
-                <ChevronDownIcon className={`h-4 w-4 transition-transform ${showMobileMenu ? 'rotate-180' : ''}`} />
-              </button>
-            </div>
+            {/* Publishing Options Button - Opens Modal */}
+            <button
+              onClick={() => setShowPublishingModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors touch-manipulation text-sm font-medium text-gray-700 relative z-10"
+              aria-label="Open Publishing Options"
+            >
+              <RocketLaunchIcon className="h-4 w-4" />
+              <span className="hidden sm:inline">Publishing Options</span>
+              <span className="sm:hidden">Publish</span>
+            </button>
 
-            {/* Mobile Dropdown Menu - Rendered outside header stacking context */}
-            {showMobileMenu && (
+            {/* Publishing Options Modal - All Screen Sizes */}
+            {showPublishingModal && (
               <>
                 {/* Backdrop */}
                 <div
-                  className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+                  className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
                   style={{ zIndex: 9998 }}
-                  onClick={() => setShowMobileMenu(false)}
+                  onClick={() => setShowPublishingModal(false)}
                 />
-                {/* Menu - Centered Modal Style */}
+                {/* Modal - Centered Modal Style */}
                 <div 
-                  className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden mobile-menu-container" 
+                  className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden publishing-modal-container animate-in fade-in zoom-in duration-200" 
                   style={{ 
                     zIndex: 9999,
                     width: 'calc(100vw - 2rem)',
-                    maxWidth: '24rem',
+                    maxWidth: '28rem',
                     maxHeight: 'calc(100vh - 4rem)',
                     display: 'flex',
                     flexDirection: 'column'
                   }}
+                  onClick={(e) => e.stopPropagation()}
                 >
                     {/* Publishing Options Header */}
-                    <div className="px-5 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white flex-shrink-0">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-base font-bold text-gray-900">Publishing Options</h3>
-                          <p className="text-xs text-gray-500 mt-1">Manage your channel publishing settings</p>
+                    <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white flex-shrink-0">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-lg font-bold text-gray-900 break-words">Publishing Options</h3>
+                          <p className="text-sm text-gray-500 mt-1.5 break-words">Manage your channel publishing settings</p>
                         </div>
                         <button
-                          onClick={() => setShowMobileMenu(false)}
-                          className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                          onClick={() => setShowPublishingModal(false)}
+                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
                           aria-label="Close"
                         >
                           <XMarkIcon className="h-5 w-5 text-gray-500" />
@@ -519,26 +537,26 @@ export default function ChannelEditorPage() {
                     </div>
 
                     {/* Scrollable Content */}
-                    <div className="flex-1 overflow-y-auto">
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar-light" style={{ minHeight: 0 }}>
                       {/* Preview Link - More Prominent */}
-                      <div className="px-4 py-3 border-b border-gray-100">
-                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      <div className="px-6 py-4 border-b border-gray-100">
+                        <label className="block text-sm font-semibold text-gray-700 mb-3 break-words">
                           Preview Channel
                         </label>
                         <Link
                           href={`/channel/${channel.slug}`}
                           target="_blank"
-                          onClick={() => setShowMobileMenu(false)}
-                          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium touch-manipulation active:scale-95"
+                          onClick={() => setShowPublishingModal(false)}
+                          className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium touch-manipulation active:scale-95 w-full"
                         >
-                          <EyeIcon className="h-4 w-4" />
-                          <span>Open Preview in New Tab</span>
+                          <EyeIcon className="h-5 w-5 flex-shrink-0" />
+                          <span className="truncate">Open Preview in New Tab</span>
                         </Link>
                       </div>
 
                       {/* Template Switcher */}
-                      <div className="px-4 py-3 border-b border-gray-100">
-                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      <div className="px-6 py-4 border-b border-gray-100">
+                        <label className="block text-sm font-semibold text-gray-700 mb-3 break-words">
                           Template
                         </label>
                         <select
@@ -565,7 +583,7 @@ export default function ChannelEditorPage() {
                               setHasChanges(false);
                               await loadChannel();
                               toast.success('Template changed successfully!');
-                              setShowMobileMenu(false);
+                              setShowPublishingModal(false);
                             } catch (error) {
                               console.error('Error saving template:', error);
                               toast.error('Failed to change template');
@@ -573,7 +591,7 @@ export default function ChannelEditorPage() {
                               setSaving(false);
                             }
                           }}
-                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-gray-900 focus:border-transparent touch-manipulation"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-gray-900 focus:border-transparent touch-manipulation"
                         >
                           <option value="">Select Template</option>
                           {templates.map((template) => (
@@ -585,17 +603,17 @@ export default function ChannelEditorPage() {
                       </div>
 
                       {/* Device Preview Toggle */}
-                      <div className="px-4 py-3 border-b border-gray-100">
-                        <label className="block text-xs font-semibold text-gray-700 mb-2">
+                      <div className="px-6 py-4 border-b border-gray-100">
+                        <label className="block text-sm font-semibold text-gray-700 mb-3 break-words">
                           Preview Size
                         </label>
-                        <div className="flex items-center gap-1.5 bg-gray-100 p-1.5 rounded-lg">
+                        <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-lg">
                           <button
                             onClick={() => {
                               setDevicePreview('desktop');
-                              setShowMobileMenu(false);
+                              setShowPublishingModal(false);
                             }}
-                            className={`flex-1 p-2.5 rounded-md transition-all touch-manipulation active:scale-95 ${
+                            className={`flex-1 p-3 rounded-md transition-all touch-manipulation active:scale-95 ${
                               devicePreview === 'desktop' 
                                 ? 'bg-white shadow-md border-2 border-gray-300' 
                                 : 'hover:bg-gray-200'
@@ -609,9 +627,9 @@ export default function ChannelEditorPage() {
                           <button
                             onClick={() => {
                               setDevicePreview('tablet');
-                              setShowMobileMenu(false);
+                              setShowPublishingModal(false);
                             }}
-                            className={`flex-1 p-2.5 rounded-md transition-all touch-manipulation active:scale-95 ${
+                            className={`flex-1 p-3 rounded-md transition-all touch-manipulation active:scale-95 ${
                               devicePreview === 'tablet' 
                                 ? 'bg-white shadow-md border-2 border-gray-300' 
                                 : 'hover:bg-gray-200'
@@ -625,9 +643,9 @@ export default function ChannelEditorPage() {
                           <button
                             onClick={() => {
                               setDevicePreview('mobile');
-                              setShowMobileMenu(false);
+                              setShowPublishingModal(false);
                             }}
-                            className={`flex-1 p-2.5 rounded-md transition-all touch-manipulation active:scale-95 ${
+                            className={`flex-1 p-3 rounded-md transition-all touch-manipulation active:scale-95 ${
                               devicePreview === 'mobile' 
                                 ? 'bg-white shadow-md border-2 border-gray-300' 
                                 : 'hover:bg-gray-200'
@@ -642,37 +660,37 @@ export default function ChannelEditorPage() {
                       </div>
 
                       {/* Publish or Connect Razorpay - Always Visible, Last Priority */}
-                      <div className="px-4 py-4 bg-gradient-to-br from-gray-50 to-white border-t border-gray-200">
+                      <div className="px-6 py-5 bg-gradient-to-br from-gray-50 to-white border-t border-gray-200 flex-shrink-0">
                         {checkingPayment ? (
                           <button
                             disabled
                             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed text-sm font-bold"
                           >
-                            <ArrowPathIcon className="h-4 w-4 animate-spin" />
-                            <span>Checking Payment Setup...</span>
+                            <ArrowPathIcon className="h-4 w-4 animate-spin flex-shrink-0" />
+                            <span className="truncate">Checking Payment Setup...</span>
                           </button>
                         ) : hasRazorpayConfig ? (
                           <button
                             onClick={() => {
                               handlePublish();
-                              setShowMobileMenu(false);
+                              setShowPublishingModal(false);
                             }}
                             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all text-sm font-bold shadow-lg touch-manipulation active:scale-95"
                           >
-                            <RocketLaunchIcon className="h-5 w-5" />
-                            <span>Publish Channel</span>
+                            <RocketLaunchIcon className="h-5 w-5 flex-shrink-0" />
+                            <span className="truncate">Publish Channel</span>
                           </button>
                         ) : (
                           <div className="space-y-2">
                             <Link
                               href="/auth/dashboard/razorpay-setup"
-                              onClick={() => setShowMobileMenu(false)}
+                              onClick={() => setShowPublishingModal(false)}
                               className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all text-sm font-bold shadow-lg touch-manipulation active:scale-95"
                             >
-                              <CreditCardIcon className="h-5 w-5" />
-                              <span>Connect Razorpay to Publish</span>
+                              <CreditCardIcon className="h-5 w-5 flex-shrink-0" />
+                              <span className="truncate text-center">Connect Razorpay to Publish</span>
                             </Link>
-                            <p className="text-xs text-gray-500 text-center px-2">
+                            <p className="text-xs text-gray-500 text-center px-2 break-words">
                               After connecting, you'll be able to publish your channel
                             </p>
                           </div>
@@ -975,6 +993,92 @@ export default function ChannelEditorPage() {
         </>
       )}
 
+      {/* Publish Success Modal */}
+      {showPublishSuccessModal && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity z-[10000]"
+            onClick={() => setShowPublishSuccessModal(false)}
+          />
+          {/* Success Modal */}
+          <div 
+            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-[10001] animate-in fade-in zoom-in duration-300"
+            style={{ 
+              width: 'calc(100vw - 2rem)',
+              maxWidth: '32rem',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Success Content */}
+            <div className="px-8 py-10 text-center">
+              {/* Success Icon */}
+              <div className="mx-auto w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
+                <CheckCircleIcon className="h-12 w-12 text-white" />
+              </div>
+              
+              {/* Success Message */}
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                🎉 Your Channel is Live!
+              </h2>
+              <p className="text-gray-600 mb-6 text-lg">
+                Your channel has been successfully published and is now live for everyone to see.
+              </p>
+
+              {/* Channel Link Display */}
+              {publishedChannelSlug && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="text-xs font-semibold text-gray-700 mb-2 text-left">Your Channel Link:</p>
+                  <div className="flex items-center gap-2 bg-white rounded-md p-2 border border-gray-300">
+                    <LinkIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    <span className="text-sm text-gray-600 truncate flex-1 text-left">
+                      {typeof window !== 'undefined' ? `${window.location.origin}/channel/${publishedChannelSlug}` : `/channel/${publishedChannelSlug}`}
+                    </span>
+                  </div>
+                </div>
+              )}
+              
+              {/* Action Buttons */}
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    if (publishedChannelSlug) {
+                      router.push(`/channel/${publishedChannelSlug}`);
+                    } else {
+                      router.push('/auth/dashboard/channels');
+                    }
+                  }}
+                  className="w-full px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all text-sm font-bold shadow-lg touch-manipulation active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <EyeIcon className="h-5 w-5" />
+                  Go to Channel
+                </button>
+                
+                {publishedChannelSlug && (
+                  <button
+                    onClick={copyChannelLink}
+                    className="w-full px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all text-sm font-semibold touch-manipulation active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    <ClipboardDocumentIcon className="h-5 w-5" />
+                    Copy Channel Link
+                  </button>
+                )}
+                
+                <button
+                  onClick={() => {
+                    setShowPublishSuccessModal(false);
+                    router.push('/auth/dashboard/channels');
+                  }}
+                  className="w-full px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all text-sm font-medium touch-manipulation active:scale-95"
+                >
+                  Back to Dashboard
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* Custom Scrollbar Styles */}
       <style jsx>{`
         .custom-scrollbar-light::-webkit-scrollbar {
@@ -997,6 +1101,40 @@ export default function ChannelEditorPage() {
         }
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
+        }
+        .publishing-modal-container {
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+        }
+        .publishing-modal-container * {
+          max-width: 100%;
+        }
+        .publishing-modal-container h3,
+        .publishing-modal-container p,
+        .publishing-modal-container label,
+        .publishing-modal-container span {
+          word-wrap: break-word;
+          overflow-wrap: break-word;
+          hyphens: auto;
+        }
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        @keyframes zoom-in {
+          from {
+            transform: translate(-50%, -50%) scale(0.95);
+          }
+          to {
+            transform: translate(-50%, -50%) scale(1);
+          }
+        }
+        .animate-in {
+          animation: fade-in 0.2s ease-out, zoom-in 0.2s ease-out;
         }
         @media (max-width: 640px) {
           .touch-manipulation {
