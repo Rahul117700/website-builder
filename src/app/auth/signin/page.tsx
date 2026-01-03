@@ -27,6 +27,7 @@ export default function SignInPage() {
       redirect: false,
       email,
       password,
+      callbackUrl: callbackUrl, // Pass callbackUrl to signIn
     });
     
     if (res?.error) {
@@ -34,11 +35,22 @@ export default function SignInPage() {
       toast.error(res.error);
     } else if (res?.ok) {
       toast.success('Signed in successfully!');
-      // Small delay to ensure session is set
+      // Decode callbackUrl in case it's encoded
+      const decodedCallbackUrl = decodeURIComponent(callbackUrl);
+      // Small delay to ensure session is set, then redirect
       setTimeout(() => {
-        router.push(callbackUrl);
-        router.refresh();
-      }, 100);
+        // Use window.location for a full page reload to ensure session is properly set
+        if (decodedCallbackUrl && decodedCallbackUrl !== '/') {
+          // Ensure URL is absolute
+          const redirectUrl = decodedCallbackUrl.startsWith('http') 
+            ? decodedCallbackUrl 
+            : `${window.location.origin}${decodedCallbackUrl.startsWith('/') ? '' : '/'}${decodedCallbackUrl}`;
+          window.location.href = redirectUrl;
+        } else {
+          router.push('/');
+          router.refresh();
+        }
+      }, 200);
     }
     setLoading(false);
   };
@@ -72,7 +84,14 @@ export default function SignInPage() {
                 type="button"
                 className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 style={{ backgroundColor: '#ffffff' }}
-                onClick={() => signIn('google', { callbackUrl })}
+                onClick={() => {
+                  // Ensure callbackUrl is properly passed
+                  const url = callbackUrl && callbackUrl !== '/' ? callbackUrl : window.location.origin;
+                  signIn('google', { 
+                    callbackUrl: url,
+                    redirect: true 
+                  });
+                }}
               >
                 <FaGoogle className="w-5 h-5 text-red-500" />
                 Continue with Google
@@ -81,7 +100,14 @@ export default function SignInPage() {
                 type="button"
                 className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 style={{ backgroundColor: '#ffffff' }}
-                onClick={() => signIn('github', { callbackUrl })}
+                onClick={() => {
+                  // Ensure callbackUrl is properly passed
+                  const url = callbackUrl && callbackUrl !== '/' ? callbackUrl : window.location.origin;
+                  signIn('github', { 
+                    callbackUrl: url,
+                    redirect: true 
+                  });
+                }}
               >
                 <FaGithub className="w-5 h-5" />
                 Continue with GitHub

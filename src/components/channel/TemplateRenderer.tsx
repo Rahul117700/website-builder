@@ -1441,13 +1441,14 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                     Subscribers
                   </button>
                 )}
-                {!isOwner && channel.subscriptionEnabled && (
+                {/* Show login/subscription buttons for non-owners, always show login if not logged in */}
+                {!isOwner && (
                   <div className="flex items-center gap-2 sm:gap-3">
                     {!session?.user ? (
                       <>
                         <button 
                           onClick={() => router.push(`/auth/signin?callbackUrl=${encodeURIComponent(channelUrl)}`)}
-                          className="hidden sm:flex px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 border-2 hover:scale-105 shadow-md hover:shadow-lg"
+                          className="flex px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 border-2 hover:scale-105 shadow-md hover:shadow-lg"
                           style={{
                             backgroundColor: 'transparent',
                             borderColor: `${primaryColor}40`,
@@ -1456,21 +1457,34 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                         >
                           Sign In
                         </button>
-                        <button 
-                          onClick={() => router.push(`/auth/signup?callbackUrl=${encodeURIComponent(channelUrl)}`)}
-                          className="group relative px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 overflow-hidden bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white"
-                        >
-                          <span className="relative z-10 flex items-center gap-1 sm:gap-2">
-                            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span className="hidden sm:inline">Subscribe Now</span>
-                            <span className="sm:hidden">Subscribe</span>
-                          </span>
-                          <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                        </button>
+                        {channel.subscriptionEnabled ? (
+                          <button 
+                            onClick={() => router.push(`/auth/signup?callbackUrl=${encodeURIComponent(channelUrl)}`)}
+                            className="group relative px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 overflow-hidden bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white"
+                          >
+                            <span className="relative z-10 flex items-center gap-1 sm:gap-2">
+                              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="hidden sm:inline">Subscribe Now</span>
+                              <span className="sm:hidden">Subscribe</span>
+                            </span>
+                            <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={() => router.push(`/auth/signup?callbackUrl=${encodeURIComponent(channelUrl)}`)}
+                            className="group relative px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 text-white"
+                          >
+                            <span className="relative z-10 flex items-center gap-1 sm:gap-2">
+                              <span className="hidden sm:inline">Sign Up</span>
+                              <span className="sm:hidden">Sign Up</span>
+                            </span>
+                            <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                          </button>
+                        )}
                       </>
-                    ) : (
+                    ) : channel.subscriptionEnabled ? (
                       <button 
                         onClick={() => setShowSubscriptionModal(true)}
                         disabled={hasActiveSubscription}
@@ -1489,7 +1503,7 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                           <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
                         )}
                       </button>
-                    )}
+                    ) : null}
                   </div>
                 )}
                 
