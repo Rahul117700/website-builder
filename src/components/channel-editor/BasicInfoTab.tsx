@@ -20,6 +20,23 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
   const [uploadingProfile, setUploadingProfile] = useState(false);
   const [imageKey, setImageKey] = useState(0); // Force re-render of images
 
+  // Helper function to get proper image URL
+  const getImageUrl = (url: string | null | undefined): string => {
+    if (!url) return '';
+    
+    // If already absolute URL, return as is
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    
+    // Ensure relative URLs start with /
+    if (!url.startsWith('/')) {
+      return `/${url}`;
+    }
+    
+    return url;
+  };
+
   // Calculate completion progress
   const requirements = useMemo(() => {
     return [
@@ -112,10 +129,72 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
         imageUrl = imageUrl.replace('/public', '');
       }
 
+      // Ensure URL starts with / if it's a relative path
+      if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
+        imageUrl = `/${imageUrl}`;
+      }
+
+      // Small delay to ensure file is written to disk
+      await new Promise(resolve => setTimeout(resolve, 300));
+
       // Verify the image URL is correct
       console.log('Uploaded image URL:', imageUrl);
       
-      // Immediately update channel with the image URL (don't wait for preload)
+      // Verify image is accessible before updating
+      const verifyImage = (url: string): Promise<boolean> => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          let resolved = false;
+          
+          img.onload = () => {
+            if (!resolved) {
+              resolved = true;
+              console.log('Image verified and accessible:', url);
+              resolve(true);
+            }
+          };
+          
+          img.onerror = () => {
+            if (!resolved) {
+              resolved = true;
+              console.error('Image verification failed:', url);
+              resolve(false);
+            }
+          };
+          
+          // Set timeout to prevent hanging
+          setTimeout(() => {
+            if (!resolved) {
+              resolved = true;
+              console.warn('Image verification timeout');
+              resolve(false);
+            }
+          }, 3000);
+          
+          // Try with cache busting first
+          const cacheBuster = `?v=${Date.now()}`;
+          img.src = url + (url.includes('?') ? '&' : '?') + cacheBuster.replace('?', '');
+        });
+      };
+
+      // Verify image accessibility
+      const isAccessible = await verifyImage(imageUrl);
+      
+      if (!isAccessible) {
+        // Try again after a short delay (file might still be writing)
+        await new Promise(resolve => setTimeout(resolve, 500));
+        const retryAccessible = await verifyImage(imageUrl);
+        
+        if (!retryAccessible) {
+          console.warn('Image may not be immediately accessible, but proceeding with update');
+          toast('Image uploaded but may take a moment to appear', {
+            icon: '⚠️',
+            duration: 3000,
+          });
+        }
+      }
+
+      // Update channel with the image URL
       if (type === 'cover') {
         onUpdate({ coverImage: imageUrl });
         setImageKey(prev => prev + 1); // Force image re-render
@@ -124,17 +203,9 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
         setImageKey(prev => prev + 1); // Force image re-render
       }
 
-      // Verify image is accessible
-      const img = new Image();
-      img.onload = () => {
-        console.log('Image verified and loaded:', imageUrl);
+      if (isAccessible) {
         toast.success('Image uploaded successfully!');
-      };
-      img.onerror = () => {
-        console.error('Image verification failed:', imageUrl);
-        toast.error('Image uploaded but may not display correctly. Please check the file.');
-      };
-      img.src = imageUrl; // Start loading the image for verification
+      }
     } catch (error) {
       console.error('Upload error:', error);
       toast.error('Failed to upload image');
@@ -204,13 +275,32 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
         {channel.coverImage ? (
           <div className="relative rounded-lg overflow-hidden border border-gray-300 group">
             <img
-              src={channel.coverImage}
+              src={`${getImageUrl(channel.coverImage)}${getImageUrl(channel.coverImage).includes('?') ? '&' : '?'}v=${imageKey}&t=${Date.now()}`}
               alt="Cover"
               className="w-full h-32 object-cover"
               key={`cover-${channel.coverImage}-${imageKey}`} // Force re-render when URL changes or key updates
               onError={(e) => {
                 console.error('Failed to load cover image:', channel.coverImage);
-                toast.error('Failed to load cover image. Please try uploading again.');
+                // Try with absolute URL if relative fails
+                const img = e.target as HTMLImageElement;
+                const imageUrl = getImageUrl(channel.coverImage);
+                
+                if (imageUrl && !imageUrl.startsWith('http')) {
+                  const absoluteUrl = typeof window !== 'undefined' 
+                    ? `${window.location.origin}${imageUrl}`
+                    : imageUrl;
+                  console.log('Trying absolute URL:', absoluteUrl);
+                  // Add cache busting to absolute URL
+                  img.src = `${absoluteUrl}${absoluteUrl.includes('?') ? '&' : '?'}v=${imageKey}&t=${Date.now()}`;
+                } else if (imageUrl.startsWith('http')) {
+                  // If it's already absolute, try with cache busting
+                  img.src = `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}v=${imageKey}&t=${Date.now()}`;
+                } else {
+                  toast.error('Failed to load cover image. Please try uploading again.');
+                }
+              }}
+              onLoad={() => {
+                console.log('Cover image loaded successfully:', channel.coverImage);
               }}
             />
             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity flex items-center justify-center gap-2 sm:group-hover:opacity-100">
@@ -265,13 +355,32 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
           {channel.profileImage ? (
             <div className="relative group flex-shrink-0">
               <img
-                src={channel.profileImage}
+                src={`${getImageUrl(channel.profileImage)}${getImageUrl(channel.profileImage).includes('?') ? '&' : '?'}v=${imageKey}&t=${Date.now()}`}
                 alt="Profile"
                 className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-gray-300 bg-white"
                 key={`profile-${channel.profileImage}-${imageKey}`} // Force re-render when URL changes or key updates
                 onError={(e) => {
                   console.error('Failed to load profile image:', channel.profileImage);
-                  toast.error('Failed to load profile image. Please try uploading again.');
+                  // Try with absolute URL if relative fails
+                  const img = e.target as HTMLImageElement;
+                  const imageUrl = getImageUrl(channel.profileImage);
+                  
+                  if (imageUrl && !imageUrl.startsWith('http')) {
+                    const absoluteUrl = typeof window !== 'undefined' 
+                      ? `${window.location.origin}${imageUrl}`
+                      : imageUrl;
+                    console.log('Trying absolute URL for profile:', absoluteUrl);
+                    // Add cache busting to absolute URL
+                    img.src = `${absoluteUrl}${absoluteUrl.includes('?') ? '&' : '?'}v=${imageKey}&t=${Date.now()}`;
+                  } else if (imageUrl.startsWith('http')) {
+                    // If it's already absolute, try with cache busting
+                    img.src = `${imageUrl}${imageUrl.includes('?') ? '&' : '?'}v=${imageKey}&t=${Date.now()}`;
+                  } else {
+                    toast.error('Failed to load profile image. Please try uploading again.');
+                  }
+                }}
+                onLoad={() => {
+                  console.log('Profile image loaded successfully:', channel.profileImage);
                 }}
               />
               <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity flex items-center justify-center sm:group-hover:opacity-100">

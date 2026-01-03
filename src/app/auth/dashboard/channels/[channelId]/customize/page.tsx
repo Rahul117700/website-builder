@@ -13,8 +13,6 @@ import {
   CloudArrowUpIcon,
   ArrowPathIcon,
   ComputerDesktopIcon,
-  DeviceTabletIcon,
-  DevicePhoneMobileIcon,
   XMarkIcon,
   HomeIcon,
   PaintBrushIcon,
@@ -224,6 +222,19 @@ export default function ChannelEditorPage() {
       setLastSaved(new Date());
       setCompletionKey(prev => prev + 1);
       
+      // Force a small delay to ensure images are accessible, then reload channel data
+      setTimeout(async () => {
+        try {
+          const refreshResponse = await fetch(`/api/channels/${channelId}`);
+          if (refreshResponse.ok) {
+            const refreshedChannel = await refreshResponse.json();
+            setChannel(refreshedChannel);
+          }
+        } catch (error) {
+          console.error('Error refreshing channel:', error);
+        }
+      }, 500);
+      
       // Silent success (only show toast if user manually saves)
     } catch (error) {
       console.error('Error saving channel:', error);
@@ -407,11 +418,8 @@ export default function ChannelEditorPage() {
   };
 
   const getPreviewWidth = () => {
-    switch (devicePreview) {
-      case 'mobile': return '375px';
-      case 'tablet': return '768px';
-      case 'desktop': return '100%';
-    }
+    // Always return desktop width
+    return '100%';
   };
 
   if (loading) {
@@ -621,59 +629,21 @@ export default function ChannelEditorPage() {
                         </select>
                       </div>
 
-                      {/* Device Preview Toggle */}
+                      {/* Device Preview Toggle - Desktop Only */}
                       <div className="px-6 py-4 border-b border-gray-100">
                         <label className="block text-sm font-semibold text-gray-700 mb-3 break-words">
                           Preview Size
                         </label>
-                        <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-lg">
+                        <div className="flex items-center justify-center bg-gray-100 p-2 rounded-lg">
                           <button
                             onClick={() => {
                               setDevicePreview('desktop');
                               setShowPublishingModal(false);
                             }}
-                            className={`flex-1 p-3 rounded-md transition-all touch-manipulation active:scale-95 ${
-                              devicePreview === 'desktop' 
-                                ? 'bg-white shadow-md border-2 border-gray-300' 
-                                : 'hover:bg-gray-200'
-                            }`}
+                            className="p-3 rounded-md transition-all touch-manipulation active:scale-95 bg-white shadow-md border-2 border-gray-300"
                             title="Desktop view"
                           >
-                            <ComputerDesktopIcon className={`h-5 w-5 mx-auto ${
-                              devicePreview === 'desktop' ? 'text-gray-900' : 'text-gray-600'
-                            }`} />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setDevicePreview('tablet');
-                              setShowPublishingModal(false);
-                            }}
-                            className={`flex-1 p-3 rounded-md transition-all touch-manipulation active:scale-95 ${
-                              devicePreview === 'tablet' 
-                                ? 'bg-white shadow-md border-2 border-gray-300' 
-                                : 'hover:bg-gray-200'
-                            }`}
-                            title="Tablet view"
-                          >
-                            <DeviceTabletIcon className={`h-5 w-5 mx-auto ${
-                              devicePreview === 'tablet' ? 'text-gray-900' : 'text-gray-600'
-                            }`} />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setDevicePreview('mobile');
-                              setShowPublishingModal(false);
-                            }}
-                            className={`flex-1 p-3 rounded-md transition-all touch-manipulation active:scale-95 ${
-                              devicePreview === 'mobile' 
-                                ? 'bg-white shadow-md border-2 border-gray-300' 
-                                : 'hover:bg-gray-200'
-                            }`}
-                            title="Mobile view"
-                          >
-                            <DevicePhoneMobileIcon className={`h-5 w-5 mx-auto ${
-                              devicePreview === 'mobile' ? 'text-gray-900' : 'text-gray-600'
-                            }`} />
+                            <ComputerDesktopIcon className="h-5 w-5 mx-auto text-gray-900" />
                           </button>
                         </div>
                       </div>
@@ -769,34 +739,14 @@ export default function ChannelEditorPage() {
               </select>
             </div>
 
-            {/* Device Toggle - Show on tablet and up */}
+            {/* Device Toggle - Desktop Only */}
             <div className="hidden md:flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
               <button
                 onClick={() => setDevicePreview('desktop')}
-                className={`p-1.5 sm:p-2 rounded transition-colors touch-manipulation ${
-                  devicePreview === 'desktop' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
-                }`}
+                className="p-1.5 sm:p-2 rounded transition-colors touch-manipulation bg-white shadow-sm"
                 title="Desktop view"
               >
                 <ComputerDesktopIcon className="h-4 w-4 text-gray-700" />
-              </button>
-              <button
-                onClick={() => setDevicePreview('tablet')}
-                className={`p-1.5 sm:p-2 rounded transition-colors touch-manipulation ${
-                  devicePreview === 'tablet' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
-                }`}
-                title="Tablet view"
-              >
-                <DeviceTabletIcon className="h-4 w-4 text-gray-700" />
-              </button>
-              <button
-                onClick={() => setDevicePreview('mobile')}
-                className={`p-1.5 sm:p-2 rounded transition-colors touch-manipulation ${
-                  devicePreview === 'mobile' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'
-                }`}
-                title="Mobile view"
-              >
-                <DevicePhoneMobileIcon className="h-4 w-4 text-gray-700" />
               </button>
             </div>
 

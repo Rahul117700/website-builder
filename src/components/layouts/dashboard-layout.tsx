@@ -594,18 +594,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   </div>
                 ) : (
                   // Expanded Logo - Show full logo with modern styling
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center">
+                  <div className="flex items-center justify-between w-full overflow-hidden">
+                    <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
                       <img 
                         src="/logo/logo.png" 
                         alt="SellEarnDirect - Turn Traffic Into Revenue" 
-                        className="object-contain transition-all duration-300 hover:scale-105 no-blur"
+                        className="object-contain transition-all duration-300 hover:scale-105 no-blur flex-shrink-0"
                         style={{ 
                           height: '52px',
                           width: 'auto',
-                          maxWidth: '200px'
+                          maxWidth: '180px'
                         }}
                       />
+                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide whitespace-nowrap flex-shrink-0">Studio</span>
                     </div>
                     <button
                       onClick={toggleSidebarCollapse}
@@ -860,7 +861,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             
             <button
               onClick={() => router.push('/')}
-              className="hover:opacity-90 transition-opacity"
+              className="hover:opacity-90 transition-opacity flex items-center gap-1.5 sm:gap-2 overflow-hidden min-w-0"
             >
               <Logo 
                 variant="icon-only" 
@@ -868,6 +869,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 href=""
                 showText={false}
               />
+              <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wide whitespace-nowrap flex-shrink-0">Studio</span>
             </button>
             
             <div className="flex items-center space-x-2">

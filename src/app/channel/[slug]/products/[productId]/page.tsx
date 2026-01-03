@@ -477,6 +477,56 @@ export default function ProductPage() {
     }
   };
 
+  const handleShare = async () => {
+    if (!product || !channel) return;
+
+    const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const shareData = {
+      title: product.title,
+      text: product.description || `Check out ${product.title} from ${channel.name}`,
+      url: currentUrl,
+    };
+
+    // Try Web Share API first (works on mobile and some desktop browsers)
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+        setModalMessage('Shared successfully!');
+        setShowSuccessModal(true);
+        return;
+      } catch (error: any) {
+        // User cancelled or error occurred, fall back to clipboard
+        if (error.name !== 'AbortError') {
+          console.error('Error sharing:', error);
+        }
+      }
+    }
+
+    // Fall back to copying URL to clipboard
+    try {
+      await navigator.clipboard.writeText(currentUrl);
+      setModalMessage('Link copied to clipboard!');
+      setShowSuccessModal(true);
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+      // Last resort: show URL in a prompt
+      const urlInput = document.createElement('input');
+      urlInput.value = currentUrl;
+      document.body.appendChild(urlInput);
+      urlInput.select();
+      try {
+        document.execCommand('copy');
+        document.body.removeChild(urlInput);
+        setModalMessage('Link copied to clipboard!');
+        setShowSuccessModal(true);
+      } catch (err) {
+        document.body.removeChild(urlInput);
+        setModalMessage(`Share this link: ${currentUrl}`);
+        setShowErrorModal(true);
+      }
+    }
+  };
+
   const getContentIcon = (type: string) => {
     switch (type?.toUpperCase()) {
       case 'VIDEO':
@@ -1286,7 +1336,10 @@ export default function ProductPage() {
                       <BookmarkIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
                     )}
                   </button>
-                  <button className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors">
+                  <button 
+                    onClick={handleShare}
+                    className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                  >
                     <ShareIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600" />
                     <span className="hidden sm:inline text-sm font-medium text-gray-700">Share</span>
                   </button>

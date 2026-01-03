@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { 
@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { RocketLaunchIcon } from '@heroicons/react/24/solid';
 import Logo from '@/components/Logo';
+import { gsap } from 'gsap';
 
 interface HeaderProps {
   showProfile?: boolean;
@@ -21,6 +22,66 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+  const logoRef = useRef<HTMLAnchorElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  // Header animation on mount
+  useEffect(() => {
+    if (typeof window === 'undefined' || !headerRef.current) return;
+
+    const header = headerRef.current;
+    const logo = logoRef.current;
+    const nav = navRef.current;
+    const profile = profileRef.current;
+
+    // Set initial state
+    gsap.set(header, { y: -100, opacity: 0 });
+    if (logo) gsap.set(logo, { x: -50, opacity: 0 });
+    if (nav) gsap.set(nav, { x: 50, opacity: 0 });
+    if (profile) gsap.set(profile, { x: 50, opacity: 0 });
+
+    // Animate header sliding down
+    gsap.to(header, {
+      y: 0,
+      opacity: 1,
+      duration: 0.6,
+      ease: 'power3.out',
+      onComplete: () => {
+        // Animate logo sliding in from left
+        if (logo) {
+          gsap.to(logo, {
+            x: 0,
+            opacity: 1,
+            duration: 0.5,
+            ease: 'back.out(1.7)',
+            delay: 0.1
+          });
+        }
+        // Animate navigation sliding in from right
+        if (nav) {
+          gsap.to(nav, {
+            x: 0,
+            opacity: 1,
+            duration: 0.5,
+            ease: 'back.out(1.7)',
+            delay: 0.2
+          });
+        }
+        // Animate profile section sliding in from right
+        if (profile) {
+          gsap.to(profile, {
+            x: 0,
+            opacity: 1,
+            duration: 0.5,
+            ease: 'back.out(1.7)',
+            delay: 0.3
+          });
+        }
+      }
+    });
+  }, []);
 
   const handleSignOut = () => {
     signOut({ callbackUrl: '/auth/signin' });
@@ -35,22 +96,26 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
   };
 
   return (
-    <nav className={`bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50 w-full ${className}`}>
+    <nav 
+      ref={headerRef}
+      className={`bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50 w-full ${className}`}
+    >
       <div className="w-full pl-2 pr-4 sm:pl-3 sm:pr-6 lg:pl-4 lg:pr-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div data-tour="logo" className="flex-shrink-0">
+        <div className="flex justify-between items-center h-12">
+          {/* Logo with Studio Text */}
+          <Link href="/" data-tour="logo" className="flex-shrink-0 flex items-center gap-1.5 sm:gap-2 group overflow-hidden min-w-0" ref={logoRef}>
             <Logo 
               variant="icon-only" 
-              size="lg"
-              href="/"
+              size="md"
+              href=""
               showText={false}
             />
-          </div>
+            <span className="text-[9px] sm:text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wide whitespace-nowrap group-hover:text-gray-700 transition-colors flex-shrink-0">Studio</span>
+          </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-6" data-tour="navigation">
-            <Link href="/" className="text-indigo-600 font-medium">Home</Link>
+          <div className="hidden lg:flex items-center space-x-5" data-tour="navigation" ref={navRef}>
+            <Link href="/" className="text-indigo-600 font-medium text-sm">Home</Link>
             <Link 
               href="/#features" 
               onClick={(e) => {
@@ -61,37 +126,37 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
                 }
                 // Otherwise, let the link navigate normally
               }}
-              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium"
+              className="text-gray-600 hover:text-indigo-600 transition-colors font-medium text-sm"
             >
               Features
             </Link>
-            <Link href="/docs" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Docs</Link>
-            <Link href="/blog" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Blog</Link>
-            <Link href="/about" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">About</Link>
-            <Link href="/contact" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium">Contact</Link>
+            <Link href="/docs" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium text-sm">Docs</Link>
+            <Link href="/blog" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium text-sm">Blog</Link>
+            <Link href="/about" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium text-sm">About</Link>
+            <Link href="/contact" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium text-sm">Contact</Link>
           </div>
 
           {/* Right side - Profile and Auth */}
-          <div className="flex items-center gap-2" data-tour="profile-section">
+          <div className="flex items-center gap-2" data-tour="profile-section" ref={profileRef}>
             {session && showProfile ? (
               <div className="relative">
                 {/* Profile Button */}
                 <button
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="flex items-center space-x-2 p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   {session.user?.image ? (
                     <img
                       src={session.user.image}
                       alt="Profile"
-                      className="h-8 w-8 rounded-full object-cover border-2 border-gray-200"
+                      className="h-7 w-7 rounded-full object-cover border-2 border-gray-200"
                     />
                   ) : (
-                    <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                      <UserIcon className="h-5 w-5 text-indigo-600" />
+                    <div className="h-7 w-7 rounded-full bg-indigo-100 flex items-center justify-center">
+                      <UserIcon className="h-4 w-4 text-indigo-600" />
                     </div>
                   )}
-                  <span className="hidden sm:block text-sm font-medium text-gray-700">
+                  <span className="hidden sm:block text-xs font-medium text-gray-700">
                     {session.user?.name || session.user?.email}
                   </span>
                 </button>
@@ -130,7 +195,7 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
             ) : session ? (
               <Link
                 href="/auth/dashboard"
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all text-sm font-medium"
+                className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition-all text-xs font-medium"
               >
                 Dashboard
               </Link>
@@ -138,13 +203,13 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
               <>
                 <Link
                   href="/auth/signin"
-                  className="hidden sm:inline-block text-gray-700 hover:text-indigo-600 px-3 py-2 transition-colors text-sm font-medium hover:bg-gray-50 rounded-lg"
+                  className="hidden sm:inline-block text-gray-700 hover:text-indigo-600 px-3 py-1.5 transition-colors text-xs font-medium hover:bg-gray-50 rounded-lg"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/auth/signup"
-                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-all text-sm font-medium whitespace-nowrap shadow-sm hover:shadow-md"
+                  className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition-all text-xs font-medium whitespace-nowrap shadow-sm hover:shadow-md"
                 >
                   Sign Up
                 </Link>
@@ -154,7 +219,7 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden inline-flex items-center justify-center p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              className="lg:hidden inline-flex items-center justify-center p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
             >
               {mobileMenuOpen ? (
                 <XMarkIcon className="h-5 w-5" />

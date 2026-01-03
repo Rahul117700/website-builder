@@ -562,7 +562,292 @@ Ready to sell your course? Create your account on Sell Earn Direct and start bui
   }
 ];
 
-// Generate 97 more blog posts programmatically
+// Helper function to generate detailed blog content with screenshot references
+function generateDetailedBlogContent(topic: { slug: string; title: string; category: string; screenshot?: string }) {
+  const screenshotMap: Record<string, string> = {
+    'your channel': '/screenshots/your channel.png',
+    'edit channel screen': '/screenshots/edit channel screen.png',
+    'new product': '/screenshots/new product.png',
+    'created product list': '/screenshots/created product list.png',
+    'product': '/screenshots/product.png',
+    'subscribe modal': '/screenshots/subscribe modal.png',
+    'live analytics': '/screenshots/live analytics.png',
+    'channel analytics': '/screenshots/channel analytics.png',
+    'basic settings': '/screenshots/basic settings.png',
+    'Theme setting': '/screenshots/Theme setting.png',
+    'layout setting': '/screenshots/layout setting.png',
+    'seo setting': '/screenshots/seo setting.png',
+    'subscription setting': '/screenshots/subscription setting.png',
+    'Home page': '/screenshots/Home page.png'
+  };
+
+  const screenshot = topic.screenshot ? screenshotMap[topic.screenshot] : null;
+  const screenshotMarkdown = screenshot ? `\n\n![${topic.title}](${screenshot})\n\n` : '\n\n';
+
+  return `# ${topic.title}
+
+${topic.title} is a crucial aspect of managing your digital product business on Sell Earn Direct. This comprehensive guide will walk you through everything you need to know to master this feature.${screenshotMarkdown}## Introduction
+
+Understanding ${topic.title.toLowerCase()} is essential for building a successful online business. Whether you're just getting started or looking to optimize your existing setup, this guide provides step-by-step instructions and expert tips.
+
+## Getting Started
+
+### What You'll Learn
+
+In this guide, you'll discover:
+- Step-by-step instructions for ${topic.title.toLowerCase()}
+- Best practices and pro tips
+- Common mistakes to avoid
+- Troubleshooting solutions
+- Advanced optimization strategies
+
+### Prerequisites
+
+Before you begin, make sure you have:
+- An active Sell Earn Direct account
+- Access to your channel dashboard
+- Basic understanding of digital product sales
+
+## Step-by-Step Guide
+
+### Step 1: Access the Feature
+
+1. Log in to your Sell Earn Direct dashboard
+2. Navigate to the appropriate section
+3. Locate the ${topic.title.toLowerCase()} option
+4. Click to open the configuration panel
+
+### Step 2: Configure Settings
+
+Follow these detailed steps to configure ${topic.title.toLowerCase()}:
+
+1. **Review Default Settings**: Start by reviewing the default configuration
+2. **Customize Options**: Adjust settings to match your needs
+3. **Test Functionality**: Always test before saving
+4. **Save Changes**: Click save to apply your settings
+
+### Step 3: Optimize for Performance
+
+Once configured, optimize for best results:
+- Test on different devices
+- Check loading speeds
+- Verify all functionality
+- Gather user feedback
+
+## Best Practices
+
+### Do's
+
+✅ **Do** take time to understand all options
+✅ **Do** test thoroughly before going live
+✅ **Do** document your settings
+✅ **Do** monitor performance regularly
+✅ **Do** seek help when needed
+
+### Don'ts
+
+❌ **Don't** rush through setup
+❌ **Don't** ignore mobile optimization
+❌ **Don't** skip testing
+❌ **Don't** forget to backup settings
+❌ **Don't** ignore user feedback
+
+## Common Issues and Solutions
+
+### Issue 1: Settings Not Saving
+
+**Solution**: Clear your browser cache and try again. Ensure you have proper permissions.
+
+### Issue 2: Feature Not Working
+
+**Solution**: Check that all prerequisites are met. Verify your account status and subscription level.
+
+### Issue 3: Performance Issues
+
+**Solution**: Optimize images and content. Check your internet connection and browser compatibility.
+
+## Advanced Tips
+
+### Tip 1: Automation
+
+Consider automating repetitive tasks to save time and reduce errors.
+
+### Tip 2: Analytics
+
+Track performance metrics to identify areas for improvement.
+
+### Tip 3: A/B Testing
+
+Test different configurations to find what works best for your audience.
+
+## Troubleshooting
+
+If you encounter issues:
+
+1. Check the documentation
+2. Review error messages carefully
+3. Contact support if needed
+4. Check community forums for solutions
+
+## Next Steps
+
+After completing ${topic.title.toLowerCase()}:
+
+1. Monitor performance
+2. Gather user feedback
+3. Make iterative improvements
+4. Explore related features
+5. Share your success story
+
+## Conclusion
+
+${topic.title} is a powerful feature that can significantly improve your digital product business. By following this guide and implementing best practices, you'll be well on your way to success.
+
+Ready to get started? Log in to your Sell Earn Direct dashboard and begin configuring ${topic.title.toLowerCase()} today!
+
+## Additional Resources
+
+- [Sell Earn Direct Documentation](/docs)
+- [Video Tutorials](/blog)
+- [Community Forum](/contact)
+- [Support Center](/contact)`;
+}
+
+// 100 comprehensive blog posts about channels, products, analytics, and settings
+const channelBlogTopics = [
+  { slug: 'how-to-create-your-first-channel', title: 'How to Create Your First Channel: Complete Step-by-Step Guide', category: 'Channel Management', screenshot: 'your channel' },
+  { slug: 'channel-customization-guide', title: 'Channel Customization Guide: Make Your Channel Stand Out', category: 'Channel Management', screenshot: 'edit channel screen' },
+  { slug: 'channel-theme-settings', title: 'Channel Theme Settings: Customize Colors, Fonts, and Branding', category: 'Channel Management', screenshot: 'Theme setting' },
+  { slug: 'channel-layout-optimization', title: 'Channel Layout Optimization: Design for Maximum Conversions', category: 'Channel Management', screenshot: 'layout setting' },
+  { slug: 'channel-seo-optimization', title: 'Channel SEO Optimization: Rank Higher in Search Results', category: 'Channel Management', screenshot: 'seo setting' },
+  { slug: 'channel-basic-settings', title: 'Channel Basic Settings: Configure Your Channel Properly', category: 'Channel Management', screenshot: 'basic settings' },
+  { slug: 'managing-multiple-channels', title: 'Managing Multiple Channels: Scale Your Digital Product Business', category: 'Channel Management', screenshot: 'your channel' },
+  { slug: 'channel-url-optimization', title: 'Channel URL Optimization: Choose the Perfect Channel Slug', category: 'Channel Management', screenshot: 'edit channel screen' },
+  { slug: 'channel-visibility-settings', title: 'Channel Visibility Settings: Public vs Private Channels', category: 'Channel Management', screenshot: 'basic settings' },
+  { slug: 'channel-branding-guide', title: 'Channel Branding Guide: Build a Memorable Brand Identity', category: 'Channel Management', screenshot: 'Theme setting' },
+  { slug: 'channel-navigation-setup', title: 'Channel Navigation Setup: Create Intuitive User Experience', category: 'Channel Management', screenshot: 'layout setting' },
+  { slug: 'channel-meta-tags', title: 'Channel Meta Tags: Optimize for Social Media Sharing', category: 'Channel Management', screenshot: 'seo setting' },
+  { slug: 'channel-payment-setup', title: 'Channel Payment Setup: Connect Razorpay to Your Channel', category: 'Channel Management', screenshot: 'basic settings' },
+  { slug: 'channel-email-settings', title: 'Channel Email Settings: Configure Notifications and Communications', category: 'Channel Management', screenshot: 'basic settings' },
+  { slug: 'channel-mobile-optimization', title: 'Channel Mobile Optimization: Ensure Perfect Mobile Experience', category: 'Channel Management', screenshot: 'layout setting' },
+  { slug: 'channel-performance-tracking', title: 'Channel Performance Tracking: Monitor Your Channel Health', category: 'Channel Management', screenshot: 'your channel' },
+  { slug: 'channel-deletion-guide', title: 'Channel Deletion Guide: Safely Remove Unused Channels', category: 'Channel Management', screenshot: 'edit channel screen' },
+  { slug: 'channel-backup-restore', title: 'Channel Backup and Restore: Protect Your Channel Data', category: 'Channel Management', screenshot: 'basic settings' },
+  { slug: 'channel-integration-guide', title: 'Channel Integration Guide: Connect Third-Party Tools', category: 'Channel Management', screenshot: 'basic settings' },
+  { slug: 'channel-best-practices', title: 'Channel Best Practices: Expert Tips for Success', category: 'Channel Management', screenshot: 'your channel' },
+  
+  // Product Management (25 posts)
+  { slug: 'how-to-create-new-product', title: 'How to Create a New Product: Complete Product Creation Guide', category: 'Product Management', screenshot: 'new product' },
+  { slug: 'product-list-management', title: 'Product List Management: Organize and Manage All Your Products', category: 'Product Management', screenshot: 'created product list' },
+  { slug: 'product-details-optimization', title: 'Product Details Optimization: Create Compelling Product Pages', category: 'Product Management', screenshot: 'product' },
+  { slug: 'product-pricing-strategy', title: 'Product Pricing Strategy: Price Your Digital Products Right', category: 'Product Management', screenshot: 'new product' },
+  { slug: 'product-categories-organization', title: 'Product Categories Organization: Structure Your Product Catalog', category: 'Product Management', screenshot: 'created product list' },
+  { slug: 'product-images-optimization', title: 'Product Images Optimization: Use High-Quality Product Images', category: 'Product Management', screenshot: 'product' },
+  { slug: 'product-descriptions-writing', title: 'Product Descriptions Writing: Write Copy That Converts', category: 'Product Management', screenshot: 'product' },
+  { slug: 'product-upload-guide', title: 'Product Upload Guide: Upload Digital Products Successfully', category: 'Product Management', screenshot: 'new product' },
+  { slug: 'product-file-management', title: 'Product File Management: Organize Your Digital Assets', category: 'Product Management', screenshot: 'created product list' },
+  { slug: 'product-bulk-actions', title: 'Product Bulk Actions: Manage Multiple Products Efficiently', category: 'Product Management', screenshot: 'created product list' },
+  { slug: 'product-search-filtering', title: 'Product Search and Filtering: Help Customers Find Products', category: 'Product Management', screenshot: 'created product list' },
+  { slug: 'product-sorting-options', title: 'Product Sorting Options: Display Products Effectively', category: 'Product Management', screenshot: 'created product list' },
+  { slug: 'product-variants-setup', title: 'Product Variants Setup: Offer Multiple Product Options', category: 'Product Management', screenshot: 'new product' },
+  { slug: 'product-bundles-creation', title: 'Product Bundles Creation: Create Product Packages', category: 'Product Management', screenshot: 'new product' },
+  { slug: 'product-inventory-tracking', title: 'Product Inventory Tracking: Monitor Product Availability', category: 'Product Management', screenshot: 'created product list' },
+  { slug: 'product-sales-tracking', title: 'Product Sales Tracking: Track Individual Product Performance', category: 'Product Management', screenshot: 'product' },
+  { slug: 'product-reviews-management', title: 'Product Reviews Management: Handle Customer Reviews', category: 'Product Management', screenshot: 'product' },
+  { slug: 'product-tags-keywords', title: 'Product Tags and Keywords: Improve Product Discoverability', category: 'Product Management', screenshot: 'new product' },
+  { slug: 'product-seo-optimization', title: 'Product SEO Optimization: Rank Your Products in Search', category: 'Product Management', screenshot: 'product' },
+  { slug: 'product-social-sharing', title: 'Product Social Sharing: Enable Social Media Sharing', category: 'Product Management', screenshot: 'product' },
+  { slug: 'product-download-links', title: 'Product Download Links: Set Up Secure Download Delivery', category: 'Product Management', screenshot: 'new product' },
+  { slug: 'product-access-control', title: 'Product Access Control: Manage Who Can Access Products', category: 'Product Management', screenshot: 'new product' },
+  { slug: 'product-updates-notifications', title: 'Product Updates Notifications: Notify Customers of Changes', category: 'Product Management', screenshot: 'created product list' },
+  { slug: 'product-archiving-guide', title: 'Product Archiving Guide: Archive Old or Discontinued Products', category: 'Product Management', screenshot: 'created product list' },
+  { slug: 'product-deletion-safety', title: 'Product Deletion Safety: Safely Remove Products', category: 'Product Management', screenshot: 'created product list' },
+  
+  // Analytics (20 posts)
+  { slug: 'live-analytics-dashboard', title: 'Live Analytics Dashboard: Real-Time Performance Monitoring', category: 'Analytics', screenshot: 'live analytics' },
+  { slug: 'channel-analytics-overview', title: 'Channel Analytics Overview: Understand Your Channel Performance', category: 'Analytics', screenshot: 'channel analytics' },
+  { slug: 'analytics-metrics-explained', title: 'Analytics Metrics Explained: What Each Metric Means', category: 'Analytics', screenshot: 'live analytics' },
+  { slug: 'visitor-tracking-setup', title: 'Visitor Tracking Setup: Track Channel Visitors Effectively', category: 'Analytics', screenshot: 'channel analytics' },
+  { slug: 'conversion-tracking-guide', title: 'Conversion Tracking Guide: Measure Sales and Conversions', category: 'Analytics', screenshot: 'live analytics' },
+  { slug: 'revenue-analytics-deep-dive', title: 'Revenue Analytics Deep Dive: Analyze Your Revenue Streams', category: 'Analytics', screenshot: 'channel analytics' },
+  { slug: 'traffic-sources-analysis', title: 'Traffic Sources Analysis: Understand Where Visitors Come From', category: 'Analytics', screenshot: 'live analytics' },
+  { slug: 'user-behavior-tracking', title: 'User Behavior Tracking: Understand How Users Interact', category: 'Analytics', screenshot: 'channel analytics' },
+  { slug: 'analytics-reports-generation', title: 'Analytics Reports Generation: Create Custom Reports', category: 'Analytics', screenshot: 'channel analytics' },
+  { slug: 'analytics-data-export', title: 'Analytics Data Export: Export Your Analytics Data', category: 'Analytics', screenshot: 'channel analytics' },
+  { slug: 'analytics-dashboard-customization', title: 'Analytics Dashboard Customization: Customize Your View', category: 'Analytics', screenshot: 'live analytics' },
+  { slug: 'analytics-alerts-setup', title: 'Analytics Alerts Setup: Get Notified of Important Changes', category: 'Analytics', screenshot: 'live analytics' },
+  { slug: 'analytics-comparison-tools', title: 'Analytics Comparison Tools: Compare Periods and Channels', category: 'Analytics', screenshot: 'channel analytics' },
+  { slug: 'analytics-goal-tracking', title: 'Analytics Goal Tracking: Set and Track Business Goals', category: 'Analytics', screenshot: 'live analytics' },
+  { slug: 'analytics-funnel-analysis', title: 'Analytics Funnel Analysis: Analyze Conversion Funnels', category: 'Analytics', screenshot: 'channel analytics' },
+  { slug: 'analytics-cohort-analysis', title: 'Analytics Cohort Analysis: Understand Customer Cohorts', category: 'Analytics', screenshot: 'channel analytics' },
+  { slug: 'analytics-retention-metrics', title: 'Analytics Retention Metrics: Measure Customer Retention', category: 'Analytics', screenshot: 'live analytics' },
+  { slug: 'analytics-mobile-vs-desktop', title: 'Analytics Mobile vs Desktop: Compare Device Performance', category: 'Analytics', screenshot: 'channel analytics' },
+  { slug: 'analytics-geographic-analysis', title: 'Analytics Geographic Analysis: Understand Geographic Data', category: 'Analytics', screenshot: 'channel analytics' },
+  { slug: 'analytics-best-practices', title: 'Analytics Best Practices: Make Data-Driven Decisions', category: 'Analytics', screenshot: 'live analytics' },
+  
+  // Subscription Management (15 posts)
+  { slug: 'subscription-modal-setup', title: 'Subscription Modal Setup: Create Engaging Subscription Offers', category: 'Subscription Management', screenshot: 'subscribe modal' },
+  { slug: 'subscription-plans-creation', title: 'Subscription Plans Creation: Design Effective Subscription Tiers', category: 'Subscription Management', screenshot: 'subscription setting' },
+  { slug: 'subscription-pricing-strategy', title: 'Subscription Pricing Strategy: Price Your Subscriptions Right', category: 'Subscription Management', screenshot: 'subscription setting' },
+  { slug: 'subscription-benefits-configuration', title: 'Subscription Benefits Configuration: Define What Subscribers Get', category: 'Subscription Management', screenshot: 'subscription setting' },
+  { slug: 'subscription-billing-cycles', title: 'Subscription Billing Cycles: Set Up Monthly and Annual Plans', category: 'Subscription Management', screenshot: 'subscription setting' },
+  { slug: 'subscription-trial-periods', title: 'Subscription Trial Periods: Offer Free Trials to Attract Customers', category: 'Subscription Management', screenshot: 'subscribe modal' },
+  { slug: 'subscription-cancellation-handling', title: 'Subscription Cancellation Handling: Manage Cancellations Gracefully', category: 'Subscription Management', screenshot: 'subscription setting' },
+  { slug: 'subscription-renewal-management', title: 'Subscription Renewal Management: Ensure Smooth Renewals', category: 'Subscription Management', screenshot: 'subscription setting' },
+  { slug: 'subscription-upgrade-downgrade', title: 'Subscription Upgrade and Downgrade: Allow Plan Changes', category: 'Subscription Management', screenshot: 'subscribe modal' },
+  { slug: 'subscription-payment-failed', title: 'Subscription Payment Failed: Handle Failed Payments', category: 'Subscription Management', screenshot: 'subscription setting' },
+  { slug: 'subscription-analytics-tracking', title: 'Subscription Analytics Tracking: Monitor Subscription Metrics', category: 'Subscription Management', screenshot: 'subscription setting' },
+  { slug: 'subscription-email-notifications', title: 'Subscription Email Notifications: Keep Subscribers Informed', category: 'Subscription Management', screenshot: 'subscribe modal' },
+  { slug: 'subscription-retention-strategies', title: 'Subscription Retention Strategies: Reduce Churn Rate', category: 'Subscription Management', screenshot: 'subscription setting' },
+  { slug: 'subscription-growth-tactics', title: 'Subscription Growth Tactics: Increase Subscriber Base', category: 'Subscription Management', screenshot: 'subscribe modal' },
+  { slug: 'subscription-best-practices', title: 'Subscription Best Practices: Build Successful Subscription Business', category: 'Subscription Management', screenshot: 'subscription setting' },
+  
+  // Settings & Configuration (20 posts)
+  { slug: 'basic-settings-overview', title: 'Basic Settings Overview: Configure Your Account Settings', category: 'Settings', screenshot: 'basic settings' },
+  { slug: 'theme-settings-customization', title: 'Theme Settings Customization: Personalize Your Channel Appearance', category: 'Settings', screenshot: 'Theme setting' },
+  { slug: 'layout-settings-optimization', title: 'Layout Settings Optimization: Design Your Channel Layout', category: 'Settings', screenshot: 'layout setting' },
+  { slug: 'seo-settings-optimization', title: 'SEO Settings Optimization: Improve Search Engine Rankings', category: 'Settings', screenshot: 'seo setting' },
+  { slug: 'payment-settings-configuration', title: 'Payment Settings Configuration: Set Up Payment Processing', category: 'Settings', screenshot: 'basic settings' },
+  { slug: 'email-settings-setup', title: 'Email Settings Setup: Configure Email Notifications', category: 'Settings', screenshot: 'basic settings' },
+  { slug: 'security-settings-guide', title: 'Security Settings Guide: Secure Your Channel and Data', category: 'Settings', screenshot: 'basic settings' },
+  { slug: 'privacy-settings-configuration', title: 'Privacy Settings Configuration: Manage Privacy Options', category: 'Settings', screenshot: 'basic settings' },
+  { slug: 'notification-settings-management', title: 'Notification Settings Management: Control Your Notifications', category: 'Settings', screenshot: 'basic settings' },
+  { slug: 'integration-settings-setup', title: 'Integration Settings Setup: Connect Third-Party Services', category: 'Settings', screenshot: 'basic settings' },
+  { slug: 'api-settings-configuration', title: 'API Settings Configuration: Set Up API Access', category: 'Settings', screenshot: 'basic settings' },
+  { slug: 'backup-settings-setup', title: 'Backup Settings Setup: Automate Data Backups', category: 'Settings', screenshot: 'basic settings' },
+  { slug: 'language-settings-configuration', title: 'Language Settings Configuration: Set Up Multi-Language Support', category: 'Settings', screenshot: 'basic settings' },
+  { slug: 'timezone-settings-setup', title: 'Timezone Settings Setup: Configure Time Zones', category: 'Settings', screenshot: 'basic settings' },
+  { slug: 'currency-settings-management', title: 'Currency Settings Management: Handle Multiple Currencies', category: 'Settings', screenshot: 'basic settings' },
+  { slug: 'tax-settings-configuration', title: 'Tax Settings Configuration: Set Up Tax Calculations', category: 'Settings', screenshot: 'basic settings' },
+  { slug: 'shipping-settings-setup', title: 'Shipping Settings Setup: Configure Shipping Options', category: 'Settings', screenshot: 'basic settings' },
+  { slug: 'discount-settings-management', title: 'Discount Settings Management: Create and Manage Discounts', category: 'Settings', screenshot: 'basic settings' },
+  { slug: 'access-control-settings', title: 'Access Control Settings: Manage User Permissions', category: 'Settings', screenshot: 'basic settings' },
+  { slug: 'advanced-settings-guide', title: 'Advanced Settings Guide: Master Advanced Configuration Options', category: 'Settings', screenshot: 'basic settings' }
+];
+
+// Generate detailed blog posts
+channelBlogTopics.forEach((topic, index) => {
+  const id = (index + 4).toString();
+  const publishedDate = new Date(2024, 1, 1 + index);
+  const publishedAt = publishedDate.toISOString().split('T')[0];
+  
+  blogPosts.push({
+    id,
+    slug: topic.slug,
+    title: topic.title,
+    metaDescription: `Learn how to ${topic.title.toLowerCase()}. Complete guide with step-by-step instructions, best practices, and expert tips for ${topic.category.toLowerCase()}.`,
+    keywords: [topic.slug.replace(/-/g, ' '), topic.category.toLowerCase(), 'sell earn direct', 'digital products', 'online business', 'channel management'],
+    excerpt: `Master ${topic.title.toLowerCase()} with this comprehensive guide. Includes step-by-step instructions, screenshots, best practices, and troubleshooting tips.`,
+    content: generateDetailedBlogContent(topic),
+    author: 'Sell Earn Direct Team',
+    publishedAt,
+    category: topic.category,
+    readTime: 8 + (index % 7), // 8-14 minutes
+    featured: index % 10 === 0 || index < 5
+  });
+});
+
+// Keep the original additionalTopics for backward compatibility but they won't be used
 const additionalTopics = [
   { slug: 'how-to-sell-videos-online', title: 'How to Sell Videos Online: Monetize Your Video Content', category: 'Video Marketing' },
   { slug: 'best-sales-funnel-online', title: 'Best Sales Funnel Online: Top Strategies That Convert', category: 'Sales Funnels' },
@@ -661,7 +946,9 @@ const additionalTopics = [
   { slug: 'mergers-acquisitions', title: 'Mergers and Acquisitions in Digital Products', category: 'Business Strategy' },
 ];
 
-// Generate content for additional blog posts
+// Note: The original additionalTopics generation is replaced by channelBlogTopics above
+// This section is kept for reference but won't generate duplicate posts
+if (false) { // Disabled - using channelBlogTopics instead
 additionalTopics.forEach((topic, index) => {
   const id = (index + 4).toString();
   const publishedDate = new Date(2024, 0, 15 + index);
@@ -788,6 +1075,7 @@ Ready to get started? Create your account on Sell Earn Direct and begin implemen
     featured: index % 10 === 0
   });
 });
+} // End of disabled section
 
 export default blogPosts;
 

@@ -25,10 +25,10 @@ export default function DocumentationPage() {
       title: 'Getting Started',
       description: 'Learn the basics and create your first funnel',
       links: [
-        { name: 'Quick Start Guide', href: '/blog/how-to-use-sell-earn-direct-platform' },
+        { name: 'Quick Start Guide', href: '/docs/quick-start' },
         { name: 'Creating Your Account', href: '/auth/signup' },
         { name: 'Dashboard Overview', href: '/auth/dashboard' },
-        { name: 'Creating Your First Funnel', href: '/blog/how-to-use-sell-earn-direct-platform' }
+        { name: 'Creating Your First Funnel', href: '/docs/creating-first-funnel' }
       ]
     },
     {
@@ -36,10 +36,10 @@ export default function DocumentationPage() {
       title: 'Funnel Builder',
       description: 'Master the funnel builder and customization',
       links: [
-        { name: 'Choosing a Template', href: '/blog/best-sales-funnel-online' },
-        { name: 'Customizing Your Funnel', href: '/blog/funnel-optimization' },
-        { name: 'Adding Products', href: '/blog/digital-product-ideas' },
-        { name: 'Publishing Your Funnel', href: '/blog/create-sales-funnel-free' }
+        { name: 'Creating Your First Funnel', href: '/docs/creating-first-funnel' },
+        { name: 'Customizing Your Funnel', href: '/docs/customizing-funnel' },
+        { name: 'Adding Products', href: '/docs/adding-products' },
+        { name: 'Publishing Your Funnel', href: '/docs/publishing-funnel' }
       ]
     },
     {
@@ -47,10 +47,10 @@ export default function DocumentationPage() {
       title: 'Payments',
       description: 'Set up and manage payments',
       links: [
-        { name: 'Razorpay Integration', href: '/blog/razorpay-integration' },
-        { name: 'Payment Gateway Setup', href: '/blog/payment-gateway-setup' },
-        { name: 'Pricing Your Products', href: '/blog/pricing-strategy-digital-products' },
-        { name: 'Handling Refunds', href: '/blog/refund-policy' }
+        { name: 'Razorpay Integration', href: '/docs/razorpay-integration' },
+        { name: 'Payment Gateway Setup', href: '/docs/razorpay-integration' },
+        { name: 'Pricing Your Products', href: '/docs/adding-products' },
+        { name: 'Handling Refunds', href: '/contact' }
       ]
     },
     {
@@ -58,10 +58,10 @@ export default function DocumentationPage() {
       title: 'Analytics',
       description: 'Track and optimize your performance',
       links: [
-        { name: 'Analytics Dashboard', href: '/blog/analytics-tracking' },
-        { name: 'Conversion Optimization', href: '/blog/conversion-rate-optimization' },
-        { name: 'A/B Testing', href: '/blog/ab-testing-guide' },
-        { name: 'Customer Insights', href: '/blog/customer-journey' }
+        { name: 'Analytics Dashboard', href: '/auth/dashboard/analytics' },
+        { name: 'View Your Dashboard', href: '/auth/dashboard' },
+        { name: 'Understanding Metrics', href: '/auth/dashboard/analytics' },
+        { name: 'Track Performance', href: '/auth/dashboard/analytics' }
       ]
     },
     {
@@ -69,10 +69,10 @@ export default function DocumentationPage() {
       title: 'Selling Courses',
       description: 'Create and sell online courses',
       links: [
-        { name: 'How to Sell Courses', href: '/blog/how-to-sell-my-course-online' },
-        { name: 'Course Creation', href: '/blog/how-to-sell-my-course-online' },
-        { name: 'Pricing Strategies', href: '/blog/pricing-strategy-digital-products' },
-        { name: 'Marketing Your Course', href: '/blog/content-marketing-strategy' }
+        { name: 'Creating Your First Funnel', href: '/docs/creating-first-funnel' },
+        { name: 'Adding Products', href: '/docs/adding-products' },
+        { name: 'Pricing Your Products', href: '/docs/adding-products' },
+        { name: 'Publishing Your Funnel', href: '/docs/publishing-funnel' }
       ]
     },
     {
@@ -80,10 +80,10 @@ export default function DocumentationPage() {
       title: 'Advanced Features',
       description: 'Unlock the full potential',
       links: [
-        { name: 'Custom Domains', href: '/blog/mobile-optimization' },
-        { name: 'Email Marketing', href: '/blog/email-marketing-sales' },
-        { name: 'Automation Tools', href: '/blog/automation-tools' },
-        { name: 'API Documentation', href: '/blog' }
+        { name: 'Customizing Your Funnel', href: '/docs/customizing-funnel' },
+        { name: 'Dashboard Settings', href: '/auth/dashboard/settings' },
+        { name: 'Analytics & Tracking', href: '/auth/dashboard/analytics' },
+        { name: 'Payment Configuration', href: '/auth/dashboard/settings' }
       ]
     },
     {
@@ -91,10 +91,10 @@ export default function DocumentationPage() {
       title: 'For Developers',
       description: 'Technical documentation and APIs',
       links: [
-        { name: 'API Reference', href: '/blog' },
-        { name: 'Webhooks', href: '/blog' },
-        { name: 'Custom Integrations', href: '/blog' },
-        { name: 'Embed Options', href: '/blog' }
+        { name: 'API Documentation', href: '/contact' },
+        { name: 'Integration Guide', href: '/docs/razorpay-integration' },
+        { name: 'Contact for API Access', href: '/contact' },
+        { name: 'Technical Support', href: '/contact' }
       ]
     },
     {
@@ -102,10 +102,10 @@ export default function DocumentationPage() {
       title: 'Support',
       description: 'Get help when you need it',
       links: [
-        { name: 'Help Center', href: '/blog' },
+        { name: 'Documentation Home', href: '/docs' },
         { name: 'Contact Support', href: '/contact' },
-        { name: 'Video Tutorials', href: '/blog' },
-        { name: 'Community Forum', href: '/blog' }
+        { name: 'Quick Start Guide', href: '/docs/quick-start' },
+        { name: 'Help & FAQ', href: '/contact' }
       ]
     }
   ];
@@ -173,19 +173,19 @@ export default function DocumentationPage() {
           <h2 className="text-3xl font-bold text-gray-900 mb-8">Popular Guides</h2>
           <div className="grid md:grid-cols-3 gap-6">
             <GuideCard
-              title="How to Use Sell Earn Direct"
-              description="Complete beginner's guide to get started"
-              link="/blog/how-to-use-sell-earn-direct-platform"
+              title="Quick Start Guide"
+              description="Get started in 10 minutes with our complete guide"
+              link="/docs/quick-start"
             />
             <GuideCard
-              title="Create Your First Sales Funnel"
+              title="Creating Your First Funnel"
               description="Step-by-step funnel creation tutorial"
-              link="/blog/create-sales-funnel-free"
+              link="/docs/creating-first-funnel"
             />
             <GuideCard
-              title="How to Sell Courses Online"
-              description="Complete guide for course creators"
-              link="/blog/how-to-sell-my-course-online"
+              title="Razorpay Integration"
+              description="Complete payment gateway setup guide"
+              link="/docs/razorpay-integration"
             />
           </div>
         </div>
