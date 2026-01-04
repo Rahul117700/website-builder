@@ -99,6 +99,13 @@ export default function RootLayout({
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
         <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
         
+        {/* Google AdSense */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5167608413139807"
+          crossOrigin="anonymous"
+        />
+        
         {/* RSS Feed */}
         <link rel="alternate" type="application/rss+xml" title="Sell Earn Direct Blog RSS Feed" href="/feed.xml" />
       </head>
