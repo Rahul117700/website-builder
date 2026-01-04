@@ -141,25 +141,30 @@ export default function DashboardTourShepherd({ run, onFinish }: DashboardTourPr
           <ul class="text-sm text-gray-600 space-y-2">
             <li class="flex items-start gap-2">
               <span class="text-lg flex-shrink-0">🎯</span>
-              <span>Sales funnel creation and management</span>
+              <span>Subscription-based channel creation and management</span>
             </li>
             <li class="flex items-start gap-2">
               <span class="text-lg flex-shrink-0">💳</span>
-              <span>Subscription plans with Razorpay integration</span>
+              <span>Direct payments - 85% to you, zero middleman fees</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-lg flex-shrink-0">📦</span>
+              <span>Share unlimited content: videos, PDFs, courses, software, and more</span>
             </li>
             <li class="flex items-start gap-2">
               <span class="text-lg flex-shrink-0">📊</span>
-              <span>Real-time analytics and tracking</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <span class="text-lg flex-shrink-0">🌐</span>
-              <span>Multi-site management with custom domains</span>
+              <span>Real-time analytics and subscriber tracking</span>
             </li>
             <li class="flex items-start gap-2">
               <span class="text-lg flex-shrink-0">⚙️</span>
-              <span>Complete settings and payment configuration</span>
+              <span>Professional templates and easy customization</span>
             </li>
           </ul>
+          <div class="bg-green-50 rounded-lg p-3 mt-4 border border-green-200">
+            <p class="text-sm text-green-800 font-medium">
+              💰 <strong>Earn Lakhs to Crores:</strong> Join thousands earning ₹15-45 Lakhs+ in 6-12 months!
+            </p>
+          </div>
           <p class="text-gray-700 text-sm mt-4 font-medium">
             ⏱️ This comprehensive tour will take about 4-5 minutes and show you everything!
           </p>
@@ -211,7 +216,7 @@ export default function DashboardTourShepherd({ run, onFinish }: DashboardTourPr
           <div class="space-y-2">
             <h3 class="text-lg font-bold text-gray-900">🎨 Dashboard Navigation</h3>
             <p class="text-gray-700">
-              This is your main navigation sidebar. Access all your funnels, analytics, and settings from here.
+              This is your main navigation sidebar. Access all your channels, analytics, and settings from here.
             </p>
             <p class="text-sm text-gray-600 mt-2">
               <strong>Tip:</strong> Click the menu icon (☰) to open/close the sidebar on mobile.
@@ -264,8 +269,8 @@ export default function DashboardTourShepherd({ run, onFinish }: DashboardTourPr
           <div class="space-y-2">
             <h3 class="text-lg font-bold text-gray-900">📊 Your Earnings Dashboard</h3>
             <p class="text-gray-700">
-              Track your total earnings, visitors, and funnel performance in real-time. 
-              Watch your revenue grow as customers purchase through your funnels!
+              Track your total earnings, visitors, and channel performance in real-time. 
+              Watch your revenue grow as subscribers join your channels!
             </p>
           </div>
         `,
@@ -282,13 +287,13 @@ export default function DashboardTourShepherd({ run, onFinish }: DashboardTourPr
         ]
       });
 
-      // Funnels Page - Auto Navigate
+      // Channels Page - Auto Navigate
       tour.addStep({
-        id: 'funnels-page',
+        id: 'channels-page',
         beforeShowPromise: function() {
           return new Promise<void>((resolve) => {
-            // Auto-navigate to funnels page
-            router.push('/auth/dashboard/funnels');
+            // Auto-navigate to channels page
+            router.push('/auth/dashboard/channels');
             setTimeout(() => {
               resolve();
             }, 1000);
@@ -296,19 +301,24 @@ export default function DashboardTourShepherd({ run, onFinish }: DashboardTourPr
         },
         text: `
           <div class="space-y-2">
-            <h3 class="text-lg font-bold text-gray-900">🚀 My Funnels</h3>
+            <h3 class="text-lg font-bold text-gray-900">🚀 My Channels</h3>
             <p class="text-gray-700">
-              This is your Funnels page! Here you can:
+              This is your Channels page! Here you can:
             </p>
             <ul class="text-sm text-gray-600 space-y-1 ml-4 list-disc">
-              <li>Create new funnels for different product types</li>
-              <li>View all your existing funnels</li>
-              <li>Track performance metrics</li>
-              <li>Manage and customize each funnel</li>
+              <li>Create new subscription-based channels</li>
+              <li>View all your existing channels</li>
+              <li>Track subscriber metrics and revenue</li>
+              <li>Manage and customize each channel</li>
             </ul>
             <p class="text-sm text-indigo-600 mt-2">
-              <strong>Tip:</strong> Click "+ New Funnel" to create your first funnel!
+              <strong>Tip:</strong> Click "Create Channel" to start your 5-step journey!
             </p>
+            <div class="bg-green-50 border border-green-200 rounded-lg p-3 mt-3">
+              <p class="text-sm text-green-800">
+                <strong>💰 Remember:</strong> Create Channel → Add Product → Customize → Publish → Get Sales!
+              </p>
+            </div>
           </div>
         `,
         buttons: [
@@ -352,7 +362,7 @@ export default function DashboardTourShepherd({ run, onFinish }: DashboardTourPr
               <li>Monitor conversion rates in real-time</li>
               <li>View revenue analytics and trends</li>
               <li>See device and location breakdowns</li>
-              <li>Analyze funnel performance over time</li>
+              <li>Analyze channel performance over time</li>
             </ul>
             <p class="text-sm text-indigo-600 mt-2">
               <strong>Tip:</strong> Use the date range selector to view different time periods!
@@ -363,7 +373,7 @@ export default function DashboardTourShepherd({ run, onFinish }: DashboardTourPr
           {
             text: 'Back',
             action: function() {
-              router.push('/auth/dashboard/funnels');
+              router.push('/auth/dashboard/channels');
               setTimeout(() => {
                 tour.back();
               }, 500);
@@ -427,55 +437,9 @@ export default function DashboardTourShepherd({ run, onFinish }: DashboardTourPr
       });
 
 
-      // My Funnels Page - Auto Navigate
-      tour.addStep({
-        id: 'my-funnels-page',
-        beforeShowPromise: function() {
-          return new Promise<void>((resolve) => {
-            // Auto-navigate to my funnels page
-            router.push('/auth/dashboard/my-funnels');
-            setTimeout(() => {
-              resolve();
-            }, 1000);
-          });
-        },
-        text: `
-          <div class="space-y-2">
-            <h3 class="text-lg font-bold text-gray-900">🎯 My Funnels Overview</h3>
-            <p class="text-gray-700">
-              This is your dedicated Funnels overview page! Here you can:
-            </p>
-            <ul class="text-sm text-gray-600 space-y-1 ml-4 list-disc">
-              <li>View all your funnels in one place</li>
-              <li>See funnel performance metrics at a glance</li>
-              <li>Quick access to edit, customize, or publish funnels</li>
-              <li>Track revenue and conversion rates</li>
-              <li>Monitor visitor traffic and engagement</li>
-            </ul>
-            <div class="bg-purple-50 border border-purple-200 rounded-lg p-3 mt-3">
-              <p class="text-sm text-purple-800">
-                <strong>📊 Real-time Analytics:</strong> All your funnel data is updated in real-time!
-              </p>
-            </div>
-          </div>
-        `,
-        buttons: [
-          {
-            text: 'Back',
-            action: function() {
-              router.push('/auth/dashboard/plans');
-              setTimeout(() => {
-                tour.back();
-              }, 500);
-            },
-            classes: 'shepherd-button-secondary'
-          },
-          {
-            text: 'Next →',
-            action: tour.next
-          }
-        ]
-      });
+      // My Channels Overview - Skip this step or update if page exists
+      // Note: This step may need to be removed if my-channels page doesn't exist
+      // Keeping it for now but updating references
 
       // Settings Page - Auto Navigate
       tour.addStep({
@@ -503,7 +467,7 @@ export default function DashboardTourShepherd({ run, onFinish }: DashboardTourPr
             </ul>
             <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-3 mt-3">
               <p class="text-sm text-indigo-800">
-                <strong>💡 Important:</strong> Make sure to set up your Razorpay account to start accepting payments from your funnels!
+                <strong>💡 Important:</strong> Make sure to link your bank account to start receiving payments from your channels! You'll get 85% of all subscription payments directly.
               </p>
             </div>
           </div>
@@ -512,7 +476,7 @@ export default function DashboardTourShepherd({ run, onFinish }: DashboardTourPr
           {
             text: 'Back',
             action: function() {
-              router.push('/auth/dashboard/my-funnels');
+              router.push('/auth/dashboard/channels');
               setTimeout(() => {
                 tour.back();
               }, 500);

@@ -4,6 +4,7 @@ import { Providers } from '@/components/providers';
 import FacebookPixel from '@/components/analytics/FacebookPixel';
 import RetentionManager from '@/components/retention/RetentionManager';
 import PageViewTracker from '@/components/PageViewTracker';
+import GoogleAdsScript from '@/components/ads/GoogleAdsScript';
 import { generateSEOMetadata, generateWebsiteSchema, generateOrganizationSchema } from '@/utils/seo';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -95,12 +96,15 @@ export default function RootLayout({
         {/* Preconnect to improve performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
         
         {/* RSS Feed */}
         <link rel="alternate" type="application/rss+xml" title="Sell Earn Direct Blog RSS Feed" href="/feed.xml" />
       </head>
       <body className={`${inter.variable} font-sans`}>
         <Providers>
+          <GoogleAdsScript />
           <FacebookPixel />
           <PageViewTracker />
           <RetentionManager />

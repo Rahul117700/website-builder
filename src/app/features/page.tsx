@@ -43,6 +43,11 @@ export default function FeaturesPage() {
       {/* Features organized by category */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         
+        {/* Ad Section 1 */}
+        <div className="mb-12">
+          <InlineAd slot="" />
+        </div>
+        
         {/* Core Features */}
         <div className="mb-20">
           <h2 className="text-3xl font-bold text-gray-900 mb-8">Core Features</h2>
@@ -112,6 +117,11 @@ export default function FeaturesPage() {
               items={['API access', 'Webhooks', 'Custom domains', 'Embed codes']}
             />
           </div>
+        </div>
+        
+        {/* Ad Section 2 */}
+        <div className="mb-12">
+          <InlineAd slot="" />
         </div>
       </div>
 

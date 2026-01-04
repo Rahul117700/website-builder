@@ -39,6 +39,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { gsap } from 'gsap';
 import Link from 'next/link';
+import DashboardAd from '@/components/ads/DashboardAd';
 
 interface RecentActivity {
   id: string;
@@ -327,6 +328,11 @@ export default function DashboardPage() {
               Create Channel
             </Link>
           </div>
+        </div>
+
+        {/* Ad Section */}
+        <div className="mb-6">
+          <DashboardAd slot="" className="max-w-4xl mx-auto" />
         </div>
 
         {/* Banners in One Row */}

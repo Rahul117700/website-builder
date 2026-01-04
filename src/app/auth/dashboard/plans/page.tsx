@@ -13,6 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import DashboardAd from '@/components/ads/DashboardAd';
 
 interface SubscriptionPlan {
   id: string;
@@ -181,6 +182,11 @@ export default function PlansPage() {
   return (
     <DashboardLayout>
       <div className="w-full h-screen p-3 sm:p-4 bg-gray-50 overflow-y-auto">
+        {/* Ad Section */}
+        <div className="mb-4">
+          <DashboardAd slot="" />
+        </div>
+
         {/* Header */}
         <div className="mb-4">
           <h1 className="text-xl font-bold text-gray-900 mb-1">Subscription Plans</h1>

@@ -15,6 +15,7 @@ import {
   ChevronUpIcon,
   ArrowTopRightOnSquareIcon
 } from '@heroicons/react/24/outline';
+import DashboardAd from '@/components/ads/DashboardAd';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<'profile' | 'billing' | 'payment-gateway'>('profile');
@@ -346,6 +347,11 @@ export default function SettingsPage() {
   return (
     <DashboardLayout>
       <div className="w-full h-screen m-0 p-4 sm:p-6 space-y-4 sm:space-y-6 bg-gray-50 overflow-y-auto">
+        {/* Ad Section */}
+        <div className="mb-4">
+          <DashboardAd slot="" />
+        </div>
+
         {/* Header */}
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Settings</h1>

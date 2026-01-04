@@ -14,6 +14,7 @@ import {
 import gsap from 'gsap';
 import Header from '@/components/Header';
 import Logo from '@/components/Logo';
+import InlineAd from '@/components/ads/InlineAd';
 
 export default function PrivacyPage() {
   const { data: session } = useSession();
@@ -111,6 +112,10 @@ export default function PrivacyPage() {
       {/* Hero Section */}
       <section ref={privacyRef} className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white via-indigo-50 to-purple-50">
         <div className="max-w-7xl mx-auto text-center">
+          {/* Ad Section */}
+          <div className="mb-8">
+            <InlineAd slot="" />
+          </div>
           <h1 className="privacy-title text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
             Privacy
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">

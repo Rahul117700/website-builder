@@ -34,6 +34,7 @@ import Logo from '@/components/Logo';
 import ScreenshotShowcase from '@/components/ScreenshotShowcase';
 import dynamic from 'next/dynamic';
 import { blogPosts } from '@/data/blogs';
+import InlineAd from '@/components/ads/InlineAd';
 
 // SaleNotifications removed - flagged as deceptive content by Google Search Console
 // const SaleNotifications = dynamic(() => import('@/components/SaleNotifications'), { ssr: false });

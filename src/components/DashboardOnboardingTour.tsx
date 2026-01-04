@@ -35,18 +35,18 @@ const ONBOARDING_STEPS: Step[] = [
   {
     id: 3,
     title: '🚀 Quick Actions',
-    description: 'Start selling by creating your first product funnel. Choose from various product types!',
+    description: 'Start earning by creating your first subscription channel. Follow our 5-step process: Create Channel → Add Product → Customize → Publish → Get Sales!',
     target: 'quick-actions',
     position: 'top',
     action: {
-      text: 'Create Your First Product',
-      link: '/auth/dashboard/funnels'
+      text: 'Create Your First Channel',
+      link: '/auth/dashboard/channels'
     }
   },
   {
     id: 4,
     title: '🎯 Track Recent Activity',
-    description: 'Monitor all your sales, funnel creations, and important activities in real-time.',
+    description: 'Monitor all your sales, channel creations, subscriber growth, and important activities in real-time.',
     target: 'recent-activity',
     position: 'top'
   }

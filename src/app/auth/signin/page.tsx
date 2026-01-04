@@ -48,7 +48,7 @@ export default function SignInPage() {
           window.location.href = redirectUrl;
         } else {
           router.push('/');
-          router.refresh();
+        router.refresh();
         }
       }, 200);
     }

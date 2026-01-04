@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import InlineAd from '@/components/ads/InlineAd';
 import {
   BookOpenIcon,
   RocketLaunchIcon,
@@ -138,6 +139,11 @@ export default function DocumentationPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Ad Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <InlineAd slot="" />
       </div>
 
       {/* Documentation Sections */}

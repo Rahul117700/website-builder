@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { CheckIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
+import InlineAd from '@/components/ads/InlineAd';
 import { useEffect, useState } from 'react';
 import { detectCountryFromBrowser, getCurrencyForCountry, formatPrice, getSupportedCurrencies } from '@/lib/geo-pricing';
 
@@ -263,6 +264,11 @@ export default function PricingPage() {
             })}
           </div>
         )}
+
+        {/* Ad Section */}
+        <div className="mt-12 mb-12">
+          <InlineAd slot="" />
+        </div>
 
         {/* CTA for signup */}
         <div className="mt-16 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-8 border-2 border-purple-200">

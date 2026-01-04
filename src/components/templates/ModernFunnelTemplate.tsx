@@ -20,6 +20,7 @@ import VideoPreviewPlayer from '@/components/VideoPreviewPlayer';
 import CountdownTimer from '@/components/CountdownTimer';
 import Image from 'next/image';
 import Link from 'next/link';
+import InlineAd from '@/components/ads/InlineAd';
 
 interface ModernFunnelTemplateProps {
     funnel: any;

@@ -49,6 +49,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { signOut } from 'next-auth/react';
 import { CreatePlaylistModal, AddToPlaylistModal } from './PlaylistModals';
+import ProductCardAd from '@/components/ads/ProductCardAd';
+import InlineAd from '@/components/ads/InlineAd';
 
 interface TemplateRendererProps {
   channel: Channel & {
@@ -2774,6 +2776,8 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                 : 'space-y-3 sm:space-y-4 px-2 sm:px-0'
               }>
                 {filteredProducts.map((product: any, index: number) => {
+                  // Insert ad every 6 products in grid view
+                  const shouldShowAd = viewMode === 'grid' && index > 0 && index % 6 === 0;
                   const canAccess = isOwner || !product.isSubscriberOnly || !channel.subscriptionEnabled || hasActiveSubscription;
                   
                   if (viewMode === 'list') {
@@ -3010,15 +3014,23 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                   }
                   
                   return (
-                    <div
-                      key={product.id || index}
-                      onClick={() => {
-                        if (canAccess) {
-                          window.location.href = `/channel/${channel.slug}/products/${product.id}`;
-                        }
-                      }}
-                      className="group relative cursor-pointer"
-                    >
+                    <>
+                      {shouldShowAd && (
+                        <ProductCardAd 
+                          key={`ad-${index}`}
+                          slot=""
+                          className="w-full"
+                        />
+                      )}
+                      <div
+                        key={product.id || index}
+                        onClick={() => {
+                          if (canAccess) {
+                            window.location.href = `/channel/${channel.slug}/products/${product.id}`;
+                          }
+                        }}
+                        className="group relative cursor-pointer"
+                      >
                       {/* Professional Card - Mobile First Design */}
                       <div className="relative bg-white border border-gray-200 rounded-lg sm:rounded-xl overflow-hidden shadow-sm active:shadow-md sm:hover:shadow-xl transition-all duration-300 h-full flex flex-col">
                         {/* Product Image/Video Preview */}
@@ -3267,6 +3279,7 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                         </div>
                       </div>
                     </div>
+                    </>
                   );
                 })}
               </div>
@@ -3856,6 +3869,14 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
     );
   };
 
+  // Small helper component for Stats
+  const Stat = ({ label, value, color }: { label: string; value: number; color: string }) => (
+    <div className="text-center">
+      <div className={`text-4xl font-bold ${color}`}>{value}</div>
+      <div className="text-sm text-gray-600 mt-1">{label}</div>
+    </div>
+  );
+
   // Tech Template - Modern gradient design
   const renderTechTemplate = () => {
     return (
@@ -4029,14 +4050,6 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
       </div>
     );
   };
-
-  // Small helper component for Stats
-  const Stat = ({ label, value, color }: { label: string; value: number; color: string }) => (
-    <div className="text-center">
-      <div className={`text-4xl font-bold ${color}`}>{value}</div>
-      <div className="text-sm text-gray-600 mt-1">{label}</div>
-    </div>
-  );
 
   // Education Template - Warm and inviting
   const renderEducationTemplate = () => {

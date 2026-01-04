@@ -27,6 +27,7 @@ import {
   BookmarkIcon as BookmarkIconSolid,
   StarIcon as StarIconSolid,
 } from '@heroicons/react/24/solid';
+import InlineAd from '@/components/ads/InlineAd';
 
 export default function ProductPage() {
   const params = useParams();
@@ -1261,6 +1262,11 @@ export default function ProductPage() {
         <div className="flex flex-col lg:flex-row">
           {/* Main Content Area - Full Width */}
           <div className="flex-1 w-full">
+            {/* Ad Section 1 */}
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
+              <InlineAd slot="" />
+            </div>
+
             {/* Video/Content Player - Full Width */}
             <div className="w-full bg-black">
               {renderContent()}

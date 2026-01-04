@@ -27,6 +27,7 @@ import toast from 'react-hot-toast';
 import { generateProductSchema, generateBreadcrumbSchema } from '@/utils/seo';
 import LogoLoader from '@/components/loaders/LogoLoader';
 import ModernFunnelTemplate from '@/components/templates/ModernFunnelTemplate';
+import InlineAd from '@/components/ads/InlineAd';
 
 
 
