@@ -3022,15 +3022,15 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                           className="w-full"
                         />
                       )}
-                      <div
-                        key={product.id || index}
-                        onClick={() => {
-                          if (canAccess) {
-                            window.location.href = `/channel/${channel.slug}/products/${product.id}`;
-                          }
-                        }}
-                        className="group relative cursor-pointer"
-                      >
+                    <div
+                      key={product.id || index}
+                      onClick={() => {
+                        if (canAccess) {
+                          window.location.href = `/channel/${channel.slug}/products/${product.id}`;
+                        }
+                      }}
+                      className="group relative cursor-pointer"
+                    >
                       {/* Professional Card - Mobile First Design */}
                       <div className="relative bg-white border border-gray-200 rounded-lg sm:rounded-xl overflow-hidden shadow-sm active:shadow-md sm:hover:shadow-xl transition-all duration-300 h-full flex flex-col">
                         {/* Product Image/Video Preview */}
