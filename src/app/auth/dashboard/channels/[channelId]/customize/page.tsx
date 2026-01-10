@@ -648,42 +648,18 @@ export default function ChannelEditorPage() {
                         </div>
                       </div>
 
-                      {/* Publish or Connect Razorpay - Always Visible, Last Priority */}
+                      {/* Publish Button - Always Visible */}
                       <div className="px-6 py-5 bg-gradient-to-br from-gray-50 to-white border-t border-gray-200 flex-shrink-0">
-                        {checkingPayment ? (
-                          <button
-                            disabled
-                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed text-sm font-bold"
-                          >
-                            <ArrowPathIcon className="h-4 w-4 animate-spin flex-shrink-0" />
-                            <span className="truncate">Checking Payment Setup...</span>
-                          </button>
-                        ) : hasRazorpayConfig ? (
-                          <button
-                            onClick={() => {
-                              handlePublish();
-                              setShowPublishingModal(false);
-                            }}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all text-sm font-bold shadow-lg touch-manipulation active:scale-95"
-                          >
-                            <RocketLaunchIcon className="h-5 w-5 flex-shrink-0" />
-                            <span className="truncate">Publish Channel</span>
-                          </button>
-                        ) : (
-                          <div className="space-y-2">
-                            <Link
-                              href="/auth/dashboard/razorpay-setup"
-                              onClick={() => setShowPublishingModal(false)}
-                              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all text-sm font-bold shadow-lg touch-manipulation active:scale-95"
-                            >
-                              <CreditCardIcon className="h-5 w-5 flex-shrink-0" />
-                              <span className="truncate text-center">Connect Razorpay to Publish</span>
-                            </Link>
-                            <p className="text-xs text-gray-500 text-center px-2 break-words">
-                              After connecting, you'll be able to publish your channel
-                            </p>
-                          </div>
-                        )}
+                        <button
+                          onClick={() => {
+                            handlePublish();
+                            setShowPublishingModal(false);
+                          }}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all text-sm font-bold shadow-lg touch-manipulation active:scale-95"
+                        >
+                          <RocketLaunchIcon className="h-5 w-5 flex-shrink-0" />
+                          <span className="truncate">Publish Channel</span>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -760,40 +736,15 @@ export default function ChannelEditorPage() {
               <span className="hidden md:inline">Preview</span>
             </Link>
 
-            {/* Publish Button or Connect Razorpay Button - Hidden on mobile (shown in dropdown) */}
+            {/* Publish Button - Hidden on mobile (shown in dropdown) */}
             <div className="hidden md:block">
-              {checkingPayment ? (
-                <div className="flex flex-col items-end gap-1">
-                  <button
-                    disabled
-                    className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed text-xs sm:text-sm font-bold touch-manipulation"
-                  >
-                    <ArrowPathIcon className="h-4 w-4 animate-spin" />
-                    <span className="hidden sm:inline">Checking...</span>
-                  </button>
-                </div>
-              ) : hasRazorpayConfig ? (
-                <button
-                  onClick={handlePublish}
-                  className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all text-xs sm:text-sm font-bold shadow-lg touch-manipulation active:scale-95"
-                >
-                  <RocketLaunchIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">Publish</span>
-                </button>
-              ) : (
-                <div className="flex flex-col items-end gap-1">
-                  <Link
-                    href="/auth/dashboard/razorpay-setup"
-                    className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all text-xs sm:text-sm font-bold shadow-lg touch-manipulation active:scale-95"
-                  >
-                    <CreditCardIcon className="h-4 w-4" />
-                    <span className="hidden sm:inline">Connect Razorpay</span>
-                  </Link>
-                  <p className="text-xs text-gray-500 text-right pr-1">
-                    After connecting, you'll be able to publish your channel
-                  </p>
-                </div>
-              )}
+              <button
+                onClick={handlePublish}
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all text-xs sm:text-sm font-bold shadow-lg touch-manipulation active:scale-95"
+              >
+                <RocketLaunchIcon className="h-4 w-4" />
+                <span className="hidden sm:inline">Publish</span>
+              </button>
             </div>
           </div>
         </div>

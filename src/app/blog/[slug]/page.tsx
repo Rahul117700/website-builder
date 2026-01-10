@@ -5,7 +5,6 @@ import { blogPosts } from '@/data/blogs';
 import { CalendarIcon, ClockIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import MarkdownContent from '@/components/blog/MarkdownContent';
 import Header from '@/components/Header';
-import InlineAd from '@/components/ads/InlineAd';
 
 interface BlogPostPageProps {
   params: {
@@ -104,11 +103,6 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           <MarkdownContent content={post.content} />
         </article>
 
-        {/* Ad Section 1 */}
-        <div className="mb-12">
-          <InlineAd slot="" />
-        </div>
-
         {/* CTA Section */}
         <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-8 text-white text-center mb-12">
           <h2 className="text-2xl font-bold mb-4">Ready to Start Selling Digital Products?</h2>
@@ -121,11 +115,6 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
           >
             Get Started Free
           </Link>
-        </div>
-
-        {/* Ad Section 2 */}
-        <div className="mb-12">
-          <InlineAd slot="" />
         </div>
 
         {/* Related Posts */}

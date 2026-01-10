@@ -1,6 +1,9 @@
 'use client';
 
-import { CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
+import { CurrencyDollarIcon, CreditCardIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { toast } from 'react-hot-toast';
 
 interface SubscriptionTabProps {
   channel: any;
@@ -8,6 +11,59 @@ interface SubscriptionTabProps {
 }
 
 export default function SubscriptionTab({ channel, onUpdate }: SubscriptionTabProps) {
+  const [hasRazorpayConfig, setHasRazorpayConfig] = useState(false);
+  const [checkingPayment, setCheckingPayment] = useState(true);
+
+  useEffect(() => {
+    checkRazorpayConfig();
+  }, []);
+
+  // Refresh Razorpay config check when page becomes visible (e.g., returning from setup page)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkRazorpayConfig();
+      }
+    };
+
+    const handleFocus = () => {
+      checkRazorpayConfig();
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
+
+  const checkRazorpayConfig = async () => {
+    try {
+      setCheckingPayment(true);
+      const response = await fetch('/api/razorpay-config');
+      const data = await response.json();
+      setHasRazorpayConfig(data.hasConfig || false);
+    } catch (error) {
+      console.error('Error checking Razorpay config:', error);
+      setHasRazorpayConfig(false);
+    } finally {
+      setCheckingPayment(false);
+    }
+  };
+
+  const handleToggleSubscription = () => {
+    // If trying to enable subscription without Razorpay, prevent and show message
+    if (!channel.subscriptionEnabled && !hasRazorpayConfig) {
+      toast.error('Please connect Razorpay first to enable subscriptions');
+      return;
+    }
+    
+    // Allow toggling if already enabled or if Razorpay is connected
+    onUpdate({ subscriptionEnabled: !channel.subscriptionEnabled });
+  };
+
   return (
     <div className="space-y-6">
       {/* Enable Subscription */}
@@ -17,10 +73,11 @@ export default function SubscriptionTab({ channel, onUpdate }: SubscriptionTabPr
             Enable Subscription
           </label>
           <button
-            onClick={() => onUpdate({ subscriptionEnabled: !channel.subscriptionEnabled })}
+            onClick={handleToggleSubscription}
+            disabled={checkingPayment || (!hasRazorpayConfig && !channel.subscriptionEnabled)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
               channel.subscriptionEnabled ? 'bg-green-600' : 'bg-gray-300'
-            }`}
+            } ${(!hasRazorpayConfig && !channel.subscriptionEnabled) ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -32,6 +89,30 @@ export default function SubscriptionTab({ channel, onUpdate }: SubscriptionTabPr
         <p className="text-xs text-gray-600">
           Allow users to subscribe to your channel for exclusive content
         </p>
+        
+        {/* Show Connect Razorpay message only when subscription is disabled and Razorpay is not configured */}
+        {!hasRazorpayConfig && !channel.subscriptionEnabled && (
+          <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <CreditCardIcon className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-amber-900 mb-1">
+                  Payment Gateway Required
+                </p>
+                <p className="text-xs text-amber-800 mb-3">
+                  To enable subscriptions, you need to connect your Razorpay account. This allows you to receive subscription payments directly to your bank account.
+                </p>
+                <Link
+                  href="/auth/dashboard/razorpay-setup"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-lg hover:from-amber-700 hover:to-amber-800 transition-all text-xs font-bold shadow-lg"
+                >
+                  <CreditCardIcon className="h-4 w-4" />
+                  Connect Razorpay
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {channel.subscriptionEnabled && (

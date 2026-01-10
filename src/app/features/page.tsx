@@ -2,7 +2,6 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import InlineAd from '@/components/ads/InlineAd';
 import {
   RocketLaunchIcon,
   ChartBarIcon,
@@ -43,11 +42,6 @@ export default function FeaturesPage() {
 
       {/* Features organized by category */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        
-        {/* Ad Section 1 */}
-        <div className="mb-12">
-          <InlineAd slot="" />
-        </div>
         
         {/* Core Features */}
         <div className="mb-20">
@@ -120,10 +114,6 @@ export default function FeaturesPage() {
           </div>
         </div>
         
-        {/* Ad Section 2 */}
-        <div className="mb-12">
-          <InlineAd slot="" />
-        </div>
       </div>
 
       {/* CTA */}

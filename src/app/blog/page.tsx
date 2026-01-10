@@ -4,7 +4,6 @@ import { blogPosts } from '@/data/blogs';
 import { CalendarIcon, ClockIcon } from '@heroicons/react/24/outline';
 import Header from '@/components/Header';
 import CategoryBrowser from '@/components/blog/CategoryBrowser';
-import InlineAd from '@/components/ads/InlineAd';
 
 export const metadata: Metadata = {
   title: 'Blog - Sell Earn Direct | Learn How to Sell Digital Products Online',
@@ -60,11 +59,6 @@ export default function BlogPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Ad Section 1 */}
-        <div className="mb-12">
-          <InlineAd slot="" />
-        </div>
-
         {/* Featured Posts */}
         {featuredPosts.length > 0 && (
           <section className="mb-16">
@@ -112,25 +106,12 @@ export default function BlogPage() {
         {/* Categories - Interactive Component */}
         <CategoryBrowser categories={categories} />
 
-        {/* Ad Section 2 */}
-        <div className="mb-12">
-          <InlineAd slot="" />
-        </div>
-
         {/* All Posts */}
         <section>
           <h2 className="text-3xl font-bold text-black mb-8">All Articles</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {blogPosts.map((post, index) => {
-              // Insert ad every 6 posts
-              const shouldShowAd = index > 0 && index % 6 === 0;
               return (
-                <>
-                  {shouldShowAd && (
-                    <div key={`ad-${index}`} className="md:col-span-2 lg:col-span-3">
-                      <InlineAd slot="" />
-                    </div>
-                  )}
                   <article
                     key={post.id}
                     className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
@@ -161,7 +142,6 @@ export default function BlogPage() {
                   </div>
                 </Link>
               </article>
-                </>
               );
             })}
           </div>

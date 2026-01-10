@@ -20,7 +20,6 @@ import { useState } from 'react';
 import gsap from 'gsap';
 import Header from '@/components/Header';
 import Logo from '@/components/Logo';
-import InlineAd from '@/components/ads/InlineAd';
 
 export default function AboutPage() {
   const { data: session } = useSession();
@@ -170,10 +169,6 @@ export default function AboutPage() {
       {/* Hero Section */}
       <section ref={aboutRef} className="relative pt-20 pb-12 px-4 bg-gradient-to-br from-white via-indigo-50 to-purple-50">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Ad Section */}
-          <div className="mb-8">
-            <InlineAd slot="" />
-          </div>
           <h1 className="about-title text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
             Empowering Digital
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">

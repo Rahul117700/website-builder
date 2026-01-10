@@ -49,8 +49,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { signOut } from 'next-auth/react';
 import { CreatePlaylistModal, AddToPlaylistModal } from './PlaylistModals';
-import ProductCardAd from '@/components/ads/ProductCardAd';
-import InlineAd from '@/components/ads/InlineAd';
 
 interface TemplateRendererProps {
   channel: Channel & {
@@ -2776,8 +2774,6 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                 : 'space-y-3 sm:space-y-4 px-2 sm:px-0'
               }>
                 {filteredProducts.map((product: any, index: number) => {
-                  // Insert ad every 6 products in grid view
-                  const shouldShowAd = viewMode === 'grid' && index > 0 && index % 6 === 0;
                   const canAccess = isOwner || !product.isSubscriberOnly || !channel.subscriptionEnabled || hasActiveSubscription;
                   
                   if (viewMode === 'list') {
@@ -3014,14 +3010,6 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                   }
                   
                   return (
-                    <>
-                      {shouldShowAd && (
-                        <ProductCardAd 
-                          key={`ad-${index}`}
-                          slot=""
-                          className="w-full"
-                        />
-                      )}
                     <div
                       key={product.id || index}
                       onClick={() => {
@@ -3279,7 +3267,6 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                         </div>
                       </div>
                     </div>
-                    </>
                   );
                 })}
               </div>

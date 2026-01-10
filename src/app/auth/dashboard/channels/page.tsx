@@ -36,7 +36,6 @@ import {
 import { gsap } from 'gsap';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
-import DashboardAd from '@/components/ads/DashboardAd';
 
 interface Channel {
   id: string;
@@ -555,29 +554,16 @@ export default function ChannelsDashboard() {
           </select>
         </div>
 
-        {/* Ad Section - After Stats */}
-        <div className="my-6">
-          <DashboardAd slot="" className="max-w-4xl mx-auto" />
-        </div>
-
         {/* Channels Grid */}
         {filteredChannels.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredChannels.map((channel, index) => {
-              // Insert ad every 6 channels
-              const shouldShowAd = index > 0 && index % 6 === 0;
               const randomTip = getRandomTip();
               const totalViews = channel.analytics?.totalViews || 0;
               const totalRevenue = channel.analytics?.totalRevenue || 0;
               const totalProducts = channel._count?.products || 0;
               
               return (
-                <>
-                  {shouldShowAd && (
-                    <div key={`ad-${index}`} className="md:col-span-2 lg:col-span-3">
-                      <DashboardAd slot="" />
-                    </div>
-                  )}
                   <div
                     key={channel.id}
                     className="group bg-white rounded-xl border border-gray-200 hover:border-gray-400 transition-all duration-300 overflow-hidden transform hover:-translate-y-1"
@@ -717,7 +703,6 @@ export default function ChannelsDashboard() {
                     </div>
                   </div>
                 </div>
-                </>
               );
             })}
           </div>

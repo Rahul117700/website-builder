@@ -33,7 +33,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { gsap } from 'gsap';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from 'recharts';
-import DashboardAd from '@/components/ads/DashboardAd';
 
 interface AnalyticsData {
   totalViews: number;
@@ -369,11 +368,6 @@ export default function AnalyticsPage() {
   return (
     <DashboardLayout>
       <div className="w-full h-screen m-0 p-3 sm:p-4 space-y-3 bg-gray-50 overflow-y-auto">
-        {/* Ad Section */}
-        <div className="mb-4">
-          <DashboardAd slot="" />
-        </div>
-
         {/* Header */}
         <div ref={heroRef} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div>
