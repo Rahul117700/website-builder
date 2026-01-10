@@ -19,40 +19,45 @@ export default function GeographicBreakdown({ data = [] }: GeographicBreakdownPr
   const totalVisitors = data.reduce((sum, d) => sum + d.visitors, 0);
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-3">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center space-x-2">
-          <MapPinIcon className="h-4 w-4 text-gray-700" />
-          <h3 className="text-sm font-semibold text-gray-900">Geographic Distribution</h3>
+    <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all group">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <MapPinIcon className="h-5 w-5 text-gray-900" />
+          </div>
+          <div>
+            <h3 className="text-lg font-black text-gray-900 tracking-tight">Geo Markets</h3>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Global Reach Breakdown</p>
+          </div>
         </div>
         {hasData && (
-          <button className="text-[10px] text-gray-600 hover:text-gray-900 font-medium">
-            View Map
+          <button className="text-[10px] font-black text-gray-400 hover:text-gray-900 uppercase tracking-widest transition-colors">
+            View Map →
           </button>
         )}
       </div>
 
       {hasData ? (
-        <>
-          <div className="space-y-2">
-            {data.map((item, index) => (
-              <div key={item.country} className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2 flex-1">
-                    <span className="text-lg">{item.flag}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-gray-900 truncate">{item.country}</p>
-                      <p className="text-[10px] text-gray-600">{item.visitors.toLocaleString()} visitors</p>
+        <div className="space-y-4">
+          <div className="space-y-4">
+            {data.slice(0, 5).map((item, index) => (
+              <div key={item.country} className="space-y-2">
+                <div className="flex items-center justify-between group/item cursor-default">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl filter drop-shadow-sm group-hover/item:scale-110 transition-transform">{item.flag}</span>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900">{item.country}</p>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{item.visitors.toLocaleString()} Unique Visits</p>
                     </div>
                   </div>
-                  <div className="text-right ml-2">
-                    <p className="text-xs font-semibold text-gray-900">{item.percentage}%</p>
-                    <p className="text-[10px] text-emerald-600">₹{item.revenue.toLocaleString()}</p>
+                  <div className="text-right">
+                    <p className="text-sm font-black text-gray-900">{item.percentage}%</p>
+                    <p className="text-[10px] font-bold text-emerald-600">₹{item.revenue.toLocaleString()}</p>
                   </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                <div className="relative h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
                   <div
-                    className="bg-gradient-to-r from-gray-700 to-gray-900 h-1.5 rounded-full transition-all duration-500"
+                    className="absolute top-0 left-0 h-full bg-gray-900 rounded-full transition-all duration-1000 ease-out"
                     style={{ width: `${item.percentage}%` }}
                   ></div>
                 </div>
@@ -60,22 +65,25 @@ export default function GeographicBreakdown({ data = [] }: GeographicBreakdownPr
             ))}
           </div>
 
-          <div className="mt-4 pt-3 border-t border-gray-200">
-            <div className="flex items-center justify-between text-[10px]">
-              <span className="text-gray-600">Total Countries</span>
-              <span className="font-semibold text-gray-900">{data.length}</span>
-            </div>
-            <div className="flex items-center justify-between text-[10px] mt-1">
-              <span className="text-gray-600">Total Visitors</span>
-              <span className="font-semibold text-gray-900">{totalVisitors.toLocaleString()}</span>
+          <div className="mt-8 pt-6 border-t border-gray-100">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Active Regions</p>
+                <p className="text-lg font-black text-gray-900">{data.length}</p>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Market Purity</p>
+                <p className="text-lg font-black text-gray-900">High</p>
+              </div>
             </div>
           </div>
-        </>
+        </div>
       ) : (
-        <div className="py-8 text-center">
-          <MapPinIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-          <p className="text-xs text-gray-600 mb-1">No geographic data available</p>
-          <p className="text-[10px] text-gray-500">Location tracking will appear here once enabled</p>
+        <div className="py-12 flex flex-col items-center justify-center">
+          <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center border border-gray-100 mb-4">
+            <MapPinIcon className="h-8 w-8 text-gray-300" />
+          </div>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Awaiting Location Data...</p>
         </div>
       )}
     </div>

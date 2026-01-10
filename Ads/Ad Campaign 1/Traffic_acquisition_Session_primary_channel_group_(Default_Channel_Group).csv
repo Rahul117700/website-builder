@@ -1,0 +1,17 @@
+# ----------------------------------------
+# Traffic acquisition: Session primary channel group (Default Channel Group)
+# Account: sendearndirect
+# Property: SellEarnDirect
+# ----------------------------------------
+# 
+# All Users
+# Start date: 20251213
+# End date: 20260109
+Session primary channel group (Default Channel Group),Sessions,Engaged sessions,Engagement rate,Average engagement time per session,Events per session,Event count,Key events,Session key event rate,Total revenue
+Direct,627,194,0.3094098883572568,77.3365231259968,8.910685805422647,5587,0,0,0
+Paid Search,82,55,0.6707317073170732,104.35365853658537,9.487804878048781,778,0,0,0
+Referral,27,19,0.7037037037037037,197.88888888888889,17.59259259259259,475,0,0,0
+Organic Search,8,6,0.75,166.125,13.375,107,0,0,0
+Unassigned,6,0,0,928.5,70.66666666666667,424,0,0,0
+Cross-network,2,2,1,59,9.5,19,0,0,0
+Organic Social,1,1,1,5,4,4,0,0,0

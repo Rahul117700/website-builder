@@ -41,6 +41,10 @@ import {
   PlayIcon as PlayIconSolid,
   ArrowRightIcon as ArrowRightIconSolid
 } from '@heroicons/react/24/solid';
+import CTAButton from '@/components/CTAButton';
+import ExitIntentPopup from '@/components/ExitIntentPopup';
+import StickyBuyNow from '@/components/StickyBuyNow';
+import { generateProductSchema, getSchemaScript } from '@/utils/seo';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -110,40 +114,40 @@ export default function HomePage() {
   // Main Carousel Categories Data
   const mainCarouselSlides = [
     {
-      category: "Wellness / Education / Success",
-      title: "Transform Lives Through Wellness",
-      description: "Share your knowledge in yoga, meditation, fitness, and personal development. Help others achieve their wellness goals while building a sustainable income.",
-      highlights: ["Online Courses", "Wellness Programs", "Coaching Services", "Educational Content"],
-      image: "https://images.pexels.com/photos/4473608/pexels-photo-4473608.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop",
+      category: "Channel Dashboard",
+      title: "Your Command Center",
+      description: "Get a comprehensive view of your entire business. Manage channels, products, and performance from a single, intuitive dashboard.",
+      highlights: ["Business Overview", "Quick Actions", "Performance Stats", "Recent Activity"],
+      image: "/screenshots/your channel.png",
+      gradient: "from-indigo-500 to-purple-600",
+      icon: "📊"
+    },
+    {
+      category: "Visual Editor",
+      title: "Customize with Ease",
+      description: "Tailor your channel's look and feel with our powerful visual editor. No coding required—just point, click, and design your perfect storefront.",
+      highlights: ["Drag & Drop", "Real-time Preview", "Theme Control", "Layout Options"],
+      image: "/screenshots/edit channel screen.png",
+      gradient: "from-blue-500 to-cyan-600",
+      icon: "🎨"
+    },
+    {
+      category: "Analytics",
+      title: "Data-Driven Decisions",
+      description: "Track every click, view, and sale in real-time. Our deep analytics give you the insights you need to optimize your funnel and boost revenue.",
+      highlights: ["Live Tracking", "Conversion Rates", "Traffic Sources", "Revenue Reports"],
+      image: "/screenshots/live analytics.png",
       gradient: "from-green-500 to-emerald-600",
-      icon: "🧘"
+      icon: "📈"
     },
     {
-      category: "Tech / Business Tools",
-      title: "Build Business Solutions",
-      description: "Create and sell software, SaaS tools, and business applications. From productivity apps to enterprise solutions, monetize your technical expertise.",
-      highlights: ["SaaS Products", "Business Software", "Productivity Tools", "Enterprise Solutions"],
-      image: "https://images.pexels.com/photos/2116721/pexels-photo-2116721.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop",
-      gradient: "from-blue-500 to-indigo-600",
-      icon: "💼"
-    },
-    {
-      category: "Code",
-      title: "Share Your Code Expertise",
-      description: "Sell code templates, frameworks, libraries, and development resources. Help fellow developers build faster while earning from your creations.",
-      highlights: ["Code Templates", "Frameworks", "Libraries", "Dev Tools"],
-      image: "https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop",
-      gradient: "from-purple-500 to-pink-600",
-      icon: "💻"
-    },
-    {
-      category: "Photography / Creativity",
-      title: "Monetize Your Creative Vision",
-      description: "Sell photography, design assets, creative templates, and digital art. Turn your creative passion into a profitable business.",
-      highlights: ["Photography", "Design Assets", "Creative Templates", "Digital Art"],
-      image: "https://images.pexels.com/photos/1854897/pexels-photo-1854897.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop",
+      category: "Products",
+      title: "Manage Digital Assets",
+      description: "Upload, organize, and sell your digital products effortlessly. Supports courses, ebooks, software, and more with instant delivery.",
+      highlights: ["Instant Delivery", "Secure Storage", "File Protection", "Easy Updates"],
+      image: "/screenshots/created product list.png",
       gradient: "from-orange-500 to-red-600",
-      icon: "📸"
+      icon: "📦"
     }
   ];
 
@@ -487,7 +491,7 @@ export default function HomePage() {
     const processSteps = document.querySelectorAll('.process-step');
     const progressLine = document.querySelector('.process-progress-line');
     const progressLineMobile = document.querySelector('.process-progress-line-mobile');
-    
+
     if (processSteps.length > 0) {
       const processTl = gsap.timeline({
         delay: 1.2, // Start after hero animations
@@ -509,7 +513,7 @@ export default function HomePage() {
         const stepIcon = step.querySelector('.process-step-icon');
         const stepBadge = step.querySelector('.process-step-badge');
         const stepText = step.querySelector('.process-step-text');
-        
+
         // Step entrance animation - different for mobile vs desktop
         const isMobile = window.innerWidth < 640;
         processTl
@@ -521,10 +525,10 @@ export default function HomePage() {
             ease: 'back.out(1.7)'
           }, index * 0.4)
           // Icon bounce in
-          .fromTo(stepIcon, 
+          .fromTo(stepIcon,
             { scale: 0, rotation: -180 },
-            { 
-              scale: 1, 
+            {
+              scale: 1,
               rotation: 0,
               duration: 0.5,
               ease: 'back.out(2)'
@@ -617,6 +621,77 @@ export default function HomePage() {
       });
     }
 
+    // Payment Section Scroll Animations
+    gsap.fromTo('.payment-header',
+      { opacity: 0, y: 50 },
+      {
+        scrollTrigger: {
+          trigger: '.payment-header',
+          start: 'top 80%',
+        },
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: 'power3.out'
+      }
+    );
+
+    gsap.to('.payment-live-indicator', {
+      scrollTrigger: {
+        trigger: '.payment-header',
+        start: 'top 80%',
+      },
+      opacity: 1,
+      duration: 0.8,
+      delay: 0.5,
+      ease: 'power2.out'
+    });
+
+    gsap.fromTo('.payment-desc-card',
+      { opacity: 0, scale: 0.95 },
+      {
+        scrollTrigger: {
+          trigger: '.payment-desc-card',
+          start: 'top 85%',
+        },
+        opacity: 1,
+        scale: 1,
+        duration: 0.8,
+        ease: 'back.out(1.7)'
+      }
+    );
+
+    gsap.fromTo('.payment-method-card',
+      { opacity: 0, y: 40, rotationX: -15 },
+      {
+        scrollTrigger: {
+          trigger: '.payment-method-card',
+          start: 'top 80%',
+        },
+        opacity: 1,
+        y: 0,
+        rotationX: 0,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: 'power2.out'
+      }
+    );
+
+    gsap.fromTo('.payment-workflow-step',
+      { opacity: 0, x: -20 },
+      {
+        scrollTrigger: {
+          trigger: '.payment-workflow-step',
+          start: 'top 85%',
+        },
+        opacity: 1,
+        x: 0,
+        duration: 0.6,
+        stagger: 0.2,
+        ease: 'power2.out'
+      }
+    );
+
     // Fallback: Ensure visibility after a delay in case animations fail
     setTimeout(ensureVisibility, 5000);
 
@@ -651,10 +726,22 @@ export default function HomePage() {
   ];
 
 
+  const productSchema = generateProductSchema({
+    name: 'SellEarnDirect Platform',
+    description: 'Create and sell digital products online. Build sales funnels, manage customers, and grow your revenue.',
+    image: 'https://sellearndirect.com/logo.png',
+    price: 0,
+    url: 'https://sellearndirect.com',
+    rating: { value: 4.8, count: 1250 }
+  });
+
   return (
     <div className="min-h-screen bg-white overflow-hidden">
+      <div dangerouslySetInnerHTML={{ __html: getSchemaScript(productSchema) }} />
+      <ExitIntentPopup discount="51%" />
+      <StickyBuyNow />
       {/* Sale Notifications removed - flagged as deceptive content by Google */}
-      
+
       {/* Custom CSS for Marquee Animations and Carousel */}
       <style dangerouslySetInnerHTML={{
         __html: `
@@ -1239,7 +1326,7 @@ export default function HomePage() {
                 {/* Animated progress line */}
                 <div className="process-progress-line absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full" style={{ width: '0%' }}></div>
               </div>
-              
+
               {/* Vertical connection line for mobile */}
               <div className="sm:hidden absolute left-7 top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-gray-200 to-transparent" style={{ zIndex: 0 }}>
                 {/* Animated progress line for mobile */}
@@ -1359,21 +1446,34 @@ export default function HomePage() {
           </div>
 
           <div className="hero-buttons flex flex-col sm:flex-row gap-2 justify-center mb-4" style={{ opacity: 1, transform: 'translateY(0)' }}>
-            <Link
-              href={session ? "/auth/dashboard" : "/auth/signin"}
-              data-tour="create-channel"
-              className="group bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2 rounded-lg text-sm sm:text-base font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all flex items-center justify-center shadow-md hover:shadow-lg"
+            <CTAButton
+              onClick={() => router.push(session ? "/auth/dashboard" : "/auth/signin")}
+              className="group text-sm sm:text-base font-semibold shadow-md hover:shadow-lg"
             >
               Start Selling Now
               <ArrowRightIconSolid className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <button
+            </CTAButton>
+
+            {/* <button
               onClick={() => setShowScreenshotShowcase(true)}
               className="group border-2 border-indigo-600 text-indigo-600 px-5 py-2 rounded-lg text-sm sm:text-base font-semibold hover:bg-indigo-50 transition-all flex items-center justify-center shadow-sm hover:shadow-md"
             >
               <PlayIcon className="mr-2 h-4 w-4" />
               See How It Works
-            </button>
+            </button> */}
+          </div>
+
+          {/* Trust Badges - Improved Visibility - Moved below buttons */}
+          <div className="hidden sm:flex flex-row gap-6 mb-8 justify-center">
+            <div className="flex items-center gap-2 text-sm text-gray-700 font-semibold bg-white shadow-sm px-4 py-2 rounded-full border border-gray-200">
+              <span className="text-green-600 font-bold">✓</span> No Credit Card
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-700 font-semibold bg-white shadow-sm px-4 py-2 rounded-full border border-gray-200">
+              <span className="text-green-600 font-bold">✓</span> 14-Day Free Trial
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-700 font-semibold bg-white shadow-sm px-4 py-2 rounded-full border border-gray-200">
+              <span className="text-green-600 font-bold">✓</span> Cancel Anytime
+            </div>
           </div>
         </div>
 
@@ -1394,268 +1494,143 @@ export default function HomePage() {
             </div>
 
             {/* Carousel Container - 50/50 Split Design - Sleek Premium Height */}
-            <div className="relative min-h-[320px] sm:min-h-[380px] overflow-hidden bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-200">
+            <div className="relative min-h-[600px] sm:min-h-[450px] overflow-hidden bg-white rounded-xl sm:rounded-2xl shadow-2xl border border-gray-100">
               {/* Carousel Slides */}
               {mainCarouselSlides.map((slide, index) => {
-                // Get chart data based on slide index
-                let chartData, chartType;
+                // Determine chart type and data based on index, similar to ScreenshotShowcase logic
+                // Using hardcoded data for the hero to ensure it matches the premium look
+                let chartData = [];
+                let chartType = 'line';
+                let highlightColor = '#ec4899';
+                let graphTitle = 'Sales & Revenue Growth';
+
                 if (index === 0) {
-                  chartData = revenueGrowthData;
-                  chartType = 'revenue';
+                  // Code Expertise - Matches Slide 1
+                  chartData = [
+                    { week: 'Week 1', revenue: 12, sales: 4 },
+                    { week: 'Week 2', revenue: 45, sales: 15 },
+                    { week: 'Week 3', revenue: 78, sales: 28 },
+                    { week: 'Week 4', revenue: 125, sales: 42 }
+                  ];
+                  chartType = 'line';
+                  highlightColor = '#ec4899';
+                  graphTitle = 'Sales & Revenue Growth';
                 } else if (index === 1) {
-                  chartData = categoryEarningsData;
-                  chartType = 'category';
+                  // Category Earnings - Matches Slide 2 style
+                  chartData = [
+                    { day: 'Mon', visits: 120, clicks: 45 },
+                    { day: 'Tue', visits: 180, clicks: 68 },
+                    { day: 'Wed', visits: 150, clicks: 55 },
+                    { day: 'Thu', visits: 220, clicks: 89 },
+                    { day: 'Fri', visits: 280, clicks: 112 },
+                    { day: 'Sat', visits: 310, clicks: 145 },
+                    { day: 'Sun', visits: 290, clicks: 130 }
+                  ];
+                  chartType = 'area';
+                  highlightColor = '#8b5cf6';
+                  graphTitle = 'Visitor Engagement';
                 } else if (index === 2) {
+                  // Sales Growth - kept as line
                   chartData = salesGrowthData;
-                  chartType = 'sales';
+                  chartType = 'line';
+                  highlightColor = '#10b981';
+                  graphTitle = 'Weekly Performance';
                 } else {
+                  // Live tracking
                   chartData = liveTrackingData;
-                  chartType = 'live';
+                  chartType = 'bar'; // map 'live' to bar for simplicity in this shared view
+                  highlightColor = '#f59e0b';
+                  graphTitle = 'Real-time Analytics';
                 }
 
                 return (
                   <div
                     key={index}
-                    className={`absolute inset-0 transition-all duration-700 ease-in-out ${currentSlide === index
-                      ? 'opacity-100 translate-x-0 z-10'
-                      : 'opacity-0 translate-x-full z-0'
+                    className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${currentSlide === index
+                      ? 'opacity-100 z-10'
+                      : 'opacity-0 z-0'
                       }`}
                   >
                     <div className="h-full flex flex-col lg:flex-row">
-                      {/* Image Section - 50% - Only render if image exists */}
-                      {slide.image && (
-                        <div className="w-full lg:w-1/2 h-40 sm:h-56 lg:h-full relative overflow-hidden">
+                      {/* LEFT SIDE: Visual (Image or Gradient) */}
+                      <div className="w-full lg:w-3/5 h-[40%] lg:h-full relative overflow-hidden group">
+                        {/* Image Rendering */}
+                        {slide.image ? (
                           <img
                             src={slide.image}
                             alt={slide.title}
-                            className="w-full h-full object-cover"
-                            loading={index === 0 ? "eager" : "lazy"}
-                            style={{ display: 'block' }}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           />
-                          {/* Gradient Overlay */}
-                          <div className={`absolute inset-0 bg-gradient-to-br ${slide.gradient} opacity-20`}></div>
-                          {/* Category Badge */}
-                          <div className="absolute top-4 left-4">
-                            <div className="bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg">
-                              <span className="text-sm font-semibold text-gray-900">{slide.category}</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                        ) : (
+                          // Fallback gradient if no image
+                          <div className={`w-full h-full bg-gradient-to-br ${slide.gradient} opacity-90`}></div>
+                        )}
 
-                      {/* Chart Section - 50% (or full width if no image) - Premium White Design */}
-                      <div className={`w-full ${slide.image ? 'lg:w-1/2' : ''} flex flex-col justify-start p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-50 to-white`}>
-                        <div className="flex flex-col">
-                          {/* Title */}
-                          <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 leading-tight">
+                        {/* Gradient Overlay for text readability on mobile */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent lg:hidden"></div>
+                      </div>
+
+                      {/* RIGHT SIDE: Content & Graph */}
+                      <div className="w-full lg:w-2/5 h-[60%] lg:h-full bg-white p-5 lg:p-8 flex flex-col justify-center relative">
+                        {/* Slide Content */}
+                        <div className="mb-4 lg:mb-6 relative z-10">
+                          <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 leading-tight">
                             {slide.title}
                           </h3>
-
-                          {/* Description */}
-                          <p className="text-sm sm:text-base text-gray-600 mb-3 leading-relaxed">
+                          <p className="text-sm sm:text-base text-gray-600 leading-relaxed line-clamp-3">
                             {slide.description}
                           </p>
+                        </div>
 
-                          {/* Chart Container */}
-                          <div className="mb-4">
-                            {chartData && chartType === 'revenue' && (
-                              <>
-                                <div className="mb-2">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center space-x-2">
-                                      <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${slide.gradient}`}></div>
-                                      <span className="text-xs font-semibold text-gray-700">Revenue Growth (₹K)</span>
-                                    </div>
-                                    <div className="text-xs text-gray-500">Live Tracking</div>
-                                  </div>
-                                  <div className="h-[140px] sm:h-[160px]">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                      <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
-                                        <defs>
-                                          <linearGradient id={`colorRevenue${index}`} x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                                          </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                        <XAxis dataKey="month" stroke="#6b7280" fontSize={11} />
-                                        <YAxis stroke="#6b7280" fontSize={11} />
-                                        <Tooltip
-                                          contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
-                                          formatter={(value: any) => [`₹${value}K`, 'Revenue']}
-                                        />
-                                        <Area
-                                          type="monotone"
-                                          dataKey="revenue"
-                                          stroke="#10b981"
-                                          strokeWidth={2}
-                                          fillOpacity={1}
-                                          fill={`url(#colorRevenue${index})`}
-                                        />
-                                      </AreaChart>
-                                    </ResponsiveContainer>
-                                  </div>
-                                </div>
-                                <div className="mt-2 text-xs text-gray-600 text-center">
-                                  <span className="font-semibold text-green-600">+215%</span> growth in 6 months
-                                </div>
-                              </>
-                            )}
-
-                            {chartData && chartType === 'category' && (
-                              <>
-                                <div className="mb-2">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center space-x-2">
-                                      <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${slide.gradient}`}></div>
-                                      <span className="text-xs font-semibold text-gray-700">Earnings by Category (₹K)</span>
-                                    </div>
-                                  </div>
-                                  <div className="h-[140px] sm:h-[160px]">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                      <BarChart data={chartData} layout="vertical" margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                        <XAxis type="number" stroke="#6b7280" fontSize={11} />
-                                        <YAxis dataKey="category" type="category" stroke="#6b7280" fontSize={11} width={65} />
-                                        <Tooltip
-                                          contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
-                                          formatter={(value: any) => [`₹${value}K`, 'Earnings']}
-                                        />
-                                        <Bar dataKey="earnings" radius={[0, 8, 8, 0]}>
-                                          {chartData.map((entry, idx) => (
-                                            <Cell key={`cell-${idx}`} fill={['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b'][idx]} />
-                                          ))}
-                                        </Bar>
-                                      </BarChart>
-                                    </ResponsiveContainer>
-                                  </div>
-                                </div>
-                                <div className="mt-2 text-xs text-gray-600 text-center">
-                                  <span className="font-semibold text-blue-600">Software/SaaS</span> leads with highest earnings
-                                </div>
-                              </>
-                            )}
-
-                            {chartData && chartType === 'sales' && (
-                              <>
-                                <div className="mb-2">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center space-x-2">
-                                      <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${slide.gradient}`}></div>
-                                      <span className="text-xs font-semibold text-gray-700">Sales & Revenue Growth</span>
-                                    </div>
-                                  </div>
-                                  <div className="h-[140px] sm:h-[160px]">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                      <LineChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 35 }}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                        <XAxis dataKey="week" stroke="#6b7280" fontSize={11} />
-                                        <YAxis stroke="#6b7280" fontSize={11} />
-                                        <Tooltip
-                                          contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
-                                          formatter={(value: any, name: string) => [
-                                            name === 'sales' ? `${value} sales` : `₹${value}K`,
-                                            name === 'sales' ? 'Sales' : 'Revenue'
-                                          ]}
-                                        />
-                                        <Legend
-                                          verticalAlign="bottom"
-                                          height={30}
-                                          wrapperStyle={{ fontSize: '10px', paddingTop: '8px' }}
-                                          iconType="line"
-                                          iconSize={10}
-                                        />
-                                        <Line
-                                          type="monotone"
-                                          dataKey="sales"
-                                          stroke="#8b5cf6"
-                                          strokeWidth={2}
-                                          dot={{ fill: '#8b5cf6', r: 4 }}
-                                          name="Sales"
-                                        />
-                                        <Line
-                                          type="monotone"
-                                          dataKey="revenue"
-                                          stroke="#ec4899"
-                                          strokeWidth={2}
-                                          dot={{ fill: '#ec4899', r: 4 }}
-                                          name="Revenue (₹K)"
-                                        />
-                                      </LineChart>
-                                    </ResponsiveContainer>
-                                  </div>
-                                </div>
-                                <div className="mt-2 text-xs text-gray-600 text-center">
-                                  <span className="font-semibold text-purple-600">4x increase</span> in just one month
-                                </div>
-                              </>
-                            )}
-
-                            {chartData && chartType === 'live' && (
-                              <>
-                                <div className="mb-2">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center space-x-2">
-                                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                      <span className="text-xs font-semibold text-gray-700">Live Sales Tracking</span>
-                                    </div>
-                                    <div className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-semibold border border-green-200">LIVE</div>
-                                  </div>
-                                  <div className="h-[140px] sm:h-[160px]">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                      <BarChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 35 }}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                        <XAxis dataKey="time" stroke="#6b7280" fontSize={11} />
-                                        <YAxis stroke="#6b7280" fontSize={11} />
-                                        <Tooltip
-                                          contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
-                                          formatter={(value: any, name: string) => [
-                                            name === 'sales' ? `${value} sales` : `₹${value}K`,
-                                            name === 'sales' ? 'Sales' : 'Revenue'
-                                          ]}
-                                        />
-                                        <Legend
-                                          verticalAlign="bottom"
-                                          height={30}
-                                          wrapperStyle={{ fontSize: '10px', paddingTop: '8px' }}
-                                          iconSize={10}
-                                        />
-                                        <Bar dataKey="sales" fill="#f59e0b" radius={[8, 8, 0, 0]} name="Sales" />
-                                        <Bar dataKey="revenue" fill="#10b981" radius={[8, 8, 0, 0]} name="Revenue (₹K)" />
-                                      </BarChart>
-                                    </ResponsiveContainer>
-                                  </div>
-                                </div>
-                                <div className="mt-2 text-xs text-gray-600 text-center">
-                                  <span className="font-semibold text-green-600">Real-time</span> tracking of your earnings
-                                </div>
-                              </>
-                            )}
+                        {/* Graph Container - Premium Card Look */}
+                        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative z-10">
+                          <div className="flex items-center gap-2 mb-4">
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: highlightColor }}></div>
+                            <h4 className="font-semibold text-gray-800 text-xs sm:text-sm uppercase tracking-wide">
+                              {graphTitle}
+                            </h4>
                           </div>
 
-                          {/* Educational Info */}
-                          <div className="mt-3 grid grid-cols-2 gap-2">
-                            {slide.highlights.map((highlight, idx) => (
-                              <div
-                                key={idx}
-                                className="bg-white rounded-lg p-2 border border-gray-200 shadow-sm"
-                              >
-                                <div className="flex items-center space-x-2">
-                                  <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${slide.gradient} flex-shrink-0`}></div>
-                                  <span className="text-xs font-medium text-gray-700 truncate">{highlight}</span>
-                                </div>
-                              </div>
-                            ))}
+                          <div className="h-[120px] sm:h-[140px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                              {chartType === 'line' ? (
+                                <LineChart data={chartData}>
+                                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                  <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 10 }} dy={10} />
+                                  <YAxis hide={true} domain={[0, 'dataMax + 20']} />
+                                  <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} itemStyle={{ fontSize: '12px', fontWeight: 600 }} />
+                                  <Line type="monotone" dataKey="revenue" stroke={highlightColor} strokeWidth={3} dot={{ r: 3, fill: highlightColor, strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 5 }} />
+                                  <Line type="monotone" dataKey="sales" stroke="#cbd5e1" strokeWidth={2} dot={false} />
+                                </LineChart>
+                              ) : chartType === 'area' ? (
+                                <AreaChart data={chartData}>
+                                  <defs>
+                                    <linearGradient id={`colorGradient${index}`} x1="0" y1="0" x2="0" y2="1">
+                                      <stop offset="5%" stopColor={highlightColor} stopOpacity={0.3} />
+                                      <stop offset="95%" stopColor={highlightColor} stopOpacity={0} />
+                                    </linearGradient>
+                                  </defs>
+                                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 10 }} dy={10} />
+                                  <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                                  <Area type="monotone" dataKey="visits" stroke={highlightColor} fillOpacity={1} fill={`url(#colorGradient${index})`} />
+                                </AreaChart>
+                              ) : (
+                                // Fallback/Bar chart for others
+                                <BarChart data={chartData}>
+                                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                  <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 10 }} />
+                                  <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                                  <Bar dataKey="sales" fill={highlightColor} radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                              )}
+                            </ResponsiveContainer>
                           </div>
 
-                          {/* CTA Button */}
-                          <Link
-                            href={session ? "/auth/dashboard" : "/auth/signin"}
-                            className={`mt-3 inline-flex items-center justify-center px-4 py-2 rounded-lg font-semibold text-white bg-gradient-to-r ${slide.gradient} hover:opacity-90 transition-all shadow-md hover:shadow-lg text-sm`}
-                          >
-                            Start Earning Now
-                            <ArrowRightIconSolid className="ml-2 h-4 w-4" />
-                          </Link>
+                          {/* Growth Stat Pilled */}
+                          <div className="absolute top-4 right-4 bg-green-50 text-green-700 px-2 py-1 rounded-md text-xs font-bold border border-green-100">
+                            +215% Growth
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1664,49 +1639,19 @@ export default function HomePage() {
               })}
             </div>
 
-            {/* Carousel Indicators */}
+            {/* Carousel Indicators - Outside */}
             <div className="flex justify-center mt-6 space-x-2">
               {mainCarouselSlides.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${currentSlide === index
-                    ? 'bg-indigo-500 w-8'
-                    : 'bg-gray-600 hover:bg-gray-500'
+                  className={`h-2 rounded-full transition-all duration-300 ${currentSlide === index
+                    ? 'bg-indigo-600 w-8'
+                    : 'bg-gray-300 w-2 hover:bg-gray-400'
                     }`}
                   aria-label={`Go to slide ${index + 1}`}
                 />
               ))}
-            </div>
-
-            {/* Enhanced Floating Elements */}
-            <div className="absolute -top-4 -left-4 w-8 h-8 bg-green-500/20 rounded-full blur-sm animate-pulse"></div>
-            <div className="absolute -bottom-4 -right-4 w-12 h-12 bg-blue-500/20 rounded-full blur-sm animate-pulse" style={{ animationDelay: '1s' }}></div>
-            <div className="absolute top-1/2 -right-8 w-6 h-6 bg-purple-500/20 rounded-full blur-sm animate-pulse" style={{ animationDelay: '2s' }}></div>
-
-            {/* Additional Floating Elements */}
-            <div className="absolute top-1/4 -right-12 w-4 h-4 bg-emerald-500/20 rounded-full blur-sm animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-            <div className="absolute bottom-1/3 -left-8 w-10 h-10 bg-indigo-500/20 rounded-full blur-sm animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-
-            {/* Animated Connection Lines */}
-            <div className="absolute top-1/2 left-0 w-16 h-px bg-gradient-to-r from-transparent via-green-500/30 to-transparent animate-pulse"></div>
-            <div className="absolute top-1/2 right-0 w-16 h-px bg-gradient-to-l from-transparent via-blue-500/30 to-transparent animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-          </div>
-        </div>
-      </section>
-
-      {/* Premium Direct Payment Feature Section - Complete Redesign */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 via-white to-gray-50 relative overflow-hidden" style={{ zIndex: 10 }}>
-        {/* Subtle background pattern */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-200 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-200 rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto relative z-10">
-          {/* Top Banner - Modern Design */}
-          <div className="flex justify-center mb-8">
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full shadow-lg">
               <BoltIcon className="h-5 w-5 text-white" />
               <span className="text-white font-bold text-sm sm:text-base">
                 <span className="hidden sm:inline">100% DIRECT PAYMENTS - ZERO MIDDLEMAN FEES</span>
@@ -1716,73 +1661,115 @@ export default function HomePage() {
           </div>
 
           {/* Main Heading - Modern Typography */}
-          <div className="text-center mb-10">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-gray-900 mb-3 leading-[1.1] tracking-tight">
+          <div className="text-center mb-16 relative payment-header">
+            {/* Background Focus Elements */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 select-none pointer-events-none opacity-5">
+              <span className="text-[15rem] sm:text-[25rem] font-black text-orange-500 leading-none">DIRECT</span>
+            </div>
+
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-48 bg-orange-400/10 rounded-full blur-3xl"></div>
+
+            {/* Live Indicator */}
+            <div className="flex items-center justify-center gap-2 mb-6 opacity-0 payment-live-indicator">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+              </span>
+              <span className="text-[10px] sm:text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Live Direct Processing</span>
+            </div>
+
+            <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-gray-900 tracking-tight leading-[1] mb-6">
               Accept Payments
               <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-amber-600 to-orange-500">
                 Directly
               </span>
             </h2>
-            <div className="inline-block mt-2 px-4 py-1.5 bg-orange-100 rounded-lg">
-              <p className="text-orange-700 font-bold text-lg sm:text-xl">No Middleman Fees</p>
+            <div className="inline-flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-orange-100 to-amber-100 rounded-full border border-orange-200 shadow-sm">
+              <span className="flex h-2 w-2 rounded-full bg-orange-500 animate-ping"></span>
+              <p className="text-orange-800 font-black text-xs sm:text-sm uppercase tracking-[0.2em]">No Middleman Fees</p>
             </div>
           </div>
 
           {/* Description Card - Clean Design */}
-          <div className="max-w-4xl mx-auto mb-12">
-            <div className="bg-white rounded-2xl p-6 sm:p-8 border-2 border-gray-100 shadow-sm">
+          <div className="max-w-4xl mx-auto mb-12 payment-desc-card">
+            <div className="bg-white rounded-2xl p-6 sm:p-8 border-2 border-gray-100 shadow-sm transform transition-all duration-500 hover:shadow-md">
               <p className="text-center text-base sm:text-lg text-gray-700 leading-relaxed">
                 Get paid directly to your bank account. <span className="font-bold text-gray-900">No platform fees, no hidden charges.</span> Keep 100% of your revenue minus standard payment processing fees.
               </p>
             </div>
           </div>
 
-          {/* Payment Methods - Modern Card Design */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {/* Payment Methods - Ultra Modern Glass Design */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20 relative">
+            {/* Background Glows */}
+            <div className="absolute top-1/2 left-0 w-64 h-64 bg-blue-400/10 rounded-full blur-[100px] pointer-events-none"></div>
+            <div className="absolute bottom-0 right-0 w-64 h-64 bg-purple-400/10 rounded-full blur-[100px] pointer-events-none"></div>
+
             {[
               {
                 title: "Credit/Debit Cards",
-                description: "Accept Visa, Mastercard, Amex, and more. Secure payment processing with industry-standard encryption.",
-                icon: "💳",
-                bgColor: "bg-blue-50",
-                borderColor: "border-blue-200",
-                hoverColor: "hover:border-blue-400"
+                subtitle: "Direct Processing",
+                description: "Accept Visa, Mastercard, Amex, and more. Secure end-to-end encrypted processing.",
+                details: "Supports 135+ Currencies",
+                icon: <CurrencyDollarIcon className="w-10 h-10" />,
+                accentColor: "blue",
+                gradient: "from-blue-500 to-indigo-600"
               },
               {
-                title: "UPI Payments",
-                description: "Instant UPI payments via PhonePe, Google Pay, Paytm, and all UPI apps. Real-time transaction processing.",
-                icon: "📱",
-                bgColor: "bg-green-50",
-                borderColor: "border-green-200",
-                hoverColor: "hover:border-green-400"
+                title: "UPI / Net Banking",
+                subtitle: "Local Payments",
+                description: "Direct settlements via PhonePe, GPay, Paytm, and all major Indian banks.",
+                details: "Instant QR Settlements",
+                icon: <BoltIcon className="w-10 h-10" />,
+                accentColor: "green",
+                gradient: "from-emerald-500 to-teal-600"
               },
               {
-                title: "Bank Transfers",
-                description: "Direct bank transfers to ANY INDIAN BANK ACCOUNT. Lower fees, faster processing, simplified reconciliation.",
-                icon: "🏦",
-                bgColor: "bg-purple-50",
-                borderColor: "border-purple-200",
-                hoverColor: "hover:border-purple-400"
+                title: "Direct Bank Payouts",
+                subtitle: "Account to Account",
+                description: "Automatic daily payouts to any Indian bank account with detailed reconciliation.",
+                details: "T+1 Settlement Cycle",
+                icon: <BanknotesIcon className="w-10 h-10" />,
+                accentColor: "purple",
+                gradient: "from-purple-500 to-pink-600"
               }
             ].map((method, index) => (
               <div
                 key={index}
-                className={`group relative ${method.bgColor} rounded-2xl p-6 border-2 ${method.borderColor} ${method.hoverColor} transition-all duration-300 hover:shadow-xl hover:-translate-y-1`}
+                className="group relative bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all duration-500 hover:-translate-y-2 overflow-hidden payment-method-card"
               >
-                {/* Icon Container */}
-                <div className="mb-5">
-                  <div className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl text-5xl bg-white border-2 ${method.borderColor} shadow-md transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                {/* Decorative Accent */}
+                <div className={`absolute -top-12 -right-12 w-32 h-32 bg-gradient-to-br ${method.gradient} opacity-5 group-hover:opacity-10 transition-opacity blur-2xl`}></div>
+
+                {/* Icon Section */}
+                <div className="relative mb-8">
+                  <div className={`inline-flex items-center justify-center w-20 h-20 rounded-[1.5rem] bg-gradient-to-br ${method.gradient} text-white shadow-lg transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
                     {method.icon}
                   </div>
                 </div>
 
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  {method.title}
-                </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {method.description}
-                </p>
+                {/* Content */}
+                <div className="relative">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`text-[10px] font-black uppercase tracking-[0.2em] text-${method.accentColor}-600`}>
+                      {method.subtitle}
+                    </span>
+                    <div className={`h-1 w-1 rounded-full bg-${method.accentColor}-600`}></div>
+                  </div>
+                  <h3 className="text-2xl font-black text-gray-900 mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-gray-900 group-hover:to-gray-600 transition-all">
+                    {method.title}
+                  </h3>
+                  <p className="text-gray-500 text-sm leading-relaxed mb-6 font-medium">
+                    {method.description}
+                  </p>
+
+                  {/* Footer Tag */}
+                  <div className="pt-6 border-t border-gray-100 flex items-center justify-between">
+                    <span className="text-xs font-bold text-gray-900">{method.details}</span>
+                    <ArrowRightIcon className="h-4 w-4 text-gray-400 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -1798,54 +1785,121 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-              {/* Connection Line */}
-              <div className="hidden md:block absolute top-16 left-0 right-0 h-1 bg-gradient-to-r from-orange-200 via-amber-200 to-orange-200 rounded-full" style={{ zIndex: 0 }}></div>
+            {/* Desktop View (Workflow Design) */}
+            <div className="hidden md:grid grid-cols-3 gap-12 relative pt-10">
+              {/* Connection Line - Professional Gradient */}
+              <div className="absolute top-[108px] left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" style={{ zIndex: 0 }}></div>
+              <div className="absolute top-[108px] left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" style={{ zIndex: 1 }}></div>
+
+              {[
+                {
+                  number: "01",
+                  title: "Create Your Channel",
+                  description: "Launch your brand with a professional, high-converting storefront in minutes.",
+                  icon: RocketLaunchIcon,
+                  gradient: "from-indigo-600 to-blue-600"
+                },
+                {
+                  number: "02",
+                  title: "Add Payment Method",
+                  description: "Securely connect your bank account. No middlemen, no platform tax.",
+                  icon: CurrencyDollarIcon,
+                  gradient: "from-orange-500 to-amber-600"
+                },
+                {
+                  number: "03",
+                  title: "Start Earning",
+                  description: "Receive instant payouts directly. Keep 100% of what you earn.",
+                  icon: BanknotesIcon,
+                  gradient: "from-emerald-500 to-teal-600"
+                }
+              ].map((step, index) => (
+                <div
+                  key={index}
+                  className="group text-center relative z-10 payment-workflow-step"
+                >
+                  {/* Step Number Badge */}
+                  <div className="mb-8 relative inline-block">
+                    <div className="absolute -inset-4 bg-gray-50 rounded-full blur-xl group-hover:bg-orange-50 transition-colors"></div>
+                    <div className="w-44 h-44 rounded-full border-2 border-gray-100 bg-white flex items-center justify-center relative shadow-sm group-hover:border-orange-200 group-hover:shadow-xl transition-all duration-500">
+                      <div className={`w-36 h-36 rounded-full bg-gradient-to-tr ${step.gradient} flex items-center justify-center transform group-hover:scale-95 transition-transform duration-500`}>
+                        <step.icon className="h-16 w-16 text-white" />
+                      </div>
+                      {/* Floating Number */}
+                      <div className="absolute -top-2 -right-2 w-14 h-14 bg-white border-4 border-gray-50 rounded-full flex items-center justify-center shadow-lg group-hover:border-orange-100">
+                        <span className="text-xl font-black text-gray-900">{step.number}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <h4 className="text-2xl font-black text-gray-900 mb-4 group-hover:text-orange-600 transition-colors">
+                    {step.title}
+                  </h4>
+                  <p className="text-gray-500 text-sm leading-relaxed max-w-[240px] mx-auto font-medium">
+                    {step.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Mobile View (Vertical Timeline) - "Cool" Animated Look */}
+            <div className="md:hidden relative px-4 space-y-12">
+              {/* Vertical Connecting Line */}
+              <div className="absolute left-[39px] top-8 bottom-12 w-1 bg-gradient-to-b from-orange-200 via-amber-400 to-orange-200" style={{ zIndex: 0 }}></div>
 
               {[
                 {
                   number: "1",
-                  title: "Create Your Channel",
-                  description: "Build your branded channel with our easy-to-use builder",
+                  title: "Create Channel",
+                  subtitle: "Sign up & start building",
                   icon: RocketLaunchIcon,
-                  iconColor: "bg-indigo-600"
+                  gradient: "from-indigo-500 to-purple-500",
+                  shadow: "shadow-indigo-200"
                 },
                 {
                   number: "2",
-                  title: "Add Payment Method",
-                  description: "Connect your bank account for payment payouts",
-                  icon: CurrencyDollarIcon,
-                  iconColor: "bg-blue-600"
+                  title: "Add Product",
+                  subtitle: "Upload your digital file",
+                  icon: ShoppingBagIcon, // Use ShoppingIcon if defined
+                  fallbackIcon: CurrencyDollarIcon, // Fallback if ShoppingIcon isn't available
+                  gradient: "from-blue-500 to-cyan-500",
+                  shadow: "shadow-blue-200"
                 },
                 {
                   number: "3",
+                  title: "Customize",
+                  subtitle: "Design your page",
+                  icon: Cog6ToothIcon,  // Use Cog icon
+                  fallbackIcon: RocketLaunchIcon,
+                  gradient: "from-emerald-500 to-teal-500",
+                  shadow: "shadow-emerald-200"
+                },
+                {
+                  number: "4",
                   title: "Start Earning",
-                  description: "Receive payments directly - no platform fees",
+                  subtitle: "Go live instantly",
                   icon: BanknotesIcon,
-                  iconColor: "bg-green-600"
+                  gradient: "from-orange-500 to-amber-500",
+                  shadow: "shadow-orange-200"
                 }
               ].map((step, index) => (
-                <div 
-                  key={index} 
-                  className="group text-center relative z-10"
-                >
-                  {/* Step Number Circle */}
-                  <div className="relative inline-block mb-6">
-                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-xl transform group-hover:scale-110 transition-all duration-300">
-                      <span className="text-5xl font-black text-white">{step.number}</span>
-                    </div>
-                    {/* Icon Badge */}
-                    <div className={`absolute -bottom-2 -right-2 w-14 h-14 ${step.iconColor} rounded-full flex items-center justify-center border-4 border-white shadow-lg`}>
-                      <step.icon className="h-7 w-7 text-white" />
+                <div key={index} className="relative z-10 flex items-center gap-6 group">
+                  {/* Left Icon/Number Box */}
+                  <div className="relative shrink-0">
+                    <div className={`w-14 h-14 rounded-2xl bg-white border border-gray-100 shadow-xl ${step.shadow} flex items-center justify-center transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6`}>
+                      <step.icon className={`h-6 w-6 text-gray-700`} />
+                      {/* Number Badge */}
+                      <div className={`absolute -top-3 -right-3 w-8 h-8 rounded-full bg-gradient-to-r ${step.gradient} flex items-center justify-center text-white font-bold text-sm shadow-md ring-4 ring-white`}>
+                        {step.number}
+                      </div>
                     </div>
                   </div>
 
-                  <h4 className="text-xl font-bold text-gray-900 mb-3">
-                    {step.title}
-                  </h4>
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    {step.description}
-                  </p>
+                  {/* Right Content */}
+                  <div className="flex-1 bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-gray-100 shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:translate-x-2">
+                    <h4 className="text-lg font-bold text-gray-900 mb-1">{step.title}</h4>
+                    <p className="text-gray-500 text-sm">{step.subtitle}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1861,7 +1915,7 @@ export default function HomePage() {
               <span className="sm:hidden">Start Earning Now</span>
               <ArrowRightIconSolid className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
             </Link>
-            
+
             <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full">
               <span className="text-2xl">✨</span>
               <p className="text-gray-700 text-sm font-medium">
@@ -1870,35 +1924,44 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Success Stories Section - Premium White Design */}
-      <section className="py-8 sm:py-10 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden" style={{ zIndex: 10 }}>
+      < section className="py-8 sm:py-10 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden" style={{ zIndex: 10 }}>
         {/* Background decorative elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        < div className="absolute inset-0 overflow-hidden pointer-events-none" >
           <div className="absolute top-10 right-20 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl"></div>
           <div className="absolute bottom-10 left-20 w-80 h-80 bg-purple-200/15 rounded-full blur-3xl"></div>
-        </div>
+        </div >
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
 
-            {/* Left Column - Text Content - Modern Design */}
-            <div className="text-center lg:text-left relative">
-              {/* Content Card */}
-              <div className="bg-white rounded-2xl p-6 sm:p-8 mb-6 border-2 border-gray-200 shadow-sm">
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 leading-tight">
+            {/* Left Column - Text Content - Ultra Premium Design */}
+            <div className="text-center lg:text-left relative py-10">
+              <div className="absolute -top-20 -left-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+              {/* Content Header */}
+              <div className="relative mb-12">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-50 rounded-full border border-indigo-100 mb-6">
+                  <StarIcon className="h-4 w-4 text-indigo-600" />
+                  <span className="text-indigo-900 font-black text-xs uppercase tracking-widest">Global Success Stories</span>
+                </div>
+
+                <h2 className="text-5xl sm:text-6xl md:text-8xl font-black text-gray-900 mb-8 leading-[0.9] tracking-tight">
                   Real People,
                   <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500">
                     Real Success
                   </span>
                 </h2>
-                <p className="text-base sm:text-lg text-gray-600 mb-3 leading-relaxed">
-                  Join thousands of digital entrepreneurs who've transformed their ideas into thriving online businesses with our platform.
+
+                <p className="text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0 font-medium italic border-l-4 border-indigo-600 pl-6 bg-gradient-to-r from-indigo-50/50 to-transparent py-4 rounded-r-xl">
+                  "I was a freelancer struggling to find stable income. SellEarnDirect helped me build a scalable digital business in just 48 hours."
                 </p>
-                <p className="text-sm text-gray-500">
-                  From software creators to course instructors, discover how our customers are building sustainable revenue streams and growing their digital empires.
+
+                <p className="text-base text-gray-500 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
+                  Join 10,000+ digital entrepreneurs who've traded their 9-to-5 for a life of freedom and automated revenue.
                 </p>
               </div>
 
@@ -1913,11 +1976,10 @@ export default function HomePage() {
                     key={index}
                     className="group relative bg-white rounded-xl p-4 border-2 border-gray-200 transition-all duration-300 hover:border-indigo-300 hover:shadow-lg hover:scale-105 min-w-[100px]"
                   >
-                    <div className={`text-xl sm:text-2xl font-black bg-gradient-to-r ${
-                      stat.color === 'indigo' ? 'from-indigo-600 to-indigo-700' : 
-                      stat.color === 'purple' ? 'from-purple-600 to-purple-700' : 
-                      'from-pink-600 to-pink-700'
-                    } bg-clip-text text-transparent`}>
+                    <div className={`text-xl sm:text-2xl font-black bg-gradient-to-r ${stat.color === 'indigo' ? 'from-indigo-600 to-indigo-700' :
+                      stat.color === 'purple' ? 'from-purple-600 to-purple-700' :
+                        'from-pink-600 to-pink-700'
+                      } bg-clip-text text-transparent`}>
                       {stat.value}
                     </div>
                     <div className="text-gray-600 mt-1 text-xs font-semibold">{stat.label}</div>
@@ -1926,194 +1988,103 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Column - Carousel - Complete Redesign */}
-            <div className="relative">
-              <div className="bg-white rounded-3xl overflow-hidden border-2 border-gray-200 shadow-xl">
-                {/* Carousel Container - Modern Height */}
-                <div className="carousel-container relative h-[600px] sm:h-[580px]">
-                  {/* Success Story Slides */}
-                  <div className="carousel-wrapper">
-                    {storiesWithImages.map((story, index) => (
-                      <div
-                        key={index}
-                        className={`success-story-slide absolute inset-0 transition-all duration-700 ease-in-out ${currentStorySlide === index ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-                          }`}
-                      >
-                        {/* Card Container */}
-                        <div className="h-full flex flex-col bg-white">
-                          {/* Header Section with Background Image */}
-                          <div className="relative h-48 sm:h-56 overflow-hidden">
-                            {story.backgroundImage ? (
-                              <>
-                                <img
-                                  src={story.backgroundImage}
-                                  alt={story.name}
-                                  className="w-full h-full object-cover"
-                                  loading="eager"
-                                  style={{ display: 'block' }}
-                                />
-                                {/* Dark Overlay */}
-                                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60"></div>
-                                
-                                {/* Profile Section Overlay */}
-                                <div className="absolute bottom-4 left-4 right-4 z-10">
-                                  <div className="flex items-center gap-3">
-                                    {/* Profile Picture */}
-                                    {story.imageUrl ? (
-                                      <div className="relative">
-                                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-4 border-white shadow-xl">
-                                          <img
-                                            src={story.imageUrl}
-                                            alt={story.name}
-                                            className="w-full h-full object-cover"
-                                            loading="eager"
-                                            style={{ display: 'block' }}
-                                            onError={(e) => {
-                                              e.currentTarget.style.display = 'none';
-                                              const fallback = e.currentTarget.parentElement;
-                                              if (fallback) {
-                                                fallback.innerHTML = `<div class="text-2xl flex items-center justify-center h-full bg-gradient-to-br from-purple-500 to-pink-500 text-white">${story.avatar}</div>`;
-                                              }
-                                            }}
-                                          />
-                                        </div>
-                                        {/* Verified Badge */}
-                                        <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 rounded-full p-1 border-2 border-white">
-                                          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                          </svg>
-                                        </div>
-                                      </div>
-                                    ) : (
-                                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center border-4 border-white shadow-xl">
-                                        <span className="text-2xl">{story.avatar}</span>
-                                      </div>
-                                    )}
-                                    
-                                    {/* Name & Business */}
-                                    <div className="bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2.5 shadow-lg flex-1">
-                                      <h3 className="text-lg sm:text-xl font-black text-gray-900 leading-tight">{story.name}</h3>
-                                      <p className="text-xs sm:text-sm text-gray-600 font-semibold mt-0.5">{story.business}</p>
-                                    </div>
-                                  </div>
-                                </div>
-                              </>
-                            ) : (
-                              <div className={`w-full h-full bg-gradient-to-br ${story.bgGradient} flex items-center justify-center relative`}>
-                                <div className="absolute inset-0 bg-black/30"></div>
-                                <div className="relative z-10 text-center">
-                                  {story.imageUrl ? (
-                                    <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-xl mx-auto mb-3">
-                                      <img src={story.imageUrl} alt={story.name} className="w-full h-full object-cover" />
-                                    </div>
-                                  ) : (
-                                    <div className="text-5xl mb-3">{story.avatar}</div>
-                                  )}
-                                  <h3 className="text-2xl font-black text-white">{story.name}</h3>
-                                  <p className="text-white/90 font-semibold">{story.business}</p>
-                                </div>
-                              </div>
-                            )}
+            {/* Right Column - Premium Dashboard Carousel */}
+            <div className="relative h-[650px]">
+              {/* Background Glow */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+              <div className="relative h-full bg-gray-50/50 backdrop-blur-xl rounded-[3rem] p-4 sm:p-8 border-2 border-white shadow-2xl overflow-hidden">
+                {storiesWithImages.map((story, index) => (
+                  <div
+                    key={index}
+                    className={`absolute inset-4 sm:inset-8 transition-all duration-1000 ease-out ${currentStorySlide === index ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-10 scale-95 pointer-events-none'
+                      }`}
+                  >
+                    {/* Top Profile Card */}
+                    <div className="bg-white rounded-[2rem] p-6 shadow-xl border border-gray-100 mb-6 group hover:shadow-2xl transition-all duration-500">
+                      <div className="flex items-center gap-5">
+                        <div className="relative">
+                          <div className="w-20 h-20 rounded-full overflow-hidden ring-4 ring-indigo-50 shadow-inner">
+                            <img src={story.imageUrl} alt={story.name} className="w-full h-full object-cover" />
                           </div>
-
-                          {/* Content Section */}
-                          <div className="flex-1 p-5 sm:p-6 flex flex-col bg-white">
-                            {/* Stats Cards - Modern Design */}
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                              <div className="bg-gray-50 rounded-xl p-4 text-center border-2 border-gray-200">
-                                <div className="text-2xl sm:text-3xl font-black text-gray-900 mb-1">{story.revenue}</div>
-                                <div className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Total Revenue</div>
-                              </div>
-                              <div className="bg-gray-50 rounded-xl p-4 text-center border-2 border-gray-200">
-                                <div className="text-2xl sm:text-3xl font-black text-gray-900 mb-1">{story.timePeriod}</div>
-                                <div className="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider">Time Period</div>
-                              </div>
-                            </div>
-
-                            {/* Quote Section - Clean Design */}
-                            <div className="bg-gray-50 rounded-xl p-5 mb-4 flex-1 border-2 border-gray-200 relative">
-                              {/* Quote Icon */}
-                              <div className="absolute top-3 left-4 text-4xl text-gray-300 font-serif">"</div>
-                              <p className="text-gray-800 text-sm sm:text-base leading-relaxed font-medium relative z-10 pt-2">
-                                {story.quote}
-                              </p>
-                            </div>
-
-                            {/* Before/After - Modern Design */}
-                            <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 border-2 border-gray-200">
-                              <div className="flex items-center justify-between gap-3">
-                                <div className="flex-1 text-center">
-                                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Before</div>
-                                  <div className="text-sm font-bold text-gray-700 bg-white rounded-lg py-2 px-3 border-2 border-gray-200">{story.before}</div>
-                                </div>
-                                <div className="flex-shrink-0">
-                                  <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full p-2 shadow-md">
-                                    <ArrowRightIcon className="h-4 w-4 text-white" />
-                                  </div>
-                                </div>
-                                <div className="flex-1 text-center">
-                                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">After</div>
-                                  <div className="text-sm font-bold bg-white rounded-lg py-2 px-3 border-2 border-indigo-300">
-                                    <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                                      {story.after}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+                          <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1.5 border-4 border-white shadow-lg">
+                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg>
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="text-2xl font-black text-gray-900 leading-none mb-2">{story.name}</h3>
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-wider rounded-md border border-indigo-100">
+                              {story.business}
+                            </span>
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </div>
 
-                {/* Navigation Arrows - Modern Design */}
-                <button
-                  onClick={() => setCurrentStorySlide(currentStorySlide === 0 ? totalStorySlides - 1 : currentStorySlide - 1)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-50 p-3 rounded-full shadow-lg border-2 border-gray-200 transition-all duration-300 z-10 group hover:scale-110"
-                  aria-label="Previous story"
-                >
-                  <ArrowRightIcon className="h-5 w-5 text-gray-700 rotate-180 group-hover:text-indigo-600" />
-                </button>
-                <button
-                  onClick={() => setCurrentStorySlide(currentStorySlide === totalStorySlides - 1 ? 0 : currentStorySlide + 1)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-50 p-3 rounded-full shadow-lg border-2 border-gray-200 transition-all duration-300 z-10 group hover:scale-110"
-                  aria-label="Next story"
-                >
-                  <ArrowRightIcon className="h-5 w-5 text-gray-700 group-hover:text-indigo-600" />
-                </button>
+                    {/* Main Stats Card */}
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="bg-white/80 backdrop-blur-sm rounded-[2rem] p-6 border border-white shadow-lg text-center transform hover:scale-105 transition-transform">
+                        <div className="text-3xl font-black text-indigo-600 mb-1">{story.revenue}</div>
+                        <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Revenue</div>
+                      </div>
+                      <div className="bg-white/80 backdrop-blur-sm rounded-[2rem] p-6 border border-white shadow-lg text-center transform hover:scale-105 transition-transform">
+                        <div className="text-3xl font-black text-gray-900 mb-1">{story.timePeriod}</div>
+                        <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Time Period</div>
+                      </div>
+                    </div>
 
-                {/* Pagination Dots - Modern Design */}
-                <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center gap-2 z-10">
-                  <div className="bg-white/90 backdrop-blur-sm px-3 py-2 rounded-full shadow-lg border border-gray-200">
-                    {Array.from({ length: totalStorySlides }, (_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setCurrentStorySlide(index)}
-                        className={`h-2 rounded-full transition-all duration-300 mx-1 ${currentStorySlide === index
-                          ? 'w-8 bg-gradient-to-r from-indigo-600 to-purple-600'
-                          : 'w-2 bg-gray-300 hover:bg-gray-400'
-                          }`}
-                        aria-label={`Go to slide ${index + 1}`}
-                      />
-                    ))}
+                    {/* Quote Card */}
+                    <div className="bg-indigo-600 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden mb-6">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
+                      <div className="absolute bottom-0 left-0 w-24 h-24 bg-indigo-400/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl"></div>
+                      <p className="text-lg font-bold leading-relaxed relative z-10 italic">
+                        "{story.quote}"
+                      </p>
+                    </div>
+
+                    {/* Before/After Progress Ribbon */}
+                    <div className="bg-white rounded-full p-2 border border-gray-100 shadow-lg flex items-center justify-between px-6">
+                      <div className="flex flex-col">
+                        <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Before</span>
+                        <span className="text-xs font-bold text-gray-500">{story.before}</span>
+                      </div>
+                      <div className="h-1 flex-1 mx-6 bg-gray-100 rounded-full relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 w-full animate-shimmer" style={{ backgroundSize: '200% 100%' }}></div>
+                      </div>
+                      <div className="flex flex-col text-right">
+                        <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest">Today</span>
+                        <span className="text-xs font-black text-indigo-600">{story.after}</span>
+                      </div>
+                    </div>
                   </div>
+                ))}
+
+                {/* Navigation Indicators */}
+                <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-2">
+                  {storiesWithImages.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentStorySlide(i)}
+                      className={`h-1.5 rounded-full transition-all duration-500 ${currentStorySlide === i ? 'w-8 bg-indigo-600' : 'w-2 bg-gray-200 hover:bg-gray-300'}`}
+                      aria-label={`Go to story ${i + 1}`}
+                    />
+                  ))}
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Features Section - Premium White Design */}
-      <section id="features" ref={featuresRef} className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden" style={{ zIndex: 10 }}>
+      < section id="features" ref={featuresRef} className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden" style={{ zIndex: 10 }}>
         {/* Background decorative elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        < div className="absolute inset-0 overflow-hidden pointer-events-none" >
           <div className="absolute top-20 left-10 w-72 h-72 bg-indigo-200/20 rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl"></div>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-pink-200/10 rounded-full blur-3xl"></div>
-        </div>
+        </div >
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-8">
@@ -2152,7 +2123,7 @@ export default function HomePage() {
                 {/* Icon with premium white background */}
                 <div className="relative mb-4">
                   <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
-                  <div 
+                  <div
                     className="relative inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl text-white"
                     style={{
                       background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(168, 85, 247, 0.9))',
@@ -2177,15 +2148,15 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Blog Section - Premium White Design */}
-      <section id="blog" className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden" style={{ zIndex: 10 }}>
+      < section id="blog" className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden" style={{ zIndex: 10 }}>
         {/* Background decorative elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        < div className="absolute inset-0 overflow-hidden pointer-events-none" >
           <div className="absolute top-20 left-10 w-96 h-96 bg-purple-200/15 rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-10 w-80 h-80 bg-pink-200/15 rounded-full blur-3xl"></div>
-        </div>
+        </div >
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-8">
@@ -2230,7 +2201,7 @@ export default function HomePage() {
 
                   <div className="p-5 relative z-10">
                     <div className="flex items-center gap-2 mb-3">
-                      <span 
+                      <span
                         className="px-3 py-1 text-purple-700 text-xs font-semibold rounded-full"
                         style={{
                           background: 'rgba(237, 233, 254, 0.8)',
@@ -2243,7 +2214,7 @@ export default function HomePage() {
                         {post.category}
                       </span>
                       {post.featured && (
-                        <span 
+                        <span
                           className="px-3 py-1 text-yellow-700 text-xs font-semibold rounded-full"
                           style={{
                             background: 'rgba(254, 243, 199, 0.8)',
@@ -2274,7 +2245,7 @@ export default function HomePage() {
                           <span>{post.readTime} min</span>
                         </div>
                       </div>
-                      <div 
+                      <div
                         className="p-2 rounded-lg transition-all duration-300 group-hover:translate-x-1"
                         style={{
                           background: 'rgba(168, 85, 247, 0.1)',
@@ -2305,10 +2276,10 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-8 px-4 sm:px-6 lg:px-8" style={{ zIndex: 10 }}>
+      < footer className="bg-gray-900 text-gray-300 py-8 px-4 sm:px-6 lg:px-8" style={{ zIndex: 10 }}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <div>
@@ -2343,14 +2314,14 @@ export default function HomePage() {
             <p>&copy; {new Date().getFullYear()} SellEarnDirect. All rights reserved.</p>
           </div>
         </div>
-      </footer>
+      </footer >
 
       {/* Screenshot Showcase Modal */}
-      <ScreenshotShowcase
+      < ScreenshotShowcase
         isOpen={showScreenshotShowcase}
         onClose={() => setShowScreenshotShowcase(false)}
       />
 
-    </div>
+    </div >
   );
 }

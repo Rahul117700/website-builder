@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { 
-  EyeIcon, 
-  UserGroupIcon, 
-  CurrencyDollarIcon, 
+import {
+  EyeIcon,
+  UserGroupIcon,
+  CurrencyDollarIcon,
   ChartBarIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
@@ -115,89 +115,109 @@ export default function DashboardAnalyticsWidget({ currentViewers }: DashboardAn
   if (!analytics) return null;
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-3">
+    <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-sm font-bold text-gray-900 flex items-center">
-            <ChartBarIcon className="h-4 w-4 mr-1.5 text-gray-700" />
-            Quick Analytics
+          <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
+              <ChartBarIcon className="h-5 w-5 text-gray-900" />
+            </div>
+            Overview
           </h3>
-          <p className="text-[10px] text-gray-600">Last 30 days overview</p>
         </div>
         <Link
           href="/auth/dashboard/analytics"
-          className="text-[10px] text-gray-900 hover:text-black font-medium px-2 py-1 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+          className="text-xs text-gray-500 hover:text-gray-900 font-semibold transition-colors flex items-center gap-1"
         >
-          View Full Report →
+          View Full Report <ArrowTrendingUpIcon className="h-3 w-3" />
         </Link>
       </div>
 
       {/* Key Metrics Grid */}
-      <div className="grid grid-cols-2 gap-2 mb-3">
+      <div className="grid grid-cols-2 gap-4 mb-5">
         {/* Views */}
-        <div className="p-2 bg-gray-50 rounded-lg border border-gray-200">
-          <div className="flex items-center justify-between mb-1">
-            <EyeIcon className="h-3.5 w-3.5 text-gray-600" />
-            <div className={`flex items-center text-[10px] font-medium ${
-              analytics.viewsGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'
-            }`}>
-              {analytics.viewsGrowth >= 0 ? '↑' : '↓'} {Math.abs(analytics.viewsGrowth)}%
+        <div className="group p-4 bg-white rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-300">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <EyeIcon className="h-5 w-5 text-blue-600" />
+            </div>
+            <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${analytics.viewsGrowth >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+              }`}>
+              {analytics.viewsGrowth >= 0 ? '+' : ''}{analytics.viewsGrowth}%
             </div>
           </div>
-          <p className="text-lg font-bold text-gray-900">{analytics.totalViews.toLocaleString()}</p>
-          <p className="text-[10px] text-gray-600">Total Views</p>
+          <p className="text-2xl font-black text-gray-900 leading-none mb-1">{analytics.totalViews.toLocaleString()}</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Impressions</p>
         </div>
 
         {/* Conversions */}
-        <div className="p-2 bg-emerald-50 rounded-lg border border-emerald-200">
-          <div className="flex items-center justify-between mb-1">
-            <UserGroupIcon className="h-3.5 w-3.5 text-emerald-600" />
-            <span className="text-[10px] font-medium text-emerald-600">{analytics.conversionRate}%</span>
+        <div className="group p-4 bg-white rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-300">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <UserGroupIcon className="h-5 w-5 text-emerald-600" />
+            </div>
+            <div className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
+              {analytics.conversionRate}% Rate
+            </div>
           </div>
-          <p className="text-lg font-bold text-gray-900">{analytics.totalConversions}</p>
-          <p className="text-[10px] text-gray-600">Conversions</p>
+          <p className="text-2xl font-black text-gray-900 leading-none mb-1">{analytics.totalConversions}</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Goal Reached</p>
         </div>
 
         {/* Revenue */}
-        <div className="p-2 bg-gray-50 rounded-lg border border-gray-200">
-          <div className="flex items-center justify-between mb-1">
-            <CurrencyDollarIcon className="h-3.5 w-3.5 text-gray-600" />
-            <div className={`flex items-center text-[10px] font-medium ${
-              analytics.revenueGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'
-            }`}>
-              {analytics.revenueGrowth >= 0 ? '↑' : '↓'} {Math.abs(analytics.revenueGrowth)}%
+        <div className="group p-4 bg-white rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-300">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <CurrencyDollarIcon className="h-5 w-5 text-purple-600" />
+            </div>
+            <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${analytics.revenueGrowth >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+              }`}>
+              {analytics.revenueGrowth >= 0 ? '+' : ''}{analytics.revenueGrowth}%
             </div>
           </div>
-          <p className="text-lg font-bold text-gray-900">₹{analytics.totalRevenue.toLocaleString()}</p>
-          <p className="text-[10px] text-gray-600">Total Revenue</p>
+          <p className="text-2xl font-black text-gray-900 leading-none mb-1">₹{analytics.totalRevenue.toLocaleString()}</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Gross Revenue</p>
         </div>
 
         {/* Session Duration */}
-        <div className="p-2 bg-blue-50 rounded-lg border border-blue-200">
-          <div className="flex items-center justify-between mb-1">
-            <ClockIcon className="h-3.5 w-3.5 text-blue-600" />
-            <span className="text-[10px] font-medium text-blue-600">Avg Time</span>
+        <div className="group p-4 bg-white rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-300">
+          <div className="flex items-center justify-between mb-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <ClockIcon className="h-5 w-5 text-amber-600" />
+            </div>
+            <div className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold">
+              Avg Session
+            </div>
           </div>
-          <p className="text-lg font-bold text-gray-900">{analytics.avgSessionDuration}</p>
-          <p className="text-[10px] text-gray-600">Session Duration</p>
+          <p className="text-2xl font-black text-gray-900 leading-none mb-1">{analytics.avgSessionDuration}</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">User Retention</p>
         </div>
       </div>
 
       {/* Live Visitors */}
-      <div className="p-2 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200 mb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+      <div className="p-4 bg-gray-950 rounded-2xl border border-slate-800 mb-5 relative overflow-hidden group">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <div className="relative">
-              <EyeIcon className="h-4 w-4 text-purple-600" />
-              <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.6)]"></div>
             </div>
             <div>
-              <p className="text-xs font-bold text-gray-900">
-                {currentViewers !== undefined ? currentViewers : analytics.liveVisitors} Active Users
+              <p className="text-lg font-black text-white leading-none">
+                {currentViewers !== undefined ? currentViewers : analytics.liveVisitors}
               </p>
-              <p className="text-[10px] text-gray-600">● Live right now</p>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Users Live</p>
             </div>
+          </div>
+          <div className="h-8 w-24 flex items-end gap-0.5">
+            {[0.4, 0.7, 0.5, 0.9, 0.6, 0.8, 0.4, 1].map((h, i) => (
+              <div
+                key={i}
+                className="flex-1 bg-green-500/40 rounded-t-sm animate-bounce"
+                style={{ height: `${h * 100}%`, animationDelay: `${i * 0.1}s`, animationDuration: '1.5s' }}
+              ></div>
+            ))}
           </div>
         </div>
       </div>

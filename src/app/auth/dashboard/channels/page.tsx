@@ -33,7 +33,7 @@ import {
   LightBulbIcon,
   ShoppingBagIcon
 } from '@heroicons/react/24/outline';
-import { gsap } from 'gsap';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
 
@@ -114,14 +114,6 @@ export default function ChannelsDashboard() {
   const [loadingSubscription, setLoadingSubscription] = useState(true);
 
   useEffect(() => {
-    // Animate on load
-    gsap.from('.channel-hero', {
-      opacity: 0,
-      y: 30,
-      duration: 0.8,
-      ease: 'power3.out'
-    });
-
     loadChannels();
     loadTemplates();
     loadSubscriptionStatus();
@@ -254,7 +246,7 @@ export default function ChannelsDashboard() {
         setSelectedTemplate(null);
         setNewChannelName('');
         setNewChannelDescription('');
-        
+
         toast.success('🎉 Channel created successfully!', {
           duration: 2000,
           style: {
@@ -262,12 +254,12 @@ export default function ChannelsDashboard() {
             color: '#fff',
           },
         });
-        
+
         // Refresh the channels list
         await loadChannels();
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error occurred' }));
-        
+
         // Handle specific error cases
         if (response.status === 403) {
           if (errorData.requiresUpgrade) {
@@ -299,7 +291,7 @@ export default function ChannelsDashboard() {
             duration: 4000,
           });
         }
-        
+
         console.error('Channel creation error:', errorData);
       }
     } catch (error) {
@@ -350,7 +342,7 @@ export default function ChannelsDashboard() {
 
   const filteredChannels = channels.filter(channel => {
     const matchesSearch = channel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        channel.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      channel.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = !statusFilter || channel.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -376,7 +368,7 @@ export default function ChannelsDashboard() {
             </div>
             <div className="h-10 w-40 bg-gray-200 rounded-lg animate-pulse"></div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-white rounded-xl p-4 space-y-3">
@@ -397,348 +389,296 @@ export default function ChannelsDashboard() {
 
   return (
     <DashboardLayout>
-      <div className="w-full min-h-screen m-0 p-4 space-y-5 bg-gray-50 overflow-y-auto">
+      <div className="w-full min-h-screen m-0 p-6 space-y-8 bg-gray-50/50 overflow-y-auto">
         {/* Hero Section */}
-        <div className="channel-hero">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-              <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-gradient-to-br from-gray-900 to-black rounded-xl">
-                  <RocketLaunchIcon className="h-6 w-6 text-white" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative"
+        >
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
+            <div className="flex-1">
+              <div className="flex items-center gap-4 mb-3">
+                <div className="p-3 bg-slate-900 rounded-2xl shadow-xl shadow-slate-200">
+                  <RocketLaunchIcon className="h-7 w-7 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">
+                  <h1 className="text-4xl font-black text-gray-900 tracking-tight">
                     My Channels
                   </h1>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <p className="text-sm text-gray-600">Create your own page and share content with your audience</p>
-                    <div className="group relative">
-                      <InformationCircleIcon className="h-4 w-4 text-gray-400 hover:text-gray-900 cursor-help transition-colors" />
-                      <div className="absolute left-0 top-full mt-2 w-80 p-4 bg-gray-900 text-white text-sm rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                        <p className="font-semibold mb-2">📺 What are Channels?</p>
-                        <p className="leading-relaxed">
-                          Just like YouTube channels, you can create your own branded page to share videos, documents, code, and more. 
-                          Users can subscribe to your channel or buy individual content!
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Architecture & Asset Management</p>
                 </div>
               </div>
-              
-              <div className="flex flex-wrap items-center gap-3 mt-3">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full">
-                  <CheckCircleIcon className="h-4 w-4 text-green-600" />
-                  <span className="text-xs font-medium text-green-900">1-Week Free Trial</span>
+
+              <p className="text-gray-600 max-w-2xl leading-relaxed font-medium">
+                Engineered for distribution. Create branded content hubs, manage your audience, and scale your digital footprint with high-conversion templates.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-3 mt-6">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                  <span className="text-[10px] font-black text-gray-900 uppercase tracking-widest">Global Protocol</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-full">
-                  <SparklesIcon className="h-4 w-4 text-blue-600" />
-                  <span className="text-xs font-medium text-blue-900">Multiple Templates</span>
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                  <SparklesIcon className="h-4 w-4 text-blue-500" />
+                  <span className="text-[10px] font-black text-gray-900 uppercase tracking-widest">Modular Design</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 border border-gray-300 rounded-full">
-                  <FireIcon className="h-4 w-4 text-gray-900" />
-                  <span className="text-xs font-medium text-gray-900">Unlimited Content</span>
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                  <ShieldCheckIcon className="h-4 w-4 text-slate-900" />
+                  <span className="text-[10px] font-black text-gray-900 uppercase tracking-widest">Secure Entry</span>
                 </div>
               </div>
             </div>
-            
-            {canAccess ? (
-              <button
-                onClick={() => {
-                  // Auto-select the first template when opening modal
-                  if (templates.length > 0) {
-                    setSelectedTemplate(templates[0]);
-                  }
-                  setShowCreateModal(true);
-                }}
-                disabled={loadingSubscription || templates.length === 0}
-                className="group relative px-6 py-2.5 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl font-bold transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                <div className="flex items-center gap-2">
-                  <PlusIcon className="h-5 w-5" />
-                  <span>Create Channel</span>
-                  <SparklesIcon className="h-4 w-4 animate-pulse" />
-                </div>
-              </button>
-            ) : (
-              <Link
-                href="/auth/dashboard/plans"
-                className="group relative px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl font-bold transition-all duration-300 transform hover:scale-105"
-              >
-                <div className="flex items-center gap-2">
-                  <SparklesIcon className="h-5 w-5" />
-                  <span>Buy Plan</span>
-                  <ArrowTrendingUpIcon className="h-4 w-4" />
-                </div>
-              </Link>
-            )}
+
+            <div className="shrink-0">
+              {canAccess ? (
+                <button
+                  onClick={() => {
+                    if (templates.length > 0) setSelectedTemplate(templates[0]);
+                    setShowCreateModal(true);
+                  }}
+                  disabled={loadingSubscription || templates.length === 0}
+                  className="group relative px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 hover:shadow-2xl hover:shadow-slate-300 hover:-translate-y-1 active:scale-95 disabled:opacity-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <PlusIcon className="h-5 w-5" />
+                    <span>Initialize Channel</span>
+                  </div>
+                </button>
+              ) : (
+                <Link
+                  href="/auth/dashboard/plans"
+                  className="group relative px-8 py-4 bg-emerald-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-200 hover:-translate-y-1 active:scale-95"
+                >
+                  <div className="flex items-center gap-3">
+                    <SparklesIcon className="h-5 w-5" />
+                    <span>Upgrade Access</span>
+                  </div>
+                </Link>
+              )}
+            </div>
           </div>
 
           {/* Stats Overview */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
-            <div className="bg-white rounded-xl p-4 border border-gray-200">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs font-medium text-gray-600">Total Channels</p>
-                <div className="p-1.5 bg-gray-100 rounded-lg">
-                  <RocketLaunchIcon className="h-4 w-4 text-gray-900" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-10">
+            {[
+              { label: 'Asset Clusters', value: channels.length, sub: 'Total Channels', icon: RocketLaunchIcon, color: 'text-slate-900', bg: 'bg-slate-50' },
+              { label: 'Operational', value: channels.filter(c => c.status === 'ACTIVE').length, sub: 'Live Protocols', icon: CheckCircleIcon, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+              { label: 'Audience Node', value: channels.reduce((sum, c) => sum + (c._count?.subscribers || 0), 0), sub: 'Total Recurrents', icon: UserGroupIcon, color: 'text-blue-600', bg: 'bg-blue-50' },
+              { label: 'Content Depth', value: channels.reduce((sum, c) => sum + (c._count?.products || 0), 0), sub: 'Live Assets', icon: VideoCameraIcon, color: 'text-orange-600', bg: 'bg-orange-50' }
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all group"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{stat.label}</span>
+                  <div className={`p-2 ${stat.bg} rounded-xl group-hover:scale-110 transition-transform`}>
+                    <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                  </div>
                 </div>
-              </div>
-              <p className="text-2xl font-bold text-gray-900">{channels.length}</p>
-              <p className="text-[10px] text-gray-500 mt-0.5">Active & Draft</p>
-            </div>
-            
-            <div className="bg-white rounded-xl p-4 border border-gray-200">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs font-medium text-gray-600">Active</p>
-                <div className="p-1.5 bg-green-100 rounded-lg">
-                  <CheckCircleIcon className="h-4 w-4 text-green-600" />
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-green-600">
-                {channels.filter(c => c.status === 'ACTIVE').length}
-              </p>
-              <p className="text-[10px] text-gray-500 mt-0.5">Live channels</p>
-            </div>
-            
-            <div className="bg-white rounded-xl p-4 border border-gray-200">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs font-medium text-gray-600">Subscribers</p>
-                <div className="p-1.5 bg-blue-100 rounded-lg">
-                  <UserGroupIcon className="h-4 w-4 text-blue-600" />
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-blue-600">
-                {channels.reduce((sum, c) => sum + (c._count?.subscribers || 0), 0)}
-              </p>
-              <p className="text-[10px] text-gray-500 mt-0.5">Total subscribers</p>
-            </div>
-            
-            <div className="bg-white rounded-xl p-4 border border-gray-200">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-xs font-medium text-gray-600">Content</p>
-                <div className="p-1.5 bg-orange-100 rounded-lg">
-                  <VideoCameraIcon className="h-4 w-4 text-orange-600" />
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-orange-600">
-                {channels.reduce((sum, c) => sum + (c._count?.products || 0), 0)}
-              </p>
-              <p className="text-[10px] text-gray-500 mt-0.5">Total items</p>
-            </div>
+                <p className={`text-3xl font-black ${stat.color} tracking-tight`}>{stat.value}</p>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">{stat.sub}</p>
+              </motion.div>
+            ))}
           </div>
-        </div>
+        </motion.div>
 
         {/* Search & Filter */}
-        <div className="flex flex-col md:flex-row gap-3 items-center">
-          <div className="flex-1 max-w-xl relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <div className="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
+          <div className="flex-1 w-full relative group">
+            <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-slate-900 transition-colors" />
             <input
               type="text"
-              placeholder="Search channels by name or description..."
+              placeholder="Search assets by name or protocol description..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 text-sm text-gray-900 placeholder-gray-400 bg-white"
+              className="w-full pl-12 pr-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-slate-900 focus:bg-white text-sm font-bold text-gray-900 placeholder-gray-400 transition-all font-black"
             />
           </div>
-          
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 text-sm text-gray-900 bg-white min-w-[160px]"
-          >
-            <option value="">All Status</option>
-            <option value="ACTIVE">✅ Active</option>
-            <option value="DRAFT">📝 Draft</option>
-            <option value="PAUSED">⏸️ Paused</option>
-            <option value="ARCHIVED">📦 Archived</option>
-          </select>
+
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+              <FunnelIcon className="h-5 w-5 text-gray-400" />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-6 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-slate-900 focus:bg-white text-sm font-black text-gray-900 transition-all min-w-[180px]"
+            >
+              <option value="">All Architectures</option>
+              <option value="ACTIVE">✅ Operational</option>
+              <option value="DRAFT">📝 Draft Matrix</option>
+              <option value="PAUSED">⏸️ On Standby</option>
+              <option value="ARCHIVED">📦 Encrypted</option>
+            </select>
+          </div>
         </div>
 
         {/* Channels Grid */}
         {filteredChannels.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredChannels.map((channel, index) => {
-              const randomTip = getRandomTip();
-              const totalViews = channel.analytics?.totalViews || 0;
-              const totalRevenue = channel.analytics?.totalRevenue || 0;
-              const totalProducts = channel._count?.products || 0;
-              
-              return (
-                  <div
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <AnimatePresence>
+              {filteredChannels.map((channel, index) => {
+                const randomTip = getRandomTip();
+                const totalViews = channel.analytics?.totalViews || 0;
+                const totalRevenue = channel.analytics?.totalRevenue || 0;
+                const totalProducts = channel._count?.products || 0;
+
+                return (
+                  <motion.div
                     key={channel.id}
-                    className="group bg-white rounded-xl border border-gray-200 hover:border-gray-400 transition-all duration-300 overflow-hidden transform hover:-translate-y-1"
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="group bg-white rounded-[2rem] border border-gray-100 hover:border-gray-200 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden flex flex-col"
                   >
-                  {/* Header with gradient */}
-                  <div className="relative p-4 bg-gray-50">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-gray-200/30 rounded-full -translate-y-12 translate-x-12"></div>
-                    <div className="relative">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-lg font-bold text-gray-900 line-clamp-1 flex-1">{channel.name}</h3>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${getStatusColor(channel.status)}`}>
+                    {/* Header Image/Gradient */}
+                    <div className="relative h-32 bg-slate-900 overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-black opacity-60"></div>
+                      <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+                      <div className="absolute top-4 right-4 flex gap-2">
+                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-white/20 backdrop-blur-md shadow-xl text-white`}>
                           {channel.status}
                         </span>
                       </div>
+                      <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+                    </div>
+
+                    {/* Content Section */}
+                    <div className="relative p-6 pt-0 -mt-10 flex-1">
+                      <div className="bg-white rounded-2xl p-4 shadow-xl shadow-slate-200/50 border border-gray-100 mb-4 group-hover:-translate-y-1 transition-transform">
+                        <h3 className="text-xl font-black text-gray-900 tracking-tight line-clamp-1">{channel.name}</h3>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                          Template: <span className="text-slate-900">{channel.template.name}</span>
+                        </p>
+                      </div>
+
                       {channel.description && (
-                        <p className="text-xs text-gray-600 line-clamp-2 mb-2">{channel.description}</p>
+                        <p className="text-xs font-medium text-gray-500 line-clamp-2 mb-6 min-h-[2rem]">
+                          {channel.description}
+                        </p>
                       )}
-                      <p className="text-[10px] text-gray-500">
-                        Template: <span className="font-medium text-gray-900">{channel.template.name}</span>
-                      </p>
-                    </div>
-                  </div>
 
-                  {/* Growth Tip Banner */}
-                  <div className="px-4 py-2 bg-gradient-to-r from-amber-50 to-orange-50 border-y border-amber-200">
-                    <div className="flex items-start gap-2">
-                      <LightBulbIcon className="h-3.5 w-3.5 text-amber-600 flex-shrink-0 mt-0.5" />
-                      <p className="text-[10px] text-amber-900 leading-relaxed">{randomTip}</p>
-                    </div>
-                  </div>
-
-                  {/* Stats Grid - 2 rows */}
-                  <div className="p-4">
-                    <div className="grid grid-cols-3 gap-2 mb-3">
-                      {/* Row 1 */}
-                      <div className="text-center group/stat relative">
-                        <div className="flex justify-center mb-1">
-                          <div className="p-1.5 bg-blue-100 rounded-lg group-hover/stat:scale-110 transition-transform">
-                            <DocumentTextIcon className="h-4 w-4 text-blue-600" title="Total content items" />
+                      {/* Rapid Stats */}
+                      <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="p-3 bg-slate-50 rounded-2xl border border-gray-100 group/stat">
+                          <div className="flex items-center gap-2 mb-1">
+                            <EyeIcon className="w-3.5 h-3.5 text-slate-400" />
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Views</span>
                           </div>
+                          <p className="text-lg font-black text-slate-900">{totalViews.toLocaleString()}</p>
                         </div>
-                        <p className="text-xl font-bold text-blue-600">{totalProducts}</p>
-                        <p className="text-[10px] text-gray-600 font-medium">Total Items</p>
-                        {/* Tooltip */}
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[9px] rounded whitespace-nowrap opacity-0 invisible group-hover/stat:opacity-100 group-hover/stat:visible transition-all z-10">
-                          All Content & Products
+                        <div className="p-3 bg-emerald-50/50 rounded-2xl border border-emerald-100 group/stat">
+                          <div className="flex items-center gap-2 mb-1">
+                            <CurrencyDollarIcon className="w-3.5 h-3.5 text-emerald-500" />
+                            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Revenue</span>
+                          </div>
+                          <p className="text-lg font-black text-emerald-600">₹{totalRevenue.toLocaleString()}</p>
                         </div>
                       </div>
-                      
-                      <div className="text-center group/stat relative">
-                        <div className="flex justify-center mb-1">
-                          <div className="p-1.5 bg-green-100 rounded-lg group-hover/stat:scale-110 transition-transform">
-                            <UserGroupIcon className="h-4 w-4 text-green-600" title="Total subscribers" />
-                          </div>
-                        </div>
-                        <p className="text-xl font-bold text-green-600">{channel._count?.subscribers || 0}</p>
-                        <p className="text-[10px] text-gray-600 font-medium">Subscribers</p>
-                        {/* Tooltip */}
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[9px] rounded whitespace-nowrap opacity-0 invisible group-hover/stat:opacity-100 group-hover/stat:visible transition-all z-10">
-                          Channel Subscribers
-                        </div>
-                      </div>
-                      
-                      <div className="text-center group/stat relative">
-                        <div className="flex justify-center mb-1">
-                          <div className="p-1.5 bg-emerald-100 rounded-lg group-hover/stat:scale-110 transition-transform">
-                            <CurrencyDollarIcon className="h-4 w-4 text-emerald-600" title="Total revenue earned" />
-                          </div>
-                        </div>
-                        <p className="text-xl font-bold text-emerald-600">₹{totalRevenue.toLocaleString()}</p>
-                        <p className="text-[10px] text-gray-600 font-medium">Revenue</p>
-                        {/* Tooltip */}
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[9px] rounded whitespace-nowrap opacity-0 invisible group-hover/stat:opacity-100 group-hover/stat:visible transition-all z-10">
-                          Total Earnings (₹)
+
+                      {/* Growth Map Indicator */}
+                      <div className="mb-6 p-3 bg-amber-50 rounded-2xl border border-amber-100/50 group/tip">
+                        <div className="flex gap-3">
+                          <LightBulbIcon className="h-5 w-5 text-amber-500 shrink-0 group-hover/tip:rotate-12 transition-transform" />
+                          <p className="text-[10px] font-bold text-amber-900 leading-relaxed uppercase tracking-tight">
+                            {randomTip}
+                          </p>
                         </div>
                       </div>
                     </div>
 
-                    {/* Row 2 - Views */}
-                    <div className="mb-4 pb-3 border-b border-gray-100">
-                      <div className="text-center group/stat relative">
-                        <div className="flex justify-center mb-1">
-                          <div className="p-1.5 bg-indigo-100 rounded-lg group-hover/stat:scale-110 transition-transform">
-                            <EyeIcon className="h-4 w-4 text-indigo-600" title="Total views" />
+                    {/* Action Bar */}
+                    <div className="p-6 pt-0 mt-auto">
+                      <div className="flex items-center gap-2">
+                        {canAccess ? (
+                          <Link
+                            href={`/auth/dashboard/channels/${channel.id}/customize`}
+                            className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-slate-200"
+                          >
+                            <PencilIcon className="w-3.5 h-3.5" />
+                            <span>Forge Content</span>
+                          </Link>
+                        ) : (
+                          <div className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-gray-100 text-gray-400 rounded-2xl text-[10px] font-black uppercase tracking-widest cursor-not-allowed">
+                            <ShieldCheckIcon className="w-3.5 h-3.5" />
+                            <span>Access Locked</span>
                           </div>
-                        </div>
-                        <p className="text-lg font-bold text-indigo-600">{totalViews.toLocaleString()}</p>
-                        <p className="text-[10px] text-gray-600 font-medium">Total Views</p>
-                        {/* Tooltip */}
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[9px] rounded whitespace-nowrap opacity-0 invisible group-hover/stat:opacity-100 group-hover/stat:visible transition-all z-10">
-                          Total Channel Views
-                        </div>
-                      </div>
-                    </div>
+                        )}
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-2">
-                      {canAccess ? (
-                        <Link
-                          href={`/auth/dashboard/channels/${channel.id}/customize`}
-                          className="group/edit flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg text-sm font-bold hover:from-gray-800 hover:to-gray-900 transition-all duration-200 relative overflow-hidden"
-                          title="Customize your channel content, design & settings"
+                        {channel.status === 'ACTIVE' && (
+                          <Link
+                            href={`/channel/${channel.slug}`}
+                            target="_blank"
+                            className="p-3.5 bg-blue-50 text-blue-600 rounded-2xl hover:bg-blue-100 transition-colors border border-blue-100"
+                          >
+                            <ArrowTrendingUpIcon className="w-5 h-5" />
+                          </Link>
+                        )}
+
+                        <button
+                          onClick={() => handleDeleteChannel(channel.id)}
+                          className="p-3.5 bg-red-50 text-red-500 rounded-2xl hover:bg-red-100 transition-colors border border-red-100"
                         >
-                          <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover/edit:translate-x-full transition-transform duration-700"></div>
-                          <PencilIcon className="h-4 w-4 group-hover/edit:rotate-12 transition-transform" />
-                          <span>Customize Channel</span>
-                          <SparklesIcon className="h-3.5 w-3.5 group-hover/edit:scale-125 transition-transform" />
-                        </Link>
-                      ) : (
-                        <div className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-gray-400 text-white rounded-lg text-sm font-bold cursor-not-allowed opacity-60"
-                          title="Upgrade to a plan to customize channels"
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                          <span>Customize Channel</span>
-                          <SparklesIcon className="h-3.5 w-3.5" />
+                          <TrashIcon className="w-5 h-5" />
+                        </button>
+                      </div>
+
+                      <div className="flex justify-between items-center mt-4 px-1">
+                        <div className="flex -space-x-2">
+                          {[1, 2, 3].map(i => (
+                            <div key={i} className={`w-5 h-5 rounded-full border-2 border-white bg-slate-${200 + i * 100}`}></div>
+                          ))}
                         </div>
-                      )}
-                      
-                      {channel.status === 'ACTIVE' && (
-                        <Link
-                          href={`/channel/${channel.slug}`}
-                          target="_blank"
-                          className="group/view p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-all relative"
-                          title="View your live channel"
-                        >
-                          <EyeIcon className="h-4 w-4 group-hover/view:scale-110 transition-transform" />
-                        </Link>
-                      )}
-                      
-                      <button
-                        onClick={() => handleDeleteChannel(channel.id)}
-                        className="group/delete p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-all"
-                        title="Permanently delete this channel"
-                      >
-                        <TrashIcon className="h-4 w-4 group-hover/delete:scale-110 transition-transform" />
-                      </button>
+                        <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest">ID: {channel.id.slice(-6)}</span>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              );
-            })}
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
         ) : (
           /* Empty State */
-          <div className="text-center py-20">
-            <div className="inline-block p-6 bg-gray-100 rounded-3xl mb-6">
-              <RocketLaunchIcon className="h-20 w-20 text-gray-900" />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-32"
+          >
+            <div className="inline-block p-10 bg-slate-900 rounded-[3rem] shadow-2xl shadow-slate-200 mb-8 relative group">
+              <RocketLaunchIcon className="h-20 w-20 text-white group-hover:scale-110 transition-transform" />
+              <div className="absolute inset-0 bg-white/10 rounded-[3rem] animate-pulse"></div>
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">
-              {searchTerm || statusFilter ? 'No Channels Found' : 'Create Your First Channel!'}
+            <h3 className="text-3xl font-black text-gray-900 mb-3 tracking-tight">
+              {searchTerm || statusFilter ? 'No Architectures Found' : 'Initialize Your First Protocol'}
             </h3>
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+            <p className="text-gray-500 mb-10 max-w-lg mx-auto font-medium leading-relaxed">
               {searchTerm || statusFilter
-                ? 'Try adjusting your search or filters to find channels'
-                : 'Start building your channel today and share amazing content with your audience. Just like YouTube, but you own it!'
+                ? 'The specified parameters did not return any operational nodes. Try resetting filters.'
+                : 'Your operational matrix is currently offline. Deploy your first channel to start distributing high-impact content hubs.'
               }
             </p>
             {!searchTerm && !statusFilter && (
               <button
                 onClick={() => {
-                  // Auto-select the first template when opening modal
-                  if (templates.length > 0) {
-                    setSelectedTemplate(templates[0]);
-                  }
+                  if (templates.length > 0) setSelectedTemplate(templates[0]);
                   setShowCreateModal(true);
                 }}
                 disabled={loadingSubscription || templates.length === 0}
-                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-gray-900 to-black text-white rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="inline-flex items-center gap-4 px-10 py-5 bg-slate-900 text-white rounded-[2rem] font-black text-sm uppercase tracking-widest transition-all duration-300 hover:shadow-2xl hover:shadow-slate-300 hover:-translate-y-1 active:scale-95"
               >
                 <PlusIcon className="h-6 w-6" />
-                <span>Create Your Channel</span>
-                <SparklesIcon className="h-5 w-5" />
+                <span>Initialize Pipeline</span>
+                <SparklesIcon className="h-5 w-5 animate-pulse" />
               </button>
             )}
-          </div>
+          </motion.div>
         )}
 
         {/* Create Channel Modal */}
@@ -795,11 +735,10 @@ export default function ChannelsDashboard() {
                       placeholder="e.g., Tech Tutorials, Design Masterclass, Code Academy..."
                       value={newChannelName}
                       onChange={(e) => setNewChannelName(e.target.value)}
-                      className={`w-full px-3 py-2 border-2 rounded-lg focus:ring-2 focus:ring-gray-900 text-sm text-gray-900 ${
-                        newChannelName.trim() && newChannelName.trim().length < 3
-                          ? 'border-red-300 focus:border-red-500'
-                          : 'border-gray-200 focus:border-gray-900'
-                      }`}
+                      className={`w-full px-3 py-2 border-2 rounded-lg focus:ring-2 focus:ring-gray-900 text-sm text-gray-900 ${newChannelName.trim() && newChannelName.trim().length < 3
+                        ? 'border-red-300 focus:border-red-500'
+                        : 'border-gray-200 focus:border-gray-900'
+                        }`}
                       autoFocus
                     />
                     {newChannelName.trim() && newChannelName.trim().length < 3 && (
@@ -941,7 +880,7 @@ export default function ChannelsDashboard() {
                     <SparklesIcon className="h-5 w-5" />
                     <span>View Plans & Pricing</span>
                   </button>
-                  
+
                   <button
                     onClick={() => setShowUpgradeModal(false)}
                     className="w-full px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
@@ -1024,7 +963,7 @@ export default function ChannelsDashboard() {
                   >
                     Cancel
                   </button>
-                  
+
                   <button
                     onClick={confirmDelete}
                     disabled={deleting}

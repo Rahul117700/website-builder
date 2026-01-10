@@ -37,39 +37,62 @@ export default function RealtimeVisitors() {
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-3">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center space-x-2">
-          <div className="relative">
-            <UserGroupIcon className="h-5 w-5 text-gray-700" />
-            <div className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-gray-900">Active Users</h3>
-            <p className="text-[10px] text-gray-600">Right now</p>
-          </div>
+    <div className="bg-slate-950 rounded-3xl border border-slate-800 p-6 relative overflow-hidden group shadow-2xl">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -translate-y-16 translate-x-16"></div>
+
+      <div className="relative z-10 flex items-center justify-between mb-8">
+        <div>
+          <h3 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
+            <div className="relative">
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-[0_0_15px_rgba(34,197,94,0.6)]"></div>
+            </div>
+            Active Users
+          </h3>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Right Now • Live Activity</p>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold text-gray-900">{activeCount}</div>
-          <div className="text-[10px] text-emerald-600 font-medium">● Live</div>
+          <div className="text-4xl font-black text-white leading-none">{activeCount}</div>
+          <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/20 text-green-400 rounded-full text-[10px] font-bold mt-2 border border-green-500/30">
+            <div className="w-1 h-1 bg-green-400 rounded-full animate-ping"></div>
+            LIVE
+          </div>
         </div>
       </div>
 
       {loading ? (
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-400 mx-auto mb-2"></div>
-          <p className="text-xs text-gray-500">Loading...</p>
+        <div className="flex flex-col items-center justify-center py-10">
+          <div className="w-12 h-12 border-4 border-slate-800 border-t-white rounded-full animate-spin"></div>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mt-4">Scanning Network...</p>
         </div>
       ) : activeCount > 0 ? (
-        <div className="text-center py-4">
-          <p className="text-xs text-gray-600 mb-1">{activeCount} {activeCount === 1 ? 'user is' : 'users are'} currently viewing your channels</p>
-          <p className="text-[10px] text-gray-500">Real-time data updates every 30 seconds</p>
+        <div className="space-y-6">
+          <div className="h-12 flex items-end gap-1 px-2">
+            {[0.4, 0.7, 0.5, 0.9, 0.6, 1, 0.8, 0.4, 0.7, 0.5, 0.9, 0.6, 0.8, 1].map((h, i) => (
+              <div
+                key={i}
+                className="flex-1 bg-blue-500/40 rounded-t-sm animate-bounce"
+                style={{ height: `${h * 100}%`, animationDelay: `${i * 0.1}s`, animationDuration: '1.5s' }}
+              ></div>
+            ))}
+          </div>
+          <div className="p-4 bg-slate-900/50 rounded-2xl border border-slate-800 backdrop-blur-md">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <GlobeAltIcon className="h-5 w-5 text-blue-400" />
+              </div>
+              <p className="text-xs font-semibold text-gray-400 leading-snug">
+                <span className="text-white font-black">{activeCount}</span> users are currently browsing your content across all channels.
+              </p>
+            </div>
+          </div>
         </div>
       ) : (
-        <div className="text-center py-8">
-          <UserGroupIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-          <p className="text-xs text-gray-500">No active visitors right now</p>
-          <p className="text-[10px] text-gray-400 mt-1">Start sharing your channels to see live activity</p>
+        <div className="py-12 flex flex-col items-center justify-center">
+          <div className="w-20 h-20 bg-slate-900 rounded-3xl flex items-center justify-center border border-slate-800 mb-6 group-hover:scale-110 transition-transform duration-500">
+            <UserGroupIcon className="h-10 w-10 text-slate-700" />
+          </div>
+          <h4 className="text-sm font-bold text-white mb-1">Station Idle</h4>
+          <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Waiting for organic traffic</p>
         </div>
       )}
     </div>

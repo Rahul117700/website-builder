@@ -12,7 +12,7 @@ import {
   ClockIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface SubscriptionPlan {
   id: string;
@@ -49,6 +49,9 @@ declare global {
 
 export default function PlansPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const showDiscount = searchParams?.get('discount') === 'WELCOME51';
+
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [subscriptionData, setSubscriptionData] = useState<SubscriptionData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -258,9 +261,8 @@ export default function PlansPage() {
           {plans.map((plan, index) => (
             <div
               key={plan.id}
-              className={`relative bg-white rounded-lg border overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] ${
-                index === 1 ? 'border-2 border-gray-900 shadow-lg' : 'border-gray-200'
-              }`}
+              className={`relative bg-white rounded-lg border overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] ${index === 1 ? 'border-2 border-gray-900 shadow-lg' : 'border-gray-200'
+                }`}
             >
               {/* Popular Badge */}
               {index === 1 && (
@@ -277,9 +279,22 @@ export default function PlansPage() {
                 <h3 className="text-base font-bold text-gray-900 mb-1">{plan.name}</h3>
                 <p className="text-xs text-gray-600 mb-3">{plan.description}</p>
 
+                {/* Validated Discount Badge */}
+                {showDiscount && (
+                  <div className="mb-2 bg-green-50 text-green-700 text-xs px-2 py-1 rounded inline-block font-bold">
+                    🎉 51% FLASH SALE ENDING SOON
+                  </div>
+                )}
+
                 {/* Price */}
                 <div className="mb-3">
                   <div className="flex items-baseline gap-1">
+                    {/* Fake Original Price (Strikethrough) */}
+                    {showDiscount && (
+                      <span className="text-gray-400 text-sm line-through mr-1">
+                        ₹{Math.round(plan.price * 2.04)}
+                      </span>
+                    )}
                     <span className="text-2xl font-bold text-gray-900">
                       ₹{plan.price}
                     </span>
@@ -335,13 +350,12 @@ export default function PlansPage() {
                 <button
                   onClick={() => handlePurchase(plan.id)}
                   disabled={purchasing === plan.id || (subscriptionData?.hasActivePlan && subscriptionData.activeSubscription.planId === plan.id)}
-                  className={`w-full py-2 px-4 rounded-lg font-bold text-xs text-white transition-all duration-200 ${
-                    subscriptionData?.hasActivePlan && subscriptionData.activeSubscription.planId === plan.id
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : index === 1
+                  className={`w-full py-2 px-4 rounded-lg font-bold text-xs text-white transition-all duration-200 ${subscriptionData?.hasActivePlan && subscriptionData.activeSubscription.planId === plan.id
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : index === 1
                       ? 'bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900'
                       : 'bg-gray-900 hover:bg-black'
-                  }`}
+                    }`}
                 >
                   {purchasing === plan.id ? (
                     <div className="flex items-center justify-center">

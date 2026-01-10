@@ -1,85 +1,60 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { XMarkIcon, ChevronLeftIcon, ChevronRightIcon, PlayIcon, PauseIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ChevronLeftIcon, ChevronRightIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { gsap } from 'gsap';
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  AreaChart, Area
+} from 'recharts';
 
-interface Screenshot {
+interface ShowcaseSlide {
+  id: string;
   image: string;
   title: string;
   description: string;
+  graphTitle: string;
+  graphData: any[];
+  graphType: 'line' | 'area';
+  highlightColor: string;
+  details: string[];
 }
 
-const screenshots: Screenshot[] = [
+const slides: ShowcaseSlide[] = [
   {
-    image: '/screenshots/Home page.png',
-    title: 'Beautiful Home Page',
-    description: 'Start your journey with our sleek and modern home page design'
+    id: 'code-expertise',
+    image: '/showcase/slide1.png',
+    title: 'Share Your Code Expertise',
+    description: 'Sell code templates, frameworks, libraries, and development resources. Help fellow developers build faster while earning from your creations.',
+    graphTitle: 'Sales & Revenue Growth',
+    graphType: 'line',
+    highlightColor: '#ec4899', // Pink
+    details: ['Monetize your GitHub repos', 'Automated delivery', 'License management'],
+    graphData: [
+      { week: 'Week 1', revenue: 12, sales: 4 },
+      { week: 'Week 2', revenue: 45, sales: 15 },
+      { week: 'Week 3', revenue: 78, sales: 28 },
+      { week: 'Week 4', revenue: 125, sales: 42 }
+    ]
   },
   {
-    image: '/screenshots/your channel.png',
-    title: 'Your Channel Dashboard',
-    description: 'Manage all your channels from one central dashboard'
-  },
-  {
-    image: '/screenshots/edit channel screen.png',
+    id: 'channel-editor',
+    image: '/showcase/slide2.png',
     title: 'Edit Your Channel',
-    description: 'Customize your channel with easy-to-use editing tools'
-  },
-  {
-    image: '/screenshots/new product.png',
-    title: 'Create New Products',
-    description: 'Add products quickly with our intuitive product creation interface'
-  },
-  {
-    image: '/screenshots/created product list.png',
-    title: 'Product Management',
-    description: 'View and manage all your products in one place'
-  },
-  {
-    image: '/screenshots/product.png',
-    title: 'Product Details',
-    description: 'Showcase your products with beautiful product pages'
-  },
-  {
-    image: '/screenshots/subscribe modal.png',
-    title: 'Subscription System',
-    description: 'Let customers subscribe to your channel with ease'
-  },
-  {
-    image: '/screenshots/live analytics.png',
-    title: 'Live Analytics',
-    description: 'Track your performance in real-time with live analytics'
-  },
-  {
-    image: '/screenshots/channel analytics.png',
-    title: 'Channel Analytics',
-    description: 'Get detailed insights into your channel performance'
-  },
-  {
-    image: '/screenshots/basic settings.png',
-    title: 'Basic Settings',
-    description: 'Configure your channel settings quickly and easily'
-  },
-  {
-    image: '/screenshots/Theme setting.png',
-    title: 'Theme Customization',
-    description: 'Customize your channel theme to match your brand'
-  },
-  {
-    image: '/screenshots/layout setting.png',
-    title: 'Layout Settings',
-    description: 'Choose from various layout options for your channel'
-  },
-  {
-    image: '/screenshots/seo setting.png',
-    title: 'SEO Settings',
-    description: 'Optimize your channel for search engines'
-  },
-  {
-    image: '/screenshots/subscription setting.png',
-    title: 'Subscription Settings',
-    description: 'Configure subscription plans and pricing'
+    description: 'Customize your channel with our intuitive visual editor. Manage products, adjust layouts, and update content in real-time without writing a single line of code.',
+    graphTitle: 'Visitor Engagement',
+    graphType: 'area',
+    highlightColor: '#8b5cf6', // Violet
+    details: ['Drag & drop interface', 'Real-time preview', 'Mobile responsive'],
+    graphData: [
+      { day: 'Mon', visits: 120, clicks: 45 },
+      { day: 'Tue', visits: 180, clicks: 68 },
+      { day: 'Wed', visits: 150, clicks: 55 },
+      { day: 'Thu', visits: 220, clicks: 89 },
+      { day: 'Fri', visits: 280, clicks: 112 },
+      { day: 'Sat', visits: 310, clicks: 145 },
+      { day: 'Sun', visits: 290, clicks: 130 }
+    ]
   }
 ];
 
@@ -90,285 +65,218 @@ interface ScreenshotShowcaseProps {
 
 export default function ScreenshotShowcase({ isOpen, onClose }: ScreenshotShowcaseProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true); // Auto-start playing
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const progressRef = useRef<HTMLDivElement>(null);
-
-  // Auto-start playing when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      setIsPlaying(true);
-      setCurrentIndex(0);
-    } else {
-      setIsPlaying(false);
-    }
-  }, [isOpen]);
-
-  // Auto-play functionality
-  useEffect(() => {
-    if (isPlaying && isOpen) {
-      // Reset and animate progress bar
-      const resetProgress = () => {
-        if (progressRef.current) {
-          progressRef.current.style.transition = 'none';
-          progressRef.current.style.width = '0%';
-          // Force reflow
-          void progressRef.current.offsetWidth;
-          // Start animation
-          setTimeout(() => {
-            if (progressRef.current) {
-              progressRef.current.style.transition = 'width 4s linear';
-              progressRef.current.style.width = '100%';
-            }
-          }, 50);
-        }
-      };
-
-      resetProgress();
-
-      intervalRef.current = setInterval(() => {
-        setCurrentIndex((prev) => (prev + 1) % screenshots.length);
-      }, 4000); // Change slide every 4 seconds
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [isPlaying, isOpen]);
-
-  // Reset progress bar when slide changes
-  useEffect(() => {
-    if (isPlaying && isOpen && progressRef.current) {
-      progressRef.current.style.transition = 'none';
-      progressRef.current.style.width = '0%';
-      void progressRef.current.offsetWidth;
-      setTimeout(() => {
-        if (progressRef.current) {
-          progressRef.current.style.transition = 'width 4s linear';
-          progressRef.current.style.width = '100%';
-        }
-      }, 50);
-    }
-  }, [currentIndex, isPlaying, isOpen]);
-
-  // Animation on slide change
-  useEffect(() => {
-    if (!isOpen) return;
-
-    setIsTransitioning(true);
-    
-    // Fade out current content
-    gsap.to(imageRef.current, {
-      opacity: 0,
-      scale: 0.95,
-      duration: 0.3,
-      ease: 'power2.in',
-      onComplete: () => {
-        // Fade in new content
-        gsap.fromTo(imageRef.current,
-          { opacity: 0, scale: 1.05 },
-          {
-            opacity: 1,
-            scale: 1,
-            duration: 0.5,
-            ease: 'power2.out',
-            onComplete: () => setIsTransitioning(false)
-          }
-        );
-      }
-    });
-
-    // Animate content text
-    if (contentRef.current) {
-      gsap.fromTo(contentRef.current,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.5, delay: 0.2, ease: 'power2.out' }
-      );
-    }
-  }, [currentIndex, isOpen]);
+  const imageRef = useRef<HTMLImageElement>(null);
 
   // Modal entrance animation
   useEffect(() => {
     if (isOpen && containerRef.current) {
       gsap.fromTo(containerRef.current,
-        { opacity: 0, scale: 0.9 },
-        { opacity: 1, scale: 1, duration: 0.4, ease: 'power3.out' }
+        { opacity: 0, scale: 0.95, y: 20 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: 'power3.out' }
       );
     }
   }, [isOpen]);
 
+  // Slide transition animation
+  useEffect(() => {
+    if (isOpen) {
+      // Animate content
+      gsap.fromTo([contentRef.current, imageRef.current],
+        { opacity: 0, x: 20 },
+        { opacity: 1, x: 0, duration: 0.4, stagger: 0.1, ease: 'power2.out' }
+      );
+    }
+  }, [currentIndex, isOpen]);
+
   const nextSlide = () => {
-    if (isTransitioning) return;
-    setCurrentIndex((prev) => (prev + 1) % screenshots.length);
+    setCurrentIndex((prev) => (prev + 1) % slides.length);
   };
 
   const prevSlide = () => {
-    if (isTransitioning) return;
-    setCurrentIndex((prev) => (prev - 1 + screenshots.length) % screenshots.length);
-  };
-
-  const goToSlide = (index: number) => {
-    if (isTransitioning) return;
-    setCurrentIndex(index);
-  };
-
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
+    setCurrentIndex((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
   if (!isOpen) return null;
 
-  const currentScreenshot = screenshots[currentIndex];
+  const currentSlide = slides[currentIndex];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/90 backdrop-blur-sm overflow-hidden">
-      {/* Close button */}
-      <button
-        onClick={onClose}
-        className="absolute top-2 right-2 sm:top-4 sm:right-4 z-50 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-        aria-label="Close"
-      >
-        <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-      </button>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md overflow-hidden">
+      {/* Click outside to close */}
+      <div className="absolute inset-0" onClick={onClose}></div>
 
-      {/* Main container */}
+      {/* Main Container */}
       <div
         ref={containerRef}
-        className="relative w-full h-full max-w-7xl max-h-[95vh] mx-auto bg-gray-900 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl flex flex-col"
+        className="relative w-full max-w-6xl h-[85vh] bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col lg:flex-row"
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Image container - takes most of the space */}
-        <div className="relative flex-1 bg-gray-800 flex items-center justify-center overflow-hidden min-h-0">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-50 p-2 rounded-full bg-white/20 hover:bg-black/10 text-gray-800 transition-colors"
+        >
+          <XMarkIcon className="h-6 w-6" />
+        </button>
+
+        {/* LEFT SIDE: Image/Visual */}
+        <div className="w-full lg:w-3/5 h-1/2 lg:h-full bg-gray-50 relative overflow-hidden group">
           <img
             ref={imageRef}
-            src={currentScreenshot.image}
-            alt={currentScreenshot.title}
-            className="max-w-full max-h-full w-auto h-auto object-contain"
-            style={{ maxHeight: 'calc(95vh - 250px)' }}
+            src={currentSlide.image}
+            alt={currentSlide.title}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             onError={(e) => {
-              // Fallback if image doesn't load
-              (e.target as HTMLImageElement).src = '/logo/logo.png';
+              (e.target as HTMLImageElement).src = '/logo/logo.png'; // Fallback
             }}
           />
+          {/* Gradient Overlay for text readability if needed */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent lg:hidden"></div>
 
-          {/* Navigation arrows */}
-          <button
-            onClick={prevSlide}
-            disabled={isTransitioning}
-            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm z-10"
-            aria-label="Previous"
-          >
-            <ChevronLeftIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-          </button>
-          <button
-            onClick={nextSlide}
-            disabled={isTransitioning}
-            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm z-10"
-            aria-label="Next"
-          >
-            <ChevronRightIcon className="h-5 w-5 sm:h-6 sm:w-6" />
-          </button>
-
-          {/* Progress bar */}
-          {isPlaying && (
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/10 z-10">
-              <div
-                ref={progressRef}
-                className="h-full bg-gradient-to-r from-purple-500 to-indigo-500"
-                style={{ 
-                  width: '0%'
-                }}
-                key={`progress-${currentIndex}`}
-              />
-            </div>
-          )}
+          {/* Navigation Arrows (Overlaid on mobile, visible on desktop hover) */}
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-between px-4 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">
+            <button
+              onClick={prevSlide}
+              className="p-3 rounded-full bg-white/90 shadow-lg text-gray-800 hover:bg-white hover:scale-110 transition-all"
+            >
+              <ChevronLeftIcon className="h-5 w-5" />
+            </button>
+            <button
+              onClick={nextSlide}
+              className="p-3 rounded-full bg-white/90 shadow-lg text-gray-800 hover:bg-white hover:scale-110 transition-all"
+            >
+              <ChevronRightIcon className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
-        {/* Content section - fixed height */}
-        <div ref={contentRef} className="flex-shrink-0 p-4 sm:p-6 bg-gradient-to-b from-gray-900 to-gray-800 overflow-y-auto max-h-[250px]">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
-            <div className="flex-1 min-w-0">
-              <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 truncate">
-                {currentScreenshot.title}
-              </h3>
-              <p className="text-gray-300 text-xs sm:text-sm md:text-base">
-                {currentScreenshot.description}
+        {/* RIGHT SIDE: Content & Graph */}
+        <div className="w-full lg:w-2/5 h-1/2 lg:h-full bg-white p-6 lg:p-10 flex flex-col overflow-y-auto">
+          <div ref={contentRef} className="flex-1 flex flex-col justify-center">
+
+            {/* Header */}
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold text-gray-900 mb-3 leading-tight">
+                {currentSlide.title}
+              </h2>
+              <p className="text-gray-600 text-lg leading-relaxed">
+                {currentSlide.description}
               </p>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <button
-                onClick={togglePlay}
-                className="p-2 sm:p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-                aria-label={isPlaying ? 'Pause' : 'Play'}
-              >
-                {isPlaying ? (
-                  <PauseIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                ) : (
-                  <PlayIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                )}
-              </button>
-            </div>
-          </div>
 
-          {/* Thumbnail navigation */}
-          <div className="mt-4 sm:mt-6 overflow-x-auto">
-            <div className="flex gap-2 pb-2">
-              {screenshots.map((screenshot, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToSlide(index)}
-                  className={`flex-shrink-0 relative group ${
-                    index === currentIndex ? 'ring-2 ring-purple-500' : 'opacity-60 hover:opacity-100'
-                  } transition-all`}
+            {/* Key Benefits/Details */}
+            <div className="flex flex-wrap gap-2 mb-8">
+              {currentSlide.details.map((detail, idx) => (
+                <span
+                  key={idx}
+                  className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full"
                 >
-                  <img
-                    src={screenshot.image}
-                    alt={screenshot.title}
-                    className="w-16 h-10 sm:w-20 sm:h-12 object-cover rounded-lg"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/logo/logo.png';
-                    }}
-                  />
-                  {index === currentIndex && (
-                    <div className="absolute inset-0 bg-purple-500/20 rounded-lg" />
-                  )}
-                </button>
+                  {detail}
+                </span>
               ))}
             </div>
-          </div>
 
-          {/* Slide counter */}
-          <div className="mt-3 sm:mt-4 text-center text-gray-400 text-xs sm:text-sm">
-            {currentIndex + 1} / {screenshots.length}
+            {/* Graph Section */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-4">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: currentSlide.highlightColor }}></div>
+                <h4 className="font-semibold text-gray-800 text-sm uppercase tracking-wide">
+                  {currentSlide.graphTitle}
+                </h4>
+              </div>
+
+              <div className="h-[200px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  {currentSlide.graphType === 'line' ? (
+                    <LineChart data={currentSlide.graphData}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                      <XAxis
+                        dataKey="week"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#9ca3af', fontSize: 10 }}
+                        dy={10}
+                      />
+                      <YAxis
+                        hide={true}
+                        domain={[0, 'dataMax + 20']}
+                      />
+                      <Tooltip
+                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                        itemStyle={{ fontSize: '12px', fontWeight: 600 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke={currentSlide.highlightColor}
+                        strokeWidth={4}
+                        dot={{ r: 4, fill: currentSlide.highlightColor, strokeWidth: 2, stroke: '#fff' }}
+                        activeDot={{ r: 6 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="sales"
+                        stroke="#a78bfa"
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                    </LineChart>
+                  ) : (
+                    <AreaChart data={currentSlide.graphData}>
+                      <defs>
+                        <linearGradient id="colorVisits" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={currentSlide.highlightColor} stopOpacity={0.3} />
+                          <stop offset="95%" stopColor={currentSlide.highlightColor} stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                      <XAxis
+                        dataKey="day"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#9ca3af', fontSize: 10 }}
+                        dy={10}
+                      />
+                      <Tooltip />
+                      <Area
+                        type="monotone"
+                        dataKey="visits"
+                        stroke={currentSlide.highlightColor}
+                        fillOpacity={1}
+                        fill="url(#colorVisits)"
+                      />
+                    </AreaChart>
+                  )}
+                </ResponsiveContainer>
+              </div>
+
+              {currentSlide.graphType === 'line' && (
+                <div className="mt-2 text-center">
+                  <span className="text-sm font-bold text-gray-900">4x increase</span>
+                  <span className="text-xs text-gray-500 ml-1">in just one month</span>
+                </div>
+              )}
+            </div>
+
+            {/* Pagination Dots */}
+            <div className="flex justify-center gap-2 mt-auto pt-4">
+              {slides.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentIndex(idx)}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${currentIndex === idx
+                      ? 'w-6 bg-gray-800'
+                      : 'bg-gray-300 hover:bg-gray-400'
+                    }`}
+                />
+              ))}
+            </div>
+
           </div>
         </div>
       </div>
-
-      {/* Keyboard navigation */}
-      <div
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === 'ArrowLeft') prevSlide();
-          if (e.key === 'ArrowRight') nextSlide();
-          if (e.key === 'Escape') onClose();
-          if (e.key === ' ') {
-            e.preventDefault();
-            togglePlay();
-          }
-        }}
-        className="absolute inset-0"
-        aria-label="Keyboard navigation: Arrow keys to navigate, Space to play/pause, Escape to close"
-      />
     </div>
   );
 }

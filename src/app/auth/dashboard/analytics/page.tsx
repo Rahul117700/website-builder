@@ -29,9 +29,12 @@ import {
   UsersIcon,
   ShoppingCartIcon,
   DocumentTextIcon,
-  ChartPieIcon
+  ChartPieIcon,
+  LightBulbIcon,
+  InformationCircleIcon
 } from '@heroicons/react/24/outline';
 import { gsap } from 'gsap';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from 'recharts';
 
 interface AnalyticsData {
@@ -101,7 +104,7 @@ interface AnalyticsData {
 const generateAnalyticsInsights = (analytics: AnalyticsData) => {
   const insights = [];
   const tips = [];
-  
+
   // Conversion Rate Analysis
   if (analytics.conversionRate < 2) {
     insights.push({
@@ -134,7 +137,7 @@ const generateAnalyticsInsights = (analytics: AnalyticsData) => {
       action: 'Increase ad budget by 50%'
     });
   }
-  
+
   // Traffic Analysis
   if (analytics.totalViews < 100) {
     insights.push({
@@ -160,7 +163,7 @@ const generateAnalyticsInsights = (analytics: AnalyticsData) => {
       impact: 'medium'
     });
   }
-  
+
   // Revenue Analysis
   if (analytics.totalRevenue < 1000) {
     insights.push({
@@ -193,7 +196,7 @@ const generateAnalyticsInsights = (analytics: AnalyticsData) => {
       action: 'Research 3 new market opportunities'
     });
   }
-  
+
   // Device Analysis
   if (analytics.deviceStats.mobile > 60) {
     insights.push({
@@ -211,7 +214,7 @@ const generateAnalyticsInsights = (analytics: AnalyticsData) => {
       action: 'Test page speed on mobile devices'
     });
   }
-  
+
   // Average Order Value Analysis
   if (analytics.avgOrderValue < 500) {
     insights.push({
@@ -229,7 +232,7 @@ const generateAnalyticsInsights = (analytics: AnalyticsData) => {
       action: 'Create a 3-product bundle'
     });
   }
-  
+
   // Performance Trends
   if (analytics.viewsGrowth > 0) {
     insights.push({
@@ -240,7 +243,7 @@ const generateAnalyticsInsights = (analytics: AnalyticsData) => {
       impact: 'medium'
     });
   }
-  
+
   if (analytics.revenueGrowth > 0) {
     insights.push({
       type: 'success',
@@ -250,7 +253,7 @@ const generateAnalyticsInsights = (analytics: AnalyticsData) => {
       impact: 'high'
     });
   }
-  
+
   return { insights: insights.slice(0, 4), tips: tips.slice(0, 3) };
 };
 
@@ -272,11 +275,11 @@ export default function AnalyticsPage() {
       { opacity: 0, y: 50 },
       { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }
     )
-    .fromTo(chartsRef.current,
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
-      "-=0.3"
-    );
+      .fromTo(chartsRef.current,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
+        "-=0.3"
+      );
 
     loadAnalytics();
   }, [timeRange]);
@@ -287,13 +290,13 @@ export default function AnalyticsPage() {
       // Use comprehensive channel analytics API
       const days = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : timeRange === '90d' ? 90 : 30;
       const response = await fetch(`/api/channels/analytics/comprehensive?days=${days}`);
-      
+
       if (response.ok) {
         const data = await response.json();
-        
+
         // Store raw data for export
         setRawAnalyticsData(data);
-        
+
         const analyticsData: AnalyticsData = {
           totalViews: data.overview.totalViews || 0,
           totalConversions: data.overview.totalConversions || 0,
@@ -316,7 +319,7 @@ export default function AnalyticsPage() {
           },
           geographicData: data.geographicData || [],
         };
-        
+
         console.log('[Analytics Page] Loaded channel analytics:', analyticsData);
         setAnalytics(analyticsData);
       } else {
@@ -367,12 +370,17 @@ export default function AnalyticsPage() {
 
   return (
     <DashboardLayout>
-      <div className="w-full h-screen m-0 p-3 sm:p-4 space-y-3 bg-gray-50 overflow-y-auto">
+      <div className="w-full min-h-screen m-0 p-4 sm:p-6 space-y-6 bg-gray-50/50 overflow-y-auto">
         {/* Header */}
-        <div ref={heroRef} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <motion.div
+          ref={heroRef}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+        >
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Analytics</h1>
-            <p className="text-xs text-gray-600 mt-0.5">Track your product performance and sales</p>
+            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Analytics</h1>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1">Product Performance & Trends</p>
           </div>
           <div className="flex items-center flex-wrap gap-2">
             <DateRangePicker
@@ -384,111 +392,102 @@ export default function AnalyticsPage() {
             <AdvancedFilters onApplyFilters={(filters) => console.log('Filters applied:', filters)} />
             <ExportButton data={rawAnalyticsData} filename="analytics-report" />
           </div>
-        </div>
-        
+        </motion.div>
+
         {/* Real-time Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
             {/* Key Metrics Overview */}
             {analytics && (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
-            {/* Total Views */}
-            <div className="bg-white rounded-lg border border-gray-200 p-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-medium text-gray-600 uppercase tracking-wide">Total Views</p>
-                  <p className="text-xl font-bold text-gray-900 mt-0.5">{analytics.totalViews.toLocaleString()}</p>
-                  <div className="flex items-center mt-0.5">
-                    {analytics.viewsGrowth >= 0 ? (
-                      <ArrowTrendingUpIcon className="h-3 w-3 text-emerald-500 mr-0.5" />
-                    ) : (
-                      <ArrowTrendingDownIcon className="h-3 w-3 text-red-500 mr-0.5" />
-                    )}
-                    <span className={`text-[10px] font-medium ${analytics.viewsGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                      {Math.abs(analytics.viewsGrowth)}%
-                    </span>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Total Views */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="bg-white rounded-3xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-all group"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-blue-50 rounded-xl group-hover:scale-110 transition-transform">
+                      <EyeIcon className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${analytics.viewsGrowth >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                      {analytics.viewsGrowth >= 0 ? '+' : ''}{analytics.viewsGrowth}%
+                    </div>
                   </div>
-                </div>
-                <div className="p-2 bg-gray-100 rounded-lg">
-                  <EyeIcon className="h-5 w-5 text-gray-700" />
-                </div>
-              </div>
-            </div>
+                  <p className="text-2xl font-black text-gray-900 leading-none">{analytics.totalViews.toLocaleString()}</p>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2 font-semibold">Total Impressions</p>
+                </motion.div>
 
-            {/* Total Conversions */}
-            <div className="bg-white rounded-lg border border-gray-200 p-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-medium text-gray-600 uppercase tracking-wide">Conversions</p>
-                  <p className="text-xl font-bold text-gray-900 mt-0.5">{analytics.totalConversions}</p>
-                  <div className="flex items-center mt-0.5">
-                    {analytics.conversionsGrowth >= 0 ? (
-                      <ArrowTrendingUpIcon className="h-3 w-3 text-emerald-500 mr-0.5" />
-                    ) : (
-                      <ArrowTrendingDownIcon className="h-3 w-3 text-red-500 mr-0.5" />
-                    )}
-                    <span className={`text-[10px] font-medium ${analytics.conversionsGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                      {Math.abs(analytics.conversionsGrowth)}%
-                    </span>
+                {/* Total Conversions */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="bg-white rounded-3xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-all group"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-emerald-50 rounded-xl group-hover:scale-110 transition-transform">
+                      <ShoppingCartIcon className="h-5 w-5 text-emerald-600" />
+                    </div>
+                    <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${analytics.conversionsGrowth >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                      {analytics.conversionsGrowth >= 0 ? '+' : ''}{analytics.conversionsGrowth}%
+                    </div>
                   </div>
-                </div>
-                <div className="p-2 bg-gray-100 rounded-lg">
-                  <ShoppingCartIcon className="h-5 w-5 text-gray-700" />
-                </div>
-              </div>
-            </div>
+                  <p className="text-2xl font-black text-gray-900 leading-none">{analytics.totalConversions}</p>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2 font-semibold">Goal Reached</p>
+                </motion.div>
 
-            {/* Total Revenue */}
-            <div className="bg-white rounded-lg border border-gray-200 p-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-medium text-gray-600 uppercase tracking-wide">Revenue</p>
-                  <p className="text-xl font-bold text-gray-900 mt-0.5">₹{analytics.totalRevenue.toLocaleString()}</p>
-                  <div className="flex items-center mt-0.5">
-                    {analytics.revenueGrowth >= 0 ? (
-                      <ArrowTrendingUpIcon className="h-3 w-3 text-emerald-500 mr-0.5" />
-                    ) : (
-                      <ArrowTrendingDownIcon className="h-3 w-3 text-red-500 mr-0.5" />
-                    )}
-                    <span className={`text-[10px] font-medium ${analytics.revenueGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                      {Math.abs(analytics.revenueGrowth)}%
-                    </span>
+                {/* Total Revenue */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="bg-white rounded-3xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-all group"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-purple-50 rounded-xl group-hover:scale-110 transition-transform">
+                      <CurrencyDollarIcon className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${analytics.revenueGrowth >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                      {analytics.revenueGrowth >= 0 ? '+' : ''}{analytics.revenueGrowth}%
+                    </div>
                   </div>
-                </div>
-                <div className="p-2 bg-gray-100 rounded-lg">
-                  <CurrencyDollarIcon className="h-5 w-5 text-gray-700" />
-                </div>
-              </div>
-            </div>
+                  <p className="text-2xl font-black text-gray-900 leading-none">₹{analytics.totalRevenue.toLocaleString()}</p>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2 font-semibold">Gross Revenue</p>
+                </motion.div>
 
-            {/* Conversion Rate */}
-            <div className="bg-white rounded-lg border border-gray-200 p-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-medium text-gray-600 uppercase tracking-wide">Conversion Rate</p>
-                  <p className="text-xl font-bold text-gray-900 mt-0.5">{analytics.conversionRate}%</p>
-                  <div className="flex items-center mt-0.5">
-                    <span className="text-[10px] text-gray-600">Avg: ₹{analytics.avgOrderValue}</span>
+                {/* Conversion Rate */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="bg-white rounded-3xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-all group"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="p-2 bg-amber-50 rounded-xl group-hover:scale-110 transition-transform">
+                      <ChartPieIcon className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <div className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold uppercase">
+                      Efficiency
+                    </div>
                   </div>
-                </div>
-                <div className="p-2 bg-gray-100 rounded-lg">
-                  <ChartPieIcon className="h-5 w-5 text-gray-700" />
-                </div>
+                  <p className="text-2xl font-black text-gray-900 leading-none">{analytics.conversionRate}%</p>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2 font-semibold">User Conversion</p>
+                </motion.div>
               </div>
-            </div>
-          </div>
-        )}
-            
+            )}
+
             {/* Audience Overview Chart */}
             {analytics && (
               <div className="mb-3">
                 <AudienceOverview data={analytics.dailyStats} />
               </div>
             )}
-            
+
             {/* Session Metrics */}
             <div className="mb-3">
-              <SessionMetrics 
+              <SessionMetrics
                 avgSessionDuration={analytics?.sessionMetrics?.avgSessionDuration}
                 pagesPerSession={analytics?.sessionMetrics?.pagesPerSession}
                 bounceRate={analytics?.sessionMetrics?.bounceRate}
@@ -496,14 +495,14 @@ export default function AnalyticsPage() {
               />
             </div>
           </div>
-          
+
           {/* Real-time Visitors Sidebar */}
           <div className="space-y-3">
             <RealtimeVisitors />
             <GeographicBreakdown data={analytics?.geographicData || []} />
           </div>
         </div>
-        
+
         {/* Acquisition & Behavior Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           <AcquisitionChannels trafficSources={analytics?.trafficSources || []} />
@@ -512,37 +511,43 @@ export default function AnalyticsPage() {
 
         {/* Analytics Insights & Tips */}
         {analytics && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Key Insights */}
-            <div className="bg-white rounded-lg border border-gray-200 p-3">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-gray-900">Key Insights</h3>
-                <div className="p-1.5 bg-gray-100 rounded-lg">
-                  <ChartBarIcon className="h-4 w-4 text-gray-700" />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5 }}
+              className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all group"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-black text-gray-900 tracking-tight">Key Insights</h3>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">AI Analysis & Alerts</p>
+                </div>
+                <div className="p-2 bg-slate-900 rounded-xl">
+                  <ChartBarIcon className="h-5 w-5 text-white" />
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {generateAnalyticsInsights(analytics).insights.map((insight, index) => (
-                  <div 
+                  <div
                     key={index}
-                    className={`p-2 rounded-lg border-l-4 ${
-                      insight.type === 'success' ? 'bg-emerald-50 border-emerald-400' :
-                      insight.type === 'warning' ? 'bg-amber-50 border-amber-400' :
-                      'bg-gray-50 border-gray-400'
-                    }`}
+                    className={`p-4 rounded-2xl border-l-4 transition-transform hover:translate-x-1 ${insight.type === 'success' ? 'bg-emerald-50/50 border-emerald-500' :
+                      insight.type === 'warning' ? 'bg-amber-50/50 border-amber-500' :
+                        'bg-gray-50 border-gray-900'
+                      }`}
                   >
-                    <div className="flex items-start space-x-2">
-                      <span className="text-base">{insight.icon}</span>
+                    <div className="flex items-start gap-4">
+                      <span className="text-2xl">{insight.icon}</span>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 text-xs">{insight.title}</h4>
-                        <p className="text-[10px] text-gray-600 mt-0.5">{insight.description}</p>
-                        <div className="flex items-center mt-1">
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                            insight.impact === 'high' ? 'bg-red-100 text-red-700' :
-                            insight.impact === 'medium' ? 'bg-amber-100 text-amber-700' :
-                            'bg-gray-100 text-gray-700'
-                          }`}>
-                            {insight.impact} impact
+                        <h4 className="font-black text-gray-900 text-sm tracking-tight">{insight.title}</h4>
+                        <p className="text-[10px] font-semibold text-gray-500 leading-relaxed mt-1">{insight.description}</p>
+                        <div className="mt-3 flex items-center gap-2">
+                          <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${insight.impact === 'high' ? 'bg-red-500 text-white' :
+                            insight.impact === 'medium' ? 'bg-amber-500 text-white' :
+                              'bg-gray-900 text-white'
+                            }`}>
+                            {insight.impact} IMPACT
                           </span>
                         </div>
                       </div>
@@ -550,27 +555,35 @@ export default function AnalyticsPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
             {/* Actionable Tips */}
-            <div className="bg-white rounded-lg border border-gray-200 p-3">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-gray-900">Actionable Tips</h3>
-                <div className="p-1.5 bg-emerald-50 rounded-lg">
-                  <StarIcon className="h-4 w-4 text-emerald-600" />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.6 }}
+              className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all group"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-black text-gray-900 tracking-tight">Growth Map</h3>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Recommendations & Fixes</p>
+                </div>
+                <div className="p-2 bg-amber-400 rounded-xl">
+                  <StarIcon className="h-5 w-5 text-amber-900" />
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {generateAnalyticsInsights(analytics).tips.map((tip, index) => (
-                  <div key={index} className="p-2 bg-gradient-to-r from-gray-50 to-slate-50 rounded-lg border border-gray-200">
-                    <div className="flex items-start space-x-2">
-                      <span className="text-base">{tip.icon}</span>
+                  <div key={index} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-white hover:border-gray-200 transition-all group/tip">
+                    <div className="flex items-start gap-4">
+                      <span className="text-2xl group-hover/tip:rotate-12 transition-transform">{tip.icon}</span>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 text-xs">{tip.title}</h4>
-                        <p className="text-[10px] text-gray-600 mt-0.5">{tip.description}</p>
-                        <div className="mt-1">
-                          <span className="text-[10px] font-medium text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded">
-                            💡 {tip.action}
+                        <h4 className="font-black text-gray-900 text-sm tracking-tight">{tip.title}</h4>
+                        <p className="text-[10px] font-semibold text-gray-500 leading-relaxed mt-1">{tip.description}</p>
+                        <div className="mt-3">
+                          <span className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-slate-900 bg-white border border-slate-200 px-2 py-1 rounded-lg group-hover/tip:border-slate-900 transition-all">
+                            <LightBulbIcon className="w-3 h-3" /> {tip.action}
                           </span>
                         </div>
                       </div>
@@ -578,550 +591,663 @@ export default function AnalyticsPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           </div>
         )}
 
         {/* Info Banner */}
-        <div className="bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-lg p-2.5">
-          <div className="flex items-start space-x-2">
-            <ChartBarIcon className="h-4 w-4 text-gray-600 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="text-xs font-medium text-gray-900">Understanding Your Analytics</p>
-              <p className="text-[10px] text-gray-700 mt-0.5">
-                <strong>Views:</strong> Total visitors • <strong>Conversions:</strong> Purchases • <strong>Revenue:</strong> Total earnings
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div ref={chartsRef} className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          {/* Top Performing Channels */}
-          <div className="bg-white rounded-lg border border-gray-200 p-3">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-gray-900">Top Channels</h3>
-              <FireIcon className="h-4 w-4 text-orange-500" />
-            </div>
-            <div className="space-y-2">
-              {analytics?.topChannels && analytics.topChannels.length > 0 ? (
-                analytics.topChannels.map((channel, index) => (
-                  <div key={channel.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                    <div className="flex items-center space-x-2 flex-1 min-w-0">
-                      <div className="w-6 h-6 bg-gradient-to-r from-gray-900 to-black rounded-lg flex items-center justify-center text-white font-semibold text-[10px] flex-shrink-0">
-                        {index + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 text-xs truncate">{channel.name}</p>
-                        <p className="text-[10px] text-gray-600">{channel.views.toLocaleString()} views • {channel.products} products</p>
-                      </div>
-                    </div>
-                    <div className="text-right ml-2 flex-shrink-0">
-                      <p className="font-semibold text-emerald-600 text-xs">₹{channel.revenue.toLocaleString()}</p>
-                      <p className="text-[10px] text-gray-600">{channel.conversionRate}%</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-4">
-                  <ChartBarIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-xs text-gray-600">No channel data available</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Top Products */}
-          <div className="bg-white rounded-lg border border-gray-200 p-3">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-gray-900">Top Products</h3>
-              <ShoppingCartIcon className="h-4 w-4 text-gray-400" />
-            </div>
-            <div className="space-y-2 max-h-80 overflow-y-auto">
-              {analytics?.topProducts && analytics.topProducts.length > 0 ? (
-                analytics.topProducts.map((product, index) => (
-                  <div key={product.id} className="flex items-start space-x-1.5 p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                    <div className="p-1.5 rounded-lg bg-blue-100 text-blue-800 flex-shrink-0">
-                      <ShoppingCartIcon className="h-4 w-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 text-xs truncate">{product.title}</p>
-                      <p className="text-[10px] text-gray-600">{product.channelName}</p>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <span className="text-[10px] text-gray-500">{product.views} views</span>
-                        <span className="text-[10px] text-gray-500">•</span>
-                        <span className="text-[10px] text-emerald-600">{product.conversions} sales</span>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-4">
-                  <ShoppingCartIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-xs text-gray-600">No product data available</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Performance Comparison & Trends */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
-          {/* Revenue vs Views Trend */}
-          <div className="bg-white rounded-lg border border-gray-200 p-3">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-gray-900">Revenue vs Views Trend</h3>
-              <div className="flex items-center space-x-3 text-[10px]">
-                <div className="flex items-center space-x-1">
-                  <div className="w-1.5 h-1.5 bg-gray-600 rounded-full"></div>
-                  <span className="text-gray-600">Views</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <div className="w-1.5 h-1.5 bg-gray-700 rounded-full"></div>
-                  <span className="text-gray-600">Revenue</span>
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-32 translate-x-32 group-hover:bg-blue-500/20 transition-all"></div>
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/10 rounded-2xl backdrop-blur-md">
+                <InformationCircleIcon className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <p className="text-lg font-black text-white tracking-tight">Decoding Your Metrics</p>
+                <div className="flex items-center gap-4 mt-1">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <div className="w-1 h-1 bg-blue-400 rounded-full"></div> Views: Reach
+                  </p>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <div className="w-1 h-1 bg-emerald-400 rounded-full"></div> Conversions: Sales
+                  </p>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <div className="w-1 h-1 bg-purple-400 rounded-full"></div> Revenue: Growth
+                  </p>
                 </div>
               </div>
             </div>
-            <div className="h-52">
+          </div>
+        </div>
+
+        <div ref={chartsRef} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Top Performing Channels */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all group"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-black text-gray-900 tracking-tight">Top Channels</h3>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">High Performance Assets</p>
+              </div>
+              <div className="p-2 bg-orange-100 rounded-xl">
+                <FireIcon className="h-5 w-5 text-orange-600" />
+              </div>
+            </div>
+            <div className="space-y-3">
+              {analytics?.topChannels && analytics.topChannels.length > 0 ? (
+                analytics.topChannels.map((channel, index) => (
+                  <div key={channel.id} className="group/item flex items-center justify-between p-3 bg-gray-50/50 rounded-2xl border border-gray-100/50 hover:bg-white hover:border-gray-200 transition-all">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <div className="w-8 h-8 bg-slate-900 rounded-xl flex items-center justify-center text-white font-black text-xs shrink-0 group-hover/item:scale-110 transition-transform">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-black text-gray-900 text-sm tracking-tight truncate">{channel.name}</p>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">{channel.views.toLocaleString()} Views • {channel.products} items</p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-black text-emerald-600 text-sm tracking-tight">₹{channel.revenue.toLocaleString()}</p>
+                      <p className="text-[9px] font-black text-white bg-slate-900 px-1.5 py-0.5 rounded-full mt-1">{channel.conversionRate}% CR</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-10 flex flex-col items-center justify-center opacity-40">
+                  <ChartBarIcon className="h-10 w-10 mb-2" />
+                  <p className="text-[10px] font-bold tracking-widest">NO ASSETS FOUND</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+
+          {/* Top Products */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all group"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-black text-gray-900 tracking-tight">Best Sellers</h3>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Top Converting Products</p>
+              </div>
+              <div className="p-2 bg-blue-100 rounded-xl">
+                <ShoppingCartIcon className="h-5 w-5 text-blue-600" />
+              </div>
+            </div>
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+              {analytics?.topProducts && analytics.topProducts.length > 0 ? (
+                analytics.topProducts.map((product, index) => (
+                  <div key={product.id} className="group/item flex items-start gap-4 p-3 hover:bg-gray-50 rounded-2xl transition-all border border-transparent hover:border-gray-100">
+                    <div className="p-3 bg-blue-50/50 rounded-xl text-blue-600 shrink-0 group-hover/item:scale-110 transition-transform">
+                      <ShoppingCartIcon className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-black text-gray-900 text-sm tracking-tight truncate">{product.title}</p>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">{product.channelName}</p>
+                      <div className="flex items-center gap-3 mt-3">
+                        <div className="flex items-center gap-1">
+                          <EyeIcon className="w-3 h-3 text-gray-400" />
+                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{product.views}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <ShoppingCartIcon className="w-3 h-3 text-emerald-500" />
+                          <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">{product.conversions} SALES</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-10 flex flex-col items-center justify-center opacity-40">
+                  <ShoppingCartIcon className="h-10 w-10 mb-2" />
+                  <p className="text-[10px] font-bold tracking-widest">NO PRODUCTS FOUND</p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Performance Comparison & Trends */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Revenue vs Views Trend */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all group"
+          >
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-xl font-black text-gray-900 tracking-tight">Financial Stream</h3>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Revenue vs Reach Correlation</p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 bg-slate-900 rounded-full"></div>
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Views</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Revenue</span>
+                </div>
+              </div>
+            </div>
+            <div className="h-64">
               {analytics && analytics.dailyStats.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={analytics.dailyStats}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis 
-                      dataKey="date" 
-                      stroke="#6b7280"
-                      style={{ fontSize: '10px' }}
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis
+                      dataKey="date"
+                      stroke="#94a3b8"
+                      style={{ fontSize: '10px', fontWeight: 'bold' }}
+                      tick={{ fill: '#94a3b8' }}
+                      axisLine={false}
+                      tickLine={false}
+                      dy={10}
                     />
-                    <YAxis 
-                      stroke="#6b7280"
-                      style={{ fontSize: '10px' }}
+                    <YAxis
+                      stroke="#94a3b8"
+                      style={{ fontSize: '10px', fontWeight: 'bold' }}
+                      tick={{ fill: '#94a3b8' }}
+                      axisLine={false}
+                      tickLine={false}
                       yAxisId="left"
+                      dx={-10}
                     />
-                    <YAxis 
-                      stroke="#6b7280"
-                      style={{ fontSize: '10px' }}
+                    <YAxis
+                      stroke="#94a3b8"
+                      style={{ fontSize: '10px', fontWeight: 'bold' }}
+                      tick={{ fill: '#94a3b8' }}
+                      axisLine={false}
+                      tickLine={false}
                       yAxisId="right"
                       orientation="right"
+                      dx={10}
                     />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#fff', 
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#111827',
+                        border: 'none',
+                        borderRadius: '16px',
+                        boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.5)',
+                        color: '#fff',
+                        fontSize: '11px',
+                        fontWeight: 'bold'
                       }}
+                      itemStyle={{ color: '#fff' }}
                     />
-                    <Line 
+                    <Line
                       yAxisId="left"
-                      type="monotone" 
-                      dataKey="views" 
-                      stroke="#4b5563" 
-                      strokeWidth={2}
-                      dot={{ fill: '#4b5563', strokeWidth: 2, r: 4 }}
+                      type="monotone"
+                      dataKey="views"
+                      stroke="#111827"
+                      strokeWidth={4}
+                      dot={false}
+                      activeDot={{ r: 6, strokeWidth: 0, fill: '#111827' }}
+                      animationDuration={2000}
                     />
-                    <Line 
+                    <Line
                       yAxisId="right"
-                      type="monotone" 
-                      dataKey="revenue" 
-                      stroke="#374151" 
-                      strokeWidth={2}
-                      dot={{ fill: '#374151', strokeWidth: 2, r: 4 }}
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="#10b981"
+                      strokeWidth={4}
+                      dot={false}
+                      activeDot={{ r: 6, strokeWidth: 0, fill: '#10b981' }}
+                      animationDuration={2000}
                     />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center bg-gray-50 rounded-lg">
-                  <div className="text-center">
-                    <ChartBarIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-500">No trend data available</p>
-                  </div>
+                <div className="h-full flex flex-col items-center justify-center opacity-40">
+                  <ChartPieIcon className="h-10 w-10 mb-2" />
+                  <p className="text-[10px] font-bold tracking-widest uppercase">No Trend Data</p>
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
 
           {/* Performance Score */}
-          <div className="bg-white rounded-lg border border-gray-200 p-3">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-semibold text-gray-900">Performance Score</h3>
-              <div className="p-1.5 bg-gradient-to-r from-gray-100 to-slate-100 rounded-lg">
-                <StarIcon className="h-4 w-4 text-gray-700" />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all group"
+          >
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-xl font-black text-gray-900 tracking-tight">Signal Grade</h3>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Aggregated Efficiency Score</p>
+              </div>
+              <div className="p-2 bg-slate-900 rounded-xl">
+                <StarIcon className="h-5 w-5 text-white" />
               </div>
             </div>
-            
+
             {analytics && (
-              <div className="space-y-3">
+              <div className="space-y-6">
                 {/* Overall Score */}
-                <div className="text-center">
-                  <div className="relative w-24 h-24 mx-auto mb-2">
-                    <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 120 120">
+                <div className="flex items-center gap-8">
+                  <div className="relative w-32 h-32 shrink-0">
+                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
                       <circle
                         cx="60"
                         cy="60"
                         r="50"
-                        stroke="#e5e7eb"
-                        strokeWidth="8"
+                        stroke="#f1f5f9"
+                        strokeWidth="12"
                         fill="none"
                       />
-                      <circle
+                      <motion.circle
                         cx="60"
                         cy="60"
                         r="50"
                         stroke="#10b981"
-                        strokeWidth="8"
+                        strokeWidth="12"
                         fill="none"
                         strokeLinecap="round"
-                        strokeDasharray={`${Math.min(75, (analytics.conversionRate * 3) + (analytics.totalViews > 100 ? 20 : 0) + (analytics.totalRevenue > 1000 ? 20 : 0))} 314`}
+                        initial={{ strokeDasharray: "0 314" }}
+                        whileInView={{ strokeDasharray: `${Math.min(314, (Math.min(100, Math.round((analytics.conversionRate * 3) + (analytics.totalViews > 100 ? 20 : 0) + (analytics.totalRevenue > 1000 ? 20 : 0))) / 100) * 314)} 314` }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 2, ease: "easeOut" }}
                       />
                     </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xl font-bold text-gray-900">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-3xl font-black text-gray-900 leading-none">
                         {Math.min(100, Math.round((analytics.conversionRate * 3) + (analytics.totalViews > 100 ? 20 : 0) + (analytics.totalRevenue > 1000 ? 20 : 0)))}
                       </span>
+                      <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest mt-1">Grade</span>
                     </div>
                   </div>
-                  <h4 className="text-sm font-semibold text-gray-900 mb-0.5">Overall Performance</h4>
-                  <p className="text-[10px] text-gray-600">Based on traffic, conversions, and revenue</p>
+                  <div>
+                    <h4 className="text-lg font-black text-gray-900 tracking-tight">Pipeline Health</h4>
+                    <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mt-1">Vitals synchronized with market benchmarks</p>
+                  </div>
                 </div>
 
                 {/* Performance Breakdown */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600">Traffic Quality</span>
-                    <div className="flex items-center space-x-1.5">
-                      <div className="w-16 bg-gray-200 rounded-full h-1.5">
-                        <div 
-                          className="bg-gray-700 h-1.5 rounded-full"
-                          style={{ width: `${Math.min(100, (analytics.totalViews / 10))}%` }}
-                        ></div>
+                <div className="space-y-4">
+                  {[
+                    { label: 'Traffic Density', value: Math.min(100, Math.round(analytics.totalViews / 10)), color: 'bg-slate-900' },
+                    { label: 'Sales Velocity', value: Math.min(100, analytics.conversionRate * 10), color: 'bg-emerald-500' },
+                    { label: 'Revenue Momentum', value: Math.min(100, Math.round(analytics.totalRevenue / 100)), color: 'bg-blue-600' }
+                  ].map((stat, i) => (
+                    <div key={i}>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{stat.label}</span>
+                        <span className="text-[10px] font-black text-gray-900 tracking-widest">{stat.value}%</span>
                       </div>
-                      <span className="text-[10px] text-gray-600 w-6">
-                        {Math.min(100, Math.round(analytics.totalViews / 10))}%
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600">Conversion Rate</span>
-                    <div className="flex items-center space-x-1.5">
-                      <div className="w-16 bg-gray-200 rounded-full h-1.5">
-                        <div 
-                          className="bg-emerald-500 h-1.5 rounded-full"
-                          style={{ width: `${Math.min(100, analytics.conversionRate * 10)}%` }}
-                        ></div>
+                      <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <motion.div
+                          className={`h-full rounded-full ${stat.color}`}
+                          initial={{ width: 0 }}
+                          whileInView={{ width: `${stat.value}%` }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 1, delay: 0.5 + (i * 0.1) }}
+                        />
                       </div>
-                      <span className="text-[10px] text-gray-600 w-6">
-                        {analytics.conversionRate}%
-                      </span>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600">Revenue Growth</span>
-                    <div className="flex items-center space-x-1.5">
-                      <div className="w-16 bg-gray-200 rounded-full h-1.5">
-                        <div 
-                          className="bg-gray-700 h-1.5 rounded-full"
-                          style={{ width: `${Math.min(100, (analytics.totalRevenue / 100))}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-[10px] text-gray-600 w-6">
-                        {Math.min(100, Math.round(analytics.totalRevenue / 100))}%
-                      </span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
 
                 {/* Performance Tips */}
-                <div className="mt-3 p-2 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
-                  <p className="text-[10px] text-gray-700">
-                    <strong>💡 Quick Win:</strong> {
-                      analytics.conversionRate < 5 ? 'Focus on improving conversion rate' :
-                      analytics.totalViews < 100 ? 'Drive more traffic to your channels' :
-                      'Great performance! Consider scaling up'
+                <div className="p-4 bg-orange-50 rounded-2xl border border-orange-100 flex items-center gap-3">
+                  <div className="w-8 h-8 bg-orange-100 rounded-xl flex items-center justify-center shrink-0">
+                    <LightBulbIcon className="w-4 h-4 text-orange-600" />
+                  </div>
+                  <p className="text-[10px] font-black text-orange-800 uppercase tracking-tight">
+                    <strong>Critical Move:</strong> {
+                      analytics.conversionRate < 5 ? 'Optimize Checkout Flow' :
+                        analytics.totalViews < 100 ? 'Increase Inbound Traffic' :
+                          'Maintain Velocity & Scale'
                     }
                   </p>
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
         </div>
 
         {/* Performance Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Daily Performance */}
-          <div className="bg-white rounded-lg border border-gray-200 p-3">
-            <div className="mb-2">
-              <h3 className="text-sm font-semibold text-gray-900 mb-1">Performance (7 Days)</h3>
-              <div className="flex items-center flex-wrap gap-2 text-[10px]">
-                <div className="flex items-center space-x-1">
-                  <div className="w-1.5 h-1.5 bg-gray-600 rounded-full"></div>
-                  <span className="text-gray-600">Views</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
-                  <span className="text-gray-600">Sales</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <div className="w-1.5 h-1.5 bg-gray-700 rounded-full"></div>
-                  <span className="text-gray-600">Revenue</span>
-                </div>
-              </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all group"
+          >
+            <div className="mb-8">
+              <h3 className="text-xl font-black text-gray-900 tracking-tight">Activity Log</h3>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">7-Day Multi-Vector Performance</p>
             </div>
-            <div className="h-52">
+            <div className="h-64">
               {analytics && analytics.dailyStats.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={analytics.dailyStats}>
                     <defs>
-                      <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#4b5563" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#4b5563" stopOpacity={0}/>
+                      <linearGradient id="colorViews2" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#111827" stopOpacity={0.1} />
+                        <stop offset="95%" stopColor="#111827" stopOpacity={0} />
                       </linearGradient>
-                      <linearGradient id="colorConversions" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      <linearGradient id="colorConversions2" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.1} />
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                       </linearGradient>
-                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#374151" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#374151" stopOpacity={0}/>
+                      <linearGradient id="colorRevenue2" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis 
-                      dataKey="date" 
-                      stroke="#6b7280"
-                      style={{ fontSize: '10px' }}
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis
+                      dataKey="date"
+                      stroke="#94a3b8"
+                      style={{ fontSize: '10px', fontWeight: 'bold' }}
+                      tick={{ fill: '#94a3b8' }}
+                      axisLine={false}
+                      tickLine={false}
                     />
-                    <YAxis 
-                      stroke="#6b7280"
-                      style={{ fontSize: '10px' }}
+                    <YAxis
+                      stroke="#94a3b8"
+                      style={{ fontSize: '10px', fontWeight: 'bold' }}
+                      tick={{ fill: '#94a3b8' }}
+                      axisLine={false}
+                      tickLine={false}
                     />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#fff', 
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#111827',
+                        border: 'none',
+                        borderRadius: '16px',
+                        boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.5)',
+                        color: '#fff',
+                        fontSize: '11px',
+                        fontWeight: 'bold'
                       }}
+                      itemStyle={{ color: '#fff' }}
                     />
-                    <Area 
-                      type="monotone" 
-                      dataKey="views" 
-                      stroke="#4b5563" 
-                      strokeWidth={2}
-                      fillOpacity={1} 
-                      fill="url(#colorViews)" 
+                    <Area
+                      type="monotone"
+                      dataKey="views"
+                      stroke="#111827"
+                      strokeWidth={3}
+                      fillOpacity={1}
+                      fill="url(#colorViews2)"
+                      animationDuration={2000}
                     />
-                    <Area 
-                      type="monotone" 
-                      dataKey="conversions" 
-                      stroke="#10b981" 
-                      strokeWidth={2}
-                      fillOpacity={1} 
-                      fill="url(#colorConversions)" 
+                    <Area
+                      type="monotone"
+                      dataKey="conversions"
+                      stroke="#10b981"
+                      strokeWidth={3}
+                      fillOpacity={1}
+                      fill="url(#colorConversions2)"
+                      animationDuration={2000}
                     />
-                    <Area 
-                      type="monotone" 
-                      dataKey="revenue" 
-                      stroke="#374151" 
-                      strokeWidth={2}
-                      fillOpacity={1} 
-                      fill="url(#colorRevenue)" 
+                    <Area
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="#3b82f6"
+                      strokeWidth={3}
+                      fillOpacity={1}
+                      fill="url(#colorRevenue2)"
+                      animationDuration={2000}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center bg-gray-50 rounded-lg">
-                  <div className="text-center">
-                    <ChartBarIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-500">No data available</p>
-                  </div>
+                <div className="h-full flex flex-col items-center justify-center opacity-40">
+                  <ChartBarIcon className="h-10 w-10 mb-2" />
+                  <p className="text-[10px] font-bold tracking-widest uppercase">No Log Data</p>
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
 
           {/* Device & Traffic Sources */}
-          <div className="space-y-3">
+          <div className="space-y-6">
             {/* Device Stats with Pie Chart */}
-            <div className="bg-white rounded-lg border border-gray-200 p-3">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-gray-900">Device Breakdown</h3>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all group"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-black text-gray-900 tracking-tight">Hardware Mix</h3>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Device Access Breakdown</p>
+                </div>
               </div>
               {analytics && (
-                <>
-                  <div className="h-40 mb-2">
+                <div className="flex items-center gap-8">
+                  <div className="h-40 w-40 shrink-0">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
                           data={[
-                            { name: 'Desktop', value: analytics.deviceStats.desktop, color: '#374151' },
+                            { name: 'Desktop', value: analytics.deviceStats.desktop, color: '#111827' },
                             { name: 'Mobile', value: analytics.deviceStats.mobile, color: '#10b981' },
-                            { name: 'Tablet', value: analytics.deviceStats.tablet, color: '#6b7280' }
+                            { name: 'Tablet', value: analytics.deviceStats.tablet, color: '#94a3b8' }
                           ]}
                           cx="50%"
                           cy="50%"
-                          innerRadius={30}
-                          outerRadius={55}
-                          paddingAngle={5}
+                          innerRadius={45}
+                          outerRadius={65}
+                          paddingAngle={8}
                           dataKey="value"
+                          stroke="none"
                         >
-                          <Cell fill="#374151" />
+                          <Cell fill="#111827" />
                           <Cell fill="#10b981" />
-                          <Cell fill="#6b7280" />
+                          <Cell fill="#f1f5f9" />
                         </Pie>
                         <Tooltip />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center space-x-1.5">
-                        <div className="w-2 h-2 bg-gray-700 rounded-full"></div>
-                        <span className="text-gray-600">Desktop</span>
+                  <div className="space-y-3 flex-1">
+                    {[
+                      { label: 'Desktop', value: analytics.deviceStats.desktop, color: 'bg-slate-900' },
+                      { label: 'Mobile', value: analytics.deviceStats.mobile, color: 'bg-emerald-500' },
+                      { label: 'Tablet', value: analytics.deviceStats.tablet, color: 'bg-gray-100' }
+                    ].map((device, i) => (
+                      <div key={i} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 ${device.color} rounded-full`}></div>
+                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{device.label}</span>
+                        </div>
+                        <span className="text-xs font-black text-gray-900">{device.value}%</span>
                       </div>
-                      <span className="font-semibold text-gray-900">{analytics.deviceStats.desktop}%</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center space-x-1.5">
-                        <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                        <span className="text-gray-600">Mobile</span>
-                      </div>
-                      <span className="font-semibold text-gray-900">{analytics.deviceStats.mobile}%</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center space-x-1.5">
-                        <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-                        <span className="text-gray-600">Tablet</span>
-                      </div>
-                      <span className="font-semibold text-gray-900">{analytics.deviceStats.tablet}%</span>
-                    </div>
+                    ))}
                   </div>
-                </>
+                </div>
               )}
-            </div>
+            </motion.div>
 
             {/* Traffic Sources with Bar Chart */}
-            <div className="bg-white rounded-lg border border-gray-200 p-3">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-gray-900">Traffic Sources</h3>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition-all group"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-black text-gray-900 tracking-tight">Origin Hub</h3>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Top Traffic Entry Points</p>
+                </div>
               </div>
               {analytics && analytics.trafficSources.length > 0 ? (
-                <div className="h-52">
+                <div className="h-48">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={analytics.trafficSources} layout="vertical">
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis type="number" stroke="#6b7280" style={{ fontSize: '10px' }} />
-                      <YAxis 
-                        dataKey="source" 
-                        type="category" 
-                        stroke="#6b7280" 
-                        style={{ fontSize: '10px' }}
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                      <XAxis type="number" hide />
+                      <YAxis
+                        dataKey="source"
+                        type="category"
+                        stroke="#94a3b8"
+                        style={{ fontSize: '10px', fontWeight: 'bold' }}
                         width={80}
+                        axisLine={false}
+                        tickLine={false}
                       />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#fff', 
-                          border: '1px solid #e5e7eb',
-                          borderRadius: '8px',
-                          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                      <Tooltip
+                        cursor={{ fill: '#f8fafc' }}
+                        contentStyle={{
+                          backgroundColor: '#111827',
+                          border: 'none',
+                          borderRadius: '12px',
+                          color: '#fff',
+                          fontSize: '10px',
+                          fontWeight: 'bold'
                         }}
                       />
-                      <Bar dataKey="visits" fill="#4b5563" radius={[0, 8, 8, 0]} />
+                      <Bar dataKey="visits" fill="#111827" radius={[0, 8, 8, 0]} barSize={20} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <p className="text-sm text-gray-500 text-center py-4">No traffic data available</p>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center py-10">Waiting for data signals...</p>
               )}
-            </div>
+            </motion.div>
           </div>
         </div>
 
         {/* Channel Performance Flow */}
-        <div className="bg-white rounded-lg border border-gray-200 p-3">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold text-gray-900">Channel Performance Flow</h3>
-            <ChartBarIcon className="h-4 w-4 text-gray-400" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm hover:shadow-md transition-all group"
+        >
+          <div className="flex items-center justify-between mb-12">
+            <div>
+              <h3 className="text-2xl font-black text-gray-900 tracking-tight uppercase">Conversion Pipeline</h3>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Full-Funnel Velocity & Drop-off Analysis</p>
+            </div>
+            <div className="p-3 bg-indigo-100 rounded-2xl">
+              <PresentationChartLineIcon className="h-6 w-6 text-indigo-600" />
+            </div>
           </div>
           {analytics && (
-            <div className="space-y-3">
+            <div className="max-w-4xl mx-auto space-y-12">
               {/* Visitors */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center space-x-1.5">
-                    <EyeIcon className="h-4 w-4 text-gray-600" />
-                    <span className="font-medium text-gray-900 text-xs">Visitors</span>
+              <div className="relative group/funnel">
+                <div className="flex items-end justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-slate-100 rounded-lg">
+                      <EyeIcon className="h-5 w-5 text-slate-900" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Stage 01: Total Reach</span>
+                      <span className="text-2xl font-black text-gray-900 tracking-tight leading-none">{analytics.totalViews.toLocaleString()}</span>
+                    </div>
                   </div>
-                  <span className="text-lg font-bold text-gray-900">{analytics.totalViews.toLocaleString()}</span>
+                  <span className="text-4xl font-black text-slate-100 group-hover/funnel:text-slate-200 transition-colors">100%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-lg h-10 flex items-center">
-                  <div 
-                    className="bg-gradient-to-r from-gray-700 to-gray-900 h-10 rounded-lg flex items-center justify-end px-3 text-white font-semibold text-xs transition-all"
-                    style={{ width: '100%' }}
+                <div className="w-full bg-gray-50 rounded-2xl h-16 border border-gray-100 overflow-hidden relative shadow-inner">
+                  <motion.div
+                    className="h-full bg-slate-900 relative"
+                    initial={{ width: 0 }}
+                    whileInView={{ width: '100%' }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1.5, ease: "circOut" }}
                   >
-                    100%
-                  </div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer"></div>
+                  </motion.div>
                 </div>
               </div>
 
               {/* Conversions */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center space-x-1.5">
-                    <ShoppingCartIcon className="h-4 w-4 text-emerald-600" />
-                    <span className="font-medium text-gray-900 text-xs">Conversions</span>
+              <div className="relative group/funnel pl-12 border-l-2 border-dashed border-gray-200">
+                <div className="flex items-end justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-emerald-100 rounded-lg">
+                      <ShoppingCartIcon className="h-5 w-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Stage 02: Success Events</span>
+                      <span className="text-2xl font-black text-emerald-600 tracking-tight leading-none">{analytics.totalConversions.toLocaleString()}</span>
+                    </div>
                   </div>
-                  <span className="text-lg font-bold text-emerald-600">{analytics.totalConversions}</span>
+                  <span className="text-4xl font-black text-slate-100 group-hover/funnel:text-emerald-50 transition-colors">{analytics.conversionRate}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-lg h-10 flex items-center">
-                  <div 
-                    className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-10 rounded-lg flex items-center justify-end px-3 text-white font-semibold text-xs transition-all"
-                    style={{ width: `${analytics.conversionRate}%` }}
+                <div className="w-full bg-gray-50 rounded-2xl h-16 border border-gray-100 overflow-hidden relative shadow-inner">
+                  <motion.div
+                    className="h-full bg-emerald-500 relative"
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${analytics.conversionRate}%` }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1.5, delay: 0.5, ease: "circOut" }}
                   >
-                    {analytics.conversionRate}%
-                  </div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+                  </motion.div>
                 </div>
               </div>
 
               {/* Revenue */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center space-x-1.5">
-                    <CurrencyDollarIcon className="h-4 w-4 text-gray-700" />
-                    <span className="font-medium text-gray-900 text-xs">Revenue Generated</span>
+              <div className="relative group/funnel pl-24 border-l-2 border-dashed border-gray-200">
+                <div className="flex items-end justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <CurrencyDollarIcon className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Stage 03: Cash Flow</span>
+                      <span className="text-2xl font-black text-blue-600 tracking-tight leading-none">₹{analytics.totalRevenue.toLocaleString()}</span>
+                    </div>
                   </div>
-                  <span className="text-lg font-bold text-gray-900">₹{analytics.totalRevenue.toLocaleString()}</span>
+                  <div className="text-right">
+                    <span className="text-xs font-black text-blue-600 uppercase tracking-widest block">Avg. Ticket</span>
+                    <span className="text-lg font-black text-gray-900 tracking-tight">₹{analytics.avgOrderValue.toLocaleString()}</span>
+                  </div>
                 </div>
-                <div className="w-full bg-gray-200 rounded-lg h-10 flex items-center">
-                  <div 
-                    className="bg-gradient-to-r from-gray-600 to-gray-800 h-10 rounded-lg flex items-center justify-end px-3 text-white font-semibold text-xs transition-all"
-                    style={{ width: `${analytics.conversionRate}%` }}
+                <div className="w-full bg-gray-50 rounded-2xl h-16 border border-gray-100 overflow-hidden relative shadow-inner">
+                  <motion.div
+                    className="h-full bg-blue-600 relative"
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${analytics.conversionRate}%` }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1.5, delay: 1, ease: "circOut" }}
                   >
-                    ₹{analytics.avgOrderValue.toLocaleString()} avg
-                  </div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+                  </motion.div>
                 </div>
               </div>
 
-              {/* Summary Stats */}
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <div className="grid grid-cols-3 gap-4 text-center">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Drop-off Rate</p>
-                    <p className="text-xl font-bold text-gray-900">{(100 - analytics.conversionRate).toFixed(1)}%</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Conversion Rate</p>
-                    <p className="text-xl font-bold text-green-600">{analytics.conversionRate}%</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Revenue per Visitor</p>
-                    <p className="text-xl font-bold text-purple-600">₹{analytics.totalViews > 0 ? Math.round(analytics.totalRevenue / analytics.totalViews).toLocaleString() : 0}</p>
-                  </div>
+              {/* Summary Stats GRID */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12 border-t border-gray-100">
+                <div className="p-6 bg-gray-50 rounded-3xl border border-gray-100 text-center hover:bg-white hover:shadow-xl transition-all">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Churn Risk</p>
+                  <p className="text-3xl font-black text-gray-900">{(100 - analytics.conversionRate).toFixed(1)}%</p>
+                  <p className="text-[10px] font-bold text-red-500 mt-2">EXIT PROBABILITY</p>
+                </div>
+                <div className="p-6 bg-emerald-50/50 rounded-3xl border border-emerald-100 text-center hover:bg-white hover:shadow-xl transition-all">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Performance</p>
+                  <p className="text-3xl font-black text-emerald-600">{analytics.conversionRate}%</p>
+                  <p className="text-[10px] font-bold text-emerald-500 mt-2">SUCCESS RATIO</p>
+                </div>
+                <div className="p-6 bg-blue-50/50 rounded-3xl border border-blue-100 text-center hover:bg-white hover:shadow-xl transition-all">
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Visitor Value</p>
+                  <p className="text-3xl font-black text-blue-600">₹{analytics.totalViews > 0 ? Math.round(analytics.totalRevenue / analytics.totalViews).toLocaleString() : 0}</p>
+                  <p className="text-[10px] font-bold text-blue-500 mt-2">RPX (REVENUE PER X)</p>
                 </div>
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
     </DashboardLayout>
   );

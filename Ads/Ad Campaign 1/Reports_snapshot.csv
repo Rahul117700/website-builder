@@ -1,0 +1,307 @@
+# ----------------------------------------
+# Reports snapshot
+# Account: sendearndirect
+# Property: SellEarnDirect
+# ----------------------------------------
+#  
+# Start date: 20251213
+# End date: 20260109
+Nth day,Active users
+0000,0
+0001,349
+0002,11
+0003,11
+0004,11
+0005,24
+0006,3
+0007,12
+0008,46
+0009,25
+0010,4
+0011,11
+0012,8
+0013,24
+0014,8
+0015,9
+0016,2
+0017,8
+0018,8
+0019,9
+0020,5
+0021,30
+0022,12
+0023,5
+0024,4
+0025,3
+0026,2
+0027,6
+
+# Start date: 20251213
+# End date: 20260109
+Nth day,New users
+0000,0
+0001,349
+0002,11
+0003,11
+0004,8
+0005,20
+0006,3
+0007,9
+0008,41
+0009,23
+0010,3
+0011,9
+0012,6
+0013,21
+0014,7
+0015,7
+0016,1
+0017,8
+0018,8
+0019,5
+0020,3
+0021,25
+0022,8
+0023,2
+0024,4
+0025,2
+0026,2
+0027,4
+
+# Start date: 20251213
+# End date: 20260109
+Nth day,Average engagement time per active user
+0000,0
+0001,5.126074498567335
+0002,11
+0003,3.727272727272727
+0004,139.27272727272728
+0005,117.16666666666667
+0006,26.333333333333332
+0007,111.58333333333333
+0008,81.43478260869566
+0009,42.6
+0010,43.25
+0011,125.45454545454545
+0012,131.875
+0013,536.5416666666666
+0014,1464.875
+0015,420
+0016,256
+0017,170.125
+0018,215.625
+0019,1324.7777777777778
+0020,579.6
+0021,139.56666666666666
+0022,169.75
+0023,135.6
+0024,0.5
+0025,141.33333333333334
+0026,0
+0027,26.333333333333332
+
+# Start date: 20251213
+# End date: 20260109
+Nth day,Total revenue
+0000,0
+0001,0
+0002,0
+0003,0
+0004,0
+0005,0
+0006,0
+0007,0
+0008,0
+0009,0
+0010,0
+0011,0
+0012,0
+0013,0
+0014,0
+0015,0
+0016,0
+0017,0
+0018,0
+0019,0
+0020,0
+0021,0
+0022,0
+0023,0
+0024,0
+0025,0
+0026,0
+0027,0
+
+# Where do your new users come from?
+# Start date: 20251213
+# End date: 20260109
+First user primary channel group (Default Channel Group),New users
+Direct,514
+Paid Search,78
+Organic Search,3
+Cross-network,2
+Referral,2
+Organic Social,1
+
+#  
+# Start date: 20251213
+# End date: 20260109
+Session primary channel group (Default Channel Group),Sessions
+Direct,627
+Paid Search,82
+Referral,27
+Organic Search,8
+Unassigned,6
+Cross-network,2
+Organic Social,1
+
+#  
+# Start date: 20251213
+# End date: 20260109
+Country ID,Active users
+CA,1
+CN,4
+DE,58
+GB,1
+ID,1
+IN,461
+KR,4
+KW,1
+PH,1
+PK,3
+SG,1
+US,23
+
+# Start date: 20251213
+# End date: 20260109
+Country,Active users
+IN,461
+DE,58
+US,23
+CN,4
+KR,4
+PK,3
+CA,1
+
+# How are active users trending?
+# Start date: 20251213
+# End date: 20260109
+Nth day,30 days,7 days,1 day
+0000,0,0,0
+0001,349,349,349
+0002,360,360,11
+0003,371,371,11
+0004,379,379,11
+0005,399,399,24
+0006,402,402,3
+0007,411,411,12
+0008,452,105,46
+0009,475,119,25
+0010,478,111,4
+0011,487,112,11
+0012,493,99,8
+0013,514,117,24
+0014,521,115,8
+0015,528,79,9
+0016,529,57,2
+0017,537,62,8
+0018,545,61,8
+0019,550,61,9
+0020,553,43,5
+0021,578,62,30
+0022,586,64,12
+0023,588,65,5
+0024,592,61,4
+0025,594,55,3
+0026,596,52,2
+0027,601,54,6
+
+# How well do you retain your users?
+# Start date: 20251123
+# End date: 20260103
+Date,Week 0,Week 1,Week 2,Week 3,Week 4,Week 5
+Nov 23 - Nov 29,0,0,0,0,0,0
+Nov 30 - Dec 6,0,0,0,0,0,-1
+Dec 7 - Dec 13,0,0,0,0,-1,-1
+Dec 14 - Dec 20,411,5,4,-1,-1,-1
+Dec 21 - Dec 27,110,1,-1,-1,-1,-1
+Dec 28 - Jan 3,57,-1,-1,-1,-1,-1
+
+#  
+# Start date: 20251213
+# End date: 20260109
+Page title and screen class,Views
+Create & Sell Digital Products Online | SellEarnDirect,3349
+Blog - Sell Earn Direct | Learn How to Sell Digital Products Online,56
+Documentation - Sell Earn Direct | Complete Guide & Tutorials,29
+Contact Us | SellEarnDirect,28
+About Us | SellEarnDirect,26
+Pricing - Sell Earn Direct | Affordable Plans for Every Creator,22
+Privacy Policy | SellEarnDirect,10
+Terms of Service | SellEarnDirect,8
+Product - Sell Earn Direct | Sales Funnel Builder Features,5
+Features - Sell Earn Direct | Complete Sales Funnel Platform,4
+Getting Started Articles - Sell Earn Direct Blog,3
+How to Use Sell Earn Direct Platform: Complete Beginner's Guide | Sell Earn Direct Blog,3
+How to Become a Millionaire Selling Digital Products Online | Sell Earn Direct Blog,2
+Product Download Links: Set Up Secure Download Delivery | Sell Earn Direct Blog,2
+Sales Strategy Articles - Sell Earn Direct Blog,2
+Subscription Best Practices: Build Successful Subscription Business | Sell Earn Direct Blog,2
+404: This page could not be found.,1
+API Settings Configuration: Set Up API Access | Sell Earn Direct Blog,1
+Analytics Cohort Analysis: Understand Customer Cohorts | Sell Earn Direct Blog,1
+Analytics Metrics Explained: What Each Metric Means | Sell Earn Direct Blog,1
+Best Sales Funnel Online: Top Strategies That Convert | Sell Earn Direct Blog,1
+Conversion Optimization Articles - Sell Earn Direct Blog,1
+Creating Your First Funnel - Sell Earn Direct | Step-by-Step Guide,1
+Customizing Your Funnel - Sell Earn Direct | Design & Content Guide,1
+Discount Settings Management: Create and Manage Discounts | Sell Earn Direct Blog,1
+Funnel Optimization: Improve Every Step | Sell Earn Direct Blog,1
+How to Get Testimonials and Use Social Proof Effectively | Sell Earn Direct Blog,1
+How to Identify and Reach Your Target Audience | Sell Earn Direct Blog,1
+How to Lower Customer Acquisition Cost for Digital Products | Sell Earn Direct Blog,1
+How to Sell My Course Online: Complete Guide for Course Creators | Sell Earn Direct Blog,1
+Mobile Optimization: Make Your Sales Funnel Mobile-Friendly | Sell Earn Direct Blog,1
+Product Management Articles - Sell Earn Direct Blog,1
+Subscription Analytics Tracking: Monitor Subscription Metrics | Sell Earn Direct Blog,1
+Subscription Management Articles - Sell Earn Direct Blog,1
+Subscription Model: Build Recurring Revenue | Sell Earn Direct Blog,1
+Upsell and Downsell Strategies That Work | Sell Earn Direct Blog,1
+Webinar Marketing: Convert Viewers to Customers | Sell Earn Direct Blog,1
+
+#  
+# Start date: 20251213
+# End date: 20260109
+Event name,Event count
+page_view,3581
+scroll,1175
+user_engagement,1152
+session_start,746
+first_visit,600
+form_start,97
+form_submit,37
+click,5
+file_download,1
+
+# What are your top performing key events?
+# Start date: 20251213
+# End date: 20260109
+Event name,Key events
+
+
+# Where does your average 120d value come from?
+# Start date: 20251213
+# End date: 20260109
+First user primary channel group (Default Channel Group),Average 120d value
+
+
+#  
+# Start date: 20251213
+# End date: 20260109
+Item name,Items purchased
+
+
+# How does activity on your platforms compare?
+# Start date: 20251213
+# End date: 20260109
+Platform,Key events

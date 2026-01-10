@@ -9,7 +9,7 @@ interface SessionMetricsProps {
   newVsReturning?: { new: number; returning: number };
 }
 
-export default function SessionMetrics({ 
+export default function SessionMetrics({
   avgSessionDuration = '0m 0s',
   pagesPerSession = 0,
   bounceRate = 0,
@@ -48,24 +48,23 @@ export default function SessionMetrics({
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {metrics.map((metric, index) => (
         <div
           key={index}
-          className="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md transition-shadow"
+          className="bg-white rounded-3xl border border-gray-100 p-4 shadow-sm hover:shadow-md transition-all group group-hover:scale-[1.02]"
         >
-          <div className="flex items-start justify-between mb-2">
-            <div className={`p-1.5 bg-gray-50 rounded-lg ${metric.color}`}>
-              <metric.icon className="h-4 w-4" />
+          <div className="flex items-center justify-between mb-4">
+            <div className={`p-2 bg-gray-50 rounded-xl ${metric.color} group-hover:scale-110 transition-transform`}>
+              <metric.icon className="h-5 w-5" />
             </div>
-            <div className={`flex items-center text-[10px] font-medium ${
-              metric.change >= 0 ? 'text-emerald-600' : 'text-red-600'
-            }`}>
+            <div className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${metric.change >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+              }`}>
               {metric.change >= 0 ? '↑' : '↓'} {Math.abs(metric.change)}%
             </div>
           </div>
-          <p className="text-[10px] text-gray-600 mb-1">{metric.label}</p>
-          <p className="text-lg font-bold text-gray-900">{metric.value}</p>
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-2">{metric.label}</p>
+          <p className="text-xl font-black text-gray-900 tracking-tight leading-none">{metric.value}</p>
         </div>
       ))}
     </div>

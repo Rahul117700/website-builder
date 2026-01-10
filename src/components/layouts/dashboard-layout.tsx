@@ -4,14 +4,14 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { 
-  Bars3Icon, 
-  XMarkIcon, 
-  HomeIcon, 
-  GlobeAltIcon, 
-  ChartBarIcon, 
-  CreditCardIcon, 
-  Cog6ToothIcon, 
+import {
+  Bars3Icon,
+  XMarkIcon,
+  HomeIcon,
+  GlobeAltIcon,
+  ChartBarIcon,
+  CreditCardIcon,
+  Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
   CubeIcon,
   ShoppingBagIcon,
@@ -71,14 +71,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   // Check for tour parameter and start dashboard tour
   useEffect(() => {
     if (!searchParams) return;
-    
+
     const tourParam = searchParams.get('tour');
     if (tourParam === 'true') {
       // Start the dashboard tour after a delay to ensure everything is loaded
       setTimeout(() => {
         setRunDashboardTour(true);
       }, 2000);
-      
+
       // Remove the tour parameter from URL without triggering a page reload
       const newUrl = new URL(window.location.href);
       newUrl.searchParams.delete('tour');
@@ -90,10 +90,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   useEffect(() => {
     if (!session?.user?.id) return;
     if (pathname !== '/auth/dashboard') return;
-    
+
     const tourShownKey = `tour_shown_${session.user.id}`;
     const hasSeenTour = localStorage.getItem(tourShownKey);
-    
+
     if (!hasSeenTour) {
       // Wait a bit longer for new users to see the dashboard first
       setTimeout(() => {
@@ -122,19 +122,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           console.log('[Notifications] Loaded:', notificationsArray.length, 'notifications,', unread, 'unread');
         })
         .catch(error => console.error('Error fetching notifications:', error));
-      
+
       // Connect to Socket.IO
       try {
         socket = socketIOClient('http://localhost:4000', {
           transports: ['websocket', 'polling'],
           timeout: 5000,
         });
-        
+
         socket.on('connect', () => {
           console.log('Socket connected, identifying user:', session.user.id);
           socket!.emit('identify', session.user.id);
         });
-        
+
         socket.on('notification', (notification) => {
           console.log('Received real-time notification:', notification);
           setNotifications(prev => [notification, ...prev]);
@@ -143,11 +143,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           // Play notification sound for new notifications
           setPlayNotificationSound(true);
         });
-        
+
         socket.on('connect_error', (error) => {
           console.error('Socket connection error:', error);
         });
-        
+
         socket.on('disconnect', (reason) => {
           console.log('Socket disconnected:', reason);
         });
@@ -173,19 +173,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         const data = await response.json();
         const notificationsArray = Array.isArray(data) ? data : (data.notifications || []);
         const unread = data.unreadCount !== undefined ? data.unreadCount : notificationsArray.filter((n: any) => !n.read).length;
-        
+
         // Update unread count
         setUnreadCount(unread);
-        
+
         // Check if there are new notifications
         if (notificationsArray.length > lastNotificationCount) {
           const newNotifications = notificationsArray.slice(0, notificationsArray.length - lastNotificationCount);
           console.log('[Notifications] Found new notifications via polling:', newNotifications.length);
-          
+
           // Update notifications list
           setNotifications(notificationsArray);
           setLastNotificationCount(notificationsArray.length);
-          
+
           // Play sound for new notifications
           setPlayNotificationSound(true);
         } else if (notificationsArray.length !== lastNotificationCount) {
@@ -203,10 +203,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Get hidden navigation items based on user's plan
   const hiddenItems = getHiddenNavigationItems(userPlan);
-  
+
   // State for navigation settings
   const [navigationSettings, setNavigationSettings] = useState<any[]>([]);
-  
+
   // Fetch navigation settings
   useEffect(() => {
     const fetchNavigationSettings = async () => {
@@ -223,52 +223,52 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         console.error('Error fetching navigation settings:', error);
       }
     };
-    
+
     fetchNavigationSettings();
   }, []);
-  
+
   // Create navigation array with filtering logic
   const navigation = useMemo(() => {
     const allNavigationItems = [
-      { 
-        name: 'Dashboard', 
-        href: '/auth/dashboard', 
-        icon: HomeIcon, 
+      {
+        name: 'Dashboard',
+        href: '/auth/dashboard',
+        icon: HomeIcon,
         current: pathname === '/auth/dashboard',
         description: 'View your sales overview and key metrics'
       },
-      { 
-        name: 'My Channels', 
-        href: '/auth/dashboard/channels', 
-        icon: RocketLaunchIcon as any, 
+      {
+        name: 'My Channels',
+        href: '/auth/dashboard/channels',
+        icon: RocketLaunchIcon as any,
         current: pathname?.startsWith('/auth/dashboard/channels'),
         description: 'Manage your channels and content'
       },
-      { 
-        name: 'Analytics', 
-        href: '/auth/dashboard/analytics', 
-        icon: ChartBarIcon, 
+      {
+        name: 'Analytics',
+        href: '/auth/dashboard/analytics',
+        icon: ChartBarIcon,
         current: pathname === '/auth/dashboard/analytics',
         description: 'Track performance and sales data'
       },
-      { 
-        name: 'Plans', 
-        href: '/auth/dashboard/plans', 
-        icon: CreditCardIcon, 
+      {
+        name: 'Plans',
+        href: '/auth/dashboard/plans',
+        icon: CreditCardIcon,
         current: pathname === '/auth/dashboard/plans',
         description: 'View and manage your subscription'
       },
-      { 
-        name: 'Blog', 
-        href: '/blog', 
-        icon: DocumentTextIcon, 
+      {
+        name: 'Blog',
+        href: '/blog',
+        icon: DocumentTextIcon,
         current: pathname?.startsWith('/blog'),
         description: 'Read helpful articles and guides'
       },
-      { 
-        name: 'Settings', 
-        href: '/auth/dashboard/settings', 
-        icon: Cog6ToothIcon, 
+      {
+        name: 'Settings',
+        href: '/auth/dashboard/settings',
+        icon: Cog6ToothIcon,
         current: pathname === '/auth/dashboard/settings',
         description: 'Configure your account and preferences'
       },
@@ -279,13 +279,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       if (hiddenItems.includes(item.name)) {
         return false;
       }
-      
+
       // Filter out items hidden by Super Admin navigation settings
       const setting = navigationSettings.find(s => s.itemName === item.name);
       if (setting && setting.isHidden) {
         return false;
       }
-      
+
       return true;
     });
   }, [hiddenItems, navigationSettings, pathname]);
@@ -293,7 +293,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   // Add Super Admin tab only if user has SUPER_ADMIN role
   const finalNavigation = useMemo(() => {
     const baseNavigation = [...navigation];
-    
+
     if (session?.user?.role === 'SUPER_ADMIN') {
       // Insert Super Admin after Dashboard but before My Channels
       const superAdminItem = {
@@ -303,7 +303,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         current: pathname === '/auth/dashboard/super-admin',
         description: 'Super Admin Panel',
       };
-      
+
       // Find Dashboard index and insert Super Admin after it
       const dashboardIndex = baseNavigation.findIndex(item => item.name === 'Dashboard');
       if (dashboardIndex !== -1) {
@@ -312,7 +312,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         baseNavigation.unshift(superAdminItem);
       }
     }
-    
+
     return baseNavigation;
   }, [navigation, session?.user?.role, pathname]);
 
@@ -393,8 +393,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {isSidebarOpen && (
           <div className="fixed inset-0 z-40 flex">
             {/* Sidebar overlay */}
-            <div 
-              className="fixed inset-0 bg-purple-900/10 transition-opacity" 
+            <div
+              className="fixed inset-0 bg-purple-900/10 transition-opacity"
               onClick={toggleSidebar}
             />
             {/* Sidebar */}
@@ -413,11 +413,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
               <div className="flex-shrink-0 flex items-center px-6 mb-8">
                 <Link href="/" className="flex items-center justify-center w-full" onClick={toggleSidebar}>
-                  <img 
-                    src="/logo/logo.png" 
-                    alt="SellEarnDirect - Turn Traffic Into Revenue" 
+                  <img
+                    src="/logo/logo.png"
+                    alt="SellEarnDirect - Turn Traffic Into Revenue"
                     className="w-auto object-contain transition-transform hover:scale-105 no-blur"
-                    style={{ 
+                    style={{
                       height: '60px',
                       maxWidth: '200px'
                     }}
@@ -433,18 +433,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         key={item.name}
                         href={item.href}
                         data-tour={item.name === 'My Channels' ? 'channels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
-                        className={`group relative flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                          item.current
-                            ? 'bg-gradient-to-r from-gray-900 to-black text-white shadow-lg shadow-gray-900/50'
-                            : 'text-gray-700 hover:bg-white hover:text-gray-900 hover:shadow-sm'
-                        }`}
+                        className={`group relative flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${item.current
+                            ? 'bg-gray-900 text-white shadow-lg shadow-gray-200'
+                            : 'text-gray-500 hover:bg-white hover:text-gray-900 hover:shadow-sm'
+                          }`}
                       >
                         <item.icon
-                          className={`h-5 w-5 mr-3 ${
-                            item.current
+                          className={`h-5 w-5 mr-3 ${item.current
                               ? 'text-white'
                               : 'text-gray-600 group-hover:text-gray-900'
-                          }`}
+                            }`}
                           aria-hidden="true"
                         />
                         <span className="flex-1">{item.name}</span>
@@ -459,18 +457,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         key={item.name}
                         href={item.href}
                         data-tour={item.name === 'My Channels' ? 'channels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
-                        className={`group relative flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                          item.current
-                            ? 'bg-gradient-to-r from-gray-900 to-black text-white shadow-lg shadow-gray-900/50'
-                            : 'text-gray-700 hover:bg-white hover:text-gray-900 hover:shadow-sm'
-                        }`}
+                        className={`group relative flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${item.current
+                            ? 'bg-gray-900 text-white shadow-lg shadow-gray-200'
+                            : 'text-gray-500 hover:bg-white hover:text-gray-900 hover:shadow-sm'
+                          }`}
                       >
                         <item.icon
-                          className={`h-5 w-5 mr-3 ${
-                            item.current
+                          className={`h-5 w-5 mr-3 ${item.current
                               ? 'text-white'
                               : 'text-gray-600 group-hover:text-gray-900'
-                          }`}
+                            }`}
                           aria-hidden="true"
                         />
                         <span className="flex-1">{item.name}</span>
@@ -484,13 +480,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="flex-shrink-0 p-4 space-y-4">
                 {/* Action Icons */}
                 <div className="flex items-center justify-center gap-2 px-4">
-                  <button 
+                  <button
                     onClick={() => setShowNotifications(!showNotifications)}
-                    className={`p-2.5 rounded-xl transition-all duration-200 relative ${
-                      showNotifications 
-                        ? 'bg-white text-gray-900 shadow-lg' 
+                    className={`p-2.5 rounded-xl transition-all duration-200 relative ${showNotifications
+                        ? 'bg-white text-gray-900 shadow-lg'
                         : 'bg-gray-100 text-gray-600 hover:bg-white hover:text-gray-900'
-                    }`}
+                      }`}
                     title="Notifications"
                   >
                     <BellIcon className="h-4 w-4" />
@@ -500,7 +495,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       </span>
                     )}
                   </button>
-                  <button 
+                  <button
                     onClick={handleSignOut}
                     disabled={isLoading}
                     className="p-2.5 rounded-xl bg-gray-100 text-gray-600 hover:bg-red-500 hover:text-white transition-all duration-200"
@@ -513,7 +508,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     )}
                   </button>
                 </div>
-                
+
                 {/* User Profile Card */}
                 <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
                   <div className="flex items-center gap-3">
@@ -540,7 +535,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         {session?.user?.role || 'User'}
                       </p>
                     </div>
-                    <button 
+                    <button
                       onClick={() => router.push('/auth/dashboard/settings')}
                       className="flex-shrink-0 p-1.5 rounded-lg text-gray-600 hover:text-purple-600 hover:bg-white transition-all duration-200"
                       title="Settings"
@@ -556,25 +551,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Collapsible sidebar for desktop */}
-      <div className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 group z-30 ${
-        isSidebarCollapsed ? (isSidebarHovered ? 'lg:w-72' : 'lg:w-16') : 'lg:w-72'
-      }`} 
-      onMouseEnter={() => setIsSidebarHovered(true)}
-      onMouseLeave={() => setIsSidebarHovered(false)}
-      data-tour="dashboard-sidebar">
-      
-      {/* Expand button for collapsed sidebar */}
-      {isSidebarCollapsed && !isSidebarHovered && (
-        <button
-          onClick={() => setIsSidebarCollapsed(false)}
-          className="absolute top-4 right-0 z-10 w-6 h-6 bg-gray-900 text-white rounded-l-lg flex items-center justify-center hover:bg-black transition-colors shadow-lg"
-          title="Expand sidebar"
-        >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      )}
+      <div className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 group z-30 ${isSidebarCollapsed ? (isSidebarHovered ? 'lg:w-72' : 'lg:w-16') : 'lg:w-72'
+        }`}
+        onMouseEnter={() => setIsSidebarHovered(true)}
+        onMouseLeave={() => setIsSidebarHovered(false)}
+        data-tour="dashboard-sidebar">
+
+        {/* Expand button for collapsed sidebar */}
+        {isSidebarCollapsed && !isSidebarHovered && (
+          <button
+            onClick={() => setIsSidebarCollapsed(false)}
+            className="absolute top-4 right-0 z-10 w-6 h-6 bg-gray-900 text-white rounded-l-lg flex items-center justify-center hover:bg-black transition-colors shadow-lg"
+            title="Expand sidebar"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
         <div className="flex min-h-0 flex-1 flex-col bg-white shadow-2xl border-r border-gray-200">
           <div className="flex flex-1 flex-col pt-4 pb-4 h-full">
             {/* Logo Section */}
@@ -596,11 +590,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   // Expanded Logo - Show full logo with modern styling
                   <div className="flex items-center justify-between w-full overflow-hidden">
                     <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
-                      <img 
-                        src="/logo/logo.png" 
-                        alt="SellEarnDirect - Turn Traffic Into Revenue" 
+                      <img
+                        src="/logo/logo.png"
+                        alt="SellEarnDirect - Turn Traffic Into Revenue"
                         className="object-contain transition-all duration-300 hover:scale-105 no-blur flex-shrink-0"
-                        style={{ 
+                        style={{
                           height: '52px',
                           width: 'auto',
                           maxWidth: '180px'
@@ -620,9 +614,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 )}
               </Link>
             </div>
-            <nav className={`flex-1 overflow-y-auto scrollbar-hide ${
-              isSidebarCollapsed && !isSidebarHovered ? 'px-2 space-y-3' : 'px-4 space-y-3'
-            }`}>
+            <nav className={`flex-1 overflow-y-auto scrollbar-hide ${isSidebarCollapsed && !isSidebarHovered ? 'px-2 space-y-3' : 'px-4 space-y-3'
+              }`}>
               {(!isSidebarCollapsed || isSidebarHovered) ? (
                 <>
                   {/* Main Navigation Group */}
@@ -632,18 +625,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         key={item.name}
                         href={item.href}
                         data-tour={item.name === 'My Channels' ? 'channels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
-                        className={`group relative flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                          item.current
-                            ? 'bg-gradient-to-r from-gray-900 to-black text-white shadow-lg shadow-gray-900/50'
-                            : 'text-gray-700 hover:bg-white hover:text-gray-900 hover:shadow-sm'
-                        }`}
+                        className={`group relative flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${item.current
+                            ? 'bg-gray-900 text-white shadow-md shadow-gray-200'
+                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                          }`}
                       >
                         <item.icon
-                          className={`h-5 w-5 mr-3 ${
-                            item.current
+                          className={`h-5 w-5 mr-3 ${item.current
                               ? 'text-white'
                               : 'text-gray-600 group-hover:text-gray-900'
-                          }`}
+                            }`}
                           aria-hidden="true"
                         />
                         <span className="flex-1">{item.name}</span>
@@ -658,18 +649,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         key={item.name}
                         href={item.href}
                         data-tour={item.name === 'My Channels' ? 'channels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
-                        className={`group relative flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                          item.current
-                            ? 'bg-gradient-to-r from-gray-900 to-black text-white shadow-lg shadow-gray-900/50'
-                            : 'text-gray-700 hover:bg-white hover:text-gray-900 hover:shadow-sm'
-                        }`}
+                        className={`group relative flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${item.current
+                            ? 'bg-gray-900 text-white shadow-md shadow-gray-200'
+                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                          }`}
                       >
                         <item.icon
-                          className={`h-5 w-5 mr-3 ${
-                            item.current
+                          className={`h-5 w-5 mr-3 ${item.current
                               ? 'text-white'
                               : 'text-gray-600 group-hover:text-gray-900'
-                          }`}
+                            }`}
                           aria-hidden="true"
                         />
                         <span className="flex-1">{item.name}</span>
@@ -710,11 +699,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <Link
                         key={item.name}
                         href={item.href}
-                        className={`flex items-center justify-center p-3 rounded-xl transition-all duration-200 ${
-                          item.current
-                            ? 'bg-gradient-to-r from-gray-900 to-black text-white shadow-lg'
-                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                        }`}
+                        className={`flex items-center justify-center p-3 rounded-xl transition-all duration-300 ${item.current
+                            ? 'bg-gray-900 text-white shadow-md'
+                            : 'text-gray-400 hover:bg-gray-100 hover:text-gray-900'
+                          }`}
                         title={item.name}
                       >
                         <item.icon
@@ -723,16 +711,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         />
                       </Link>
                     ))}
-                    
+
                     {/* Prominent Notification button for collapsed view */}
                     <div className="relative">
                       <button
                         onClick={() => setShowNotifications(true)}
-                        className={`flex items-center justify-center p-3 rounded-xl transition-all duration-200 w-full ${
-                          showNotifications 
-                            ? 'bg-white text-gray-900 shadow-lg' 
+                        className={`flex items-center justify-center p-3 rounded-xl transition-all duration-200 w-full ${showNotifications
+                            ? 'bg-white text-gray-900 shadow-lg'
                             : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                        } hover:shadow-xl hover:scale-105`}
+                          } hover:shadow-xl hover:scale-105`}
                         title="Notifications"
                       >
                         <BellIcon className="h-5 w-5" />
@@ -749,20 +736,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </nav>
           </div>
           {/* Bottom Section */}
-          <div className={`flex-shrink-0 space-y-4 ${
-            isSidebarCollapsed && !isSidebarHovered ? 'p-2' : 'p-4'
-          }`}>
+          <div className={`flex-shrink-0 space-y-4 ${isSidebarCollapsed && !isSidebarHovered ? 'p-2' : 'p-4'
+            }`}>
             {!(isSidebarCollapsed && !isSidebarHovered) && (
               <>
                 {/* Action Icons */}
                 <div className="flex items-center justify-center gap-2 px-4">
-                  <button 
+                  <button
                     onClick={() => setShowNotifications(!showNotifications)}
-                    className={`p-2.5 rounded-xl transition-all duration-200 relative ${
-                      showNotifications 
-                        ? 'bg-white text-gray-900 shadow-lg' 
+                    className={`p-2.5 rounded-xl transition-all duration-200 relative ${showNotifications
+                        ? 'bg-white text-gray-900 shadow-lg'
                         : 'bg-gray-100 text-gray-600 hover:bg-white hover:text-gray-900'
-                    }`}
+                      }`}
                     title="Notifications"
                   >
                     <BellIcon className="h-4 w-4" />
@@ -772,7 +757,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       </span>
                     )}
                   </button>
-                  <button 
+                  <button
                     onClick={handleSignOut}
                     disabled={isLoading}
                     className="p-2.5 rounded-xl bg-gray-100 text-gray-600 hover:bg-red-500 hover:text-white transition-all duration-200"
@@ -785,7 +770,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     )}
                   </button>
                 </div>
-                
+
                 {/* User Profile Card */}
                 <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
                   <div className="flex items-center gap-3">
@@ -812,7 +797,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         {session?.user?.role || 'User'}
                       </p>
                     </div>
-                    <button 
+                    <button
                       onClick={() => router.push('/auth/dashboard/settings')}
                       className="flex-shrink-0 p-1.5 rounded-lg text-gray-600 hover:text-purple-600 hover:bg-white transition-all duration-200"
                       title="Settings"
@@ -825,7 +810,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             )}
             {(isSidebarCollapsed && !isSidebarHovered) && (
               <div className="flex flex-col items-center gap-3">
-                <button 
+                <button
                   onClick={handleSignOut}
                   disabled={isLoading}
                   className="p-3 rounded-xl bg-gray-100 text-gray-600 hover:bg-red-500 hover:text-white transition-all duration-200"
@@ -844,9 +829,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Main content */}
-      <div className={`flex flex-col flex-1 transition-all duration-300 relative z-10 ${
-        isSidebarCollapsed ? (isSidebarHovered ? 'lg:pl-72' : 'lg:pl-16') : 'lg:pl-72'
-      }`}>
+      <div className={`flex flex-col flex-1 transition-all duration-300 relative z-10 ${isSidebarCollapsed ? (isSidebarHovered ? 'lg:pl-72' : 'lg:pl-16') : 'lg:pl-72'
+        }`}>
         {/* Modern Mobile Header */}
         <div className="lg:hidden sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm" data-tour="dashboard-header">
           <div className="flex items-center justify-between px-4 py-3">
@@ -858,20 +842,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <span className="sr-only">Open sidebar</span>
               <Bars3Icon className="h-6 w-6" aria-hidden="true" />
             </button>
-            
+
             <button
               onClick={() => router.push('/')}
               className="hover:opacity-90 transition-opacity flex items-center gap-1.5 sm:gap-2 overflow-hidden min-w-0"
             >
-              <Logo 
-                variant="icon-only" 
+              <Logo
+                variant="icon-only"
                 size="md"
                 href=""
                 showText={false}
               />
               <span className="text-[9px] sm:text-[10px] font-bold text-gray-500 uppercase tracking-wide whitespace-nowrap flex-shrink-0">Studio</span>
             </button>
-            
+
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
@@ -888,7 +872,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
           </div>
         </div>
-        
+
         <main className="flex-1 w-full h-full m-0 p-0">
           {children}
         </main>
@@ -898,11 +882,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {showNotifications && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" 
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
             onClick={() => setShowNotifications(false)}
           ></div>
-          
+
           {/* Modal */}
           <div className="flex min-h-full items-center justify-center p-2 sm:p-4">
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-auto transform transition-all max-h-[90vh] flex flex-col">
@@ -920,7 +904,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {notifications.length > 0 && unreadCount > 0 && (
                       <button
@@ -939,7 +923,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     </button>
                   </div>
                 </div>
-                
+
                 {/* Mobile Mark All Button */}
                 {notifications.length > 0 && unreadCount > 0 && (
                   <div className="sm:hidden mt-3 pt-3 border-t border-gray-200">
@@ -966,18 +950,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 ) : (
                   <div className="divide-y divide-gray-100">
                     {notifications.map((activity) => (
-                      <div 
-                        key={activity.id} 
-                        className={`p-3 sm:p-4 hover:bg-gray-50 transition-colors cursor-pointer touch-manipulation ${
-                          !activity.read ? 'bg-gray-50 border-l-4 border-gray-900' : 'bg-white'
-                        }`}
+                      <div
+                        key={activity.id}
+                        className={`p-3 sm:p-4 hover:bg-gray-50 transition-colors cursor-pointer touch-manipulation ${!activity.read ? 'bg-gray-50 border-l-4 border-gray-900' : 'bg-white'
+                          }`}
                         onClick={() => !activity.read && handleMarkAsRead(activity.id)}
                       >
                         <div className="flex items-start gap-3">
                           {/* Icon */}
-                          <div className={`p-2 rounded-lg flex-shrink-0 ${
-                            activity.category === 'SALE' ? 'bg-green-100' : 'bg-gray-900'
-                          }`}>
+                          <div className={`p-2 rounded-lg flex-shrink-0 ${activity.category === 'SALE' ? 'bg-green-100' : 'bg-gray-900'
+                            }`}>
                             {activity.category === 'SALE' && <BanknotesIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />}
                             {activity.category === 'PAYMENT' && <CreditCardIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
                             {activity.category === 'SITE' && <GlobeAltIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
@@ -994,7 +976,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                             {!activity.category && activity.type === 'plan' && <CreditCardIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
                             {!activity.category && activity.type === 'publish' && <GlobeAltIcon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />}
                           </div>
-                          
+
                           {/* Content */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
@@ -1008,7 +990,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                   {activity.message}
                                 </p>
                               </div>
-                              
+
                               {/* Unread indicator */}
                               {!activity.read && (
                                 <div className="flex-shrink-0 mt-1">
@@ -1016,18 +998,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                 </div>
                               )}
                             </div>
-                            
+
                             {/* Timestamp and Category - Mobile Optimized */}
                             <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-2">
                               <span className="text-xs text-gray-500">
                                 {new Date(activity.createdAt).toLocaleString()}
                               </span>
                               {activity.category && (
-                                <span className={`px-2 py-1 text-xs font-medium rounded-full self-start ${
-                                  activity.category === 'SALE' 
-                                    ? 'bg-green-100 text-green-700' 
+                                <span className={`px-2 py-1 text-xs font-medium rounded-full self-start ${activity.category === 'SALE'
+                                    ? 'bg-green-100 text-green-700'
                                     : 'bg-gray-900 text-white'
-                                }`}>
+                                  }`}>
                                   {activity.category}
                                 </span>
                               )}
@@ -1048,8 +1029,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {showWelcome && !runDashboardTour && <WelcomeModal open={showWelcome} setOpen={setShowWelcome} forceShow />}
 
       {/* Notification Sound */}
-      <NotificationSound 
-        play={playNotificationSound} 
+      <NotificationSound
+        play={playNotificationSound}
         onPlay={() => setPlayNotificationSound(false)}
       />
 
