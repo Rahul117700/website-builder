@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import TemplateRenderer from '@/components/channel/TemplateRenderer';
 import LogoLoader from '@/components/loaders/LogoLoader';
+import MainLayout from '@/components/layout/MainLayout';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 export default function PublicChannelPage() {
@@ -24,7 +25,7 @@ export default function PublicChannelPage() {
     try {
       setLoading(true);
       const response = await fetch(`/api/channels/public/${slug}`);
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to load channel');
@@ -67,5 +68,9 @@ export default function PublicChannelPage() {
     );
   }
 
-  return <TemplateRenderer channel={channel} />;
+  return (
+    <MainLayout>
+      <TemplateRenderer channel={channel} />
+    </MainLayout>
+  );
 }

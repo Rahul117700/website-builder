@@ -239,9 +239,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       },
       {
         name: 'My Channels',
-        href: '/auth/dashboard/channels',
+        href: '/auth/dashboard/my-channel',
         icon: RocketLaunchIcon as any,
-        current: pathname?.startsWith('/auth/dashboard/channels'),
+        current: pathname?.startsWith('/auth/dashboard/channels') || pathname?.startsWith('/auth/dashboard/my-channel'),
         description: 'Manage your channels and content'
       },
       {
@@ -434,14 +434,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         href={item.href}
                         data-tour={item.name === 'My Channels' ? 'channels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
                         className={`group relative flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${item.current
-                            ? 'bg-gray-900 text-white shadow-lg shadow-gray-200'
-                            : 'text-gray-500 hover:bg-white hover:text-gray-900 hover:shadow-sm'
+                          ? 'bg-gray-900 text-white shadow-lg shadow-gray-200'
+                          : 'text-gray-500 hover:bg-white hover:text-gray-900 hover:shadow-sm'
                           }`}
                       >
                         <item.icon
                           className={`h-5 w-5 mr-3 ${item.current
-                              ? 'text-white'
-                              : 'text-gray-600 group-hover:text-gray-900'
+                            ? 'text-white'
+                            : 'text-gray-600 group-hover:text-gray-900'
                             }`}
                           aria-hidden="true"
                         />
@@ -458,14 +458,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         href={item.href}
                         data-tour={item.name === 'My Channels' ? 'channels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
                         className={`group relative flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${item.current
-                            ? 'bg-gray-900 text-white shadow-lg shadow-gray-200'
-                            : 'text-gray-500 hover:bg-white hover:text-gray-900 hover:shadow-sm'
+                          ? 'bg-gray-900 text-white shadow-lg shadow-gray-200'
+                          : 'text-gray-500 hover:bg-white hover:text-gray-900 hover:shadow-sm'
                           }`}
                       >
                         <item.icon
                           className={`h-5 w-5 mr-3 ${item.current
-                              ? 'text-white'
-                              : 'text-gray-600 group-hover:text-gray-900'
+                            ? 'text-white'
+                            : 'text-gray-600 group-hover:text-gray-900'
                             }`}
                           aria-hidden="true"
                         />
@@ -483,8 +483,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <button
                     onClick={() => setShowNotifications(!showNotifications)}
                     className={`p-2.5 rounded-xl transition-all duration-200 relative ${showNotifications
-                        ? 'bg-white text-gray-900 shadow-lg'
-                        : 'bg-gray-100 text-gray-600 hover:bg-white hover:text-gray-900'
+                      ? 'bg-white text-gray-900 shadow-lg'
+                      : 'bg-gray-100 text-gray-600 hover:bg-white hover:text-gray-900'
                       }`}
                     title="Notifications"
                   >
@@ -572,10 +572,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="flex min-h-0 flex-1 flex-col bg-white shadow-2xl border-r border-gray-200">
           <div className="flex flex-1 flex-col pt-4 pb-4 h-full">
             {/* Logo Section */}
+            {/* Logo Section */}
             <div className="flex flex-shrink-0 items-center justify-center px-4 sm:px-6 mb-6 sm:mb-8">
-              <Link href="/" className="flex items-center justify-center w-full">
-                {isSidebarCollapsed && !isSidebarHovered ? (
-                  // Collapsed Logo - Show a modern icon design
+              {isSidebarCollapsed && !isSidebarHovered ? (
+                // Collapsed Logo - Show a modern icon design
+                <Link href="/" className="flex items-center justify-center w-full">
                   <div className="relative">
                     <div className="w-12 h-12 bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-2xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-white/10">
                       <div className="relative">
@@ -586,9 +587,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     {/* Subtle glow effect */}
                     <div className="absolute inset-0 w-12 h-12 bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-2xl opacity-20 blur-md -z-10"></div>
                   </div>
-                ) : (
-                  // Expanded Logo - Show full logo with modern styling
-                  <div className="flex items-center justify-between w-full overflow-hidden">
+                </Link>
+              ) : (
+                // Expanded Logo - Show full logo with modern styling
+                <div className="flex items-center justify-between w-full overflow-hidden">
+                  <Link href="/" className="flex items-center gap-2 flex-shrink-0 min-w-0">
                     <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
                       <img
                         src="/logo/logo.png"
@@ -602,17 +605,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       />
                       <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide whitespace-nowrap flex-shrink-0">Studio</span>
                     </div>
-                    <button
-                      onClick={toggleSidebarCollapse}
-                      className="hidden lg:flex p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200 ml-2 group"
-                      aria-label="Collapse sidebar"
-                      title="Collapse sidebar"
-                    >
-                      <Bars3Icon className="h-5 w-5 group-hover:rotate-90 transition-transform duration-200" />
-                    </button>
-                  </div>
-                )}
-              </Link>
+                  </Link>
+                  <button
+                    onClick={toggleSidebarCollapse}
+                    className="hidden lg:flex p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200 ml-2 group"
+                    aria-label="Collapse sidebar"
+                    title="Collapse sidebar"
+                  >
+                    <Bars3Icon className="h-5 w-5 group-hover:rotate-90 transition-transform duration-200" />
+                  </button>
+                </div>
+              )}
             </div>
             <nav className={`flex-1 overflow-y-auto scrollbar-hide ${isSidebarCollapsed && !isSidebarHovered ? 'px-2 space-y-3' : 'px-4 space-y-3'
               }`}>
@@ -626,14 +629,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         href={item.href}
                         data-tour={item.name === 'My Channels' ? 'channels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
                         className={`group relative flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${item.current
-                            ? 'bg-gray-900 text-white shadow-md shadow-gray-200'
-                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                          ? 'bg-gray-900 text-white shadow-md shadow-gray-200'
+                          : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                           }`}
                       >
                         <item.icon
                           className={`h-5 w-5 mr-3 ${item.current
-                              ? 'text-white'
-                              : 'text-gray-600 group-hover:text-gray-900'
+                            ? 'text-white'
+                            : 'text-gray-600 group-hover:text-gray-900'
                             }`}
                           aria-hidden="true"
                         />
@@ -650,14 +653,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         href={item.href}
                         data-tour={item.name === 'My Channels' ? 'channels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
                         className={`group relative flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${item.current
-                            ? 'bg-gray-900 text-white shadow-md shadow-gray-200'
-                            : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                          ? 'bg-gray-900 text-white shadow-md shadow-gray-200'
+                          : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                           }`}
                       >
                         <item.icon
                           className={`h-5 w-5 mr-3 ${item.current
-                              ? 'text-white'
-                              : 'text-gray-600 group-hover:text-gray-900'
+                            ? 'text-white'
+                            : 'text-gray-600 group-hover:text-gray-900'
                             }`}
                           aria-hidden="true"
                         />
@@ -700,8 +703,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         key={item.name}
                         href={item.href}
                         className={`flex items-center justify-center p-3 rounded-xl transition-all duration-300 ${item.current
-                            ? 'bg-gray-900 text-white shadow-md'
-                            : 'text-gray-400 hover:bg-gray-100 hover:text-gray-900'
+                          ? 'bg-gray-900 text-white shadow-md'
+                          : 'text-gray-400 hover:bg-gray-100 hover:text-gray-900'
                           }`}
                         title={item.name}
                       >
@@ -717,8 +720,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       <button
                         onClick={() => setShowNotifications(true)}
                         className={`flex items-center justify-center p-3 rounded-xl transition-all duration-200 w-full ${showNotifications
-                            ? 'bg-white text-gray-900 shadow-lg'
-                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                          ? 'bg-white text-gray-900 shadow-lg'
+                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                           } hover:shadow-xl hover:scale-105`}
                         title="Notifications"
                       >
@@ -745,8 +748,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <button
                     onClick={() => setShowNotifications(!showNotifications)}
                     className={`p-2.5 rounded-xl transition-all duration-200 relative ${showNotifications
-                        ? 'bg-white text-gray-900 shadow-lg'
-                        : 'bg-gray-100 text-gray-600 hover:bg-white hover:text-gray-900'
+                      ? 'bg-white text-gray-900 shadow-lg'
+                      : 'bg-gray-100 text-gray-600 hover:bg-white hover:text-gray-900'
                       }`}
                     title="Notifications"
                   >
@@ -1006,8 +1009,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                               </span>
                               {activity.category && (
                                 <span className={`px-2 py-1 text-xs font-medium rounded-full self-start ${activity.category === 'SALE'
-                                    ? 'bg-green-100 text-green-700'
-                                    : 'bg-gray-900 text-white'
+                                  ? 'bg-green-100 text-green-700'
+                                  : 'bg-gray-900 text-white'
                                   }`}>
                                   {activity.category}
                                 </span>

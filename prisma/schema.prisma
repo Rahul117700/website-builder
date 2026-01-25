@@ -44,6 +44,7 @@ model User {
   productLikes         ProductLike[]         @relation("ProductLikes")
   playlists            Playlist[]            @relation("UserPlaylists")
   savedProducts        ProductSave[]         @relation("UserSavedProducts")
+  history              UserHistory[]         @relation("UserHistory")
 
   @@map("User")
 }
@@ -850,6 +851,7 @@ model ChannelProduct {
   viewCount     Int @default(0)
   purchaseCount Int @default(0)
   likeCount     Int @default(0)
+  saveCount     Int @default(0)
 
   // Status
   status    ChannelProductStatus @default(DRAFT)
@@ -863,6 +865,7 @@ model ChannelProduct {
   likes         ProductLike[]
   playlistItems PlaylistItem[]
   saves         ProductSave[]
+  history       UserHistory[]    @relation("ProductHistory")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1072,3 +1075,20 @@ model ProductSave {
   @@index([productId])
   @@map("product_saves")
 }
+
+model UserHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  viewedAt  DateTime @default(now())
+
+  user    User           @relation("UserHistory", fields: [userId], references: [id], onDelete: Cascade)
+  product ChannelProduct @relation("ProductHistory", fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([productId])
+  @@index([viewedAt])
+  @@index([userId, viewedAt])
+  @@map("user_history")
+}
+

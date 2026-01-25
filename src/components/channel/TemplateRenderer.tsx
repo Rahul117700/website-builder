@@ -68,9 +68,11 @@ interface TemplateRendererProps {
       subscribers: number;
     };
   };
+  isEditing?: boolean;
+  onAddProduct?: () => void;
 }
 
-export default function TemplateRenderer({ channel }: TemplateRendererProps) {
+export default function TemplateRenderer({ channel, isEditing = false, onAddProduct }: TemplateRendererProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const template = channel.template;
@@ -105,6 +107,9 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
   const [successMessage, setSuccessMessage] = useState('');
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // New Design State
+  const [activeTab, setActiveTab] = useState<'home' | 'videos' | 'playlists' | 'community' | 'about'>('home');
 
   // Check if current user is the channel owner
   const isOwner = session?.user?.id === channel.userId;
@@ -559,7 +564,7 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
   const borderRadius = customTheme.borderRadius || theme?.borderRadius || '0.5rem';
 
   // Helper function to format price
-  const formatPrice = (price: number, currency: string = 'INR') => {
+  const formatPrice = (price: any, currency: string = 'INR') => {
     const currencySymbols: { [key: string]: string } = {
       'USD': '$',
       'EUR': '€',
@@ -567,7 +572,8 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
       'INR': '₹',
     };
     const symbol = currencySymbols[currency] || currency + ' ';
-    return `${symbol}${price.toFixed(2)}`;
+    const numPrice = Number(price);
+    return isNaN(numPrice) ? `${symbol}0.00` : `${symbol}${numPrice.toFixed(2)}`;
   };
 
   // Helper function to format view count
@@ -621,6 +627,107 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
       subscriptionCurrency: channel.subscriptionCurrency,
     });
   }
+
+  // New Channel Design - Header & Tabs
+  const renderChannelHeader = () => {
+    return (
+      <div className="bg-white">
+        {/* Banner Image */}
+        <div className="relative w-full h-48 sm:h-56 md:h-72 lg:h-80 bg-gray-100 group overflow-hidden">
+          {channel.coverImage || getCoverImage ? (
+            <div
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 group-hover:scale-105"
+              style={{ backgroundImage: `url(${channel.coverImage || getCoverImage})` }}
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-200 to-gray-300 animate-pulse" />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
+        </div>
+
+        {/* Profile Section */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center md:items-end -mt-16 md:-mt-20 relative z-10 pb-6 mb-2">
+            {/* Avatar */}
+            <div className="relative mb-4 md:mb-0">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
+                {channel.profileImage || channel.user.image ? (
+                  <img
+                    src={channel.profileImage || channel.user.image || ''}
+                    alt={channel.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+                    <UserCircleIcon className="w-20 h-20" />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Channel Info */}
+            <div className="flex-1 text-center md:text-left md:ml-6 mb-4 md:mb-2">
+              <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-1" style={{ fontFamily: headingFont }}>
+                {channel.name}
+              </h1>
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 text-sm text-gray-600 mb-3">
+                <span className="font-medium">@{channel.slug}</span>
+                <span>•</span>
+                <span>{formatViewCount(channel._count?.subscribers || 0)} subscribers</span>
+                <span>•</span>
+                <span>{channel._count?.products || 0} products</span>
+              </div>
+              <p className="text-sm text-gray-600 line-clamp-1 max-w-2xl mx-auto md:mx-0">
+                {channel.description || 'Welcome to my channel!'}
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col sm:flex-row gap-3 mb-2 w-full md:w-auto">
+              {!isOwner && channel.subscriptionEnabled && (
+                <button
+                  onClick={() => !hasActiveSubscription && setShowSubscriptionModal(true)}
+                  disabled={hasActiveSubscription}
+                  className={`px-6 py-2.5 rounded-full font-semibold text-sm transition-all shadow-sm ${hasActiveSubscription
+                    ? 'bg-gray-100 text-gray-600 cursor-default'
+                    : 'bg-gray-900 text-white hover:bg-black hover:shadow-md active:scale-95'
+                    }`}
+                >
+                  {hasActiveSubscription ? 'Subscribed' : 'Subscribe'}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="flex items-center gap-6 sm:gap-8 overflow-x-auto scrollbar-hide border-b border-gray-200">
+            {[
+              { id: 'home', label: 'Home' },
+              { id: 'videos', label: 'Products' }, // Renamed from Videos since it's products
+              { id: 'playlists', label: 'Playlists' },
+              { id: 'community', label: 'Community' },
+              { id: 'about', label: 'About' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`py-3 text-sm sm:text-base font-medium whitespace-nowrap border-b-2 transition-colors ${activeTab === tab.id
+                  ? 'border-gray-900 text-gray-900'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+            {/* Search Bar in Tabs (Optional: could also be below) */}
+            <div className="ml-auto pl-4 hidden md:flex items-center" >
+              {/* Search input could go here, but maybe keep it separate for now */}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   // Helper function to replace template variables
   const replaceVariables = (text: string): string => {
@@ -1027,349 +1134,599 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
           color: textColor,
         }}
       >
-        {/* Premium Soft-UI Header/Navigation */}
-        <motion.header
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="sticky top-0 z-50 backdrop-blur-2xl border-b transition-all duration-500"
-          style={{
-            background: `${backgroundColor}D9`, // ~85% opacity
-            borderColor: `${textColor}0D`,
-            boxShadow: `0 4px 30px rgba(0, 0, 0, 0.03)`,
-          }}
-        >
-          <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16 sm:h-18 md:h-20">
-              {/* Logo/Brand with Navigation Dropdown */}
-              <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-1 min-w-0">
-                {/* Navigation Dropdown Button - Visible on all screens */}
-                <div className="relative">
-                  <button
-                    onClick={() => {
-                      setShowNavDropdown(!showNavDropdown);
-                      setSidebarOpen(false);
-                    }}
-                    className="p-2 rounded-full hover:bg-opacity-10 transition-colors touch-manipulation"
-                    style={{ color: textColor }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${textColor}10`}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                    aria-label="Navigation menu"
-                  >
-                    <Bars3Icon className="w-6 h-6" />
-                  </button>
+        {renderChannelHeader()}
 
-                  {/* Navigation Dropdown Menu */}
-                  <AnimatePresence>
-                    {showNavDropdown && (
-                      <>
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="fixed inset-0 z-40 bg-black/5 backdrop-blur-[2px]"
-                          onClick={() => setShowNavDropdown(false)}
-                        />
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                          className="absolute left-0 mt-3 w-72 max-h-[80vh] overflow-y-auto rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border z-50 scrollbar-hide"
-                          style={{
-                            backgroundColor: backgroundColor,
-                            borderColor: `${textColor}10`,
-                          }}
-                        >
-                          <div className="p-2">
-                            {/* Main Navigation */}
-                            <nav className="space-y-1 mb-2">
-                              <button
-                                onClick={() => {
-                                  setActiveSidebarItem('home');
-                                  const productsSection = document.getElementById('products');
-                                  if (productsSection) {
-                                    productsSection.scrollIntoView({ behavior: 'smooth' });
-                                  }
-                                  setShowNavDropdown(false);
-                                }}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'home'
-                                  ? 'shadow-inner'
-                                  : 'hover:bg-gray-50/50'
-                                  }`}
-                                style={{
-                                  color: activeSidebarItem === 'home' ? textColor : `${textColor}CC`,
-                                  backgroundColor: activeSidebarItem === 'home' ? `${primaryColor}0D` : 'transparent',
-                                }}
-                              >
-                                <HomeIcon className={`w-5 h-5 flex-shrink-0 ${activeSidebarItem === 'home' ? 'text-primary' : ''}`} style={{ color: activeSidebarItem === 'home' ? primaryColor : 'inherit' }} />
-                                <span className="text-sm font-medium">Home</span>
-                              </button>
-
-                              <button
-                                onClick={() => {
-                                  setActiveSidebarItem('explore');
-                                  setShowNavDropdown(false);
-                                }}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'explore'
-                                  ? 'shadow-inner'
-                                  : 'hover:bg-gray-50/50'
-                                  }`}
-                                style={{
-                                  color: activeSidebarItem === 'explore' ? textColor : `${textColor}CC`,
-                                  backgroundColor: activeSidebarItem === 'explore' ? `${primaryColor}0D` : 'transparent',
-                                }}
-                              >
-                                <FireIcon className="w-5 h-5 flex-shrink-0" style={{ color: activeSidebarItem === 'explore' ? primaryColor : 'inherit' }} />
-                                <span className="text-sm font-medium">Explore</span>
-                              </button>
-
-                              {session?.user && (
+        {/* Premium Soft-UI Header/Navigation - Hidden, using MainLayout header instead */}
+        {false && (
+          <motion.header
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="sticky top-0 z-50 backdrop-blur-2xl border-b transition-all duration-500"
+            style={{
+              background: `${backgroundColor}D9`, // ~85% opacity
+              borderColor: `${textColor}0D`,
+              boxShadow: `0 4px 30px rgba(0, 0, 0, 0.03)`,
+            }}
+          >
+            <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
+              <div className="flex items-center justify-between h-16 sm:h-18 md:h-20">
+                {/* Logo/Brand with Navigation Dropdown */}
+                <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-1 min-w-0">
+                  {/* Navigation Dropdown removed - using main app sidebar instead */}
+                  <div className="relative">
+                    {/* Navigation Dropdown Menu */}
+                    <AnimatePresence>
+                      {false && showNavDropdown && (
+                        <>
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-40 bg-black/5 backdrop-blur-[2px]"
+                            onClick={() => setShowNavDropdown(false)}
+                          />
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                            className="absolute left-0 mt-3 w-72 max-h-[80vh] overflow-y-auto rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border z-50 scrollbar-hide"
+                            style={{
+                              backgroundColor: backgroundColor,
+                              borderColor: `${textColor}10`,
+                            }}
+                          >
+                            <div className="p-2">
+                              {/* Main Navigation */}
+                              <nav className="space-y-1 mb-2">
                                 <button
                                   onClick={() => {
-                                    setActiveSidebarItem('subscriptions');
+                                    setActiveSidebarItem('home');
+                                    const productsSection = document.getElementById('products');
+                                    if (productsSection) {
+                                      productsSection.scrollIntoView({ behavior: 'smooth' });
+                                    }
                                     setShowNavDropdown(false);
                                   }}
-                                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'subscriptions'
+                                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'home'
+                                    ? 'shadow-inner'
+                                    : 'hover:bg-gray-50/50'
+                                    }`}
+                                  style={{
+                                    color: activeSidebarItem === 'home' ? textColor : `${textColor}CC`,
+                                    backgroundColor: activeSidebarItem === 'home' ? `${primaryColor}0D` : 'transparent',
+                                  }}
+                                >
+                                  <HomeIcon className={`w-5 h-5 flex-shrink-0 ${activeSidebarItem === 'home' ? 'text-primary' : ''}`} style={{ color: activeSidebarItem === 'home' ? primaryColor : 'inherit' }} />
+                                  <span className="text-sm font-medium">Home</span>
+                                </button>
+
+                                <button
+                                  onClick={() => {
+                                    setActiveSidebarItem('explore');
+                                    setShowNavDropdown(false);
+                                  }}
+                                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'explore'
+                                    ? 'shadow-inner'
+                                    : 'hover:bg-gray-50/50'
+                                    }`}
+                                  style={{
+                                    color: activeSidebarItem === 'explore' ? textColor : `${textColor}CC`,
+                                    backgroundColor: activeSidebarItem === 'explore' ? `${primaryColor}0D` : 'transparent',
+                                  }}
+                                >
+                                  <FireIcon className="w-5 h-5 flex-shrink-0" style={{ color: activeSidebarItem === 'explore' ? primaryColor : 'inherit' }} />
+                                  <span className="text-sm font-medium">Explore</span>
+                                </button>
+
+                                {session?.user && (
+                                  <button
+                                    onClick={() => {
+                                      setActiveSidebarItem('subscriptions');
+                                      setShowNavDropdown(false);
+                                    }}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'subscriptions'
+                                      ? 'bg-gray-100 font-semibold'
+                                      : 'hover:bg-gray-50'
+                                      }`}
+                                    style={{
+                                      color: activeSidebarItem === 'subscriptions' ? textColor : `${textColor}CC`,
+                                    }}
+                                  >
+                                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                    <span className="text-sm">Subscriptions</span>
+                                  </button>
+                                )}
+                              </nav>
+
+                              {/* Divider */}
+                              {session?.user && (
+                                <>
+                                  <div className="my-2 border-t" style={{ borderColor: `${textColor}15` }} />
+
+                                  {/* Library Section */}
+                                  <div className="px-4 py-2">
+                                    <h3
+                                      className="text-xs font-semibold uppercase tracking-wider"
+                                      style={{
+                                        color: `${textColor}80`,
+                                        fontFamily: bodyFont,
+                                        letterSpacing: '0.1em',
+                                        fontWeight: 600,
+                                      }}
+                                    >
+                                      Library
+                                    </h3>
+                                  </div>
+                                  <nav className="space-y-1 mb-2">
+                                    <button
+                                      onClick={() => {
+                                        setActiveSidebarItem('history');
+                                        setShowNavDropdown(false);
+                                      }}
+                                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'history'
+                                        ? 'bg-gray-100 font-semibold'
+                                        : 'hover:bg-gray-50'
+                                        }`}
+                                      style={{
+                                        color: activeSidebarItem === 'history' ? textColor : `${textColor}CC`,
+                                      }}
+                                    >
+                                      <ClockIcon className="w-5 h-5 flex-shrink-0" />
+                                      <span className="text-sm">History</span>
+                                    </button>
+
+                                    <button
+                                      onClick={() => {
+                                        setActiveSidebarItem('liked');
+                                        setShowNavDropdown(false);
+                                      }}
+                                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'liked'
+                                        ? 'bg-gray-100 font-semibold'
+                                        : 'hover:bg-gray-50'
+                                        }`}
+                                      style={{
+                                        color: activeSidebarItem === 'liked' ? textColor : `${textColor}CC`,
+                                      }}
+                                    >
+                                      <HeartIcon className="w-5 h-5 flex-shrink-0" />
+                                      <span className="text-sm">Liked Products</span>
+                                    </button>
+
+                                    <button
+                                      onClick={() => {
+                                        setActiveSidebarItem('saved');
+                                        setShowNavDropdown(false);
+                                      }}
+                                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'saved'
+                                        ? 'bg-gray-100 font-semibold'
+                                        : 'hover:bg-gray-50'
+                                        }`}
+                                      style={{
+                                        color: activeSidebarItem === 'saved' ? textColor : `${textColor}CC`,
+                                      }}
+                                    >
+                                      <BookmarkIcon className="w-5 h-5 flex-shrink-0" />
+                                      <span className="text-sm">Saved</span>
+                                    </button>
+
+                                    <button
+                                      onClick={() => {
+                                        setShowCreatePlaylistModal(true);
+                                        setShowNavDropdown(false);
+                                      }}
+                                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-gray-50 border border-dashed border-gray-300"
+                                      style={{
+                                        color: `${textColor}CC`,
+                                      }}
+                                    >
+                                      <PlusIcon className="w-5 h-5 flex-shrink-0" />
+                                      <span className="text-sm">Create Playlist</span>
+                                    </button>
+
+                                    {/* User's Playlists */}
+                                    {playlists.length > 0 && (
+                                      <div className="mt-2 space-y-1 max-h-48 overflow-y-auto">
+                                        {playlists.map((playlist) => (
+                                          <button
+                                            key={playlist.id}
+                                            onClick={() => {
+                                              setSelectedPlaylist(playlist);
+                                              setActiveSidebarItem(`playlist-${playlist.id}`);
+                                              setShowNavDropdown(false);
+                                            }}
+                                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === `playlist-${playlist.id}`
+                                              ? 'bg-gray-100 font-semibold'
+                                              : 'hover:bg-gray-50'
+                                              }`}
+                                            style={{
+                                              color: activeSidebarItem === `playlist-${playlist.id}` ? textColor : `${textColor}CC`,
+                                            }}
+                                          >
+                                            <FolderIcon className="w-5 h-5 flex-shrink-0" />
+                                            <span className="text-sm truncate flex-1 text-left">{playlist.name}</span>
+                                            <span className="text-xs opacity-70">({playlist.items?.length || 0})</span>
+                                          </button>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </nav>
+
+                                  <div className="my-2 border-t" style={{ borderColor: `${textColor}15` }} />
+                                </>
+                              )}
+
+                              {/* Explore Categories */}
+                              <div className="px-4 py-2">
+                                <h3
+                                  className="text-xs font-semibold uppercase tracking-wider"
+                                  style={{
+                                    color: `${textColor}80`,
+                                    fontFamily: bodyFont,
+                                    letterSpacing: '0.1em',
+                                    fontWeight: 600,
+                                  }}
+                                >
+                                  Explore
+                                </h3>
+                              </div>
+                              <nav className="space-y-1 mb-2">
+                                <button
+                                  onClick={() => {
+                                    setActiveSidebarItem('music');
+                                    setShowNavDropdown(false);
+                                  }}
+                                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'music'
                                     ? 'bg-gray-100 font-semibold'
                                     : 'hover:bg-gray-50'
                                     }`}
                                   style={{
-                                    color: activeSidebarItem === 'subscriptions' ? textColor : `${textColor}CC`,
+                                    color: activeSidebarItem === 'music' ? textColor : `${textColor}CC`,
+                                  }}
+                                >
+                                  <MusicalNoteIcon className="w-5 h-5 flex-shrink-0" />
+                                  <span className="text-sm">Music</span>
+                                </button>
+
+                                <button
+                                  onClick={() => {
+                                    setActiveSidebarItem('gaming');
+                                    setShowNavDropdown(false);
+                                  }}
+                                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'gaming'
+                                    ? 'bg-gray-100 font-semibold'
+                                    : 'hover:bg-gray-50'
+                                    }`}
+                                  style={{
+                                    color: activeSidebarItem === 'gaming' ? textColor : `${textColor}CC`,
                                   }}
                                 >
                                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                   </svg>
-                                  <span className="text-sm">Subscriptions</span>
+                                  <span className="text-sm">Gaming</span>
                                 </button>
+
+                                <button
+                                  onClick={() => {
+                                    setActiveSidebarItem('news');
+                                    setShowNavDropdown(false);
+                                  }}
+                                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'news'
+                                    ? 'bg-gray-100 font-semibold'
+                                    : 'hover:bg-gray-50'
+                                    }`}
+                                  style={{
+                                    color: activeSidebarItem === 'news' ? textColor : `${textColor}CC`,
+                                  }}
+                                >
+                                  <NewspaperIcon className="w-5 h-5 flex-shrink-0" />
+                                  <span className="text-sm">News</span>
+                                </button>
+
+                                <button
+                                  onClick={() => {
+                                    setActiveSidebarItem('sports');
+                                    setShowNavDropdown(false);
+                                  }}
+                                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'sports'
+                                    ? 'bg-gray-100 font-semibold'
+                                    : 'hover:bg-gray-50'
+                                    }`}
+                                  style={{
+                                    color: activeSidebarItem === 'sports' ? textColor : `${textColor}CC`,
+                                  }}
+                                >
+                                  <TrophyIcon className="w-5 h-5 flex-shrink-0" />
+                                  <span className="text-sm">Sports</span>
+                                </button>
+
+                                <button
+                                  onClick={() => {
+                                    setActiveSidebarItem('learning');
+                                    setShowNavDropdown(false);
+                                  }}
+                                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'learning'
+                                    ? 'bg-gray-100 font-semibold'
+                                    : 'hover:bg-gray-50'
+                                    }`}
+                                  style={{
+                                    color: activeSidebarItem === 'learning' ? textColor : `${textColor}CC`,
+                                  }}
+                                >
+                                  <LightBulbIcon className="w-5 h-5 flex-shrink-0" />
+                                  <span className="text-sm">Learning</span>
+                                </button>
+                              </nav>
+
+                              {/* Settings */}
+                              {session?.user && (
+                                <>
+                                  <div className="my-2 border-t" style={{ borderColor: `${textColor}15` }} />
+                                  <button
+                                    onClick={() => {
+                                      if (isOwner) {
+                                        router.push('/auth/dashboard/settings');
+                                      } else {
+                                        router.push('/settings');
+                                      }
+                                      setShowNavDropdown(false);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-gray-50"
+                                    style={{ color: `${textColor}CC` }}
+                                  >
+                                    <Cog6ToothIcon className="w-5 h-5 flex-shrink-0" />
+                                    <span className="text-sm">Settings</span>
+                                  </button>
+                                </>
                               )}
-                            </nav>
+                            </div>
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                  {/* Channel header removed per user request */}
+                </div>
 
-                            {/* Divider */}
-                            {session?.user && (
-                              <>
-                                <div className="my-2 border-t" style={{ borderColor: `${textColor}15` }} />
 
-                                {/* Library Section */}
-                                <div className="px-4 py-2">
-                                  <h3
-                                    className="text-xs font-semibold uppercase tracking-wider"
-                                    style={{
-                                      color: `${textColor}80`,
-                                      fontFamily: bodyFont,
-                                      letterSpacing: '0.1em',
-                                      fontWeight: 600,
-                                    }}
-                                  >
-                                    Library
-                                  </h3>
-                                </div>
-                                <nav className="space-y-1 mb-2">
-                                  <button
-                                    onClick={() => {
-                                      setActiveSidebarItem('history');
-                                      setShowNavDropdown(false);
-                                    }}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'history'
-                                      ? 'bg-gray-100 font-semibold'
-                                      : 'hover:bg-gray-50'
-                                      }`}
-                                    style={{
-                                      color: activeSidebarItem === 'history' ? textColor : `${textColor}CC`,
-                                    }}
-                                  >
-                                    <ClockIcon className="w-5 h-5 flex-shrink-0" />
-                                    <span className="text-sm">History</span>
-                                  </button>
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                  {isOwner && channel.subscriptionEnabled && (
+                    <button
+                      onClick={() => setShowSubscribersList(true)}
+                      className="hidden md:flex items-center gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 hover:scale-105"
+                      style={{
+                        backgroundColor: `${primaryColor}15`,
+                        color: primaryColor,
+                      }}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                      Subscribers
+                    </button>
+                  )}
+                  {/* Show login/subscription buttons for non-owners, always show login if not logged in */}
+                  {!isOwner && (
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      {!session?.user ? (
+                        <>
+                          <button
+                            onClick={() => router.push(`/auth/signin?callbackUrl=${encodeURIComponent(channelUrl)}`)}
+                            className="flex px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 border-2 hover:scale-105 shadow-md hover:shadow-lg"
+                            style={{
+                              backgroundColor: 'transparent',
+                              borderColor: `${primaryColor}40`,
+                              color: primaryColor,
+                            }}
+                          >
+                            Sign In
+                          </button>
+                          {channel.subscriptionEnabled ? (
+                            <button
+                              onClick={() => router.push(`/auth/signup?callbackUrl=${encodeURIComponent(channelUrl)}`)}
+                              className="group relative px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 overflow-hidden bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white"
+                            >
+                              <span className="relative z-10 flex items-center gap-1 sm:gap-2">
+                                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span className="hidden sm:inline">Subscribe Now</span>
+                                <span className="sm:hidden">Subscribe</span>
+                              </span>
+                              <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => router.push(`/auth/signup?callbackUrl=${encodeURIComponent(channelUrl)}`)}
+                              className="group relative px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 text-white"
+                            >
+                              <span className="relative z-10 flex items-center gap-1 sm:gap-2">
+                                <span className="hidden sm:inline">Sign Up</span>
+                                <span className="sm:hidden">Sign Up</span>
+                              </span>
+                              <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                            </button>
+                          )}
+                        </>
+                      ) : channel.subscriptionEnabled ? (
+                        <button
+                          onClick={() => setShowSubscriptionModal(true)}
+                          disabled={hasActiveSubscription}
+                          className={`group relative flex items-center gap-1 sm:gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 overflow-hidden ${hasActiveSubscription
+                            ? 'bg-gray-400 text-white'
+                            : 'bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white'
+                            }`}
+                        >
+                          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span className="relative z-10 hidden sm:inline">{hasActiveSubscription ? 'Subscribed' : (getSubscribeButtonText() || 'Subscribe')}</span>
+                          <span className="relative z-10 sm:hidden">{hasActiveSubscription ? '✓' : '✓'}</span>
+                          {!hasActiveSubscription && (
+                            <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                          )}
+                        </button>
+                      ) : null}
+                    </div>
+                  )}
 
-                                  <button
-                                    onClick={() => {
-                                      setActiveSidebarItem('liked');
-                                      setShowNavDropdown(false);
-                                    }}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'liked'
-                                      ? 'bg-gray-100 font-semibold'
-                                      : 'hover:bg-gray-50'
-                                      }`}
-                                    style={{
-                                      color: activeSidebarItem === 'liked' ? textColor : `${textColor}CC`,
-                                    }}
-                                  >
-                                    <HeartIcon className="w-5 h-5 flex-shrink-0" />
-                                    <span className="text-sm">Liked Products</span>
-                                  </button>
+                  {/* User Menu - Show when logged in */}
+                  {session?.user && (
+                    <div className="relative">
+                      <button
+                        onClick={() => setShowUserMenu(!showUserMenu)}
+                        className="group flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105"
+                        style={{
+                          backgroundColor: showUserMenu ? `${primaryColor}15` : 'transparent',
+                          color: textColor,
+                        }}
+                      >
+                        {session.user.image ? (
+                          <div className="relative">
+                            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
+                            <img
+                              src={session.user.image}
+                              alt={session.user.name || 'User'}
+                              className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover transition-transform duration-300 group-hover:scale-110"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center"
+                            style={{
+                              backgroundColor: `${primaryColor}15`,
+                              color: primaryColor,
+                            }}
+                          >
+                            <UserCircleIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+                          </div>
+                        )}
+                        <span className="hidden lg:block text-xs sm:text-sm font-semibold truncate max-w-[100px]">{session.user.name || 'User'}</span>
+                        <ChevronDownIcon className={`w-3 h-3 sm:w-4 sm:h-4 transition-all duration-300 ${showUserMenu ? 'rotate-180' : ''}`} />
+                      </button>
 
-                                  <button
-                                    onClick={() => {
-                                      setActiveSidebarItem('saved');
-                                      setShowNavDropdown(false);
-                                    }}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'saved'
-                                      ? 'bg-gray-100 font-semibold'
-                                      : 'hover:bg-gray-50'
-                                      }`}
-                                    style={{
-                                      color: activeSidebarItem === 'saved' ? textColor : `${textColor}CC`,
-                                    }}
-                                  >
-                                    <BookmarkIcon className="w-5 h-5 flex-shrink-0" />
-                                    <span className="text-sm">Saved</span>
-                                  </button>
-
-                                  <button
-                                    onClick={() => {
-                                      setShowCreatePlaylistModal(true);
-                                      setShowNavDropdown(false);
-                                    }}
-                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-gray-50 border border-dashed border-gray-300"
-                                    style={{
-                                      color: `${textColor}CC`,
-                                    }}
-                                  >
-                                    <PlusIcon className="w-5 h-5 flex-shrink-0" />
-                                    <span className="text-sm">Create Playlist</span>
-                                  </button>
-
-                                  {/* User's Playlists */}
-                                  {playlists.length > 0 && (
-                                    <div className="mt-2 space-y-1 max-h-48 overflow-y-auto">
-                                      {playlists.map((playlist) => (
-                                        <button
-                                          key={playlist.id}
-                                          onClick={() => {
-                                            setSelectedPlaylist(playlist);
-                                            setActiveSidebarItem(`playlist-${playlist.id}`);
-                                            setShowNavDropdown(false);
-                                          }}
-                                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === `playlist-${playlist.id}`
-                                            ? 'bg-gray-100 font-semibold'
-                                            : 'hover:bg-gray-50'
-                                            }`}
-                                          style={{
-                                            color: activeSidebarItem === `playlist-${playlist.id}` ? textColor : `${textColor}CC`,
-                                          }}
-                                        >
-                                          <FolderIcon className="w-5 h-5 flex-shrink-0" />
-                                          <span className="text-sm truncate flex-1 text-left">{playlist.name}</span>
-                                          <span className="text-xs opacity-70">({playlist.items?.length || 0})</span>
-                                        </button>
-                                      ))}
+                      {/* User Menu Dropdown */}
+                      <AnimatePresence>
+                        {showUserMenu && (
+                          <>
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="fixed inset-0 z-40 bg-black/5 backdrop-blur-[2px]"
+                              onClick={() => setShowUserMenu(false)}
+                            />
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                              animate={{ opacity: 1, scale: 1, y: 0 }}
+                              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                              className="absolute right-0 mt-3 w-80 max-h-[90vh] overflow-y-auto rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border z-50 scrollbar-hide"
+                              style={{
+                                backgroundColor: backgroundColor,
+                                borderColor: `${textColor}10`,
+                              }}
+                            >
+                              {/* User Info Header */}
+                              <div className="p-4 border-b" style={{ borderColor: `${textColor}15` }}>
+                                <div className="flex items-center gap-3 mb-2">
+                                  {session.user.image ? (
+                                    <img
+                                      src={session.user.image}
+                                      alt={session.user.name || 'User'}
+                                      className="w-10 h-10 rounded-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-10 h-10 rounded-full flex items-center justify-center"
+                                      style={{
+                                        backgroundColor: `${primaryColor}15`,
+                                        color: primaryColor,
+                                      }}
+                                    >
+                                      <UserCircleIcon className="w-6 h-6" />
                                     </div>
                                   )}
-                                </nav>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-sm truncate" style={{ color: textColor }}>
+                                      {session.user.name || 'User'}
+                                    </p>
+                                    <p className="text-xs truncate" style={{ color: `${textColor}70` }}>
+                                      {session.user.email}
+                                    </p>
+                                  </div>
+                                </div>
+                                {isOwner && (
+                                  <button
+                                    onClick={() => {
+                                      router.push(`/channel/${channel.slug}`);
+                                      setShowUserMenu(false);
+                                    }}
+                                    className="text-xs font-medium hover:underline"
+                                    style={{ color: primaryColor }}
+                                  >
+                                    View your channel →
+                                  </button>
+                                )}
+                              </div>
 
-                                <div className="my-2 border-t" style={{ borderColor: `${textColor}15` }} />
-                              </>
-                            )}
+                              {/* Menu Items - YouTube Style */}
+                              <div className="py-1">
+                                {/* Channel/Account Section */}
+                                {isOwner ? (
+                                  <>
+                                    <button
+                                      onClick={() => {
+                                        router.push('/auth/dashboard');
+                                        setShowUserMenu(false);
+                                      }}
+                                      className="w-full flex items-center gap-4 px-4 py-2.5 hover:bg-opacity-10 transition-colors"
+                                      style={{ color: textColor }}
+                                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${textColor}10`)}
+                                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                    >
+                                      <FolderIcon className="w-5 h-5" />
+                                      <span className="text-sm flex-1 text-left">My Channel</span>
+                                      <ArrowTopRightOnSquareIcon className="w-4 h-4 opacity-50" />
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        router.push('/auth/dashboard');
+                                        setShowUserMenu(false);
+                                      }}
+                                      className="w-full flex items-center gap-4 px-4 py-2.5 hover:bg-opacity-10 transition-colors"
+                                      style={{ color: textColor }}
+                                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${textColor}10`)}
+                                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                    >
+                                      <UserCircleIcon className="w-5 h-5" />
+                                      <span className="text-sm flex-1 text-left">Profile & Details</span>
+                                    </button>
+                                  </>
+                                ) : (
+                                  <button
+                                    onClick={() => {
+                                      router.push('/');
+                                      setShowUserMenu(false);
+                                    }}
+                                    className="w-full flex items-center gap-4 px-4 py-2.5 hover:bg-opacity-10 transition-colors"
+                                    style={{ color: textColor }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${textColor}10`)}
+                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                  >
+                                    <PlusIcon className="w-5 h-5" />
+                                    <span className="text-sm flex-1 text-left">Create my channel</span>
+                                    <ArrowTopRightOnSquareIcon className="w-4 h-4 opacity-50" />
+                                  </button>
+                                )}
 
-                            {/* Explore Categories */}
-                            <div className="px-4 py-2">
-                              <h3
-                                className="text-xs font-semibold uppercase tracking-wider"
-                                style={{
-                                  color: `${textColor}80`,
-                                  fontFamily: bodyFont,
-                                  letterSpacing: '0.1em',
-                                  fontWeight: 600,
-                                }}
-                              >
-                                Explore
-                              </h3>
-                            </div>
-                            <nav className="space-y-1 mb-2">
-                              <button
-                                onClick={() => {
-                                  setActiveSidebarItem('music');
-                                  setShowNavDropdown(false);
-                                }}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'music'
-                                  ? 'bg-gray-100 font-semibold'
-                                  : 'hover:bg-gray-50'
-                                  }`}
-                                style={{
-                                  color: activeSidebarItem === 'music' ? textColor : `${textColor}CC`,
-                                }}
-                              >
-                                <MusicalNoteIcon className="w-5 h-5 flex-shrink-0" />
-                                <span className="text-sm">Music</span>
-                              </button>
+                                {/* Divider */}
+                                <div className="h-px my-1" style={{ backgroundColor: `${textColor}15` }}></div>
 
-                              <button
-                                onClick={() => {
-                                  setActiveSidebarItem('gaming');
-                                  setShowNavDropdown(false);
-                                }}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'gaming'
-                                  ? 'bg-gray-100 font-semibold'
-                                  : 'hover:bg-gray-50'
-                                  }`}
-                                style={{
-                                  color: activeSidebarItem === 'gaming' ? textColor : `${textColor}CC`,
-                                }}
-                              >
-                                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span className="text-sm">Gaming</span>
-                              </button>
-
-                              <button
-                                onClick={() => {
-                                  setActiveSidebarItem('news');
-                                  setShowNavDropdown(false);
-                                }}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'news'
-                                  ? 'bg-gray-100 font-semibold'
-                                  : 'hover:bg-gray-50'
-                                  }`}
-                                style={{
-                                  color: activeSidebarItem === 'news' ? textColor : `${textColor}CC`,
-                                }}
-                              >
-                                <NewspaperIcon className="w-5 h-5 flex-shrink-0" />
-                                <span className="text-sm">News</span>
-                              </button>
-
-                              <button
-                                onClick={() => {
-                                  setActiveSidebarItem('sports');
-                                  setShowNavDropdown(false);
-                                }}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'sports'
-                                  ? 'bg-gray-100 font-semibold'
-                                  : 'hover:bg-gray-50'
-                                  }`}
-                                style={{
-                                  color: activeSidebarItem === 'sports' ? textColor : `${textColor}CC`,
-                                }}
-                              >
-                                <TrophyIcon className="w-5 h-5 flex-shrink-0" />
-                                <span className="text-sm">Sports</span>
-                              </button>
-
-                              <button
-                                onClick={() => {
-                                  setActiveSidebarItem('learning');
-                                  setShowNavDropdown(false);
-                                }}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'learning'
-                                  ? 'bg-gray-100 font-semibold'
-                                  : 'hover:bg-gray-50'
-                                  }`}
-                                style={{
-                                  color: activeSidebarItem === 'learning' ? textColor : `${textColor}CC`,
-                                }}
-                              >
-                                <LightBulbIcon className="w-5 h-5 flex-shrink-0" />
-                                <span className="text-sm">Learning</span>
-                              </button>
-                            </nav>
-
-                            {/* Settings */}
-                            {session?.user && (
-                              <>
-                                <div className="my-2 border-t" style={{ borderColor: `${textColor}15` }} />
+                                {/* Settings Section */}
                                 <button
                                   onClick={() => {
                                     if (isOwner) {
@@ -1377,273 +1734,6 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                                     } else {
                                       router.push('/settings');
                                     }
-                                    setShowNavDropdown(false);
-                                  }}
-                                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-gray-50"
-                                  style={{ color: `${textColor}CC` }}
-                                >
-                                  <Cog6ToothIcon className="w-5 h-5 flex-shrink-0" />
-                                  <span className="text-sm">Settings</span>
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </motion.div>
-                      </>
-                    )}
-                  </AnimatePresence>
-                </div>
-                {channel.user?.image ? (
-                  <div className="relative group">
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-                    <img
-                      src={channel.user.image}
-                      alt={sellerName}
-                      className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full border-3 border-white shadow-lg object-cover transition-transform duration-300 group-hover:scale-105"
-                      style={{ borderColor: `${primaryColor}30` }}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center border-3 shadow-lg"
-                    style={{
-                      backgroundColor: `${primaryColor}15`,
-                      borderColor: `${primaryColor}30`,
-                      color: primaryColor,
-                    }}
-                  >
-                    <UserCircleIcon className="w-8 h-8" />
-                  </div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <h1
-                    className="text-base sm:text-lg md:text-xl lg:text-2xl font-extrabold tracking-tight bg-gradient-to-r bg-clip-text text-transparent truncate"
-                    style={{
-                      fontFamily: headingFont,
-                      backgroundImage: `linear-gradient(135deg, ${textColor} 0%, ${primaryColor} 100%)`,
-                    }}
-                  >
-                    {channel.name}
-                  </h1>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-                {isOwner && channel.subscriptionEnabled && (
-                  <button
-                    onClick={() => setShowSubscribersList(true)}
-                    className="hidden md:flex items-center gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 hover:scale-105"
-                    style={{
-                      backgroundColor: `${primaryColor}15`,
-                      color: primaryColor,
-                    }}
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                    Subscribers
-                  </button>
-                )}
-                {/* Show login/subscription buttons for non-owners, always show login if not logged in */}
-                {!isOwner && (
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    {!session?.user ? (
-                      <>
-                        <button
-                          onClick={() => router.push(`/auth/signin?callbackUrl=${encodeURIComponent(channelUrl)}`)}
-                          className="flex px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 border-2 hover:scale-105 shadow-md hover:shadow-lg"
-                          style={{
-                            backgroundColor: 'transparent',
-                            borderColor: `${primaryColor}40`,
-                            color: primaryColor,
-                          }}
-                        >
-                          Sign In
-                        </button>
-                        {channel.subscriptionEnabled ? (
-                          <button
-                            onClick={() => router.push(`/auth/signup?callbackUrl=${encodeURIComponent(channelUrl)}`)}
-                            className="group relative px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 overflow-hidden bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white"
-                          >
-                            <span className="relative z-10 flex items-center gap-1 sm:gap-2">
-                              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                              </svg>
-                              <span className="hidden sm:inline">Subscribe Now</span>
-                              <span className="sm:hidden">Subscribe</span>
-                            </span>
-                            <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => router.push(`/auth/signup?callbackUrl=${encodeURIComponent(channelUrl)}`)}
-                            className="group relative px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 text-white"
-                          >
-                            <span className="relative z-10 flex items-center gap-1 sm:gap-2">
-                              <span className="hidden sm:inline">Sign Up</span>
-                              <span className="sm:hidden">Sign Up</span>
-                            </span>
-                            <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                          </button>
-                        )}
-                      </>
-                    ) : channel.subscriptionEnabled ? (
-                      <button
-                        onClick={() => setShowSubscriptionModal(true)}
-                        disabled={hasActiveSubscription}
-                        className={`group relative flex items-center gap-1 sm:gap-2 px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 overflow-hidden ${hasActiveSubscription
-                          ? 'bg-gray-400 text-white'
-                          : 'bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white'
-                          }`}
-                      >
-                        <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span className="relative z-10 hidden sm:inline">{hasActiveSubscription ? 'Subscribed' : (getSubscribeButtonText() || 'Subscribe')}</span>
-                        <span className="relative z-10 sm:hidden">{hasActiveSubscription ? '✓' : '✓'}</span>
-                        {!hasActiveSubscription && (
-                          <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                        )}
-                      </button>
-                    ) : null}
-                  </div>
-                )}
-
-                {/* User Menu - Show when logged in */}
-                {session?.user && (
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowUserMenu(!showUserMenu)}
-                      className="group flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2 rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105"
-                      style={{
-                        backgroundColor: showUserMenu ? `${primaryColor}15` : 'transparent',
-                        color: textColor,
-                      }}
-                    >
-                      {session.user.image ? (
-                        <div className="relative">
-                          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
-                          <img
-                            src={session.user.image}
-                            alt={session.user.name || 'User'}
-                            className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover transition-transform duration-300 group-hover:scale-110"
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center"
-                          style={{
-                            backgroundColor: `${primaryColor}15`,
-                            color: primaryColor,
-                          }}
-                        >
-                          <UserCircleIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-                        </div>
-                      )}
-                      <span className="hidden lg:block text-xs sm:text-sm font-semibold truncate max-w-[100px]">{session.user.name || 'User'}</span>
-                      <ChevronDownIcon className={`w-3 h-3 sm:w-4 sm:h-4 transition-all duration-300 ${showUserMenu ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {/* User Menu Dropdown */}
-                    <AnimatePresence>
-                      {showUserMenu && (
-                        <>
-                          <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-40 bg-black/5 backdrop-blur-[2px]"
-                            onClick={() => setShowUserMenu(false)}
-                          />
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                            className="absolute right-0 mt-3 w-80 max-h-[90vh] overflow-y-auto rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border z-50 scrollbar-hide"
-                            style={{
-                              backgroundColor: backgroundColor,
-                              borderColor: `${textColor}10`,
-                            }}
-                          >
-                            {/* User Info Header */}
-                            <div className="p-4 border-b" style={{ borderColor: `${textColor}15` }}>
-                              <div className="flex items-center gap-3 mb-2">
-                                {session.user.image ? (
-                                  <img
-                                    src={session.user.image}
-                                    alt={session.user.name || 'User'}
-                                    className="w-10 h-10 rounded-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-10 h-10 rounded-full flex items-center justify-center"
-                                    style={{
-                                      backgroundColor: `${primaryColor}15`,
-                                      color: primaryColor,
-                                    }}
-                                  >
-                                    <UserCircleIcon className="w-6 h-6" />
-                                  </div>
-                                )}
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-semibold text-sm truncate" style={{ color: textColor }}>
-                                    {session.user.name || 'User'}
-                                  </p>
-                                  <p className="text-xs truncate" style={{ color: `${textColor}70` }}>
-                                    {session.user.email}
-                                  </p>
-                                </div>
-                              </div>
-                              {isOwner && (
-                                <button
-                                  onClick={() => {
-                                    router.push(`/channel/${channel.slug}`);
-                                    setShowUserMenu(false);
-                                  }}
-                                  className="text-xs font-medium hover:underline"
-                                  style={{ color: primaryColor }}
-                                >
-                                  View your channel →
-                                </button>
-                              )}
-                            </div>
-
-                            {/* Menu Items - YouTube Style */}
-                            <div className="py-1">
-                              {/* Channel/Account Section */}
-                              {isOwner ? (
-                                <>
-                                  <button
-                                    onClick={() => {
-                                      router.push('/auth/dashboard');
-                                      setShowUserMenu(false);
-                                    }}
-                                    className="w-full flex items-center gap-4 px-4 py-2.5 hover:bg-opacity-10 transition-colors"
-                                    style={{ color: textColor }}
-                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${textColor}10`)}
-                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                                  >
-                                    <FolderIcon className="w-5 h-5" />
-                                    <span className="text-sm flex-1 text-left">My Channel</span>
-                                    <ArrowTopRightOnSquareIcon className="w-4 h-4 opacity-50" />
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      router.push('/auth/dashboard');
-                                      setShowUserMenu(false);
-                                    }}
-                                    className="w-full flex items-center gap-4 px-4 py-2.5 hover:bg-opacity-10 transition-colors"
-                                    style={{ color: textColor }}
-                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${textColor}10`)}
-                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                                  >
-                                    <UserCircleIcon className="w-5 h-5" />
-                                    <span className="text-sm flex-1 text-left">Profile & Details</span>
-                                  </button>
-                                </>
-                              ) : (
-                                <button
-                                  onClick={() => {
-                                    router.push('/');
                                     setShowUserMenu(false);
                                   }}
                                   className="w-full flex items-center gap-4 px-4 py-2.5 hover:bg-opacity-10 transition-colors"
@@ -1651,131 +1741,108 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${textColor}10`)}
                                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                                 >
-                                  <PlusIcon className="w-5 h-5" />
-                                  <span className="text-sm flex-1 text-left">Create my channel</span>
+                                  <Cog6ToothIcon className="w-5 h-5" />
+                                  <span className="text-sm flex-1 text-left">Settings</span>
                                   <ArrowTopRightOnSquareIcon className="w-4 h-4 opacity-50" />
                                 </button>
-                              )}
 
-                              {/* Divider */}
-                              <div className="h-px my-1" style={{ backgroundColor: `${textColor}15` }}></div>
+                                {/* Divider */}
+                                <div className="h-px my-1" style={{ backgroundColor: `${textColor}15` }}></div>
 
-                              {/* Settings Section */}
-                              <button
-                                onClick={() => {
-                                  if (isOwner) {
-                                    router.push('/auth/dashboard/settings');
-                                  } else {
-                                    router.push('/settings');
-                                  }
-                                  setShowUserMenu(false);
-                                }}
-                                className="w-full flex items-center gap-4 px-4 py-2.5 hover:bg-opacity-10 transition-colors"
-                                style={{ color: textColor }}
-                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${textColor}10`)}
-                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                              >
-                                <Cog6ToothIcon className="w-5 h-5" />
-                                <span className="text-sm flex-1 text-left">Settings</span>
-                                <ArrowTopRightOnSquareIcon className="w-4 h-4 opacity-50" />
-                              </button>
+                                {/* Subscriptions Section */}
+                                <div className="px-4 py-2">
+                                  <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: `${textColor}60` }}>
+                                    Subscriptions
+                                  </p>
+                                  <button
+                                    onClick={() => {
+                                      setShowMySubscriptions(true);
+                                      setShowUserMenu(false);
+                                    }}
+                                    className="w-full flex items-center gap-4 px-0 py-2 hover:bg-opacity-10 transition-colors rounded"
+                                    style={{ color: textColor }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${textColor}10`)}
+                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                  >
+                                    <CreditCardIcon className="w-5 h-5" />
+                                    <span className="text-sm flex-1 text-left">My Subscriptions</span>
+                                    {channelSubscriptions.length > 0 && (
+                                      <span className="px-2 py-0.5 rounded-full text-xs font-semibold"
+                                        style={{
+                                          backgroundColor: `${textColor}20`,
+                                          color: textColor,
+                                        }}
+                                      >
+                                        {channelSubscriptions.filter(s => s.status === 'ACTIVE' && new Date(s.endDate) > new Date()).length}
+                                      </span>
+                                    )}
+                                  </button>
+                                </div>
 
-                              {/* Divider */}
-                              <div className="h-px my-1" style={{ backgroundColor: `${textColor}15` }}></div>
+                                {/* Divider */}
+                                <div className="h-px my-1" style={{ backgroundColor: `${textColor}15` }}></div>
 
-                              {/* Subscriptions Section */}
-                              <div className="px-4 py-2">
-                                <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: `${textColor}60` }}>
-                                  Subscriptions
-                                </p>
+                                {/* Help & Support Section */}
+                                <div className="px-4 py-2">
+                                  <button
+                                    onClick={() => {
+                                      window.open('https://sellearndirect.com/docs', '_blank');
+                                      setShowUserMenu(false);
+                                    }}
+                                    className="w-full flex items-center gap-4 px-0 py-2 hover:bg-opacity-10 transition-colors rounded"
+                                    style={{ color: textColor }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${textColor}10`)}
+                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                  >
+                                    <QuestionMarkCircleIcon className="w-5 h-5" />
+                                    <span className="text-sm flex-1 text-left">Help</span>
+                                    <ArrowTopRightOnSquareIcon className="w-4 h-4 opacity-50" />
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      window.open('https://sellearndirect.com/contact', '_blank');
+                                      setShowUserMenu(false);
+                                    }}
+                                    className="w-full flex items-center gap-4 px-0 py-2 hover:bg-opacity-10 transition-colors rounded"
+                                    style={{ color: textColor }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${textColor}10`)}
+                                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                                  >
+                                    <InformationCircleIcon className="w-5 h-5" />
+                                    <span className="text-sm flex-1 text-left">Send feedback</span>
+                                    <ArrowTopRightOnSquareIcon className="w-4 h-4 opacity-50" />
+                                  </button>
+                                </div>
+
+                                {/* Divider */}
+                                <div className="h-px my-1" style={{ backgroundColor: `${textColor}15` }}></div>
+
+                                {/* Sign Out */}
                                 <button
                                   onClick={() => {
-                                    setShowMySubscriptions(true);
+                                    signOut({ callbackUrl: channelUrl });
                                     setShowUserMenu(false);
                                   }}
-                                  className="w-full flex items-center gap-4 px-0 py-2 hover:bg-opacity-10 transition-colors rounded"
-                                  style={{ color: textColor }}
-                                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${textColor}10`)}
+                                  className="w-full flex items-center gap-4 px-4 py-2.5 hover:bg-opacity-10 transition-colors"
+                                  style={{ color: '#ef4444' }}
+                                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#ef444410')}
                                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                                 >
-                                  <CreditCardIcon className="w-5 h-5" />
-                                  <span className="text-sm flex-1 text-left">My Subscriptions</span>
-                                  {channelSubscriptions.length > 0 && (
-                                    <span className="px-2 py-0.5 rounded-full text-xs font-semibold"
-                                      style={{
-                                        backgroundColor: `${textColor}20`,
-                                        color: textColor,
-                                      }}
-                                    >
-                                      {channelSubscriptions.filter(s => s.status === 'ACTIVE' && new Date(s.endDate) > new Date()).length}
-                                    </span>
-                                  )}
+                                  <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                                  <span className="text-sm flex-1 text-left">Sign out</span>
                                 </button>
                               </div>
-
-                              {/* Divider */}
-                              <div className="h-px my-1" style={{ backgroundColor: `${textColor}15` }}></div>
-
-                              {/* Help & Support Section */}
-                              <div className="px-4 py-2">
-                                <button
-                                  onClick={() => {
-                                    window.open('https://sellearndirect.com/docs', '_blank');
-                                    setShowUserMenu(false);
-                                  }}
-                                  className="w-full flex items-center gap-4 px-0 py-2 hover:bg-opacity-10 transition-colors rounded"
-                                  style={{ color: textColor }}
-                                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${textColor}10`)}
-                                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                                >
-                                  <QuestionMarkCircleIcon className="w-5 h-5" />
-                                  <span className="text-sm flex-1 text-left">Help</span>
-                                  <ArrowTopRightOnSquareIcon className="w-4 h-4 opacity-50" />
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    window.open('https://sellearndirect.com/contact', '_blank');
-                                    setShowUserMenu(false);
-                                  }}
-                                  className="w-full flex items-center gap-4 px-0 py-2 hover:bg-opacity-10 transition-colors rounded"
-                                  style={{ color: textColor }}
-                                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = `${textColor}10`)}
-                                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                                >
-                                  <InformationCircleIcon className="w-5 h-5" />
-                                  <span className="text-sm flex-1 text-left">Send feedback</span>
-                                  <ArrowTopRightOnSquareIcon className="w-4 h-4 opacity-50" />
-                                </button>
-                              </div>
-
-                              {/* Divider */}
-                              <div className="h-px my-1" style={{ backgroundColor: `${textColor}15` }}></div>
-
-                              {/* Sign Out */}
-                              <button
-                                onClick={() => {
-                                  signOut({ callbackUrl: channelUrl });
-                                  setShowUserMenu(false);
-                                }}
-                                className="w-full flex items-center gap-4 px-4 py-2.5 hover:bg-opacity-10 transition-colors"
-                                style={{ color: '#ef4444' }}
-                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#ef444410')}
-                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                              >
-                                <ArrowRightOnRectangleIcon className="w-5 h-5" />
-                                <span className="text-sm flex-1 text-left">Sign out</span>
-                              </button>
-                            </div>
-                          </motion.div>
-                        </>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                )}
+                            </motion.div>
+                          </>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </motion.header>
+          </motion.header>
+        )}
 
         {/* Mobile Menu Dropdown - Removed */}
         {false && (
@@ -1939,349 +2006,533 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
 
         {/* Main Content with Sidebar */}
         <div className="flex relative">
-          {/* YouTube-Style Sidebar - Hidden on mobile, shown on desktop */}
-          <aside
-            className={`hidden lg:block fixed lg:sticky top-20 left-0 h-[calc(100vh-5rem)] z-40 border-r transition-all duration-500 overflow-y-auto scrollbar-hide w-64`}
-            style={{
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-              backgroundColor: backgroundColor,
-              borderColor: `${textColor}0D`,
-              boxShadow: `4px 0 24px rgba(0, 0, 0, 0.02)`,
-            }}
-          >
-            <div className="w-64 p-2">
-              {/* Main Navigation */}
-              <nav className="space-y-1">
-                <button
-                  onClick={() => {
-                    setActiveSidebarItem('home');
-                    const productsSection = document.getElementById('products');
-                    if (productsSection) {
-                      productsSection.scrollIntoView({ behavior: 'smooth' });
-                    }
-                    setSidebarOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'home'
-                    ? 'shadow-inner'
-                    : 'hover:bg-gray-50/50'
-                    }`}
-                  style={{
-                    color: activeSidebarItem === 'home' ? textColor : `${textColor}CC`,
-                    backgroundColor: activeSidebarItem === 'home' ? `${primaryColor}0D` : 'transparent',
-                  }}
-                >
-                  <HomeIcon className="w-6 h-6 flex-shrink-0" />
-                  <span
-                    className="text-sm"
-                    style={{
-                      fontFamily: bodyFont,
-                      letterSpacing: '-0.01em',
-                    }}
-                  >
-                    Home
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setActiveSidebarItem('explore');
-                    setSidebarOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'explore'
-                    ? 'shadow-inner'
-                    : 'hover:bg-gray-50/50'
-                    }`}
-                  style={{
-                    color: activeSidebarItem === 'explore' ? textColor : `${textColor}CC`,
-                    backgroundColor: activeSidebarItem === 'explore' ? `${primaryColor}0D` : 'transparent',
-                  }}
-                >
-                  <FireIcon className="w-6 h-6 flex-shrink-0" />
-                  <span className="text-sm">Explore</span>
-                </button>
-
-                {session?.user && (
-                  <>
-                    <button
-                      onClick={() => {
-                        setActiveSidebarItem('subscriptions');
-                        setSidebarOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'subscriptions'
-                        ? 'shadow-inner'
-                        : 'hover:bg-gray-50/50'
-                        }`}
-                      style={{
-                        color: activeSidebarItem === 'subscriptions' ? textColor : `${textColor}CC`,
-                        backgroundColor: activeSidebarItem === 'subscriptions' ? `${primaryColor}0D` : 'transparent',
-                      }}
-                    >
-                      <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
-                      <span className="text-sm">Subscriptions</span>
-                    </button>
-                  </>
-                )}
-              </nav>
-
-              {/* Divider */}
-              <div className="my-4 mx-4 border-t" style={{ borderColor: `${textColor}0D` }} />
-
-              {/* Library Section */}
-              {session?.user && (
-                <>
-                  <div className="px-4 py-3">
-                    <h3
-                      className="text-[10px] font-bold uppercase tracking-[0.15em]"
-                      style={{
-                        color: `${textColor}60`,
-                        fontFamily: headingFont,
-                      }}
-                    >
-                      Library
-                    </h3>
-                  </div>
-                  <nav className="space-y-1">
-                    <button
-                      onClick={() => {
-                        setActiveSidebarItem('history');
-                        setSidebarOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'history'
-                        ? 'shadow-inner'
-                        : 'hover:bg-gray-50/50'
-                        }`}
-                      style={{
-                        color: activeSidebarItem === 'history' ? textColor : `${textColor}CC`,
-                        backgroundColor: activeSidebarItem === 'history' ? `${primaryColor}0D` : 'transparent',
-                      }}
-                    >
-                      <ClockIcon className="w-6 h-6 flex-shrink-0" />
-                      <span className="text-sm font-medium">History</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setActiveSidebarItem('liked');
-                        setSidebarOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'liked'
-                        ? 'shadow-inner'
-                        : 'hover:bg-gray-50/50'
-                        }`}
-                      style={{
-                        color: activeSidebarItem === 'liked' ? textColor : `${textColor}CC`,
-                        backgroundColor: activeSidebarItem === 'liked' ? `${primaryColor}0D` : 'transparent',
-                      }}
-                    >
-                      <HeartIcon className="w-6 h-6 flex-shrink-0" />
-                      <span className="text-sm font-medium">Liked Products</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setActiveSidebarItem('saved');
-                        setSidebarOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'saved'
-                        ? 'shadow-inner'
-                        : 'hover:bg-gray-50/50'
-                        }`}
-                      style={{
-                        color: activeSidebarItem === 'saved' ? textColor : `${textColor}CC`,
-                        backgroundColor: activeSidebarItem === 'saved' ? `${primaryColor}0D` : 'transparent',
-                      }}
-                    >
-                      <BookmarkIcon className="w-6 h-6 flex-shrink-0" />
-                      <span className="text-sm font-medium">Saved</span>
-                    </button>
-
-                    {/* Create Playlist Button */}
-                    <button
-                      onClick={() => {
-                        setShowCreatePlaylistModal(true);
-                        setSidebarOpen(false);
-                      }}
-                      className="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-gray-50/50 border border-dashed border-gray-300/50"
-                      style={{
-                        color: `${textColor}CC`,
-                      }}
-                    >
-                      <PlusIcon className="w-6 h-6 flex-shrink-0" />
-                      <span className="text-sm font-medium">Create Playlist</span>
-                    </button>
-
-                    {/* User's Playlists */}
-                    {playlists.length > 0 && (
-                      <div className="mt-2 space-y-1 max-h-64 overflow-y-auto">
-                        {playlists.map((playlist) => (
-                          <button
-                            key={playlist.id}
-                            onClick={() => {
-                              setSelectedPlaylist(playlist);
-                              setActiveSidebarItem(`playlist-${playlist.id}`);
-                              setSidebarOpen(false);
-                            }}
-                            className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === `playlist-${playlist.id}`
-                              ? 'shadow-inner'
-                              : 'hover:bg-gray-50/50'
-                              }`}
-                            style={{
-                              color: activeSidebarItem === `playlist-${playlist.id}` ? textColor : `${textColor}CC`,
-                              backgroundColor: activeSidebarItem === `playlist-${playlist.id}` ? `${primaryColor}0D` : 'transparent',
-                            }}
-                          >
-                            <FolderIcon className="w-6 h-6 flex-shrink-0" />
-                            <span className="text-sm font-medium truncate flex-1 text-left">{playlist.name}</span>
-                            <span className="text-xs opacity-70">({playlist.items?.length || 0})</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </nav>
-
-                  {/* Divider */}
-                  <div className="my-4 mx-4 border-t" style={{ borderColor: `${textColor}0D` }} />
-                </>
-              )}
-
-              {/* Explore Categories */}
-              <div className="px-4 py-2">
-                <h3
-                  className="text-xs font-semibold uppercase tracking-wider"
-                  style={{
-                    color: `${textColor}80`,
-                    fontFamily: bodyFont,
-                    letterSpacing: '0.1em',
-                    fontWeight: 600,
-                  }}
-                >
-                  Explore
-                </h3>
-              </div>
-              <nav className="space-y-1">
-                <button
-                  onClick={() => {
-                    setActiveSidebarItem('music');
-                    setSidebarOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'music'
-                    ? 'bg-gray-100 font-semibold'
-                    : 'hover:bg-gray-50'
-                    }`}
-                  style={{
-                    color: activeSidebarItem === 'music' ? textColor : `${textColor}CC`,
-                  }}
-                >
-                  <MusicalNoteIcon className="w-6 h-6 flex-shrink-0" />
-                  <span className="text-sm">Music</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setActiveSidebarItem('gaming');
-                    setSidebarOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'gaming'
-                    ? 'bg-gray-100 font-semibold'
-                    : 'hover:bg-gray-50'
-                    }`}
-                  style={{
-                    color: activeSidebarItem === 'gaming' ? textColor : `${textColor}CC`,
-                  }}
-                >
-                  <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-sm">Gaming</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setActiveSidebarItem('news');
-                    setSidebarOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'news'
-                    ? 'bg-gray-100 font-semibold'
-                    : 'hover:bg-gray-50'
-                    }`}
-                  style={{
-                    color: activeSidebarItem === 'news' ? textColor : `${textColor}CC`,
-                  }}
-                >
-                  <NewspaperIcon className="w-6 h-6 flex-shrink-0" />
-                  <span className="text-sm">News</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setActiveSidebarItem('sports');
-                    setSidebarOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'sports'
-                    ? 'bg-gray-100 font-semibold'
-                    : 'hover:bg-gray-50'
-                    }`}
-                  style={{
-                    color: activeSidebarItem === 'sports' ? textColor : `${textColor}CC`,
-                  }}
-                >
-                  <TrophyIcon className="w-6 h-6 flex-shrink-0" />
-                  <span className="text-sm">Sports</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setActiveSidebarItem('learning');
-                    setSidebarOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'learning'
-                    ? 'bg-gray-100 font-semibold'
-                    : 'hover:bg-gray-50'
-                    }`}
-                  style={{
-                    color: activeSidebarItem === 'learning' ? textColor : `${textColor}CC`,
-                  }}
-                >
-                  <LightBulbIcon className="w-6 h-6 flex-shrink-0" />
-                  <span className="text-sm">Learning</span>
-                </button>
-              </nav>
-
-              {/* Settings */}
-              {session?.user && (
-                <>
-                  <div className="my-2 border-t" style={{ borderColor: `${textColor}15` }} />
+          {/* YouTube-Style Sidebar - Hidden to prevent duplicate with MainLayout sidebar */}
+          {false && (
+            <aside
+              className={`hidden lg:block fixed lg:sticky top-20 left-0 h-[calc(100vh-5rem)] z-40 border-r transition-all duration-500 overflow-y-auto scrollbar-hide w-64`}
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                backgroundColor: backgroundColor,
+                borderColor: `${textColor}0D`,
+                boxShadow: `4px 0 24px rgba(0, 0, 0, 0.02)`,
+              }}
+            >
+              <div className="w-64 p-2">
+                {/* Main Navigation */}
+                <nav className="space-y-1">
                   <button
                     onClick={() => {
-                      // If user is channel owner, go to dashboard settings
-                      // Otherwise, go to viewer settings page
-                      if (isOwner) {
-                        router.push('/auth/dashboard/settings');
-                      } else {
-                        router.push('/settings');
+                      setActiveSidebarItem('home');
+                      const productsSection = document.getElementById('products');
+                      if (productsSection) {
+                        productsSection.scrollIntoView({ behavior: 'smooth' });
                       }
                       setSidebarOpen(false);
                     }}
-                    className="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-gray-50"
-                    style={{ color: `${textColor}CC` }}
+                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'home'
+                      ? 'shadow-inner'
+                      : 'hover:bg-gray-50/50'
+                      }`}
+                    style={{
+                      color: activeSidebarItem === 'home' ? textColor : `${textColor}CC`,
+                      backgroundColor: activeSidebarItem === 'home' ? `${primaryColor}0D` : 'transparent',
+                    }}
                   >
-                    <Cog6ToothIcon className="w-6 h-6 flex-shrink-0" />
-                    <span className="text-sm">Settings</span>
+                    <HomeIcon className="w-6 h-6 flex-shrink-0" />
+                    <span
+                      className="text-sm"
+                      style={{
+                        fontFamily: bodyFont,
+                        letterSpacing: '-0.01em',
+                      }}
+                    >
+                      Home
+                    </span>
                   </button>
-                </>
-              )}
-            </div>
-          </aside>
+
+                  <button
+                    onClick={() => {
+                      setActiveSidebarItem('explore');
+                      setSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'explore'
+                      ? 'shadow-inner'
+                      : 'hover:bg-gray-50/50'
+                      }`}
+                    style={{
+                      color: activeSidebarItem === 'explore' ? textColor : `${textColor}CC`,
+                      backgroundColor: activeSidebarItem === 'explore' ? `${primaryColor}0D` : 'transparent',
+                    }}
+                  >
+                    <FireIcon className="w-6 h-6 flex-shrink-0" />
+                    <span className="text-sm">Explore</span>
+                  </button>
+
+                  {session?.user && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setActiveSidebarItem('subscriptions');
+                          setSidebarOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'subscriptions'
+                          ? 'shadow-inner'
+                          : 'hover:bg-gray-50/50'
+                          }`}
+                        style={{
+                          color: activeSidebarItem === 'subscriptions' ? textColor : `${textColor}CC`,
+                          backgroundColor: activeSidebarItem === 'subscriptions' ? `${primaryColor}0D` : 'transparent',
+                        }}
+                      >
+                        <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <span className="text-sm">Subscriptions</span>
+                      </button>
+                    </>
+                  )}
+                </nav>
+
+                {/* Divider */}
+                <div className="my-4 mx-4 border-t" style={{ borderColor: `${textColor}0D` }} />
+
+                {/* Library Section */}
+                {session?.user && (
+                  <>
+                    <div className="px-4 py-3">
+                      <h3
+                        className="text-[10px] font-bold uppercase tracking-[0.15em]"
+                        style={{
+                          color: `${textColor}60`,
+                          fontFamily: headingFont,
+                        }}
+                      >
+                        Library
+                      </h3>
+                    </div>
+                    <nav className="space-y-1">
+                      <button
+                        onClick={() => {
+                          setActiveSidebarItem('history');
+                          setSidebarOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'history'
+                          ? 'shadow-inner'
+                          : 'hover:bg-gray-50/50'
+                          }`}
+                        style={{
+                          color: activeSidebarItem === 'history' ? textColor : `${textColor}CC`,
+                          backgroundColor: activeSidebarItem === 'history' ? `${primaryColor}0D` : 'transparent',
+                        }}
+                      >
+                        <ClockIcon className="w-6 h-6 flex-shrink-0" />
+                        <span className="text-sm font-medium">History</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setActiveSidebarItem('liked');
+                          setSidebarOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'liked'
+                          ? 'shadow-inner'
+                          : 'hover:bg-gray-50/50'
+                          }`}
+                        style={{
+                          color: activeSidebarItem === 'liked' ? textColor : `${textColor}CC`,
+                          backgroundColor: activeSidebarItem === 'liked' ? `${primaryColor}0D` : 'transparent',
+                        }}
+                      >
+                        <HeartIcon className="w-6 h-6 flex-shrink-0" />
+                        <span className="text-sm font-medium">Liked Products</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setActiveSidebarItem('saved');
+                          setSidebarOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'saved'
+                          ? 'shadow-inner'
+                          : 'hover:bg-gray-50/50'
+                          }`}
+                        style={{
+                          color: activeSidebarItem === 'saved' ? textColor : `${textColor}CC`,
+                          backgroundColor: activeSidebarItem === 'saved' ? `${primaryColor}0D` : 'transparent',
+                        }}
+                      >
+                        <BookmarkIcon className="w-6 h-6 flex-shrink-0" />
+                        <span className="text-sm font-medium">Saved</span>
+                      </button>
+
+                      {/* Create Playlist Button */}
+                      <button
+                        onClick={() => {
+                          setShowCreatePlaylistModal(true);
+                          setSidebarOpen(false);
+                        }}
+                        className="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-gray-50/50 border border-dashed border-gray-300/50"
+                        style={{
+                          color: `${textColor}CC`,
+                        }}
+                      >
+                        <PlusIcon className="w-6 h-6 flex-shrink-0" />
+                        <span className="text-sm font-medium">Create Playlist</span>
+                      </button>
+
+                      {/* User's Playlists */}
+                      {playlists.length > 0 && (
+                        <div className="mt-2 space-y-1 max-h-64 overflow-y-auto">
+                          {playlists.map((playlist) => (
+                            <button
+                              key={playlist.id}
+                              onClick={() => {
+                                setSelectedPlaylist(playlist);
+                                setActiveSidebarItem(`playlist-${playlist.id}`);
+                                setSidebarOpen(false);
+                              }}
+                              className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === `playlist-${playlist.id}`
+                                ? 'shadow-inner'
+                                : 'hover:bg-gray-50/50'
+                                }`}
+                              style={{
+                                color: activeSidebarItem === `playlist-${playlist.id}` ? textColor : `${textColor}CC`,
+                                backgroundColor: activeSidebarItem === `playlist-${playlist.id}` ? `${primaryColor}0D` : 'transparent',
+                              }}
+                            >
+                              <FolderIcon className="w-6 h-6 flex-shrink-0" />
+                              <span className="text-sm font-medium truncate flex-1 text-left">{playlist.name}</span>
+                              <span className="text-xs opacity-70">({playlist.items?.length || 0})</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </nav>
+
+                    {/* Divider */}
+                    <div className="my-4 mx-4 border-t" style={{ borderColor: `${textColor}0D` }} />
+                  </>
+                )}
+
+                {/* Explore Categories */}
+                <div className="px-4 py-2">
+                  <h3
+                    className="text-xs font-semibold uppercase tracking-wider"
+                    style={{
+                      color: `${textColor}80`,
+                      fontFamily: bodyFont,
+                      letterSpacing: '0.1em',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Explore
+                  </h3>
+                </div>
+                <nav className="space-y-1">
+                  <button
+                    onClick={() => {
+                      setActiveSidebarItem('music');
+                      setSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'music'
+                      ? 'bg-gray-100 font-semibold'
+                      : 'hover:bg-gray-50'
+                      }`}
+                    style={{
+                      color: activeSidebarItem === 'music' ? textColor : `${textColor}CC`,
+                    }}
+                  >
+                    <MusicalNoteIcon className="w-6 h-6 flex-shrink-0" />
+                    <span className="text-sm">Music</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveSidebarItem('gaming');
+                      setSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'gaming'
+                      ? 'bg-gray-100 font-semibold'
+                      : 'hover:bg-gray-50'
+                      }`}
+                    style={{
+                      color: activeSidebarItem === 'gaming' ? textColor : `${textColor}CC`,
+                    }}
+                  >
+                    <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm">Gaming</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveSidebarItem('news');
+                      setSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'news'
+                      ? 'bg-gray-100 font-semibold'
+                      : 'hover:bg-gray-50'
+                      }`}
+                    style={{
+                      color: activeSidebarItem === 'news' ? textColor : `${textColor}CC`,
+                    }}
+                  >
+                    <NewspaperIcon className="w-6 h-6 flex-shrink-0" />
+                    <span className="text-sm">News</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveSidebarItem('sports');
+                      setSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'sports'
+                      ? 'bg-gray-100 font-semibold'
+                      : 'hover:bg-gray-50'
+                      }`}
+                    style={{
+                      color: activeSidebarItem === 'sports' ? textColor : `${textColor}CC`,
+                    }}
+                  >
+                    <TrophyIcon className="w-6 h-6 flex-shrink-0" />
+                    <span className="text-sm">Sports</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setActiveSidebarItem('learning');
+                      setSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'learning'
+                      ? 'bg-gray-100 font-semibold'
+                      : 'hover:bg-gray-50'
+                      }`}
+                    style={{
+                      color: activeSidebarItem === 'learning' ? textColor : `${textColor}CC`,
+                    }}
+                  >
+                    <LightBulbIcon className="w-6 h-6 flex-shrink-0" />
+                    <span className="text-sm">Learning</span>
+                  </button>
+                </nav>
+
+                {/* Settings */}
+                {session?.user && (
+                  <>
+                    <div className="my-2 border-t" style={{ borderColor: `${textColor}15` }} />
+                    <button
+                      onClick={() => {
+                        // If user is channel owner, go to dashboard settings
+                        // Otherwise, go to viewer settings page
+                        if (isOwner) {
+                          router.push('/auth/dashboard/settings');
+                        } else {
+                          router.push('/settings');
+                        }
+                        setSidebarOpen(false);
+                      }}
+                      className="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-gray-50"
+                      style={{ color: `${textColor}CC` }}
+                    >
+                      <Cog6ToothIcon className="w-6 h-6 flex-shrink-0" />
+                      <span className="text-sm">Settings</span>
+                    </button>
+                  </>
+                )}
+              </div>
+            </aside>
+          )}
 
 
           {/* Main Content Area */}
           <div className="flex-1 min-w-0">
+
+            {/* Tab Content */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+              {/* HOME TAB */}
+              {activeTab === 'home' && (
+                <div className="space-y-12">
+                  {/* Featured Section (if any) could go here */}
+
+                  {/* Latest Products */}
+                  <div>
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-xl font-bold text-gray-900">Latest Products</h2>
+                      {allProducts.length > 8 && (
+                        <button
+                          onClick={() => setActiveTab('videos')}
+                          className="text-sm font-medium text-gray-600 hover:text-gray-900"
+                        >
+                          View all
+                        </button>
+                      )}
+                    </div>
+
+                    {allProducts.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {allProducts.slice(0, 8).map((product: any) => (
+                          <div key={product.id} className="group cursor-pointer" onClick={() => router.push(`/channel/${channel.slug}/products/${product.id}`)}>
+                            <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3">
+                              {product.thumbnail ? (
+                                <img
+                                  src={product.thumbnail}
+                                  alt={product.title}
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">
+                                  <VideoCameraIcon className="w-10 h-10" />
+                                </div>
+                              )}
+                              {/* Price Badge */}
+                              <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-md">
+                                {product.price > 0 ? formatPrice(product.price, product.currency) : 'Free'}
+                              </div>
+                            </div>
+                            <h3 className="font-bold text-gray-900 line-clamp-2 mb-1 group-hover:text-primary transition-colors">
+                              {product.title}
+                            </h3>
+                            <div className="flex items-center text-sm text-gray-500">
+                              <span>{product.category || 'Product'}</span>
+                              <span className="mx-1">•</span>
+                              <span>{formatViewCount(product.viewCount || 0)} views</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                        <p className="text-gray-500">No products available yet.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* VIDEOS / PRODUCTS TAB */}
+              {activeTab === 'videos' && (
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">All Products</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {allProducts.map((product: any) => (
+                      <div key={product.id} className="group cursor-pointer" onClick={() => router.push(`/channel/${channel.slug}/products/${product.id}`)}>
+                        <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3">
+                          {product.thumbnail ? (
+                            <img
+                              src={product.thumbnail}
+                              alt={product.title}
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">
+                              <VideoCameraIcon className="w-10 h-10" />
+                            </div>
+                          )}
+                          <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-md">
+                            {product.price > 0 ? formatPrice(product.price, product.currency) : 'Free'}
+                          </div>
+                        </div>
+                        <h3 className="font-bold text-gray-900 line-clamp-2 mb-1 group-hover:text-primary transition-colors">
+                          {product.title}
+                        </h3>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <span>{product.category || 'Product'}</span>
+                          <span className="mx-1">•</span>
+                          <span>{formatViewCount(product.viewCount || 0)} views</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* PLAYLISTS TAB */}
+              {activeTab === 'playlists' && (
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-6">Playlists</h2>
+                  {playlists.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {playlists.map((playlist) => (
+                        <div key={playlist.id} className="group cursor-pointer">
+                          <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                            <span className="text-white font-bold text-lg">{playlist.items?.length || 0}</span>
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
+                            <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-black/20 backdrop-blur-sm flex items-center justify-center">
+                              <ListBulletIcon className="w-8 h-8 text-white" />
+                            </div>
+                          </div>
+                          <h3 className="font-bold text-gray-900 line-clamp-1 mb-1">{playlist.name}</h3>
+                          <p className="text-sm text-gray-500">Updated today</p>
+                          <p className="text-xs text-blue-600 font-medium mt-1">View full playlist</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                      <p className="text-gray-500">No playlists created.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* COMMUNITY TAB */}
+              {activeTab === 'community' && (
+                <div className="text-center py-20">
+                  <div className="inline-block p-4 bg-gray-100 rounded-full mb-4 text-gray-400">
+                    <UserCircleIcon className="w-12 h-12" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">Community posts coming soon</h3>
+                  <p className="text-gray-500 mt-2">Interact with channel subscribers here.</p>
+                </div>
+              )}
+
+              {/* ABOUT TAB */}
+              {activeTab === 'about' && (
+                <div className="max-w-4xl mx-auto">
+                  <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm">
+                    <h2 className="text-xl font-bold text-gray-900 mb-4">Description</h2>
+                    <p className="whitespace-pre-wrap text-gray-700 leading-relaxed text-base">
+                      {channel.description || 'No description available.'}
+                    </p>
+
+                    <div className="mt-8 pt-8 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-3 gap-8">
+                      <div>
+                        <h3 className="font-semibold mb-2 text-gray-900">Stats</h3>
+                        <div className="space-y-2 text-sm text-gray-600">
+                          <p>Joined {new Date(channel.createdAt).toLocaleDateString()}</p>
+                          <p>{formatViewCount(allProducts.reduce((acc: number, p: any) => acc + (p.viewCount || 0), 0))} views</p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className="font-semibold mb-2 text-gray-900">Details</h3>
+                        <div className="space-y-2 text-sm text-gray-600">
+                          <p>Business inquiries: <a href={`mailto:${channel.user.email}`} className="text-blue-600 hover:underline">{channel.user.email}</a></p>
+                          <p>Location: United States</p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className="font-semibold mb-2 text-gray-900">Links</h3>
+                        <div className="space-y-2 text-sm">
+                          {/* Mock links */}
+                          <p><a href="#" className="text-blue-600 hover:underline">Website</a></p>
+                          <p><a href="#" className="text-blue-600 hover:underline">Twitter</a></p>
+                          <p><a href="#" className="text-blue-600 hover:underline">Instagram</a></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Premium Hero Section - SaaS Marketplace Design */}
-            {isSectionVisible('hero') && (
+            {false && isSectionVisible('hero') && (
               <section id="features" className="relative min-h-screen flex flex-col scroll-mt-20">
                 {/* Header with Title */}
                 <div className="relative z-20 pt-8 sm:pt-12 pb-6 sm:pb-8">
@@ -2497,7 +2748,7 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
 
 
             {/* Subscriptions View */}
-            {activeSidebarItem === 'subscriptions' && session?.user && (
+            {false && activeSidebarItem === 'subscriptions' && session?.user && (
               <section className="px-4 sm:px-6 md:px-8 lg:px-12 py-8 sm:py-12">
                 <div className="max-w-7xl mx-auto">
                   <h2
@@ -2553,7 +2804,7 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
             )}
 
             {/* All Products Section */}
-            {isSectionVisible('products') && (
+            {false && isSectionVisible('products') && (
               <section id="products" className="py-8 sm:py-12 bg-white scroll-mt-20">
                 <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 max-w-7xl mx-auto">
 
@@ -4012,6 +4263,20 @@ export default function TemplateRenderer({ channel }: TemplateRendererProps) {
                 </button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {isEditing && (
+                  <div
+                    onClick={onAddProduct}
+                    className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-dashed border-gray-300 hover:border-purple-500 cursor-pointer min-h-[300px] flex flex-col items-center justify-center gap-4 hover:bg-gray-50"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <PlusIcon className="w-8 h-8 text-purple-600" />
+                    </div>
+                    <div className="text-center">
+                      <h3 className="text-lg font-bold text-gray-900">Add New Product</h3>
+                      <p className="text-sm text-gray-500 mt-1">Create a new product for your channel</p>
+                    </div>
+                  </div>
+                )}
                 {channel.products.map((product: any, index: number) => (
                   <div
                     key={product.id || index}

@@ -40,7 +40,7 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -105,7 +105,41 @@ export async function POST(
         published,
         status: 'ACTIVE',
       },
+      include: {
+        channel: true
+      }
     });
+
+    // Notify subscribers asynchronously
+    // In a real app, this should be a background job (e.g., BullMQ, Inngest)
+    if (published) {
+      (async () => {
+        try {
+          const subscribers = await prisma.channelSubscription.findMany({
+            where: {
+              channelId: params.channelId,
+              status: 'ACTIVE'
+            },
+            select: { userId: true }
+          });
+
+          if (subscribers.length > 0) {
+            await prisma.userNotification.createMany({
+              data: subscribers.map(sub => ({
+                userId: sub.userId,
+                title: `New from ${product.channel.name}`,
+                message: `Check out "${product.title}"`,
+                type: 'INFO',
+                category: 'COMMUNITY',
+                metadata: { productId: product.id, channelId: product.channelId }
+              }))
+            });
+          }
+        } catch (err) {
+          console.error('Failed to send notifications', err);
+        }
+      })();
+    }
 
     return NextResponse.json({
       success: true,

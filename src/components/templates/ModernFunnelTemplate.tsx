@@ -43,7 +43,8 @@ export default function ModernFunnelTemplate({
     isPreview = false,
     email,
     onEmailChange,
-}: ModernFunnelTemplateProps) {
+    isSubscribed = false, // Added prop
+}: ModernFunnelTemplateProps & { isSubscribed?: boolean }) {
     const [localEmail, setLocalEmail] = React.useState('');
     const effectiveEmail = email !== undefined ? email : localEmail;
 
@@ -202,8 +203,8 @@ export default function ModernFunnelTemplate({
                             </div>
                         )}
 
-                        {/* Pricing */}
-                        <div className="border-t border-b border-gray-200 py-3">
+                        {/* Pricing - HIDDEN per user request */}
+                        {/* <div className="border-t border-b border-gray-200 py-3">
                             <div className="flex items-baseline gap-2">
                                 <span className="text-3xl @lg:text-4xl font-bold text-red-600">₹{productDetails.price}</span>
                                 {customizations.discountPercent > 0 && (
@@ -213,10 +214,11 @@ export default function ModernFunnelTemplate({
                                     </>
                                 )}
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Buy Section */}
                         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3">
+                            {/* Email Input - Only show if not free/subscribed? Kept for now as it aids lead gen */}
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Email Address</label>
                                 <div className="relative">
@@ -235,7 +237,7 @@ export default function ModernFunnelTemplate({
                                 className="w-full py-3 px-6 text-base font-bold rounded-lg shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
                                 style={{ backgroundColor: buttonColor, color: '#000' }}
                             >
-                                {cta}
+                                {productDetails.price === 0 ? "Download Now" : (cta === 'Buy Now' ? 'Subscribe' : cta)}
                                 <ArrowRightIcon className="w-5 h-5" />
                             </button>
                             <div className="flex items-center justify-center gap-4 text-xs text-gray-600">
@@ -327,14 +329,27 @@ export default function ModernFunnelTemplate({
                                     <div className="p-3">
                                         <h3 className="font-semibold text-sm line-clamp-2 mb-1">{product.name || 'Digital Product'}</h3>
                                         <div className="flex items-baseline gap-2">
-                                            <p className="text-lg font-bold text-purple-600">
-                                                ₹{product.product?.price || product.price || 0}
-                                            </p>
-                                            {product.customizations?.discountPercent > 0 && (
+                                            {/* Logic: If free -> Show Free. If paid -> Show nothing or 'Subscribe' button context (here just hiding price as requested) */}
+                                            {(product.product?.price === 0 || product.price === 0) ? (
+                                                <p className="text-lg font-bold text-green-600">Free</p>
+                                            ) : (
+                                                // User asked to just show "Free" or option to subscribe. 
+                                                // Use a small subscribe button or badge?
+                                                // "in below cards i do not want to shjow the price , jsut show free . or option to subscribe"
+                                                <div className="flex items-center gap-2 w-full">
+                                                    <span className="hidden">Subscribe</span>
+                                                    {/* We can't put a button inside the main Link (invalid HTML).
+                                                        The whole card is a link to the product page where they can subscribe.
+                                                        So we just label it appropriately. */}
+                                                    <p className="text-sm font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded">Subscribe</p>
+                                                </div>
+                                            )}
+                                            {/* Hide Discount info if price is hidden */}
+                                            {/* {product.customizations?.discountPercent > 0 && (
                                                 <p className="text-xs text-gray-500 line-through">
                                                     ₹{Math.round((product.product?.price || product.price || 0) * (1 + product.customizations.discountPercent / 100))}
                                                 </p>
-                                            )}
+                                            )} */}
                                         </div>
                                     </div>
                                 </Link>
