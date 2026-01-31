@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 /**
  * Newsletter Prompt
- * Encourages users to subscribe for exclusive content and offers
+ * Non-intrusive bottom banner that encourages users to subscribe
  */
 export default function NewsletterPrompt() {
   const [show, setShow] = useState(false);
@@ -19,13 +19,13 @@ export default function NewsletterPrompt() {
     const checkSubscription = async () => {
       const hasSubscribed = localStorage.getItem('newsletter_subscribed');
       const savedEmail = localStorage.getItem('newsletter_email');
-      
+
       // If we have a saved email, verify it's still subscribed
       if (savedEmail && hasSubscribed) {
         try {
           const response = await fetch(`/api/newsletter/subscribe?email=${encodeURIComponent(savedEmail)}`);
           const data = await response.json();
-          
+
           if (data.subscribed) {
             // Still subscribed, don't show popup
             return;
@@ -38,7 +38,7 @@ export default function NewsletterPrompt() {
           console.error('Error checking subscription:', error);
         }
       }
-      
+
       // Show after 45 seconds if user hasn't subscribed
       const timer = setTimeout(() => {
         if (!hasSubscribed) {
@@ -76,10 +76,10 @@ export default function NewsletterPrompt() {
         // Save to localStorage to prevent showing popup again
         localStorage.setItem('newsletter_subscribed', 'true');
         localStorage.setItem('newsletter_email', email.trim());
-        
+
         setSubmitted(true);
         setSubmitting(false);
-        
+
         // Hide after 3 seconds
         setTimeout(() => {
           setShow(false);
@@ -96,77 +96,91 @@ export default function NewsletterPrompt() {
     }
   };
 
+  const handleDismiss = () => {
+    setShow(false);
+    // Remember dismissal for this session
+    sessionStorage.setItem('newsletter_dismissed', 'true');
+  };
+
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative animate-[fadeIn_0.3s_ease-in-out,zoomIn_0.3s_ease-in-out]">
-        <button
-          onClick={() => setShow(false)}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-        >
-          <XMarkIcon className="h-5 w-5" />
-        </button>
-
-        {!submitted ? (
-          <>
-            <div className="text-center mb-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mb-3">
-                <EnvelopeIcon className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                Get Exclusive Tips & Updates! 📧
-              </h3>
-              <p className="text-sm text-gray-600">
-                Join our newsletter and get:
-              </p>
-              <ul className="text-sm text-gray-600 mt-2 space-y-1">
-                <li className="flex items-center justify-center gap-2">
-                  <SparklesIcon className="h-4 w-4 text-purple-600" />
-                  <span>Weekly sales tips</span>
-                </li>
-                <li className="flex items-center justify-center gap-2">
-                  <SparklesIcon className="h-4 w-4 text-purple-600" />
-                  <span>Exclusive discounts</span>
-                </li>
-                <li className="flex items-center justify-center gap-2">
-                  <SparklesIcon className="h-4 w-4 text-purple-600" />
-                  <span>New feature announcements</span>
-                </li>
-              </ul>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-black"
-              />
+    <div
+      className={`fixed bottom-0 left-0 right-0 z-[9999] flex justify-center px-4 pb-4 pointer-events-none transition-all duration-500 ${show ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
+        }`}
+    >
+      <div className="max-w-4xl w-full pointer-events-auto">
+        <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl border border-white/20 animate-in slide-in-from-bottom duration-500">
+          {!submitted ? (
+            <div className="relative p-4 sm:p-6">
+              {/* Close Button */}
               <button
-                type="submit"
-                disabled={submitting}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg font-bold hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50"
+                onClick={handleDismiss}
+                className="absolute top-3 right-3 text-white/80 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-lg"
+                aria-label="Dismiss"
               >
-                {submitting ? 'Subscribing...' : 'Subscribe Now'}
+                <XMarkIcon className="h-5 w-5" />
               </button>
-            </form>
 
-            <p className="text-xs text-gray-500 text-center mt-3">
-              No spam, unsubscribe anytime
-            </p>
-          </>
-        ) : (
-          <div className="text-center py-4">
-            <div className="text-4xl mb-3">🎉</div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Thank You!</h3>
-            <p className="text-sm text-gray-600">
-              Check your email for exclusive content and offers!
-            </p>
-          </div>
-        )}
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+                {/* Icon */}
+                <div className="flex-shrink-0">
+                  <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                    <EnvelopeIcon className="h-7 w-7 text-white" />
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 text-center sm:text-left">
+                  <h3 className="text-lg sm:text-xl font-bold text-white mb-1">
+                    🎉 Get Exclusive Tips & Updates!
+                  </h3>
+                  <p className="text-sm text-white/90 mb-0">
+                    Weekly sales tips • Exclusive discounts • New features
+                  </p>
+                </div>
+
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="flex-shrink-0 w-full sm:w-auto">
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email"
+                      required
+                      className="px-4 py-2.5 rounded-xl border-2 border-white/30 bg-white/10 backdrop-blur-sm text-white placeholder-white/60 focus:outline-none focus:border-white/60 focus:bg-white/20 transition-all min-w-[200px] sm:min-w-[240px]"
+                    />
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="px-6 py-2.5 bg-white text-purple-600 rounded-xl font-bold hover:bg-white/90 transition-all disabled:opacity-50 whitespace-nowrap shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                    >
+                      {submitting ? 'Subscribing...' : 'Subscribe'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Small text */}
+              <p className="text-xs text-white/70 text-center sm:text-right mt-3 sm:mt-2">
+                No spam, unsubscribe anytime
+              </p>
+            </div>
+          ) : (
+            <div className="p-6 text-center">
+              <div className="inline-flex items-center gap-3">
+                <div className="text-3xl">🎉</div>
+                <div className="text-left">
+                  <h3 className="text-lg font-bold text-white">Thank You!</h3>
+                  <p className="text-sm text-white/90">
+                    Check your email for exclusive content!
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

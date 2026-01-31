@@ -26,6 +26,9 @@ import {
   ChartBarIcon,
   DocumentTextIcon,
   ChevronDownIcon,
+  UserCircleIcon,
+  BanknotesIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
 import MainLayout from '@/components/layout/MainLayout';
@@ -36,9 +39,14 @@ import ProductsTab from '@/components/channel-editor/ProductsTab';
 import SubscriptionTab from '@/components/channel-editor/SubscriptionTab';
 import SettingsTab from '@/components/channel-editor/SettingsTab';
 import TemplateRenderer from '@/components/channel/TemplateRenderer';
+import AnalyticsView from '@/components/dashboard/views/AnalyticsView';
+import ChannelsView from '@/components/dashboard/views/ChannelsView';
+import PlansView from '@/components/dashboard/views/PlansView';
+import SettingsView from '@/components/dashboard/views/SettingsView';
+import AnalyticsTab from '@/components/channel-editor/AnalyticsTab';
 
 type DeviceType = 'desktop' | 'tablet' | 'mobile';
-type TabType = 'basic' | 'theme' | 'layout' | 'products' | 'subscription' | 'settings' | null;
+type TabType = 'basic' | 'theme' | 'layout' | 'products' | 'subscription' | 'settings' | 'analytics' | 'profile' | null;
 
 export default function ChannelEditorPage() {
   const params = useParams();
@@ -50,6 +58,7 @@ export default function ChannelEditorPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>(null);
+  const [viewMode, setViewMode] = useState<'editor' | 'analytics' | 'channels' | 'plans' | 'settings'>('editor');
   const [devicePreview, setDevicePreview] = useState<DeviceType>('desktop');
   const [showStudioMenu, setShowStudioMenu] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -60,6 +69,16 @@ export default function ChannelEditorPage() {
   const [showPublishingModal, setShowPublishingModal] = useState(false);
   const [showPublishSuccessModal, setShowPublishSuccessModal] = useState(false);
   const [publishedChannelSlug, setPublishedChannelSlug] = useState<string | null>(null);
+  const [subscriptionData, setSubscriptionData] = useState<any>(null);
+  const [showPlansModal, setShowPlansModal] = useState(false);
+  const [plans, setPlans] = useState<any[]>([]);
+
+  // Default to Analytics tab on desktop
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+      setActiveTab('analytics');
+    }
+  }, []);
 
   // Close publishing modal when clicking outside and prevent body scroll
   useEffect(() => {
@@ -108,6 +127,8 @@ export default function ChannelEditorPage() {
       loadChannel();
       loadTemplates();
       checkRazorpayConfig();
+      loadSubscriptionData();
+      loadPlans();
     }
   }, [channelId]);
 
@@ -203,6 +224,30 @@ export default function ChannelEditorPage() {
     } catch (error) {
       console.error('Error loading templates:', error);
       toast.error('Failed to load templates');
+    }
+  };
+
+  const loadSubscriptionData = async () => {
+    try {
+      const response = await fetch('/api/user/subscriptions');
+      if (response.ok) {
+        const data = await response.json();
+        setSubscriptionData(data);
+      }
+    } catch (error) {
+      console.error('Error loading subscription data:', error);
+    }
+  };
+
+  const loadPlans = async () => {
+    try {
+      const response = await fetch('/api/user/plans');
+      if (response.ok) {
+        const data = await response.json();
+        setPlans(data.plans || []);
+      }
+    } catch (error) {
+      console.error('Error loading plans:', error);
     }
   };
 
@@ -456,24 +501,31 @@ export default function ChannelEditorPage() {
 
   const tabs = [
     { id: 'basic' as TabType, label: 'Basic', shortLabel: 'Basic', icon: HomeIcon, title: 'Basic Information' },
-    { id: 'theme' as TabType, label: 'Theme', shortLabel: 'Theme', icon: PaintBrushIcon, title: 'Colors & Fonts' },
-    { id: 'layout' as TabType, label: 'Layout', shortLabel: 'Layout', icon: RectangleStackIcon, title: 'Section Layout' },
-    { id: 'products' as TabType, label: 'Products', shortLabel: 'Products', icon: ShoppingBagIcon, title: 'Products & Content' },
+    { id: 'products' as TabType, label: 'Add Products', shortLabel: 'Add Products', icon: ShoppingBagIcon, title: 'Products & Content' },
     { id: 'subscription' as TabType, label: 'Subscribe', shortLabel: 'Subscribe', icon: CreditCardIcon, title: 'Subscription Settings' },
     { id: 'settings' as TabType, label: 'Settings', shortLabel: 'Settings', icon: Cog6ToothIcon, title: 'SEO & Settings' },
+    { id: 'analytics' as TabType, label: 'Analytics', shortLabel: 'Data', icon: ChartBarIcon, title: 'Channel Analytics' },
   ];
 
-  const handleTabClick = (tabId: TabType) => {
+
+  const handleTabClick = (tabId: TabType | 'profile') => {
+    // If we are in 'profile' mode, we just switch tabs, no redirection needed anymore
     if (activeTab === tabId) {
-      setActiveTab(null); // Close if already open
+      if (viewMode !== 'editor') {
+        setViewMode('editor');
+      } else {
+        setActiveTab(null); // Close if already open
+      }
     } else {
-      setActiveTab(tabId); // Open the selected tab
+      setActiveTab(tabId as TabType); // Open the selected tab
+      setViewMode('editor'); // Ensure we are in editor mode
     }
   };
 
   const handleAddProduct = () => {
     // Switch to products tab if not already there
     setActiveTab('products');
+    setViewMode('editor'); // Ensure we are in editor mode
     toast.success('Use the "Add Product" button in the panel to create content');
   };
 
@@ -487,25 +539,59 @@ export default function ChannelEditorPage() {
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <div className="min-w-0 flex-1">
                 <h1 className="text-base sm:text-lg font-bold text-gray-900 truncate">
-                  {channel.name || 'Untitled Channel'}
+                  {viewMode === 'editor' ? (channel ? channel.name || 'Untitled Channel' : 'Loading...') :
+                    viewMode === 'analytics' ? 'Channel Analytics' :
+                      viewMode === 'channels' ? 'My Channels' :
+                        viewMode === 'plans' ? 'Subscription Plans' :
+                          viewMode === 'settings' ? 'Settings' : ''}
                 </h1>
-                <div className="flex items-center gap-2 text-xs text-gray-600">
-                  {saving ? (
-                    <>
-                      <CloudArrowUpIcon className="h-3.5 w-3.5 animate-pulse flex-shrink-0" />
-                      <span className="truncate">Saving...</span>
-                    </>
-                  ) : lastSaved ? (
-                    <>
-                      <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
-                      <span className="truncate hidden sm:inline">Saved {lastSaved.toLocaleTimeString()}</span>
-                      <span className="truncate sm:hidden">Saved</span>
-                    </>
-                  ) : null}
+                {viewMode === 'editor' && (
+                  <div className="flex items-center gap-2 text-xs text-gray-600">
+                    {saving ? (
+                      <>
+                        <CloudArrowUpIcon className="h-3.5 w-3.5 animate-pulse flex-shrink-0" />
+                        <span className="truncate">Saving...</span>
+                      </>
+                    ) : lastSaved ? (
+                      <>
+                        <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
+                        <span className="truncate hidden sm:inline">Saved {lastSaved.toLocaleTimeString()}</span>
+                        <span className="truncate sm:hidden">Saved</span>
+                      </>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+
+              {/* Gross Revenue & Plan Info */}
+              <div className="hidden sm:flex items-center gap-2 ml-4">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-full">
+                  <BanknotesIcon className="h-4 w-4 text-emerald-600" />
+                  <span className="text-xs font-bold text-emerald-700">
+                    ₹{channel?.totalRevenue?.toLocaleString() || '0'}
+                  </span>
                 </div>
+
+                {subscriptionData?.hasActivePlan ? (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-full">
+                    <SparklesIcon className="h-4 w-4 text-indigo-600" />
+                    <span className="text-xs font-bold text-indigo-700">
+                      {subscriptionData.tier?.planName || 'Active Plan'}
+                    </span>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowPlansModal(true)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-full shadow-sm hover:shadow-md transition-all active:scale-95"
+                  >
+                    <SparklesIcon className="h-3.5 w-3.5" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Pricing</span>
+                  </button>
+                )}
               </div>
             </div>
 
+            {/* Right Side Actions - Always Visible */}
             <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
               {/* Publishing Options Button - Opens Modal */}
               <button
@@ -673,6 +759,106 @@ export default function ChannelEditorPage() {
                 , document.body
               )}
 
+              {/* Plans Modal */}
+              {showPlansModal && typeof window !== 'undefined' && createPortal(
+                <>
+                  <div
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+                    style={{ zIndex: 999999 }}
+                    onClick={() => setShowPlansModal(false)}
+                  />
+                  <div
+                    className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden animate-in fade-in zoom-in duration-300"
+                    style={{
+                      zIndex: 1000000,
+                      width: 'calc(100vw - 2rem)',
+                      maxWidth: '64rem',
+                      height: 'calc(100vh - 4rem)',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between shrink-0">
+                      <div>
+                        <h2 className="text-2xl font-black text-gray-900 tracking-tight">Subscription Plans</h2>
+                        <p className="text-sm text-gray-500 font-medium mt-1">Scale your business with the perfect plan</p>
+                      </div>
+                      <button
+                        onClick={() => setShowPlansModal(false)}
+                        className="p-3 hover:bg-gray-100 rounded-2xl transition-all active:scale-90"
+                      >
+                        <XMarkIcon className="h-6 w-6 text-gray-400" />
+                      </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar-light">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {plans.map((plan, index) => (
+                          <div
+                            key={plan.id}
+                            className={`relative bg-white rounded-[2rem] p-6 border-2 transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-100/50 group ${index === 1 ? 'border-indigo-600 shadow-xl scale-105' : 'border-gray-100 hover:border-indigo-200'
+                              }`}
+                          >
+                            {index === 1 && (
+                              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">
+                                Most Popular
+                              </div>
+                            )}
+
+                            <div className="mb-6">
+                              <h3 className="text-xl font-black text-gray-900 mb-2">{plan.name}</h3>
+                              <p className="text-sm text-gray-500 font-medium leading-relaxed">{plan.description}</p>
+                            </div>
+
+                            <div className="mb-8">
+                              <div className="flex items-baseline gap-1">
+                                <span className="text-4xl font-black text-gray-900">₹{plan.price}</span>
+                                <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">
+                                  /{plan.duration === 365 ? 'Year' : 'Month'}
+                                </span>
+                              </div>
+                              {plan.duration === 365 && (
+                                <p className="text-xs font-bold text-emerald-600 mt-2">Save up to 30% annually</p>
+                              )}
+                            </div>
+
+                            <div className="space-y-4 mb-8">
+                              {plan.features?.map((feature: string, fIdx: number) => (
+                                <div key={fIdx} className="flex items-center gap-3">
+                                  <div className="w-5 h-5 bg-indigo-50 rounded-full flex items-center justify-center shrink-0">
+                                    <CheckCircleSolid className="w-4 h-4 text-indigo-600" />
+                                  </div>
+                                  <span className="text-sm font-medium text-gray-600">{feature}</span>
+                                </div>
+                              ))}
+                            </div>
+
+                            <button
+                              onClick={async () => {
+                                // Close modal and redirect to purchase or handle inline
+                                setShowPlansModal(false);
+                                toast.loading('Initializing checkout...');
+                                // Re-using purchase logic from PlansView would be ideal
+                                // For now, directing to dashboard/plans if it's simpler or implementing here
+                                router.push('/auth/dashboard?view=plans');
+                              }}
+                              className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-[0.98] ${index === 1
+                                ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-200 hover:bg-indigo-700'
+                                : 'bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200'
+                                }`}
+                            >
+                              Get Started
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </>
+                , document.body
+              )}
+
               {/* Template Switcher - Hidden on mobile */}
               <div className="hidden lg:block">
                 <select
@@ -756,33 +942,36 @@ export default function ChannelEditorPage() {
           </div>
 
           {/* Edit Options Tabs in Header - Mobile Optimized */}
-          <nav className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto md:overflow-visible pb-2 -mx-3 sm:-mx-4 px-3 sm:px-4 scrollbar-hide snap-x snap-mandatory relative z-20">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => handleTabClick(tab.id)}
-                  className={`group relative flex items-center gap-2 px-4 sm:px-4 py-2.5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap touch-manipulation active:scale-95 snap-start flex-shrink-0 ${activeTab === tab.id
-                    ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/40'
-                    : 'bg-slate-100 text-slate-700 active:bg-slate-200'
-                    }`}
-                  title={tab.title}
-                  style={{ minWidth: 'max-content' }}
-                >
-                  {activeTab === tab.id && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-xl blur-lg opacity-50 -z-10"></div>
-                  )}
-                  <Icon className={`h-4 w-4 sm:h-4 sm:w-4 flex-shrink-0 ${activeTab === tab.id ? 'text-white' : 'text-slate-600'}`} />
-                  <span className="block">{tab.label}</span>
-                </button>
-              );
-            })}
+          {/* Edit Options Tabs in Header - Mobile Optimized */}
+          <div className="flex items-center gap-2 relative z-20 pb-2 -mx-3 sm:-mx-4 px-3 sm:px-4">
+            <nav className="flex-1 flex items-center gap-2 sm:gap-2.5 overflow-x-auto scrollbar-hide snap-x snap-mandatory pr-2">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => handleTabClick(tab.id)}
+                    className={`group relative flex items-center gap-2 px-4 sm:px-4 py-2.5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap touch-manipulation active:scale-95 snap-start flex-shrink-0 ${activeTab === tab.id
+                      ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/40'
+                      : 'bg-slate-100 text-slate-700 active:bg-slate-200'
+                      }`}
+                    title={tab.title}
+                    style={{ minWidth: 'max-content' }}
+                  >
+                    {activeTab === tab.id && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-xl blur-lg opacity-50 -z-10"></div>
+                    )}
+                    <Icon className={`h-4 w-4 sm:h-4 sm:w-4 flex-shrink-0 ${activeTab === tab.id ? 'text-white' : 'text-slate-600'}`} />
+                    <span className="block">{tab.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
 
             {/* Separator */}
             <div className="w-px h-8 bg-gray-200 mx-1 flex-shrink-0 hidden sm:block"></div>
 
-            {/* Studio Dropdown */}
+            {/* Studio Dropdown - Always Visible */}
             <div className="relative flex-shrink-0">
               <button
                 onClick={() => setShowStudioMenu(!showStudioMenu)}
@@ -801,7 +990,7 @@ export default function ChannelEditorPage() {
                     className="fixed inset-0 z-30"
                     onClick={() => setShowStudioMenu(false)}
                   />
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 z-40 overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
                     <div className="py-1">
                       <Link
                         href="/auth/dashboard"
@@ -815,29 +1004,39 @@ export default function ChannelEditorPage() {
 
                       <div className="h-px bg-gray-100 my-1"></div>
 
-                      <Link
-                        href="/auth/dashboard/channels"
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                      <button
+                        onClick={() => {
+                          setViewMode('channels');
+                          setShowStudioMenu(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
                       >
                         <RocketLaunchIcon className="w-4 h-4" />
                         My Channels
-                      </Link>
+                      </button>
 
-                      <Link
-                        href="/auth/dashboard/analytics"
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                      <button
+                        onClick={() => {
+                          setViewMode('editor');
+                          setActiveTab('analytics');
+                          setShowStudioMenu(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
                       >
                         <ChartBarIcon className="w-4 h-4" />
                         Analytics
-                      </Link>
+                      </button>
 
-                      <Link
-                        href="/auth/dashboard/plans"
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                      <button
+                        onClick={() => {
+                          setViewMode('plans');
+                          setShowStudioMenu(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
                       >
                         <CreditCardIcon className="w-4 h-4" />
                         Plans
-                      </Link>
+                      </button>
 
                       <Link
                         href="/auth/dashboard/blog"
@@ -849,53 +1048,65 @@ export default function ChannelEditorPage() {
 
                       <div className="h-px bg-gray-100 my-1"></div>
 
-                      <Link
-                        href="/auth/dashboard/settings"
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                      <button
+                        onClick={() => {
+                          setViewMode('settings');
+                          setShowStudioMenu(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
                       >
                         <Cog6ToothIcon className="w-4 h-4" />
-                        Settings
-                      </Link>
+                        My Profile
+                      </button>
                     </div>
                   </div>
                 </>
               )}
             </div>
-          </nav>
+          </div>
         </div>
 
         {/* Content Wrapper */}
         <div className="flex-1 flex overflow-hidden relative">
-          {/* Main Content - Full Width Preview */}
-          <main className="flex-1 bg-gray-100 overflow-auto p-2 sm:p-4 relative safe-area-inset-bottom">
-            <div className="h-full flex items-start justify-center">
-              <div
-                className="bg-white rounded-lg sm:rounded-lg shadow-xl overflow-hidden transition-all duration-300 relative w-full"
-                style={{
-                  width: getPreviewWidth(),
-                  maxWidth: '100%',
-                  minHeight: '100%',
-                }}
-              >
-                {/* Direct Preview Render */}
-                {channel && channel.template ? (
-                  <div className="w-full min-h-full relative overflow-auto">
-                    <TemplateRenderer
-                      channel={channel}
-                      isEditing={true}
-                      onAddProduct={handleAddProduct}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center min-h-screen p-4 sm:p-8">
-                    <div className="text-center">
-                      <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto mb-4"></div>
-                      <p className="text-sm sm:text-base text-gray-600">Loading preview...</p>
+
+          <main className="flex-1 bg-gray-100 overflow-auto relative safe-area-inset-bottom">
+            {viewMode === 'editor' ? (
+              <div className="h-full flex items-start justify-center p-2 sm:p-4">
+                <div
+                  className="bg-white rounded-lg sm:rounded-lg shadow-xl overflow-hidden transition-all duration-300 relative w-full"
+                  style={{
+                    width: getPreviewWidth(),
+                    maxWidth: '100%',
+                    minHeight: '100%',
+                  }}
+                >
+                  {/* Direct Preview Render */}
+                  {channel && channel.template ? (
+                    <div className="w-full min-h-full relative overflow-auto">
+                      <TemplateRenderer
+                        channel={channel}
+                        isEditing={true}
+                        onAddProduct={handleAddProduct}
+                      />
                     </div>
-                  </div>
-                )}
+                  ) : (
+                    <div className="flex items-center justify-center min-h-screen p-4 sm:p-8">
+                      <div className="text-center">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-sm sm:text-base text-gray-600">Loading preview...</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="h-full w-full overflow-auto">
+                {viewMode === 'analytics' && <AnalyticsView />}
+                {viewMode === 'channels' && <ChannelsView />}
+                {viewMode === 'plans' && <PlansView />}
+                {viewMode === 'settings' && <SettingsView />}
+              </div>
+            )}
           </main>
 
           {/* Edit Panel */}
@@ -1002,12 +1213,17 @@ export default function ChannelEditorPage() {
                     {activeTab === 'settings' && (
                       <SettingsTab channel={channel} onUpdate={handleChannelUpdate} />
                     )}
+                    {activeTab === 'analytics' && (
+                      <AnalyticsTab channel={channel} onUpdate={handleChannelUpdate} />
+                    )}
+                    {activeTab === 'profile' && (
+                      <SettingsView />
+                    )}
                   </div>
                 </div>
               </div>
             </>
           )}
-
         </div>
 
         {/* Publish Success Modal */}

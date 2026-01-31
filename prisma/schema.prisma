@@ -865,7 +865,7 @@ model ChannelProduct {
   likes         ProductLike[]
   playlistItems PlaylistItem[]
   saves         ProductSave[]
-  history       UserHistory[]    @relation("ProductHistory")
+  history       UserHistory[]     @relation("ProductHistory")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1091,4 +1091,3 @@ model UserHistory {
   @@index([userId, viewedAt])
   @@map("user_history")
 }
-

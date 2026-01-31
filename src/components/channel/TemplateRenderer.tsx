@@ -1,7 +1,7 @@
 'use client';
 
 import { Channel, ChannelTemplate, ChannelProductType } from '@prisma/client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -71,6 +71,150 @@ interface TemplateRendererProps {
   isEditing?: boolean;
   onAddProduct?: () => void;
 }
+
+// Internal component for Video Overlay with Hover Preview
+const VideoHoverPreview = ({ product, primaryColor, getContentIcon }: { product: any, primaryColor: string, getContentIcon: any }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [previewTimeout, setPreviewTimeout] = useState<NodeJS.Timeout | null>(null);
+
+  const isVideo = product.type === 'VIDEO' || product.type === 'VIDEOS';
+  const hasVideoSource = product.videoUrl || product.fileUrl;
+
+  useEffect(() => {
+    if (isVideo && hasVideoSource && videoRef.current) {
+      if (isHovered) {
+        // Start playing
+        videoRef.current.currentTime = 0;
+        const playPromise = videoRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            // Auto-play might be blocked
+            console.log("Auto-play prevented:", error);
+          });
+        }
+
+        // Stop after 10 seconds
+        const timeout = setTimeout(() => {
+          if (videoRef.current) {
+            videoRef.current.pause();
+            videoRef.current.currentTime = 0;
+          }
+        }, 10000);
+        setPreviewTimeout(timeout);
+      } else {
+        // Stop playing
+        if (previewTimeout) {
+          clearTimeout(previewTimeout);
+          setPreviewTimeout(null);
+        }
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+      }
+    }
+    return () => {
+      if (previewTimeout) clearTimeout(previewTimeout);
+    };
+  }, [isHovered, isVideo, hasVideoSource]);
+
+  return (
+    <div
+      className="relative w-full h-full group-hover:scale-105 transition-transform duration-500"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Background Image (Always visible as base) */}
+      {product.previewImage ? (
+        <img
+          src={product.previewImage}
+          alt={product.title}
+          className={`w-full h-full object-cover transition-opacity duration-300 ${isHovered && isVideo && hasVideoSource ? 'opacity-0' : 'opacity-100'}`}
+        />
+      ) : (
+        <div className={`w-full h-full flex items-center justify-center bg-gray-50 transition-opacity duration-300 ${isHovered && isVideo && hasVideoSource ? 'opacity-0' : 'opacity-100'}`}>
+          <div style={{ color: `${primaryColor}40` }}>{getContentIcon(product.type)}</div>
+        </div>
+      )}
+
+      {/* Video Overlay (Visible on Hover) */}
+      {isVideo && hasVideoSource && (
+        <video
+          ref={videoRef}
+          src={product.videoUrl || product.fileUrl}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+          muted
+          loop
+          playsInline
+        // Removed autoPlay here, controlled by ref
+        />
+      )}
+    </div>
+  );
+};
+
+// Helper for content icons
+const getContentIcon = (type: string) => {
+  switch (type) {
+    case 'VIDEO':
+    case 'VIDEOS':
+      return <VideoCameraIcon className="w-12 h-12" />;
+    case 'DOCUMENT':
+    case 'DOCUMENTS':
+      return <DocumentTextIcon className="w-12 h-12" />;
+    case 'CODE':
+      return <CodeBracketIcon className="w-12 h-12" />;
+    case 'SOFTWARE':
+      return <CommandLineIcon className="w-12 h-12" />;
+    case 'COURSE':
+    case 'COURSES':
+      return <LightBulbIcon className="w-12 h-12" />;
+    case 'TEMPLATE':
+    case 'TEMPLATES':
+      return <Squares2X2Icon className="w-12 h-12" />;
+    default:
+      return <ShoppingBagIcon className="w-12 h-12" />;
+  }
+};
+
+// Helper Functions
+const formatDuration = (seconds: number) => {
+  if (!seconds) return '0:00';
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
+
+const getTimeAgo = (date: Date) => {
+  const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
+  let interval = seconds / 31536000;
+  if (interval > 1) return Math.floor(interval) + " years ago";
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + " months ago";
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + " days ago";
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + " hours ago";
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + " minutes ago";
+  return Math.floor(seconds) + " seconds ago";
+};
+
+const formatViewCount = (count: number) => {
+  if (count >= 1000000) {
+    return (count / 1000000).toFixed(1) + 'M';
+  }
+  if (count >= 1000) {
+    return (count / 1000).toFixed(1) + 'K';
+  }
+  return count.toString();
+};
+
+const formatPrice = (price: number, currency: string) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency || 'USD',
+  }).format(price);
+};
 
 export default function TemplateRenderer({ channel, isEditing = false, onAddProduct }: TemplateRendererProps) {
   const { data: session } = useSession();
@@ -647,13 +791,13 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
         {/* Profile Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center md:items-end -mt-16 md:-mt-20 relative z-10 pb-6 mb-2">
+          <div className="flex flex-col md:flex-row items-center md:items-end relative z-10 pb-6 mb-2">
             {/* Avatar */}
-            <div className="relative mb-4 md:mb-0">
+            <div className="relative mb-4 md:mb-0 -mt-16 md:-mt-20">
               <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
-                {channel.profileImage || channel.user.image ? (
+                {channel.profileImage || channel.user?.image ? (
                   <img
-                    src={channel.profileImage || channel.user.image || ''}
+                    src={channel.profileImage || channel.user?.image || ''}
                     alt={channel.name}
                     className="w-full h-full object-cover"
                   />
@@ -666,14 +810,24 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
             </div>
 
             {/* Channel Info */}
-            <div className="flex-1 text-center md:text-left md:ml-6 mb-4 md:mb-2">
+            <div className="flex-1 text-center md:text-left md:ml-6 mb-4 md:mb-2 relative z-10">
               <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-1" style={{ fontFamily: headingFont }}>
                 {channel.name}
               </h1>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 text-sm text-gray-600 mb-3">
                 <span className="font-medium">@{channel.slug}</span>
                 <span>•</span>
-                <span>{formatViewCount(channel._count?.subscribers || 0)} subscribers</span>
+                {isOwner ? (
+                  <button
+                    onClick={() => setShowSubscribersList(true)}
+                    className="hover:text-gray-900 hover:underline transition-colors focus:outline-none"
+                    title="View subscriber list"
+                  >
+                    {formatViewCount(channel._count?.subscribers || 0)} subscribers
+                  </button>
+                ) : (
+                  <span>{formatViewCount(channel._count?.subscribers || 0)} subscribers</span>
+                )}
                 <span>•</span>
                 <span>{channel._count?.products || 0} products</span>
               </div>
@@ -703,9 +857,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
           <div className="flex items-center gap-6 sm:gap-8 overflow-x-auto scrollbar-hide border-b border-gray-200">
             {[
               { id: 'home', label: 'Home' },
-              { id: 'videos', label: 'Products' }, // Renamed from Videos since it's products
-              { id: 'playlists', label: 'Playlists' },
-              { id: 'community', label: 'Community' },
+              { id: 'videos', label: 'Products' },
               { id: 'about', label: 'About' },
             ].map((tab) => (
               <button
@@ -2356,20 +2508,113 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
               {/* HOME TAB */}
               {activeTab === 'home' && (
                 <div className="space-y-12">
-                  {/* Featured Section (if any) could go here */}
+                  {/* Featured Content (Most Viewed Video) */}
+                  {(() => {
+                    const featuredProduct = [...allProducts]
+                      .filter((p: any) => (p.type === 'VIDEO' || p.type === 'VIDEOS') && (p.videoUrl || p.fileUrl))
+                      .sort((a: any, b: any) => (b.viewCount || 0) - (a.viewCount || 0))[0];
 
-                  {/* Latest Products */}
+                    if (!featuredProduct) return null;
+
+                    return (
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                        <div className="lg:col-span-2 aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl relative group">
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 pointer-events-none" />
+                          {/* Auto-play Video */}
+                          <video
+                            src={featuredProduct.videoUrl || featuredProduct.fileUrl}
+                            className="w-full h-full object-cover"
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                          />
+
+                          <div className="absolute inset-0 flex items-center justify-center z-20">
+                            <button
+                              onClick={() => router.push(`/channel/${channel.slug}/products/${featuredProduct.id}`)}
+                              className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
+                            >
+                              <PlayIcon className="w-8 h-8 text-white fill-white" />
+                            </button>
+                          </div>
+
+                          <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
+                            <span className="inline-block px-2 py-1 mb-2 text-xs font-bold text-white bg-red-600 rounded-md uppercase tracking-wider">
+                              Most Viewed
+                            </span>
+                            <h3 className="text-2xl font-bold text-white mb-2 line-clamp-2">{featuredProduct.title}</h3>
+                          </div>
+                        </div>
+                        <div className="flex flex-col justify-center">
+                          <h3 className="text-xl font-bold text-gray-900 mb-2">{featuredProduct.title}</h3>
+                          <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                            <span>{new Date(featuredProduct.createdAt).toLocaleDateString()}</span>
+                            <span>•</span>
+                            <span>{formatViewCount(featuredProduct.viewCount || 0)} views</span>
+                          </div>
+                          <p className="text-gray-600 line-clamp-4 mb-6">{featuredProduct.description}</p>
+                          <button
+                            onClick={() => router.push(`/channel/${channel.slug}/products/${featuredProduct.id}`)}
+                            className="px-6 py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition-colors w-max"
+                          >
+                            Watch Now
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Latest Videos (Horizontal List) */}
                   <div>
                     <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-xl font-bold text-gray-900">Latest Products</h2>
-                      {allProducts.length > 8 && (
-                        <button
-                          onClick={() => setActiveTab('videos')}
-                          className="text-sm font-medium text-gray-600 hover:text-gray-900"
-                        >
-                          View all
-                        </button>
-                      )}
+                      <h2 className="text-xl font-bold text-gray-900">Latest Videos</h2>
+                    </div>
+                    {allProducts.filter(p => p.type === 'VIDEO' || p.type === 'VIDEOS').length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {allProducts
+                          .filter((p: any) => p.type === 'VIDEO' || p.type === 'VIDEOS')
+                          .slice(0, 4)
+                          .map((product: any) => (
+                            <div key={product.id} className="group cursor-pointer" onClick={() => router.push(`/channel/${channel.slug}/products/${product.id}`)}>
+                              <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3">
+                                <VideoHoverPreview
+                                  product={product}
+                                  primaryColor={primaryColor}
+                                  getContentIcon={getContentIcon}
+                                />
+                                <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-md">
+                                  {formatDuration(product.duration || 0)}
+                                </div>
+                              </div>
+                              <h3 className="font-bold text-gray-900 line-clamp-2 mb-1 group-hover:text-primary transition-colors">
+                                {product.title}
+                              </h3>
+                              <div className="flex items-center text-sm text-gray-500">
+                                <span>{formatViewCount(product.viewCount || 0)} views</span>
+                                <span className="mx-1">•</span>
+                                <span>{getTimeAgo(new Date(product.createdAt))}</span>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 italic">No videos uploaded yet.</p>
+                    )}
+                  </div>
+
+                  {/* All Products Grid */}
+                  <div>
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-xl font-bold text-gray-900">All Products</h2>
+
+                      <button
+                        onClick={() => setActiveTab('videos')}
+                        className="text-sm font-medium text-gray-600 hover:text-gray-900"
+                      >
+                        View all
+                      </button>
+
                     </div>
 
                     {allProducts.length > 0 ? (
@@ -2377,20 +2622,40 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                         {allProducts.slice(0, 8).map((product: any) => (
                           <div key={product.id} className="group cursor-pointer" onClick={() => router.push(`/channel/${channel.slug}/products/${product.id}`)}>
                             <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3">
-                              {product.thumbnail ? (
-                                <img
-                                  src={product.thumbnail}
-                                  alt={product.title}
-                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">
-                                  <VideoCameraIcon className="w-10 h-10" />
+                              <VideoHoverPreview
+                                product={product}
+                                primaryColor={primaryColor}
+                                getContentIcon={getContentIcon}
+                              />
+
+                              {/* Video Play Icon Overlay */}
+                              {((product.type === 'VIDEO' || product.type === 'VIDEOS') && (product.videoUrl || product.fileUrl)) && (
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                  <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <PlayIcon className="w-5 h-5 text-white" />
+                                  </div>
                                 </div>
                               )}
+
+                              {/* Badges */}
+                              <div className="absolute top-2 left-2 flex gap-1 pointer-events-none">
+                                {(product.type === 'VIDEO' || product.type === 'VIDEOS') && (
+                                  <div className="px-2 py-1 rounded-md bg-red-500/90 backdrop-blur-md shadow-sm border border-red-400/40 text-white flex items-center gap-1">
+                                    <VideoCameraIcon className="w-3 h-3" />
+                                    <span className="text-[9px] font-bold uppercase tracking-widest">
+                                      Video
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+
                               {/* Price Badge */}
                               <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-md">
-                                {product.price > 0 ? formatPrice(product.price, product.currency) : 'Free'}
+                                {product.isSubscriberOnly ? (
+                                  <span className="text-xs font-bold text-primary">Sub Only</span>
+                                ) : product.price > 0 ? formatPrice(product.price, product.currency) : (
+                                  <span className="text-green-600">Free</span>
+                                )}
                               </div>
                             </div>
                             <h3 className="font-bold text-gray-900 line-clamp-2 mb-1 group-hover:text-primary transition-colors">
@@ -2411,6 +2676,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                     )}
                   </div>
                 </div>
+
               )}
 
               {/* VIDEOS / PRODUCTS TAB */}
@@ -2421,19 +2687,39 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                     {allProducts.map((product: any) => (
                       <div key={product.id} className="group cursor-pointer" onClick={() => router.push(`/channel/${channel.slug}/products/${product.id}`)}>
                         <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3">
-                          {product.thumbnail ? (
-                            <img
-                              src={product.thumbnail}
-                              alt={product.title}
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">
-                              <VideoCameraIcon className="w-10 h-10" />
+                          <VideoHoverPreview
+                            product={product}
+                            primaryColor={primaryColor}
+                            getContentIcon={getContentIcon}
+                          />
+
+                          {/* Video Play Icon Overlay */}
+                          {((product.type === 'VIDEO' || product.type === 'VIDEOS') && (product.videoUrl || product.fileUrl)) && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <PlayIcon className="w-5 h-5 text-white" />
+                              </div>
                             </div>
                           )}
+
+                          {/* Badges */}
+                          <div className="absolute top-2 left-2 flex gap-1 pointer-events-none">
+                            {(product.type === 'VIDEO' || product.type === 'VIDEOS') && (
+                              <div className="px-2 py-1 rounded-md bg-red-500/90 backdrop-blur-md shadow-sm border border-red-400/40 text-white flex items-center gap-1">
+                                <VideoCameraIcon className="w-3 h-3" />
+                                <span className="text-[9px] font-bold uppercase tracking-widest">
+                                  Video
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
                           <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-md">
-                            {product.price > 0 ? formatPrice(product.price, product.currency) : 'Free'}
+                            {product.isSubscriberOnly ? (
+                              <span className="text-xs font-bold text-primary">Sub Only</span>
+                            ) : product.price > 0 ? formatPrice(product.price, product.currency) : (
+                              <span className="text-green-600">Free</span>
+                            )}
                           </div>
                         </div>
                         <h3 className="font-bold text-gray-900 line-clamp-2 mb-1 group-hover:text-primary transition-colors">
@@ -2511,7 +2797,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       <div>
                         <h3 className="font-semibold mb-2 text-gray-900">Details</h3>
                         <div className="space-y-2 text-sm text-gray-600">
-                          <p>Business inquiries: <a href={`mailto:${channel.user.email}`} className="text-blue-600 hover:underline">{channel.user.email}</a></p>
+                          <p>Business inquiries: <a href={`mailto:${channel.user?.email || ''}`} className="text-blue-600 hover:underline">{channel.user?.email || 'N/A'}</a></p>
                           <p>Location: United States</p>
                         </div>
                       </div>
@@ -3066,42 +3352,27 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                 <div className="flex flex-col md:flex-row">
                                   {/* Thumbnail */}
                                   <div className="relative w-full md:w-80 lg:w-96 aspect-video md:aspect-auto bg-gray-50 overflow-hidden">
-                                    {(product.type === 'VIDEO' || product.type === 'VIDEOS') && (product.videoUrl || product.fileUrl) ? (
-                                      <>
-                                        <video
-                                          src={product.videoUrl || product.fileUrl}
-                                          className="w-full h-full object-cover"
-                                          muted
-                                          loop
-                                          playsInline
-                                          autoPlay
-                                        />
-                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-500" />
-                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 scale-90 group-hover:scale-100">
-                                          <div className="w-16 h-16 rounded-full flex items-center justify-center bg-white/95 backdrop-blur-md shadow-2xl">
-                                            <div className="w-0 h-0 border-l-[12px] border-l-primary border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent ml-1"></div>
-                                          </div>
-                                        </div>
-                                      </>
-                                    ) : product.previewImage ? (
-                                      <img
-                                        src={product.previewImage}
-                                        alt={product.title}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
-                                      />
-                                    ) : (
-                                      <div className="w-full h-full flex items-center justify-center">
-                                        <div style={{ color: `${primaryColor}40` }}>{getContentIcon(product.type)}</div>
-                                      </div>
-                                    )}
+                                    <VideoHoverPreview
+                                      product={product}
+                                      primaryColor={primaryColor}
+                                      getContentIcon={getContentIcon}
+                                    />
 
-                                    {/* Type Badge */}
-                                    <div className="absolute top-4 left-4">
+                                    {/* Badges */}
+                                    <div className="absolute top-4 left-4 flex gap-2">
                                       <div className="px-3 py-1.5 rounded-xl bg-white/80 backdrop-blur-md shadow-lg border border-white/40">
                                         <span className="text-[10px] font-bold text-gray-900 uppercase tracking-widest">
                                           {product.type}
                                         </span>
                                       </div>
+                                      {(product.type === 'VIDEO' || product.type === 'VIDEOS') && (
+                                        <div className="px-3 py-1.5 rounded-xl bg-red-500/90 backdrop-blur-md shadow-lg border border-red-400/40 text-white flex items-center gap-1">
+                                          <VideoCameraIcon className="w-3 h-3" />
+                                          <span className="text-[10px] font-bold uppercase tracking-widest">
+                                            Video
+                                          </span>
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
 
@@ -3229,105 +3500,113 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                             className="group relative cursor-pointer h-full"
                           >
                             <div className="relative bg-white/70 backdrop-blur-sm border border-gray-100 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.1)] transition-all duration-500 h-full flex flex-col">
-                              <div className="relative w-full aspect-[4/5] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-                                {(product.type === 'VIDEO' || product.type === 'VIDEOS') && (product.videoUrl || product.fileUrl) ? (
+                              {(() => {
+                                const isVideo = product.type === 'VIDEO' || product.type === 'VIDEOS';
+                                const hasVideoSource = product.videoUrl || product.fileUrl;
+                                return (
                                   <>
-                                    <video
-                                      src={product.videoUrl || product.fileUrl}
-                                      className="w-full h-full object-cover"
-                                      muted
-                                      loop
-                                      playsInline
-                                      autoPlay
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                    {/* Play Button */}
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 scale-90 group-hover:scale-100">
-                                      <div className="w-16 h-16 rounded-full flex items-center justify-center bg-white/95 backdrop-blur-md shadow-2xl">
-                                        <div className="w-0 h-0 border-l-[12px] border-l-primary border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent ml-1"></div>
+                                    <div className="relative w-full aspect-[4/5] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                                      <VideoHoverPreview
+                                        product={product}
+                                        primaryColor={primaryColor}
+                                        getContentIcon={getContentIcon}
+                                      />
+
+                                      {isVideo && hasVideoSource && (
+                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                                            <PlayIcon className="w-6 h-6 text-white opacity-80" />
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {product.type !== 'VIDEO' && product.type !== 'VIDEOS' && !product.previewImage && (
+                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                          <div style={{ color: `${primaryColor}40` }}>{getContentIcon(product.type)}</div>
+                                        </div>
+                                      )}
+
+                                      {/* Premium Badges */}
+                                      <div className="absolute top-4 left-4 right-4 flex justify-between items-start pointer-events-none">
+                                        <div className="flex gap-2">
+                                          <div className="px-3 py-1.5 rounded-xl bg-white/80 backdrop-blur-md shadow-lg border border-white/40">
+                                            <span className="text-[10px] font-bold text-gray-900 uppercase tracking-widest">
+                                              {product.type}
+                                            </span>
+                                          </div>
+                                          {(product.type === 'VIDEO' || product.type === 'VIDEOS') && (
+                                            <div className="px-3 py-1.5 rounded-xl bg-red-500/90 backdrop-blur-md shadow-lg border border-red-400/40 text-white flex items-center gap-1">
+                                              <VideoCameraIcon className="w-3 h-3" />
+                                              <span className="text-[10px] font-bold uppercase tracking-widest">
+                                                Video
+                                              </span>
+                                            </div>
+                                          )}
+                                        </div>
+
+                                        {!canAccess && (
+                                          <div className="p-2 rounded-xl bg-gray-900/80 backdrop-blur-md shadow-lg text-white">
+                                            <LockClosedIcon className="w-4 h-4" />
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {/* Content Section */}
+                                    <div className="flex-1 flex flex-col p-5 sm:p-6">
+                                      <div className="mb-3 flex flex-wrap gap-2">
+                                        {product.tags?.slice(0, 1).map((tag: string) => (
+                                          <span key={tag} className="text-[10px] font-bold px-2 py-1 rounded-lg bg-primary/5 text-primary border border-primary/10 uppercase tracking-wider">
+                                            {tag}
+                                          </span>
+                                        ))}
+                                      </div>
+
+                                      <h3
+                                        className="text-lg font-bold mb-2 text-gray-900 line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-300"
+                                        style={{ fontFamily: headingFont }}
+                                      >
+                                        {product.title}
+                                      </h3>
+
+                                      <div className="mt-auto pt-4 flex items-center justify-between">
+                                        <div>
+                                          <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Premium Access</p>
+                                          <p className="text-xl font-black text-gray-900" style={{ fontFamily: headingFont }}>
+                                            {product.price > 0 ? `$${product.price}` : 'Free'}
+                                          </p>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                          {session?.user && (
+                                            <button
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleToggleSave(product.id, e);
+                                              }}
+                                              className={`p-2.5 rounded-xl transition-all duration-300 ${isProductSaved(product.id)
+                                                ? 'bg-primary/10 text-primary border-primary/20'
+                                                : 'bg-gray-50 text-gray-400 border-gray-100 hover:bg-gray-100'
+                                                } border`}
+                                            >
+                                              <BookmarkIcon className={`w-5 h-5 ${isProductSaved(product.id) ? 'fill-current' : ''}`} />
+                                            </button>
+                                          )}
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              window.location.href = `/channel/${channel.slug}/products/${product.id}`;
+                                            }}
+                                            className="p-2.5 rounded-xl bg-gray-900 text-white shadow-lg hover:shadow-primary/20 hover:bg-primary transition-all duration-300 active:scale-95"
+                                          >
+                                            <ArrowRightIcon className="w-5 h-5" />
+                                          </button>
+                                        </div>
                                       </div>
                                     </div>
                                   </>
-                                ) : product.previewImage ? (
-                                  <img
-                                    src={product.previewImage}
-                                    alt={product.title}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                                    <div style={{ color: `${primaryColor}40` }}>{getContentIcon(product.type)}</div>
-                                  </div>
-                                )}
-
-                                {/* Premium Badges */}
-                                <div className="absolute top-4 left-4 right-4 flex justify-between items-start pointer-events-none">
-                                  <div className="px-3 py-1.5 rounded-xl bg-white/80 backdrop-blur-md shadow-lg border border-white/40">
-                                    <span className="text-[10px] font-bold text-gray-900 uppercase tracking-widest">
-                                      {product.type}
-                                    </span>
-                                  </div>
-
-                                  {!canAccess && (
-                                    <div className="p-2 rounded-xl bg-gray-900/80 backdrop-blur-md shadow-lg text-white">
-                                      <LockClosedIcon className="w-4 h-4" />
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-
-                              {/* Content Section */}
-                              <div className="flex-1 flex flex-col p-5 sm:p-6">
-                                <div className="mb-3 flex flex-wrap gap-2">
-                                  {product.tags?.slice(0, 1).map((tag: string) => (
-                                    <span key={tag} className="text-[10px] font-bold px-2 py-1 rounded-lg bg-primary/5 text-primary border border-primary/10 uppercase tracking-wider">
-                                      {tag}
-                                    </span>
-                                  ))}
-                                </div>
-
-                                <h3
-                                  className="text-lg font-bold mb-2 text-gray-900 line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-300"
-                                  style={{ fontFamily: headingFont }}
-                                >
-                                  {product.title}
-                                </h3>
-
-                                <div className="mt-auto pt-4 flex items-center justify-between">
-                                  <div>
-                                    <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Premium Access</p>
-                                    <p className="text-xl font-black text-gray-900" style={{ fontFamily: headingFont }}>
-                                      {product.price > 0 ? `$${product.price}` : 'Free'}
-                                    </p>
-                                  </div>
-
-                                  <div className="flex items-center gap-2">
-                                    {session?.user && (
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleToggleSave(product.id, e);
-                                        }}
-                                        className={`p-2.5 rounded-xl transition-all duration-300 ${isProductSaved(product.id)
-                                          ? 'bg-primary/10 text-primary border-primary/20'
-                                          : 'bg-gray-50 text-gray-400 border-gray-100 hover:bg-gray-100'
-                                          } border`}
-                                      >
-                                        <BookmarkIcon className={`w-5 h-5 ${isProductSaved(product.id) ? 'fill-current' : ''}`} />
-                                      </button>
-                                    )}
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        window.location.href = `/channel/${channel.slug}/products/${product.id}`;
-                                      }}
-                                      className="p-2.5 rounded-xl bg-gray-900 text-white shadow-lg hover:shadow-primary/20 hover:bg-primary transition-all duration-300 active:scale-95"
-                                    >
-                                      <ArrowRightIcon className="w-5 h-5" />
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
+                                );
+                              })()}
                             </div>
                           </motion.div>
                         );
@@ -3348,70 +3627,36 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
               </section>
             )}
 
-            {/* Related Products Carousel */}
-            {channel.products && channel.products.length > 0 && (
-              <section className="py-24 relative overflow-hidden bg-gray-50/50">
-                <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
-                  <div className="flex items-end justify-between mb-12">
-                    <div>
-                      <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-2" style={{ fontFamily: headingFont }}>
-                        You May Also Like
-                      </h2>
-                      <p className="text-gray-500 font-medium">Handpicked recommendations from {channel.name}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button className="p-3 rounded-full bg-white shadow-md hover:shadow-xl transition-all active:scale-95 text-gray-400 hover:text-gray-900 border border-gray-100">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                      </button>
-                      <button className="p-3 rounded-full bg-white shadow-md hover:shadow-xl transition-all active:scale-95 text-gray-400 hover:text-gray-900 border border-gray-100">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                      </button>
-                    </div>
-                  </div>
+            {/* Newsletter / Lead Capture Section */}
+            <section className="py-24 relative overflow-hidden bg-gray-900">
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black opacity-50" />
+              <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
+                <h2 className="text-3xl md:text-4xl font-black text-white mb-4" style={{ fontFamily: headingFont }}>
+                  Join the Community
+                </h2>
+                <p className="text-gray-400 mb-8 text-lg max-w-2xl mx-auto">
+                  Get exclusive updates, new product announcements, and special offers directly to your inbox.
+                </p>
 
-                  <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide snap-x snap-mandatory">
-                    {channel.products.slice(0, 6).map((product, idx) => (
-                      <motion.div
-                        key={product.id}
-                        whileHover={{ y: -10 }}
-                        className="flex-shrink-0 w-[300px] sm:w-[350px] snap-start"
-                      >
-                        <div className="bg-white rounded-[2rem] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden group">
-                          <div className="aspect-video relative overflow-hidden">
-                            <img
-                              src={product.previewImage || defaultCoverImages[idx % 3]}
-                              alt={product.title}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000"
-                            />
-                            <div className="absolute top-4 left-4">
-                              <div className="px-3 py-1.5 rounded-xl bg-primary text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/30">
-                                {idx % 2 === 0 ? 'Hot Pick' : 'Editor Choice'}
-                              </div>
-                            </div>
-                            {idx % 3 === 0 && (
-                              <div className="absolute top-4 right-4 animate-bounce">
-                                <div className="px-3 py-1.5 rounded-xl bg-red-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-red-500/30">
-                                  20% OFF
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                          <div className="p-6">
-                            <h3 className="font-bold text-gray-900 mb-2 line-clamp-1">{product.title}</h3>
-                            <div className="flex items-center justify-between">
-                              <span className="text-xl font-black text-gray-900">${product.price || '0'}</span>
-                              <button className="w-10 h-10 rounded-xl bg-gray-900 text-white flex items-center justify-center hover:bg-primary transition-colors">
-                                <PlusIcon className="w-5 h-5" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              </section>
-            )}
+                <form className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto" onSubmit={(e) => e.preventDefault()}>
+                  <input
+                    type="email"
+                    placeholder="Enter your email address"
+                    className="flex-1 px-6 py-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/20 transition-all"
+                  />
+                  <button
+                    type="submit"
+                    className="px-8 py-4 rounded-xl font-bold text-white bg-primary hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 hover:scale-105 active:scale-95"
+                    style={{ backgroundColor: primaryColor }}
+                  >
+                    Subscribe
+                  </button>
+                </form>
+                <p className="text-xs text-gray-500 mt-4">
+                  We respect your privacy. Unsubscribe at any time.
+                </p>
+              </div>
+            </section>
 
             {/* Premium Footer */}
             <footer className="relative pt-24 pb-12 bg-white overflow-hidden">

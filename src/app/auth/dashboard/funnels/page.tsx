@@ -56,6 +56,8 @@ import toast from 'react-hot-toast';
 import { LineChart, Line, AreaChart, Area, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 import UpgradeModal from '@/components/modals/UpgradeModal';
 import RazorpayRequiredModal from '@/components/modals/RazorpayRequiredModal';
+import RazorpayConnectModal from '@/components/modals/RazorpayConnectModal';
+
 
 interface FunnelTemplate {
   id: string;
@@ -86,7 +88,7 @@ const generateMarketingTips = (funnel: any) => {
   const visitors = funnel.visitors;
   const conversionRate = funnel.conversionRate;
   const revenue = funnel.revenue;
-  
+
   // Product-specific tip pools
   const productSpecificTips = {
     software: [
@@ -399,14 +401,14 @@ const generateMarketingTips = (funnel: any) => {
         action: 'Create buyer personas'
       }
     ];
-    
+
     const remainingGeneralTips = generalTips.filter(tip => !tips.some((existingTip: any) => existingTip.title === tip.title));
     if (remainingGeneralTips.length > 0) {
       const randomGeneralTip = remainingGeneralTips[Math.floor(Math.random() * remainingGeneralTips.length)];
       tips.push(randomGeneralTip);
     }
   }
-  
+
   return tips.slice(0, 2); // Show max 2 tips
 };
 
@@ -455,7 +457,7 @@ export default function FunnelsDashboard() {
   const [selectedTemplate, setSelectedTemplate] = useState<FunnelTemplate | null>(null);
   const [newFunnelName, setNewFunnelName] = useState('');
   const [newFunnelDescription, setNewFunnelDescription] = useState('');
-  
+
   // Delete modal state
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [funnelToDelete, setFunnelToDelete] = useState<Funnel | null>(null);
@@ -473,6 +475,8 @@ export default function FunnelsDashboard() {
   const [showRazorpayModal, setShowRazorpayModal] = useState(false);
   const [hasRazorpayConfig, setHasRazorpayConfig] = useState(false);
   const [checkingRazorpay, setCheckingRazorpay] = useState(true);
+  const [isRazorpayModalOpen, setIsRazorpayModalOpen] = useState(false);
+
 
   // Subscription state
   const [subscriptionData, setSubscriptionData] = useState<any>(null);
@@ -489,11 +493,11 @@ export default function FunnelsDashboard() {
       { opacity: 0, y: 50 },
       { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }
     )
-    .fromTo(funnelsRef.current,
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
-      "-=0.3"
-    );
+      .fromTo(funnelsRef.current,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
+        "-=0.3"
+      );
 
     loadFunnels();
     loadTemplates();
@@ -769,7 +773,7 @@ export default function FunnelsDashboard() {
   const filteredAndSortedFunnels = funnels
     .filter(funnel => {
       const matchesSearch = funnel.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          funnel.template.name.toLowerCase().includes(searchTerm.toLowerCase());
+        funnel.template.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = !statusFilter || funnel.status === statusFilter;
       const matchesType = !typeFilter || funnel.template.type === typeFilter;
       return matchesSearch && matchesStatus && matchesType;
@@ -863,7 +867,7 @@ export default function FunnelsDashboard() {
         setSelectedTemplate(null);
         setNewFunnelName('');
         setNewFunnelDescription('');
-        
+
         // Show success toast
         toast.success('🎉 Product created successfully! Opening editor...', {
           duration: 2000,
@@ -873,7 +877,7 @@ export default function FunnelsDashboard() {
             color: '#fff',
           },
         });
-        
+
         // Auto-redirect to edit page after a short delay
         setTimeout(() => {
           window.location.href = `/auth/dashboard/funnels/${newFunnel.id}/customize`;
@@ -881,14 +885,14 @@ export default function FunnelsDashboard() {
       } else {
         const errorData = await response.json().catch(() => ({}));
         console.log('Error response:', errorData);
-        
+
         // Check if payment gateway needs to be configured
         if (errorData.requiresRazorpaySetup) {
           setShowCreateModal(false);
           setShowRazorpayModal(true);
           return;
         }
-        
+
         if (errorData.requiresUpgrade && errorData.error === 'Free tier limit reached') {
           // Show upgrade modal
           console.log('Showing upgrade modal');
@@ -927,7 +931,7 @@ export default function FunnelsDashboard() {
           duration: 2000,
           icon: '✅',
         });
-        
+
         // Auto-redirect to edit page
         setTimeout(() => {
           window.location.href = `/auth/dashboard/funnels/${mockFunnel.id}/customize`;
@@ -961,7 +965,7 @@ export default function FunnelsDashboard() {
       setSelectedTemplate(null);
       setNewFunnelName('');
       setNewFunnelDescription('');
-      
+
       // Auto-redirect to edit page even on error fallback
       setTimeout(() => {
         window.location.href = `/auth/dashboard/funnels/${mockFunnel.id}/customize`;
@@ -976,9 +980,9 @@ export default function FunnelsDashboard() {
 
   const confirmDeleteFunnel = async () => {
     if (!funnelToDelete) return;
-    
+
     setDeleteLoading(true);
-    
+
     try {
       const response = await fetch(`/api/funnels/${funnelToDelete.id}`, {
         method: 'DELETE',
@@ -1024,7 +1028,7 @@ export default function FunnelsDashboard() {
       });
 
       if (response.ok) {
-        setFunnels(funnels.map(f => 
+        setFunnels(funnels.map(f =>
           f.id === funnelId ? { ...f, status: newStatus as any } : f
         ));
         toast.success(`✅ Status updated to ${newStatus.toLowerCase()}`, {
@@ -1032,14 +1036,14 @@ export default function FunnelsDashboard() {
         });
       } else {
         // Fallback to local update
-        setFunnels(funnels.map(f => 
+        setFunnels(funnels.map(f =>
           f.id === funnelId ? { ...f, status: newStatus as any } : f
         ));
       }
     } catch (error) {
       console.error('Error updating funnel status:', error);
       // Fallback to local update
-      setFunnels(funnels.map(f => 
+      setFunnels(funnels.map(f =>
         f.id === funnelId ? { ...f, status: newStatus as any } : f
       ));
     }
@@ -1208,7 +1212,7 @@ export default function FunnelsDashboard() {
           <div className="relative overflow-hidden rounded-2xl p-6 sm:p-8 shadow-2xl bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 mb-6">
             <div className="absolute top-0 right-0 -mt-4 -mr-4 w-40 h-40 bg-white opacity-10 rounded-full"></div>
             <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-32 h-32 bg-white opacity-10 rounded-full"></div>
-            
+
             <div className="relative z-10">
               <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                 <div className="flex-1">
@@ -1216,15 +1220,15 @@ export default function FunnelsDashboard() {
                     <BoltIcon className="h-4 w-4 text-white mr-2" />
                     <span className="text-xs font-semibold text-white uppercase">⚠️ PAYMENT SETUP REQUIRED</span>
                   </div>
-                  
+
                   <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
                     💳 Connect Razorpay to Receive Payments!
                   </h2>
-                  
+
                   <p className="text-base sm:text-lg text-white/90 mb-3">
                     <strong>Important:</strong> You need to connect your Razorpay account to receive payments from customers. All money goes <strong>directly to YOUR bank account</strong>!
                   </p>
-                  
+
                   <div className="flex flex-wrap items-center gap-4 mb-4">
                     <div className="flex items-center bg-white/20 backdrop-blur-sm px-3 py-2 rounded-lg">
                       <CheckCircleIcon className="h-5 w-5 text-white mr-2" />
@@ -1239,22 +1243,23 @@ export default function FunnelsDashboard() {
                       <span className="text-sm text-white font-medium">Zero Platform Fees</span>
                     </div>
                   </div>
-                  
+
                   <p className="text-sm text-white/80 flex items-start">
                     <SparklesIcon className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
                     <span>Without Razorpay, you won't be able to create products or receive any payments from your customers.</span>
                   </p>
                 </div>
-                
+
                 <div className="flex-shrink-0">
-                  <Link
-                    href="/auth/dashboard/razorpay-setup"
+                  <button
+                    onClick={() => setIsRazorpayModalOpen(true)}
                     className="group inline-flex items-center px-6 py-3 bg-white text-red-600 rounded-xl font-bold text-base hover:bg-gray-50 transition-all duration-200 shadow-xl hover:shadow-2xl hover:scale-105"
                   >
                     <BanknotesIcon className="h-5 w-5 mr-2" />
                     Connect Razorpay Now
                     <ArrowTrendingUpIcon className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                  </Link>
+                  </button>
+
                   <p className="text-xs text-white/90 text-center mt-2 font-medium">⚡ Takes only 2 minutes to setup</p>
                 </div>
               </div>
@@ -1289,7 +1294,7 @@ export default function FunnelsDashboard() {
                 <p className="text-sm text-gray-600">Find your products quickly with smart search and filters</p>
               </div>
             </div>
-            
+
             {/* Active Filters Count */}
             {(searchTerm || statusFilter || typeFilter) && (
               <div className="flex items-center gap-2 px-3 py-1 bg-purple-100 rounded-full">
@@ -1395,41 +1400,37 @@ export default function FunnelsDashboard() {
               <span className="text-sm font-medium text-gray-600">Quick filters:</span>
               <button
                 onClick={() => setStatusFilter('ACTIVE')}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
-                  statusFilter === 'ACTIVE' 
-                    ? 'bg-green-100 text-green-700 border border-green-300' 
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${statusFilter === 'ACTIVE'
+                    ? 'bg-green-100 text-green-700 border border-green-300'
                     : 'bg-gray-100 text-gray-600 hover:bg-green-50 hover:text-green-600'
-                }`}
+                  }`}
               >
                 ✅ Active Only
               </button>
               <button
                 onClick={() => setStatusFilter('DRAFT')}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
-                  statusFilter === 'DRAFT' 
-                    ? 'bg-yellow-100 text-yellow-700 border border-yellow-300' 
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${statusFilter === 'DRAFT'
+                    ? 'bg-yellow-100 text-yellow-700 border border-yellow-300'
                     : 'bg-gray-100 text-gray-600 hover:bg-yellow-50 hover:text-yellow-600'
-                }`}
+                  }`}
               >
                 📝 Drafts Only
               </button>
               <button
                 onClick={() => setTypeFilter('SOFTWARE')}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
-                  typeFilter === 'SOFTWARE' 
-                    ? 'bg-blue-100 text-blue-700 border border-blue-300' 
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${typeFilter === 'SOFTWARE'
+                    ? 'bg-blue-100 text-blue-700 border border-blue-300'
                     : 'bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600'
-                }`}
+                  }`}
               >
                 💻 Software
               </button>
               <button
                 onClick={() => setTypeFilter('VIDEOS')}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
-                  typeFilter === 'VIDEOS' 
-                    ? 'bg-red-100 text-red-700 border border-red-300' 
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${typeFilter === 'VIDEOS'
+                    ? 'bg-red-100 text-red-700 border border-red-300'
                     : 'bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-600'
-                }`}
+                  }`}
               >
                 🎥 Videos
               </button>
@@ -1536,10 +1537,10 @@ export default function FunnelsDashboard() {
                     <div className="h-10 mt-3">
                       <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={generateChartData(funnel)}>
-                          <Line 
-                            type="monotone" 
-                            dataKey="views" 
-                            stroke="#8b5cf6" 
+                          <Line
+                            type="monotone"
+                            dataKey="views"
+                            stroke="#8b5cf6"
                             strokeWidth={3}
                             dot={false}
                           />
@@ -1571,10 +1572,10 @@ export default function FunnelsDashboard() {
                     <div className="h-10 mt-3">
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={generateChartData(funnel)}>
-                          <Area 
-                            type="monotone" 
-                            dataKey="revenue" 
-                            stroke="#3b82f6" 
+                          <Area
+                            type="monotone"
+                            dataKey="revenue"
+                            stroke="#3b82f6"
                             fill="#3b82f6"
                             fillOpacity={0.4}
                             strokeWidth={3}
@@ -1607,13 +1608,12 @@ export default function FunnelsDashboard() {
                   </div>
                   <div className="space-y-3">
                     {generateMarketingTips(funnel).map((tip, index) => (
-                      <div key={index} className={`p-4 rounded-xl border-l-4 shadow-sm transition-all duration-300 hover:shadow-md min-w-0 ${
-                        tip.type === 'traffic' ? 'bg-blue-50 border-blue-400 hover:bg-blue-100' :
-                        tip.type === 'conversion' ? 'bg-orange-50 border-orange-400 hover:bg-orange-100' :
-                        tip.type === 'revenue' ? 'bg-green-50 border-green-400 hover:bg-green-100' :
-                        tip.type === 'content' ? 'bg-purple-50 border-purple-400 hover:bg-purple-100' :
-                        'bg-indigo-50 border-indigo-400 hover:bg-indigo-100'
-                      }`}>
+                      <div key={index} className={`p-4 rounded-xl border-l-4 shadow-sm transition-all duration-300 hover:shadow-md min-w-0 ${tip.type === 'traffic' ? 'bg-blue-50 border-blue-400 hover:bg-blue-100' :
+                          tip.type === 'conversion' ? 'bg-orange-50 border-orange-400 hover:bg-orange-100' :
+                            tip.type === 'revenue' ? 'bg-green-50 border-green-400 hover:bg-green-100' :
+                              tip.type === 'content' ? 'bg-purple-50 border-purple-400 hover:bg-purple-100' :
+                                'bg-indigo-50 border-indigo-400 hover:bg-indigo-100'
+                        }`}>
                         <div className="flex items-start gap-3 min-w-0">
                           <div className="p-2 bg-white rounded-lg shadow-sm flex-shrink-0">
                             <span className="text-2xl">{tip.icon}</span>
@@ -1653,16 +1653,15 @@ export default function FunnelsDashboard() {
                             });
                           }
                         }}
-                        className={`p-3 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md ${
-                          funnel.status === 'ACTIVE'
+                        className={`p-3 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md ${funnel.status === 'ACTIVE'
                             ? 'text-purple-600 hover:text-white hover:bg-purple-600 cursor-pointer'
                             : 'text-gray-400 hover:text-white hover:bg-gray-400 cursor-pointer'
-                        }`}
+                          }`}
                         title={funnel.status === 'ACTIVE' ? "View Live Site" : "Publish to view live"}
                       >
                         <EyeIcon className="h-5 w-5" />
                       </button>
-                      
+
                       {/* EDIT BUTTON - Made more prominent */}
                       <button
                         onClick={() => window.location.href = `/auth/dashboard/funnels/${funnel.id}/customize`}
@@ -1676,7 +1675,7 @@ export default function FunnelsDashboard() {
                           <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></div>
                         </div>
                       </button>
-                      
+
                       <button
                         onClick={() => {
                           const url = `${window.location.origin}/f/${funnel.id}`;
@@ -1791,7 +1790,7 @@ export default function FunnelsDashboard() {
                       <p className="text-sm font-semibold text-green-900">Secure & Easy</p>
                     </div>
                     <p className="text-xs text-green-800 text-left">
-                      Your products are securely stored and protected. Payment processing is handled safely with Razorpay. 
+                      Your products are securely stored and protected. Payment processing is handled safely with Razorpay.
                       No technical skills required - we've got you covered!
                     </p>
                   </div>
@@ -1979,7 +1978,7 @@ export default function FunnelsDashboard() {
           <div className="fixed inset-0 z-50 overflow-y-auto">
             {/* Backdrop */}
             <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onClick={cancelDelete}></div>
-            
+
             {/* Modal */}
             <div className="flex min-h-full items-center justify-center p-4">
               <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 transform transition-all">
@@ -2011,7 +2010,7 @@ export default function FunnelsDashboard() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
                     <div className="flex items-start gap-3">
                       <div className="p-1 bg-red-100 rounded-lg">
@@ -2057,13 +2056,20 @@ export default function FunnelsDashboard() {
             </div>
           </div>
         )}
-        
+
         {/* Razorpay Required Modal */}
         <RazorpayRequiredModal
           isOpen={showRazorpayModal}
           onClose={() => setShowRazorpayModal(false)}
         />
       </div>
+      <RazorpayConnectModal
+        isOpen={isRazorpayModalOpen}
+        onClose={() => setIsRazorpayModalOpen(false)}
+        onSuccess={() => {
+          checkRazorpayConfig();
+        }}
+      />
     </DashboardLayout>
   );
 }

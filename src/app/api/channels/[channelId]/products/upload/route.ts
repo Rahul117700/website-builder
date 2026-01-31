@@ -18,7 +18,7 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -37,6 +37,7 @@ export async function POST(
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const coverImage = formData.get('coverImage') as File;
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
     const type = formData.get('type') as string;
@@ -53,11 +54,57 @@ export async function POST(
       );
     }
 
+    if (!coverImage) {
+      return NextResponse.json(
+        { error: 'Cover image is required' },
+        { status: 400 }
+      );
+    }
+
     let fileUrl: string | null = null;
     let videoUrl: string | null = null;
     let fileType: string | null = null;
     let fileSize: number | null = null;
+    let previewImageUrl: string | null = null;
     let uploadResult: any = null;
+    let coverUploadResult: any = null;
+
+    // Handle Cover Image Upload
+    if (coverImage) {
+      const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+      if (!validImageTypes.includes(coverImage.type)) {
+        return NextResponse.json(
+          { error: 'Invalid cover image type. Please upload JPEG, PNG, or WEBP.' },
+          { status: 400 }
+        );
+      }
+
+      const coverExt = coverImage.name.split('.').pop()?.toLowerCase();
+      const coverName = `cover_${session.user.id}_${Date.now()}.${coverExt}`;
+      const uploadsDir = join(process.cwd(), 'public', 'uploads', 'channel-products');
+      // Ensure dir exists (shared with product files)
+      if (!existsSync(uploadsDir)) {
+        await mkdir(uploadsDir, { recursive: true });
+      }
+      const coverPath = join(uploadsDir, coverName);
+      const coverBuffer = Buffer.from(await coverImage.arrayBuffer());
+
+      coverUploadResult = await uploadFileWithFallback(
+        coverBuffer,
+        coverName,
+        coverImage.type,
+        coverPath,
+        'channel-products'
+      );
+
+      if (!coverUploadResult.success) {
+        return NextResponse.json(
+          { error: 'Failed to upload cover image' },
+          { status: 500 }
+        );
+      }
+      previewImageUrl = coverUploadResult.url;
+    }
 
     // Handle file upload if provided
     if (file) {
@@ -120,7 +167,7 @@ export async function POST(
       fileUrl = uploadResult.url;
       fileType = file.type;
       fileSize = file.size;
-      
+
       // For video files, also set videoUrl
       if (file.type.startsWith('video/')) {
         videoUrl = uploadResult.url;
@@ -179,6 +226,7 @@ export async function POST(
         tags: tagsArray,
         isSubscriberOnly,
         isFree,
+        previewImage: previewImageUrl, // Save cover image URL
         published: true,
         status: 'ACTIVE',
       },

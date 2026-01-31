@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { CurrencyDollarIcon, CreditCardIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
+import RazorpayConnectModal from '@/components/modals/RazorpayConnectModal';
+
 
 interface SubscriptionTabProps {
   channel: any;
@@ -13,6 +15,8 @@ interface SubscriptionTabProps {
 export default function SubscriptionTab({ channel, onUpdate }: SubscriptionTabProps) {
   const [hasRazorpayConfig, setHasRazorpayConfig] = useState(false);
   const [checkingPayment, setCheckingPayment] = useState(true);
+  const [isRazorpayModalOpen, setIsRazorpayModalOpen] = useState(false);
+
 
   useEffect(() => {
     checkRazorpayConfig();
@@ -32,7 +36,7 @@ export default function SubscriptionTab({ channel, onUpdate }: SubscriptionTabPr
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
-    
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
@@ -59,7 +63,7 @@ export default function SubscriptionTab({ channel, onUpdate }: SubscriptionTabPr
       toast.error('Please connect Razorpay first to enable subscriptions');
       return;
     }
-    
+
     // Allow toggling if already enabled or if Razorpay is connected
     onUpdate({ subscriptionEnabled: !channel.subscriptionEnabled });
   };
@@ -75,21 +79,19 @@ export default function SubscriptionTab({ channel, onUpdate }: SubscriptionTabPr
           <button
             onClick={handleToggleSubscription}
             disabled={checkingPayment || (!hasRazorpayConfig && !channel.subscriptionEnabled)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              channel.subscriptionEnabled ? 'bg-green-600' : 'bg-gray-300'
-            } ${(!hasRazorpayConfig && !channel.subscriptionEnabled) ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${channel.subscriptionEnabled ? 'bg-green-600' : 'bg-gray-300'
+              } ${(!hasRazorpayConfig && !channel.subscriptionEnabled) ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                channel.subscriptionEnabled ? 'translate-x-6' : 'translate-x-1'
-              }`}
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${channel.subscriptionEnabled ? 'translate-x-6' : 'translate-x-1'
+                }`}
             />
           </button>
         </div>
         <p className="text-xs text-gray-600">
           Allow users to subscribe to your channel for exclusive content
         </p>
-        
+
         {/* Show Connect Razorpay message only when subscription is disabled and Razorpay is not configured */}
         {!hasRazorpayConfig && !channel.subscriptionEnabled && (
           <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
@@ -102,13 +104,14 @@ export default function SubscriptionTab({ channel, onUpdate }: SubscriptionTabPr
                 <p className="text-xs text-amber-800 mb-3">
                   To enable subscriptions, you need to connect your Razorpay account. This allows you to receive subscription payments directly to your bank account.
                 </p>
-                <Link
-                  href="/auth/dashboard/razorpay-setup"
+                <button
+                  onClick={() => setIsRazorpayModalOpen(true)}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-600 to-amber-700 text-white rounded-lg hover:from-amber-700 hover:to-amber-800 transition-all text-xs font-bold shadow-lg"
                 >
                   <CreditCardIcon className="h-4 w-4" />
                   Connect Razorpay
-                </Link>
+                </button>
+
               </div>
             </div>
           </div>
@@ -161,7 +164,17 @@ export default function SubscriptionTab({ channel, onUpdate }: SubscriptionTabPr
           </div>
         </>
       )}
+
+      {/* Razorpay Connect Modal */}
+      <RazorpayConnectModal
+        isOpen={isRazorpayModalOpen}
+        onClose={() => setIsRazorpayModalOpen(false)}
+        onSuccess={() => {
+          checkRazorpayConfig();
+        }}
+      />
     </div>
   );
 }
+
 

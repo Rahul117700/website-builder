@@ -5,7 +5,7 @@ import GithubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { compare } from 'bcryptjs';
-import{ prisma } from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -80,58 +80,51 @@ export const authOptions: NextAuthOptions = {
       console.log('Session input:', session);
       console.log('Token input:', token);
       console.log('User input:', user);
-      
+
       if (session.user && token) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.email = token.email || session.user.email;
-        session.user.name = token.name || session.user.name;
-        
-        // Include currency preferences in session
-        // if (token.preferredCurrency) {
-        //   session.user.preferredCurrency = token.preferredCurrency;
-        // }
-        
+        session.user.id = token.id as string;
+        session.user.role = token.role as any;
+        session.user.email = (token.email as string) || session.user.email;
+        session.user.name = (token.name as string) || session.user.name;
+        session.user.image = (token.picture as string) || session.user.image;
+
         console.log('Session updated with user ID:', session.user.id);
         console.log('Session updated with user role:', session.user.role);
         console.log('Session updated with user email:', session.user.email);
-        // console.log('Session updated with preferred currency:', session.user.preferredCurrency);
+        console.log('Session updated with user image:', session.user.image);
       }
-      
+
       console.log('Final session output:', session);
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       console.log('=== NextAuth JWT callback ===');
       console.log('Token input:', token);
       console.log('User input:', user);
-      
+
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.email = user.email;
         token.name = user.name;
-        // token.preferredCurrency = user.preferredCurrency;
+        token.picture = user.image;
         console.log('JWT updated with user ID:', user.id);
-        console.log('JWT updated with user role:', user.role);
-        console.log('JWT updated with user email:', user.email);
-        // console.log('JWT updated with preferred currency:', user.preferredCurrency);
+      } else if (trigger === 'update' && session?.user?.image) {
+        // Handle session update
+        token.picture = session.user.image;
+        console.log('JWT updated via session update with image:', token.picture);
       } else if (!token.role && token.id) {
         console.log('Fetching user role from DB for token ID:', token.id);
-        // Fetch user role from DB if not present (for refreshes)
-        const dbUser = await prisma.user.findUnique({ where: { id: token.id } });
+        const dbUser = await prisma.user.findUnique({ where: { id: token.id as string } });
         console.log('DB user found:', dbUser);
         if (dbUser) {
           token.role = dbUser.role || 'USER';
           token.email = dbUser.email;
           token.name = dbUser.name;
-          // token.preferredCurrency = dbUser.preferredCurrency || 'USD';
+          token.picture = dbUser.image;
         }
-        console.log('JWT role set to:', token.role);
-        console.log('JWT email set to:', token.email);
-        // console.log('JWT preferred currency set to:', token.preferredCurrency);
       }
-      
+
       console.log('Final JWT output:', token);
       return token;
     },

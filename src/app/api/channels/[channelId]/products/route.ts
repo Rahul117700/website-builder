@@ -110,6 +110,26 @@ export async function POST(
       }
     });
 
+    // Auto-publish channel if this is the first product
+    if (product.channelId && !product.channel.published) {
+      const productCount = await prisma.channelProduct.count({
+        where: { channelId: params.channelId }
+      });
+
+      if (productCount === 1) {
+        // First product created! Auto-publish channel.
+        await prisma.channel.update({
+          where: { id: params.channelId },
+          data: {
+            published: true,
+            // Ensure slug exists if not already (though usually created on setup)
+            slug: product.channel.slug || product.channel.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.random().toString(36).substring(7)
+          }
+        });
+        console.log(`Auto-published channel ${params.channelId} after first product creation`);
+      }
+    }
+
     // Notify subscribers asynchronously
     // In a real app, this should be a background job (e.g., BullMQ, Inngest)
     if (published) {

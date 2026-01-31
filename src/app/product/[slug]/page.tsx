@@ -153,13 +153,17 @@ export default async function ProductDetailsPage({ params }: Props) {
                             <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
                                 <div className="mb-6">
                                     <span className="text-3xl font-bold text-gray-900">
-                                        {product.isFree ? 'Free' : formatPrice(product.price, product.currency)}
+                                        {product.isSubscriberOnly ? (
+                                            <span className="text-indigo-600">Sub Only</span>
+                                        ) : product.isFree || Number(product.price) === 0 ? (
+                                            <span className="text-green-600">Free</span>
+                                        ) : formatPrice(product.price, product.currency)}
                                     </span>
                                 </div>
 
                                 <button className="w-full py-4 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 transition-all hover:scale-[1.02] active:scale-[0.98] mb-4 flex items-center justify-center gap-2">
                                     <ArrowDownTrayIcon className="w-5 h-5" />
-                                    {product.isFree ? 'Download Now' : 'Buy Now'}
+                                    {product.isSubscriberOnly ? 'Subscribe to Access' : (product.isFree || Number(product.price) === 0 ? 'Download Now' : 'Buy Now')}
                                 </button>
 
                                 <p className="text-xs text-center text-gray-500 mb-6">

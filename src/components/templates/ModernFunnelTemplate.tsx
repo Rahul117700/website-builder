@@ -298,12 +298,10 @@ export default function ModernFunnelTemplate({
                                 >
                                     <div className="relative aspect-square bg-gray-100">
                                         {product.customizations?.previewImage ? (
-                                            <Image
+                                            <img
                                                 src={product.customizations.previewImage}
                                                 alt={product.name}
-                                                fill
-                                                className="object-cover group-hover:scale-105 transition-transform"
-                                                unoptimized
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-100 to-pink-100">
@@ -328,28 +326,15 @@ export default function ModernFunnelTemplate({
                                     </div>
                                     <div className="p-3">
                                         <h3 className="font-semibold text-sm line-clamp-2 mb-1">{product.name || 'Digital Product'}</h3>
-                                        <div className="flex items-baseline gap-2">
-                                            {/* Logic: If free -> Show Free. If paid -> Show nothing or 'Subscribe' button context (here just hiding price as requested) */}
-                                            {(product.product?.price === 0 || product.price === 0) ? (
-                                                <p className="text-lg font-bold text-green-600">Free</p>
+                                        <div className="mt-2">
+                                            {/* Logic: If subscriber-only -> Show Sub. If free -> Show Free. If paid -> Show Subscribe badge. */}
+                                            {product.isSubscriberOnly || product.product?.isSubscriberOnly ? (
+                                                <p className="inline-block text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">Sub Only</p>
+                                            ) : (product.product?.price === 0 || product.price === 0 || product.isFree || product.product?.isFree) ? (
+                                                <p className="inline-block text-sm font-bold text-green-600">Free</p>
                                             ) : (
-                                                // User asked to just show "Free" or option to subscribe. 
-                                                // Use a small subscribe button or badge?
-                                                // "in below cards i do not want to shjow the price , jsut show free . or option to subscribe"
-                                                <div className="flex items-center gap-2 w-full">
-                                                    <span className="hidden">Subscribe</span>
-                                                    {/* We can't put a button inside the main Link (invalid HTML).
-                                                        The whole card is a link to the product page where they can subscribe.
-                                                        So we just label it appropriately. */}
-                                                    <p className="text-sm font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded">Subscribe</p>
-                                                </div>
+                                                <p className="inline-block text-xs font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded">Subscribe</p>
                                             )}
-                                            {/* Hide Discount info if price is hidden */}
-                                            {/* {product.customizations?.discountPercent > 0 && (
-                                                <p className="text-xs text-gray-500 line-through">
-                                                    ₹{Math.round((product.product?.price || product.price || 0) * (1 + product.customizations.discountPercent / 100))}
-                                                </p>
-                                            )} */}
                                         </div>
                                     </div>
                                 </Link>
@@ -415,6 +400,6 @@ export default function ModernFunnelTemplate({
                     </div>
                 </div>
             </footer>
-        </div>
+        </div >
     );
 }

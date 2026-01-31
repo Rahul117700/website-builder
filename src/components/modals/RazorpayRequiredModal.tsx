@@ -3,6 +3,8 @@
 import React from 'react';
 import { XMarkIcon, BanknotesIcon, CheckCircleIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
+import RazorpayConnectModal from './RazorpayConnectModal';
+
 
 interface RazorpayRequiredModalProps {
   isOpen: boolean;
@@ -11,21 +13,24 @@ interface RazorpayRequiredModalProps {
 
 export default function RazorpayRequiredModal({ isOpen, onClose }: RazorpayRequiredModalProps) {
   const router = useRouter();
+  const [isConnectModalOpen, setIsConnectModalOpen] = React.useState(false);
+
 
   if (!isOpen) return null;
 
   const handleSetupRazorpay = () => {
-    router.push('/auth/dashboard/razorpay-setup');
+    setIsConnectModalOpen(true);
   };
+
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" 
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
         onClick={onClose}
       ></div>
-      
+
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 transform transition-all">
@@ -78,7 +83,7 @@ export default function RazorpayRequiredModal({ isOpen, onClose }: RazorpayRequi
                     <p className="text-sm text-green-800 mt-1">All money goes straight to YOUR bank - we never hold your funds!</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3 p-4 bg-purple-50 rounded-lg border border-purple-200">
                   <CheckCircleIcon className="h-6 w-6 text-purple-600 flex-shrink-0 mt-0.5" />
                   <div>
@@ -86,7 +91,7 @@ export default function RazorpayRequiredModal({ isOpen, onClose }: RazorpayRequi
                     <p className="text-sm text-purple-800 mt-1">Get your money within minutes of a sale with Razorpay's instant settlements</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <CheckCircleIcon className="h-6 w-6 text-blue-600 flex-shrink-0 mt-0.5" />
                   <div>
@@ -144,8 +149,15 @@ export default function RazorpayRequiredModal({ isOpen, onClose }: RazorpayRequi
             </div>
           </div>
         </div>
+
+        <RazorpayConnectModal
+          isOpen={isConnectModalOpen}
+          onClose={() => setIsConnectModalOpen(false)}
+          onSuccess={() => {
+            onClose(); // Close the required modal as well
+          }}
+        />
       </div>
     </div>
   );
 }
-

@@ -20,6 +20,8 @@ export type ProductCardData = {
     videoUrl?: string; // [NEW] Added for hover preview
     channelSlug?: string; // [NEW] Added for redirect logic
     hasAccess?: boolean; // [NEW] Check if user has access (subscribed)
+    isSubscriberOnly?: boolean;
+    isFree?: boolean;
 };
 
 export type SubscriptionData = {
@@ -224,6 +226,125 @@ export async function searchProducts(query: string): Promise<ProductCardData[]> 
     }
 }
 
+export async function getProductsByTag(tag: string, userId?: string): Promise<ProductCardData[]> {
+    if (!tag) return [];
+
+    try {
+        const products = await prisma.channelProduct.findMany({
+            where: {
+                tags: {
+                    has: tag.toUpperCase()
+                },
+                published: true,
+                status: 'ACTIVE'
+            },
+            include: {
+                channel: {
+                    include: {
+                        user: { select: { image: true, name: true } },
+                        subscribers: userId ? {
+                            where: {
+                                userId: userId,
+                                status: 'ACTIVE'
+                            },
+                            take: 1
+                        } : false
+                    },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 40,
+        });
+
+        return products.map(p => ({
+            ...mapToCardData(p),
+            hasAccess: p.channel.subscribers && p.channel.subscribers.length > 0
+        }));
+    } catch (error) {
+        console.error('Error fetching products by tag:', error);
+        return [];
+    }
+}
+
+export async function getTrendingProducts(tag?: string, userId?: string): Promise<ProductCardData[]> {
+    try {
+        const whereClause: any = {
+            published: true,
+            status: 'ACTIVE'
+        };
+
+        if (tag) {
+            whereClause.tags = {
+                has: tag.toUpperCase()
+            };
+        }
+
+        const products = await prisma.channelProduct.findMany({
+            where: whereClause,
+            include: {
+                channel: {
+                    include: {
+                        user: { select: { image: true, name: true } },
+                        subscribers: userId ? {
+                            where: {
+                                userId: userId,
+                                status: 'ACTIVE'
+                            },
+                            take: 1
+                        } : false
+                    },
+                },
+            },
+            orderBy: { viewCount: 'desc' },
+            take: 20,
+        });
+
+        return products.map(p => ({
+            ...mapToCardData(p),
+            hasAccess: p.channel.subscribers && p.channel.subscribers.length > 0
+        }));
+    } catch (error) {
+        console.error('Error fetching trending products:', error);
+        return [];
+    }
+}
+
+export async function getMarketplaceChannels(): Promise<any[]> {
+    try {
+        const channels = await prisma.channel.findMany({
+            where: {
+                status: 'ACTIVE'
+            },
+            include: {
+                user: { select: { image: true, name: true } },
+                _count: {
+                    select: {
+                        subscribers: { where: { status: 'ACTIVE' } },
+                        products: { where: { published: true, status: 'ACTIVE' } }
+                    }
+                }
+            },
+            orderBy: {
+                subscribers: { _count: 'desc' }
+            },
+            take: 50
+        });
+
+        return channels.map(c => ({
+            id: c.id,
+            name: c.name,
+            slug: c.slug,
+            avatar: c.profileImage || c.user?.image || '',
+            subscribers: c._count.subscribers,
+            productsCount: c._count.products,
+            description: c.description || ''
+        }));
+    } catch (error) {
+        console.error('Error fetching marketplace channels:', error);
+        return [];
+    }
+}
+
 function mapToCardData(product: any): ProductCardData {
     return {
         id: product.id,
@@ -239,6 +360,8 @@ function mapToCardData(product: any): ProductCardData {
         slug: product.slug || '',
         videoUrl: product.videoUrl || undefined, // [NEW] Map video URL
         channelSlug: product.channel.slug, // [NEW] Map channel slug
+        isSubscriberOnly: product.isSubscriberOnly,
+        isFree: product.isFree,
     };
 }
 

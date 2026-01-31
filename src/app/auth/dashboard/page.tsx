@@ -38,10 +38,14 @@ import {
   CreditCardIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
+import RazorpayConnectModal from '@/components/modals/RazorpayConnectModal';
+
 import { gsap } from 'gsap';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FinancialStreamChart, ActivityLogChart } from '@/components/dashboard/DashboardAdvancedCharts';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 interface RecentActivity {
   id: string;
@@ -111,9 +115,13 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [hasRazorpayConfig, setHasRazorpayConfig] = useState(false);
   const [checkingRazorpay, setCheckingRazorpay] = useState(true);
+  const [isRazorpayModalOpen, setIsRazorpayModalOpen] = useState(false);
+
   const [isClient, setIsClient] = useState(false);
   const [subscriptionData, setSubscriptionData] = useState<any>(null);
   const [loadingSubscription, setLoadingSubscription] = useState(true);
+  const [creatingInitialChannel, setCreatingInitialChannel] = useState(false);
+  const router = useRouter();
 
   // GSAP refs
   const heroRef = useRef<HTMLDivElement>(null);
@@ -154,6 +162,57 @@ export default function DashboardPage() {
       clearInterval(statsInterval);
     };
   }, [isClient]);
+
+  // Auto-create channel if none exist
+  useEffect(() => {
+    if (!loading && stats.totalChannels === 0 && !creatingInitialChannel && isClient) {
+      createInitialChannel();
+    }
+  }, [loading, stats.totalChannels, creatingInitialChannel, isClient]);
+
+  const createInitialChannel = async () => {
+    try {
+      setCreatingInitialChannel(true);
+      const loadingToast = toast.loading('Setting up your first channel...');
+
+      // 1. Fetch templates to get a valid template ID
+      const templatesRes = await fetch('/api/channel-templates');
+      if (!templatesRes.ok) throw new Error('Failed to load templates');
+      const templates = await templatesRes.json();
+
+      if (!templates || templates.length === 0) {
+        throw new Error('No templates available');
+      }
+
+      // 2. Create the channel
+      const createRes = await fetch('/api/channels', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: 'My First Channel',
+          description: 'Your personal content hub',
+          templateId: templates[0].id,
+        }),
+      });
+
+      if (!createRes.ok) throw new Error('Failed to create channel');
+
+      const newChannel = await createRes.json();
+
+      toast.dismiss(loadingToast);
+      toast.success('Channel created! Taking you to the editor...');
+
+      // 3. Redirect to customize page
+      router.push(`/auth/dashboard/channels/${newChannel.id}/customize`);
+
+    } catch (error) {
+      console.error('Error auto-creating channel:', error);
+      toast.error('Could not create initial channel');
+      // Keep creatingInitialChannel true to prevent infinite loop of failures
+    }
+  };
 
   const checkRazorpayConfig = async () => {
     try {
@@ -418,12 +477,13 @@ export default function DashboardPage() {
                     <p className="text-xs text-gray-500">Connect Razorpay to enable instant settlements. No middlemen.</p>
                   </div>
                   <div className="flex flex-col items-center gap-1.5">
-                    <Link
-                      href="/auth/dashboard/razorpay-setup"
+                    <button
+                      onClick={() => setIsRazorpayModalOpen(true)}
                       className="px-4 py-2 bg-white text-gray-900 rounded-xl font-bold text-sm hover:bg-gray-100 transition-all duration-300 shadow-lg"
                     >
                       Connect Now
-                    </Link>
+                    </button>
+
                     <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest">2 Min Setup ⚡</span>
                   </div>
                 </div>
@@ -736,7 +796,16 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        <RazorpayConnectModal
+          isOpen={isRazorpayModalOpen}
+          onClose={() => setIsRazorpayModalOpen(false)}
+          onSuccess={() => {
+            checkRazorpayConfig();
+          }}
+        />
       </motion.div>
     </DashboardLayout>
   );
 }
+

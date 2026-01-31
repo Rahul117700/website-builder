@@ -23,6 +23,7 @@ import {
 import Logo from '@/components/Logo';
 import { Sidebar } from './Sidebar';
 import { SubscriptionData, NotificationData } from '@/app/actions/homepage';
+import CreatePlaylistModal from '@/components/modals/CreatePlaylistModal';
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -44,6 +45,8 @@ export default function MainLayout({
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
     const [notiMenuOpen, setNotiMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
+    const [playlistRefreshKey, setPlaylistRefreshKey] = useState(0);
 
     // Close mobile menu on resize
     useEffect(() => {
@@ -69,9 +72,10 @@ export default function MainLayout({
 
     return (
         <div className="min-h-screen bg-white text-gray-900 font-sans">
-            {/* Header */}
-            <header className="fixed top-0 left-0 right-0 z-50 bg-white h-16 flex items-center justify-between px-4 border-b border-gray-100 shadow-sm">
-                <div className="flex items-center gap-4">
+            {/* Header - Premium Global Standard Design */}
+            <header className="fixed top-0 left-0 right-0 z-50 h-[56px] flex items-center justify-between px-4 lg:px-6 backdrop-blur-xl bg-white/95 border-b border-gray-200/50 shadow-sm transition-all duration-300">
+                {/* Left Section - Menu & Logo */}
+                <div className="flex items-center gap-3 lg:gap-4">
                     {!hideSidebar && (
                         <button
                             onClick={() => {
@@ -81,64 +85,81 @@ export default function MainLayout({
                                     setSidebarOpen(!sidebarOpen);
                                 }
                             }}
-                            className="p-2 hover:bg-gray-100 rounded-full"
+                            className="p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95"
                         >
-                            <Bars3Icon className="w-6 h-6" />
+                            <Bars3Icon className="w-5 h-5 text-gray-700" />
                         </button>
                     )}
-                    <Link href="/" className="flex-shrink-0 flex items-center gap-1">
-                        <Logo variant="default" size="sm" showText={false} href="" />
+                    <Link href="/" className="flex-shrink-0 flex items-center gap-2 group">
+                        <div className="transition-transform duration-300 group-hover:scale-105">
+                            <Logo variant="default" size="sm" showText={false} href="" />
+                        </div>
                     </Link>
                 </div>
 
+                {/* Center Section - Enhanced Search Bar */}
                 <div className="flex-1 max-w-2xl mx-4 hidden md:flex">
-                    <form onSubmit={handleSearch} className="flex w-full group">
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search channels, products, videos..."
-                            className="w-full px-4 py-2 border border-gray-300 rounded-l-full focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-inner bg-gray-50 focus:bg-white transition-colors"
-                        />
-                        <button type="submit" className="px-6 bg-gray-100 border border-l-0 border-gray-300 rounded-r-full hover:bg-gray-200 flex items-center justify-center">
-                            <MagnifyingGlassIcon className="w-5 h-5 text-gray-600" />
+                    <form onSubmit={handleSearch} className="flex w-full group relative">
+                        <div className="relative w-full">
+                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-indigo-500 transition-colors duration-200" />
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search channels, products, videos..."
+                                className="w-full pl-10 pr-3 py-2 border-2 border-gray-200 rounded-full focus:border-indigo-500 focus:outline-none bg-gray-50/50 focus:bg-white transition-all duration-300 text-sm placeholder:text-gray-400 hover:border-gray-300 shadow-sm focus:shadow-md"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="ml-2 px-4 py-2 bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900 text-white rounded-full font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 flex items-center justify-center"
+                        >
+                            <MagnifyingGlassIcon className="w-4 h-4" />
                         </button>
                     </form>
                 </div>
 
-                <div className="flex items-center gap-1 sm:gap-2">
-                    <Link href="/auth/dashboard" className="hidden sm:flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-sm font-medium mr-2 transition-colors">
-                        <VideoCameraIcon className="w-5 h-5" />
+                {/* Right Section - Actions */}
+                <div className="flex items-center gap-2 lg:gap-3">
+                    {/* Premium Create Button */}
+                    <Link
+                        href="/auth/dashboard/my-channel"
+                        className="hidden sm:flex items-center gap-2 px-3 lg:px-4 py-2 bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900 text-white rounded-full text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 group"
+                    >
+                        <VideoCameraIcon className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
                         <span>Create</span>
                     </Link>
 
                     {session ? (
                         <>
-                            {/* Notification Bell */}
+                            {/* Enhanced Notification Bell */}
                             <div className="relative">
                                 <button
                                     onClick={() => setNotiMenuOpen(!notiMenuOpen)}
-                                    className="p-2 hover:bg-gray-100 rounded-full relative"
+                                    className="p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 relative"
                                 >
-                                    <BellIcon className="w-6 h-6 text-gray-700" />
+                                    <BellIcon className="w-5 h-5 text-gray-700" />
                                     {notifications && notifications.some(n => !n.read) && (
-                                        <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                                        <>
+                                            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+                                            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
+                                        </>
                                     )}
                                 </button>
 
                                 {notiMenuOpen && (
-                                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 max-h-[400px] overflow-y-auto">
-                                        <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
+                                    <div className="absolute right-0 mt-3 w-80 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 py-2 z-50 animate-in fade-in slide-in-from-top-4 duration-300 max-h-[400px] overflow-y-auto">
+                                        <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white/95 backdrop-blur-xl">
                                             <h3 className="font-bold text-gray-900">Notifications</h3>
-                                            <button onClick={() => setNotiMenuOpen(false)}>
-                                                <XMarkIcon className="w-5 h-5 text-gray-500 cursor-pointer" />
+                                            <button onClick={() => setNotiMenuOpen(false)} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
+                                                <XMarkIcon className="w-5 h-5 text-gray-500" />
                                             </button>
                                         </div>
                                         {notifications && notifications.length > 0 ? (
                                             notifications.map(note => (
-                                                <div key={note.id} className={`px-4 py-3 hover:bg-gray-50 border-b border-gray-50 last:border-0 ${!note.read ? 'bg-indigo-50/50' : ''}`}>
+                                                <div key={note.id} className={`px-4 py-3 hover:bg-gray-50/80 border-b border-gray-50 last:border-0 transition-colors cursor-pointer ${!note.read ? 'bg-indigo-50/30' : ''}`}>
                                                     <div className="flex gap-3">
-                                                        <div className="w-2 h-2 mt-2 rounded-full bg-indigo-600 flex-shrink-0" style={{ opacity: note.read ? 1 : 0 }}></div>
+                                                        <div className={`w-2 h-2 mt-2 rounded-full flex-shrink-0 ${!note.read ? 'bg-indigo-600' : 'bg-gray-300'}`}></div>
                                                         <div>
                                                             <p className="text-sm font-medium text-gray-800 line-clamp-1">{note.title}</p>
                                                             <p className="text-xs text-gray-500 mt-1 line-clamp-2">{note.message}</p>
@@ -156,27 +177,27 @@ export default function MainLayout({
                                 )}
                             </div>
 
-                            {/* Profile */}
+                            {/* Enhanced Profile Menu */}
                             <div className="relative ml-2">
                                 <button
                                     onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                                    className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition-colors"
+                                    className="flex items-center gap-2 p-1 rounded-full hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 transition-all duration-200 hover:scale-105 active:scale-95"
                                 >
                                     {session.user?.image ? (
                                         <img
                                             src={session.user.image}
                                             alt={session.user.name || "User"}
-                                            className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                                            className="w-8 h-8 rounded-full object-cover border-2 border-gray-200 hover:border-indigo-400 transition-colors"
                                         />
                                     ) : (
-                                        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
-                                            <UserIcon className="w-5 h-5" />
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-indigo-600">
+                                            <UserIcon className="w-4 h-4" />
                                         </div>
                                     )}
                                 </button>
 
                                 {profileMenuOpen && (
-                                    <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                                    <div className="absolute right-0 mt-3 w-72 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 py-2 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
                                         <div className="px-4 py-3 border-b border-gray-100 flex items-start gap-3">
                                             {session.user?.image ? (
                                                 <img
@@ -192,9 +213,9 @@ export default function MainLayout({
                                             <div className="min-w-0">
                                                 <p className="text-sm font-bold text-gray-900 truncate">{session.user?.name}</p>
                                                 <p className="text-xs text-gray-500 truncate">{session.user?.email}</p>
-                                                <Link href="/auth/dashboard/my-channel" className="text-xs text-indigo-600 mt-0.5 block hover:underline">
+                                                {/* <Link href="/auth/dashboard/my-channel" className="text-xs text-indigo-600 mt-0.5 block hover:underline">
                                                     View your channel →
-                                                </Link>
+                                                </Link> */}
                                             </div>
                                         </div>
 
@@ -206,22 +227,6 @@ export default function MainLayout({
                                             >
                                                 <FolderIcon className="w-5 h-5" />
                                                 My Channel
-                                            </Link>
-                                            <Link
-                                                href="/auth/dashboard/settings"
-                                                className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                                onClick={() => setProfileMenuOpen(false)}
-                                            >
-                                                <UserCircleIcon className="w-5 h-5" />
-                                                Profile & Details
-                                            </Link>
-                                            <Link
-                                                href="/auth/dashboard/settings"
-                                                className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                                                onClick={() => setProfileMenuOpen(false)}
-                                            >
-                                                <Cog6ToothIcon className="w-5 h-5" />
-                                                Settings
                                             </Link>
                                         </div>
 
@@ -278,19 +283,23 @@ export default function MainLayout({
                             </div>
                         </>
                     ) : (
-                        <Link href="/auth/signin" className="flex items-center gap-2 px-4 py-2 text-indigo-600 border border-gray-200 rounded-full hover:bg-indigo-50 font-medium text-sm ml-2 transition-colors">
-                            <UserCircleIcon className="w-6 h-6" />
+                        <Link href="/auth/signin" className="flex items-center gap-2 px-3 lg:px-4 py-2 bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900 text-white rounded-full font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95">
+                            <UserCircleIcon className="w-4 h-4" />
                             <span className="hidden sm:inline">Sign in</span>
                         </Link>
                     )}
                 </div>
-            </header>
+            </header >
 
             {!hideSidebar && (
                 <>
                     {/* Sidebar - Desktop */}
-                    <aside className={`hidden lg:block fixed left-0 top-16 bottom-0 w-60 bg-white overflow-y-auto no-scrollbar px-3 py-4 transition-transform duration-300 z-40 border-r border-gray-100 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-                        <Sidebar userSubscriptions={userSubscriptions} />
+                    <aside className={`hidden lg:block fixed left-0 top-16 bottom-0 w-60 overflow-hidden transition-transform duration-300 z-40 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                        <Sidebar
+                            userSubscriptions={userSubscriptions}
+                            onCreatePlaylist={() => setIsPlaylistModalOpen(true)}
+                            refreshKey={playlistRefreshKey}
+                        />
                     </aside>
 
                     {/* Sidebar - Mobile Overlay */}
@@ -308,17 +317,28 @@ export default function MainLayout({
                                     </button>
                                     <Logo variant="icon-only" size="sm" showText={false} />
                                 </div>
-                                <Sidebar userSubscriptions={userSubscriptions} />
+                                <Sidebar
+                                    userSubscriptions={userSubscriptions}
+                                    onCreatePlaylist={() => setIsPlaylistModalOpen(true)}
+                                    refreshKey={playlistRefreshKey}
+                                />
                             </aside>
                         </>
                     )}
                 </>
-            )}
+            )
+            }
 
             {/* Main Content */}
             <main className={`pt-16 min-h-screen transition-all duration-300 ${!hideSidebar && sidebarOpen ? 'lg:ml-60' : 'ml-0'}`}>
                 {children}
             </main>
+
+            <CreatePlaylistModal
+                isOpen={isPlaylistModalOpen}
+                onClose={() => setIsPlaylistModalOpen(false)}
+                onPlaylistCreated={() => setPlaylistRefreshKey(prev => prev + 1)}
+            />
         </div>
     );
 }

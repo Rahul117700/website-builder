@@ -1,8 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { PlusIcon, ShoppingBagIcon, XMarkIcon, CloudArrowUpIcon, PencilIcon, TrashIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { PlusIcon, ShoppingBagIcon, XMarkIcon, CloudArrowUpIcon, PencilIcon, TrashIcon, CheckCircleIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 import { ChannelProductType } from '@prisma/client';
+
+// Helper for Portal
+const ModalPortal = ({ children }: { children: React.ReactNode }) => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(children, document.body);
+};
 
 interface ProductsTabProps {
   channel: any;
@@ -21,6 +36,9 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Load products
   useEffect(() => {
@@ -44,12 +62,11 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
   const handleProductUpload = async (formData: FormData) => {
     setUploading(true);
     setUploadProgress(10); // Start progress
-    
+
     try {
-      // Simulate progress for better UX (since fetch doesn't support progress events)
+      // Simulate progress for better UX
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => {
-          // Gradually increase progress, but cap at 90% until upload completes
           if (prev < 90) {
             return Math.min(prev + 5, 90);
           }
@@ -63,20 +80,19 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
       });
 
       clearInterval(progressInterval);
-      setUploadProgress(95); // Almost done
+      setUploadProgress(95);
 
       const result = await response.json();
 
       if (!response.ok) {
         throw new Error(result.error || 'Failed to upload product');
       }
-      
-      setUploadProgress(100); // Complete
-      
-      // Small delay to show 100% before closing
+
+      setUploadProgress(100);
+
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Refresh products list
+
+      // Refresh products
       const productsResponse = await fetch(`/api/channels/${channel.id}/products`);
       if (productsResponse.ok) {
         const updatedProducts = await productsResponse.json();
@@ -85,7 +101,9 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
 
       setShowUploadModal(false);
       setUploadProgress(0);
-      // Show success modal
+      setShowUploadModal(false);
+      setUploadProgress(0);
+      setSuccessMessage('Product uploaded successfully!');
       setShowSuccessModal(true);
     } catch (error) {
       console.error('Error uploading product:', error);
@@ -103,14 +121,21 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
     setShowEditModal(true);
   };
 
-  const handleDelete = async (productId: string) => {
-    if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
-      return;
-    }
+  const handleDelete = (productId: string) => {
+    setProductToDelete(productId);
+    setShowDeleteConfirmationModal(true);
+  };
 
-    setDeleting(productId);
+  const confirmDelete = async () => {
+    if (!productToDelete) return;
+
+    setDeleting(productToDelete);
+    setShowDeleteConfirmationModal(false); // Close confirmation immediately or keep open with loading state? Let's close and show loading on button if we kept it, but here we used native so let's close.
+    // Actually, common pattern is to keep it open with loading, OR close and show global loading.
+    // Let's close it and show deleting spinner in the list as before.
+
     try {
-      const response = await fetch(`/api/channels/${channel.id}/products/${productId}`, {
+      const response = await fetch(`/api/channels/${channel.id}/products/${productToDelete}`, {
         method: 'DELETE',
       });
 
@@ -119,13 +144,13 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
         throw new Error(result.error || 'Failed to delete product');
       }
 
-      // Refresh products list
       const productsResponse = await fetch(`/api/channels/${channel.id}/products`);
       if (productsResponse.ok) {
         const updatedProducts = await productsResponse.json();
         setProducts(updatedProducts);
       }
 
+      setSuccessMessage('Product deleted successfully!');
       setShowSuccessModal(true);
     } catch (error) {
       console.error('Error deleting product:', error);
@@ -134,6 +159,7 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
       setShowErrorModal(true);
     } finally {
       setDeleting(null);
+      setProductToDelete(null);
     }
   };
 
@@ -175,14 +201,14 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
               <div className="flex items-start justify-between mb-2">
                 <h4 className="font-semibold text-gray-900 line-clamp-2">{product.title}</h4>
                 <div className="flex gap-2">
-                  <button 
+                  <button
                     onClick={() => handleEdit(product)}
                     className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
                     title="Edit product"
                   >
                     <PencilIcon className="h-4 w-4" />
                   </button>
-                  <button 
+                  <button
                     onClick={() => handleDelete(product.id)}
                     disabled={deleting === product.id}
                     className="p-1 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
@@ -203,15 +229,16 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
                 <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
               )}
               <div className="flex items-center justify-between">
-                {!channel.subscriptionEnabled && (
-                  <span className="text-lg font-bold text-gray-900">
-                    {product.currency === 'USD' ? '$' : product.currency === 'EUR' ? '€' : '₹'}
-                    {Number(product.price).toFixed(2)}
+                <div className="flex gap-2">
+                  <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+                    {product.type}
                   </span>
-                )}
-                <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
-                  {product.type}
-                </span>
+                  {product.tags && product.tags.length > 0 && (
+                    <span className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-700 font-medium">
+                      {product.tags[0]}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           ))}
@@ -259,7 +286,6 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
           product={editingProduct}
           channel={channel}
           onUpdate={async () => {
-            // Refresh products list
             const productsResponse = await fetch(`/api/channels/${channel.id}/products`);
             if (productsResponse.ok) {
               const updatedProducts = await productsResponse.json();
@@ -267,17 +293,19 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
             }
             setShowEditModal(false);
             setEditingProduct(null);
+            setShowEditModal(false);
+            setEditingProduct(null);
+            setSuccessMessage('Product updated successfully!');
             setShowSuccessModal(true);
           }}
         />
       )}
 
-      {/* Success Modal */}
       {showSuccessModal && (
         <SuccessModal
           isOpen={showSuccessModal}
           onClose={() => setShowSuccessModal(false)}
-          message="Product uploaded successfully!"
+          message={successMessage || "Product uploaded successfully!"}
         />
       )}
 
@@ -287,6 +315,18 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
           isOpen={showErrorModal}
           onClose={() => setShowErrorModal(false)}
           message={errorMessage}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirmationModal && (
+        <DeleteConfirmationModal
+          isOpen={showDeleteConfirmationModal}
+          onClose={() => {
+            setShowDeleteConfirmationModal(false);
+            setProductToDelete(null);
+          }}
+          onConfirm={confirmDelete}
         />
       )}
     </div>
@@ -313,11 +353,15 @@ function ProductUploadModal({
     title: '',
     description: '',
     type: 'DOCUMENTS' as ChannelProductType,
-    tags: '',
     isSubscriberOnly: false,
+    tags: '',
   });
   const [file, setFile] = useState<File | null>(null);
+  const [coverImage, setCoverImage] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   useEffect(() => {
     if (!isOpen) {
@@ -325,27 +369,30 @@ function ProductUploadModal({
         title: '',
         description: '',
         type: 'DOCUMENTS' as ChannelProductType,
-        tags: '',
         isSubscriberOnly: false,
+        tags: '',
       });
       setFile(null);
       setPreview(null);
+      setCoverImage(null);
+      setCoverPreview(null);
     }
   }, [isOpen]);
 
-  const [errorMessage, setErrorMessage] = useState('');
-  const [showErrorModal, setShowErrorModal] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validation - these will be handled by the error modal
+
     if (!formData.title.trim()) {
       setErrorMessage('Please enter a product title');
       setShowErrorModal(true);
       return;
     }
 
+    if (!coverImage) {
+      setErrorMessage('Please upload a cover image');
+      setShowErrorModal(true);
+      return;
+    }
 
     if (!file && !formData.description.trim()) {
       setErrorMessage('Please either upload a file or provide a description');
@@ -353,39 +400,68 @@ function ProductUploadModal({
       return;
     }
 
-    // Validate file size if file exists
     if (file && file.size > 500 * 1024 * 1024) {
       setErrorMessage('File size exceeds 500MB limit');
       setShowErrorModal(true);
       return;
     }
-    
+
     const uploadFormData = new FormData();
     uploadFormData.append('title', formData.title.trim());
     uploadFormData.append('description', formData.description.trim());
     uploadFormData.append('type', formData.type);
     uploadFormData.append('price', '0');
     uploadFormData.append('currency', 'INR');
-    uploadFormData.append('tags', formData.tags);
+    uploadFormData.append('tags', formData.tags); // Selected tag
     uploadFormData.append('isFree', 'true');
     uploadFormData.append('isSubscriberOnly', formData.isSubscriberOnly.toString());
-    
+
     if (file) {
       uploadFormData.append('file', file);
+    }
+
+    if (coverImage) {
+      uploadFormData.append('coverImage', coverImage);
     }
 
     onUpload(uploadFormData);
   };
 
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      const maxSize = 5 * 1024 * 1024; // 5MB for images
+      if (selectedFile.size > maxSize) {
+        setErrorMessage(`Cover image size exceeds 5MB limit`);
+        setShowErrorModal(true);
+        e.target.value = '';
+        return;
+      }
+
+      if (!selectedFile.type.startsWith('image/')) {
+        setErrorMessage(`Please upload a valid image file (JPG, PNG, WEBP)`);
+        setShowErrorModal(true);
+        e.target.value = '';
+        return;
+      }
+
+      setCoverImage(selectedFile);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverPreview(reader.result as string);
+      };
+      reader.readAsDataURL(selectedFile);
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      // Validate file size
       const maxSize = 500 * 1024 * 1024; // 500MB
       if (selectedFile.size > maxSize) {
         setErrorMessage(`File size (${(selectedFile.size / 1024 / 1024).toFixed(2)}MB) exceeds 500MB limit`);
         setShowErrorModal(true);
-        e.target.value = ''; // Clear the input
+        e.target.value = '';
         return;
       }
 
@@ -405,239 +481,255 @@ function ProductUploadModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl bg-white">
-        {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between p-6 border-b border-gray-200 bg-white">
-          <h2 className="text-2xl font-bold text-gray-900">Add New Product</h2>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg transition-colors text-gray-500 hover:bg-gray-100"
-          >
-            <XMarkIcon className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700">
-              Product Title *
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 placeholder-gray-400"
-              placeholder="Enter product title"
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700">
-              Description
-            </label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={4}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 placeholder-gray-400"
-              placeholder="Describe your product"
-            />
-          </div>
-
-          {/* Type */}
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700">
-              Product Type *
-            </label>
-            <select
-              required
-              value={formData.type}
-              onChange={(e) => setFormData({ ...formData, type: e.target.value as ChannelProductType })}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 bg-white"
+    <ModalPortal>
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+        <div className="relative w-full max-w-5xl max-h-[95vh] overflow-y-auto rounded-3xl shadow-2xl bg-white border border-gray-100 flex flex-col">
+          {/* Header */}
+          <div className="sticky top-0 flex items-center justify-between px-8 py-6 border-b border-gray-100 bg-white/80 backdrop-blur-md z-10">
+            <div>
+              <h2 className="text-2xl font-black text-gray-900 tracking-tight">Add New Product</h2>
+              <p className="text-sm text-gray-500 mt-1">Share your content with the world</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-xl transition-all text-gray-400 hover:bg-gray-100 hover:text-gray-900"
             >
-              <option value="DOCUMENTS">Documents</option>
-              <option value="VIDEOS">Videos</option>
-              <option value="IMAGES">Images</option>
-              <option value="SOFTWARE">Software</option>
-              <option value="CODE">Code</option>
-              <option value="COURSES">Courses</option>
-              <option value="TEMPLATES">Templates</option>
-              <option value="OTHER">Other</option>
-            </select>
+              <XMarkIcon className="w-6 h-6" />
+            </button>
           </div>
 
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+            <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-          {/* Subscriber Only Checkbox */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="isSubscriberOnly"
-                checked={formData.isSubscriberOnly}
-                onChange={(e) => setFormData({ ...formData, isSubscriberOnly: e.target.checked })}
-                className="w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
-              />
-              <label htmlFor="isSubscriberOnly" className="text-sm font-medium text-gray-700">
-                Subscriber Only
-              </label>
-            </div>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <p className="text-sm text-blue-800">
-                <span className="font-semibold">💡 Important:</span> If this checkbox is <span className="font-semibold">not selected</span>, the product will be <span className="font-semibold">free for all users</span> to view and access.
-              </p>
-            </div>
-          </div>
+              {/* Left Column: Details */}
+              <div className="space-y-8">
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-gray-900">Product Title <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 placeholder-gray-400 bg-gray-50/50 transition-all font-medium"
+                    placeholder="e.g., Ultimate Web Development Course"
+                  />
+                </div>
 
-          {/* Tags */}
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700">
-              Tags (comma-separated)
-            </label>
-            <input
-              type="text"
-              value={formData.tags}
-              onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-              placeholder="tag1, tag2, tag3"
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 placeholder-gray-400"
-            />
-          </div>
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-gray-900">Description</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={4}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 placeholder-gray-400 bg-gray-50/50 transition-all resize-none"
+                    placeholder="Tell your audience what makes this product special..."
+                  />
+                  <p className="text-right text-xs text-gray-400 mt-2">{formData.description.length} characters</p>
+                </div>
 
-          {/* File Upload */}
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-700">
-              Product File
-            </label>
-            <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-              uploading 
-                ? 'border-purple-500 bg-purple-50' 
-                : 'border-gray-300 hover:border-gray-400'
-            }`}>
-              <input
-                type="file"
-                id="file-upload"
-                onChange={handleFileChange}
-                className="hidden"
-                accept=".zip,.pdf,.jpg,.jpeg,.png,.mp4,.avi,.mov,.webm,.doc,.docx,.txt,.json,.js,.css,.html"
-                disabled={uploading}
-              />
-              <label
-                htmlFor="file-upload"
-                className={`flex flex-col items-center gap-2 ${uploading ? 'cursor-not-allowed opacity-75' : 'cursor-pointer'}`}
-              >
-                {uploading ? (
-                  <>
-                    <div className="relative w-16 h-16">
-                      <svg className="transform -rotate-90 w-16 h-16">
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="28"
-                          stroke="#e5e7eb"
-                          strokeWidth="4"
-                          fill="none"
-                        />
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="28"
-                          stroke="#9333ea"
-                          strokeWidth="4"
-                          fill="none"
-                          strokeDasharray={`${2 * Math.PI * 28}`}
-                          strokeDashoffset={`${2 * Math.PI * 28 * (1 - uploadProgress / 100)}`}
-                          strokeLinecap="round"
-                          className="transition-all duration-300"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-xs font-bold text-purple-600">{uploadProgress}%</span>
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-bold mb-2 text-gray-900">Product Type <span className="text-red-500">*</span></label>
+                    <div className="relative">
+                      <select
+                        required
+                        value={formData.type}
+                        onChange={(e) => setFormData({ ...formData, type: e.target.value as ChannelProductType })}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 bg-gray-50/50 appearance-none font-medium cursor-pointer"
+                      >
+                        <option value="VIDEOS">Video Content</option>
+                        <option value="DOCUMENTS">Document / PDF</option>
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                       </div>
                     </div>
-                    <span className="text-sm text-purple-700 font-semibold">
-                      Uploading video...
-                    </span>
-                    <span className="text-xs text-purple-600">
-                      Please don't close this window
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <CloudArrowUpIcon className="w-12 h-12 text-gray-400" />
-                    <span className="text-sm text-gray-600 font-medium">
-                      {file ? file.name : 'Click to upload or drag and drop'}
-                    </span>
-                    {file && (
-                      <span className="text-xs text-gray-500">
-                        Size: {(file.size / 1024 / 1024).toFixed(2)} MB
-                      </span>
-                    )}
-                    <span className="text-xs text-gray-500">
-                      Max 500MB (Videos Supported!)
-                    </span>
-                  </>
-                )}
-              </label>
-              
-              {/* Upload Progress Bar */}
-              {uploading && (
-                <div className="mt-4 w-full">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-medium text-gray-700">Upload Progress</span>
-                    <span className="text-xs font-bold text-purple-600">{uploadProgress}%</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-300 ease-out"
-                      style={{ width: `${uploadProgress}%` }}
-                    ></div>
-                  </div>
-                </div>
-              )}
-              
-              {preview && !uploading && (
-                <div className="mt-4">
-                  <img src={preview} alt="Preview" className="max-w-full max-h-48 rounded-lg mx-auto" />
-                </div>
-              )}
-            </div>
-          </div>
 
-          {/* Actions */}
-          <div className="flex gap-4 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-6 py-3 rounded-lg font-semibold transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
-              disabled={uploading}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-6 py-3 rounded-lg font-semibold text-white transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed bg-gray-900 hover:bg-black flex items-center justify-center gap-2"
-              disabled={uploading || !formData.title.trim()}
-            >
-              {uploading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Uploading...
-                </>
-              ) : (
-                'Upload Product'
-              )}
-            </button>
-          </div>
-        </form>
+                  <div>
+                    <label className="block text-sm font-bold mb-2 text-gray-900">Product Tag</label>
+                    <div className="relative">
+                      <select
+                        value={formData.tags}
+                        onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 bg-gray-50/50 appearance-none font-medium cursor-pointer"
+                      >
+                        <option value="">No Tag</option>
+                        <option value="MUSIC">🎵 Music</option>
+                        <option value="SPORTS">🏆 Sports</option>
+                        <option value="GAMING">🎮 Gaming</option>
+                        <option value="NEWS">📰 News</option>
+                        <option value="LEARNING">💡 Learning</option>
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-gray-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h4 className="text-sm font-bold text-gray-900">Access Control</h4>
+                      <p className="text-xs text-gray-500 mt-0.5">Who can view this content?</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-2xl p-1">
+                    <label className="flex items-center p-3 rounded-xl cursor-pointer hover:bg-white transition-all group">
+                      <input
+                        type="checkbox"
+                        checked={!formData.isSubscriberOnly}
+                        onChange={(e) => setFormData({ ...formData, isSubscriberOnly: !e.target.checked })}
+                        className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                      />
+                      <div className="ml-3">
+                        <span className="block text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">Free for Everyone</span>
+                        <span className="block text-xs text-gray-500">Visible to all visitors</span>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center p-3 rounded-xl cursor-pointer hover:bg-white transition-all group">
+                      <input
+                        type="checkbox"
+                        checked={formData.isSubscriberOnly}
+                        onChange={(e) => setFormData({ ...formData, isSubscriberOnly: e.target.checked })}
+                        className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                      />
+                      <div className="ml-3">
+                        <span className="block text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">Subscribers Only</span>
+                        <span className="block text-xs text-gray-500">Premium content for members</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Media */}
+              <div className="space-y-8">
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-gray-900">Cover Image <span className="text-red-500">*</span></label>
+                  <div className="group relative w-full aspect-video rounded-2xl overflow-hidden border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-50 hover:border-primary/50 transition-all">
+                    {coverPreview ? (
+                      <>
+                        <img src={coverPreview} alt="Cover Preview" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <p className="text-white font-medium text-sm">Click to change</p>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
+                        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                          <CloudArrowUpIcon className="w-6 h-6 text-gray-400" />
+                        </div>
+                        <span className="text-sm font-semibold text-gray-600">Upload Thumbnail</span>
+                        <span className="text-xs text-gray-400 mt-1">1280x720 (16:9) recommended</span>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      id="cover-upload-new"
+                      onChange={handleCoverImageChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      accept="image/png, image/jpeg, image/jpg, image/webp"
+                      required={!coverImage}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-gray-900">Product File</label>
+                  <div className={`relative w-full rounded-2xl overflow-hidden border-2 border-dashed transition-all ${uploading ? 'border-primary bg-primary/5' : 'border-gray-200 bg-gray-50/50 hover:bg-gray-50 hover:border-primary/50'}`}>
+                    <input
+                      type="file"
+                      id="file-upload-new"
+                      onChange={handleFileChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      accept=".zip,.pdf,.jpg,.jpeg,.png,.mp4,.avi,.mov,.webm,.doc,.docx,.txt,.json,.js,.css,.html"
+                      disabled={uploading}
+                    />
+
+                    <div className="p-8 text-center min-h-[200px] flex flex-col items-center justify-center">
+                      {uploading ? (
+                        <div className="w-full max-w-xs">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-xs font-bold text-primary uppercase tracking-wider">Uploading</span>
+                            <span className="text-xs font-bold text-primary">{uploadProgress}%</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div className="bg-primary h-2 rounded-full transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }}></div>
+                          </div>
+                          <p className="text-center text-xs text-gray-500 mt-3 animate-pulse">Please keep this window open</p>
+                        </div>
+                      ) : file ? (
+                        <>
+                          <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mb-4">
+                            <CheckCircleIcon className="w-8 h-8 text-green-600" />
+                          </div>
+                          <h4 className="text-gray-900 font-bold mb-1 truncate max-w-full px-4">{file.name}</h4>
+                          <p className="text-xs text-gray-500 mb-4">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                          <button type="button" className="text-sm font-medium text-red-500 hover:text-red-700 z-20 relative" onClick={(e) => {
+                            e.stopPropagation();
+                            setFile(null);
+                            setPreview(null);
+                          }}>
+                            Remove File
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                            <CloudArrowUpIcon className="w-8 h-8 text-gray-400 group-hover:text-primary" />
+                          </div>
+                          <h4 className="text-gray-900 font-bold mb-1">Upload Product File</h4>
+                          <p className="text-sm text-gray-500">Drag & drop or click to browse</p>
+                          <p className="text-xs text-gray-400 mt-4 border border-gray-200 rounded-full px-3 py-1">Max 500MB • Video supported</p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer / Guidelines */}
+            <div className="px-8 pb-8">
+              <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5 mb-6">
+                <h4 className="flex items-center gap-2 text-sm font-bold text-gray-900 mb-2">
+                  <ShieldCheckIcon className="w-5 h-5 text-gray-600" />
+                  3. Copyright & DMCA Compliance
+                </h4>
+                <p className="text-xs leading-relaxed text-gray-600">
+                  By uploading content to this platform, you certify that you own the rights to this content or have explicit permission to use it.
+                  Uploading copyrighted material without permission is a violation of our terms and may result in account termination.
+                  Please ensure your content adheres to all community guidelines and local laws.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-8 py-4 rounded-xl font-bold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  disabled={uploading}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-8 py-4 rounded-xl font-bold text-white bg-gray-900 hover:bg-black transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                  disabled={uploading || !formData.title.trim()}
+                >
+                  {uploading ? 'Processing...' : 'Publish Product'}
+                  {!uploading && <CloudArrowUpIcon className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </ModalPortal>
   );
 }
 
@@ -664,39 +756,37 @@ function SuccessModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="relative w-full max-w-md rounded-2xl shadow-2xl bg-white animate-in fade-in zoom-in duration-200">
-        <div className="p-6">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <CheckCircleIcon className="h-12 w-12 text-green-500" />
+    <ModalPortal>
+      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div className="relative w-full max-w-md rounded-2xl shadow-2xl bg-white animate-in fade-in zoom-in duration-200">
+          <div className="p-6">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <CheckCircleIcon className="h-12 w-12 text-green-500" />
+              </div>
+              <div className="ml-4 flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Success!</h3>
+                <p className="text-sm text-gray-600">{message}</p>
+              </div>
+              <button
+                onClick={onClose}
+                className="ml-4 flex-shrink-0 p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
             </div>
-            <div className="ml-4 flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                Success!
-              </h3>
-              <p className="text-sm text-gray-600">
-                {message}
-              </p>
-            </div>
+          </div>
+          <div className="px-6 py-4 bg-gray-50 rounded-b-2xl flex justify-end">
             <button
               onClick={onClose}
-              className="ml-4 flex-shrink-0 p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              className="px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-black transition-colors"
             >
-              <XMarkIcon className="h-5 w-5" />
+              OK
             </button>
           </div>
         </div>
-        <div className="px-6 py-4 bg-gray-50 rounded-b-2xl flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-black transition-colors"
-          >
-            OK
-          </button>
-        </div>
       </div>
-    </div>
+    </ModalPortal>
   );
 }
 
@@ -713,41 +803,39 @@ function ErrorModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="relative w-full max-w-md rounded-2xl shadow-2xl bg-white animate-in fade-in zoom-in duration-200">
-        <div className="p-6">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">
-              <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
-                <XMarkIcon className="h-8 w-8 text-red-600" />
+    <ModalPortal>
+      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div className="relative w-full max-w-md rounded-2xl shadow-2xl bg-white animate-in fade-in zoom-in duration-200">
+          <div className="p-6">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
+                  <XMarkIcon className="h-8 w-8 text-red-600" />
+                </div>
               </div>
+              <div className="ml-4 flex-1">
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Error</h3>
+                <p className="text-sm text-gray-600">{message}</p>
+              </div>
+              <button
+                onClick={onClose}
+                className="ml-4 flex-shrink-0 p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
             </div>
-            <div className="ml-4 flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                Error
-              </h3>
-              <p className="text-sm text-gray-600">
-                {message}
-              </p>
-            </div>
+          </div>
+          <div className="px-6 py-4 bg-red-50 rounded-b-2xl flex justify-end">
             <button
               onClick={onClose}
-              className="ml-4 flex-shrink-0 p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+              className="px-6 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
             >
-              <XMarkIcon className="h-5 w-5" />
+              OK
             </button>
           </div>
         </div>
-        <div className="px-6 py-4 bg-gray-50 rounded-b-2xl flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-6 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
-          >
-            OK
-          </button>
-        </div>
       </div>
-    </div>
+    </ModalPortal>
   );
 }
 
@@ -769,8 +857,8 @@ function ProductEditModal({
     title: product?.title || '',
     description: product?.description || '',
     type: product?.type || 'DOCUMENTS' as ChannelProductType,
-    tags: product?.tags?.join(', ') || '',
     isSubscriberOnly: product?.isSubscriberOnly || false,
+    tags: product?.tags?.[0] || '',
   });
   const [updating, setUpdating] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -782,15 +870,15 @@ function ProductEditModal({
         title: product.title || '',
         description: product.description || '',
         type: product.type || 'DOCUMENTS' as ChannelProductType,
-        tags: product.tags?.join(', ') || '',
         isSubscriberOnly: product.isSubscriberOnly || false,
+        tags: product.tags?.[0] || '',
       });
     }
   }, [isOpen, product]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim()) {
       setErrorMessage('Please enter a product title');
       setShowErrorModal(true);
@@ -808,7 +896,7 @@ function ProductEditModal({
           title: formData.title.trim(),
           description: formData.description.trim(),
           type: formData.type,
-          tags: formData.tags.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag),
+          tags: formData.tags ? [formData.tags] : [],
           isSubscriberOnly: formData.isSubscriberOnly,
         }),
       });
@@ -832,141 +920,186 @@ function ProductEditModal({
   if (!isOpen) return null;
 
   return (
-    <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-        <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl bg-white">
+    <ModalPortal>
+      <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+        <div className="relative w-full max-w-5xl max-h-[95vh] overflow-y-auto rounded-3xl shadow-2xl bg-white border border-gray-100 flex flex-col">
           {/* Header */}
-          <div className="sticky top-0 flex items-center justify-between p-6 border-b border-gray-200 bg-white">
-            <h2 className="text-2xl font-bold text-gray-900">Edit Product</h2>
+          <div className="sticky top-0 flex items-center justify-between px-8 py-6 border-b border-gray-100 bg-white/80 backdrop-blur-md z-10">
+            <div>
+              <h2 className="text-2xl font-black text-gray-900 tracking-tight">Edit Product</h2>
+              <p className="text-sm text-gray-500 mt-1">Update your content details</p>
+            </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg transition-colors text-gray-500 hover:bg-gray-100"
+              className="p-2 rounded-xl transition-all text-gray-400 hover:bg-gray-100 hover:text-gray-900"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Title */}
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-700">
-                Product Title *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 placeholder-gray-400"
-                placeholder="Enter product title"
-              />
-            </div>
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+            <div className="p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-700">
-                Description
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={4}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 placeholder-gray-400"
-                placeholder="Describe your product"
-              />
-            </div>
+              {/* Left Column: Details */}
+              <div className="space-y-8">
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-gray-900">Product Title <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 placeholder-gray-400 bg-gray-50/50 transition-all font-medium"
+                    placeholder="Enter product title"
+                  />
+                </div>
 
-            {/* Type */}
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-700">
-                Product Type *
-              </label>
-              <select
-                required
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value as ChannelProductType })}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 bg-white"
-              >
-                <option value="DOCUMENTS">Documents</option>
-                <option value="VIDEOS">Videos</option>
-                <option value="IMAGES">Images</option>
-                <option value="SOFTWARE">Software</option>
-                <option value="CODE">Code</option>
-                <option value="COURSES">Courses</option>
-                <option value="TEMPLATES">Templates</option>
-                <option value="OTHER">Other</option>
-              </select>
-            </div>
-
-            {/* Subscriber Only Checkbox */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="editIsSubscriberOnly"
-                  checked={formData.isSubscriberOnly}
-                  onChange={(e) => setFormData({ ...formData, isSubscriberOnly: e.target.checked })}
-                  className="w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
-                />
-                <label htmlFor="editIsSubscriberOnly" className="text-sm font-medium text-gray-700">
-                  Subscriber Only
-                </label>
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-gray-900">Description</label>
+                  <textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={6}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 placeholder-gray-400 bg-gray-50/50 transition-all resize-none"
+                    placeholder="Describe your product..."
+                  />
+                  <p className="text-right text-xs text-gray-400 mt-2">{formData.description.length} characters</p>
+                </div>
               </div>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p className="text-sm text-blue-800">
-                  <span className="font-semibold">💡 Important:</span> If this checkbox is <span className="font-semibold">not selected</span>, the product will be <span className="font-semibold">free for all users</span> to view and access.
+
+              {/* Right Column: Settings */}
+              <div className="space-y-8">
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-gray-900">Product Type <span className="text-red-500">*</span></label>
+                  <div className="relative">
+                    <select
+                      required
+                      value={formData.type}
+                      onChange={(e) => setFormData({ ...formData, type: e.target.value as ChannelProductType })}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 bg-gray-50/50 appearance-none font-medium cursor-pointer"
+                    >
+                      <option value="VIDEOS">Videos</option>
+                      <option value="DOCUMENTS">Documents</option>
+                      <option value="IMAGES">Images</option>
+                      <option value="SOFTWARE">Software</option>
+                      <option value="COURSES">Courses</option>
+                      <option value="TEMPLATES">Templates</option>
+                      <option value="OTHER">Other</option>
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold mb-2 text-gray-900">Product Tag</label>
+                  <div className="relative">
+                    <select
+                      value={formData.tags}
+                      onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 bg-gray-50/50 appearance-none font-medium cursor-pointer"
+                    >
+                      <option value="">No Tag</option>
+                      <option value="MUSIC">🎵 Music</option>
+                      <option value="SPORTS">🏆 Sports</option>
+                      <option value="GAMING">🎮 Gaming</option>
+                      <option value="NEWS">📰 News</option>
+                      <option value="LEARNING">💡 Learning</option>
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-gray-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h4 className="text-sm font-bold text-gray-900">Access Control</h4>
+                      <p className="text-xs text-gray-500 mt-0.5">Who can view this content?</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-2xl p-1">
+                    <label className="flex items-center p-3 rounded-xl cursor-pointer hover:bg-white transition-all group">
+                      <input
+                        type="checkbox"
+                        checked={!formData.isSubscriberOnly}
+                        onChange={(e) => setFormData({ ...formData, isSubscriberOnly: !e.target.checked })}
+                        className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                      />
+                      <div className="ml-3">
+                        <span className="block text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">Free for Everyone</span>
+                        <span className="block text-xs text-gray-500">Visible to all visitors</span>
+                      </div>
+                    </label>
+
+                    <label className="flex items-center p-3 rounded-xl cursor-pointer hover:bg-white transition-all group">
+                      <input
+                        type="checkbox"
+                        checked={formData.isSubscriberOnly}
+                        onChange={(e) => setFormData({ ...formData, isSubscriberOnly: e.target.checked })}
+                        className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                      />
+                      <div className="ml-3">
+                        <span className="block text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">Subscribers Only</span>
+                        <span className="block text-xs text-gray-500">Premium content for members</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Media Placeholder (Read-only for now) */}
+                <div className="pt-4 border-t border-gray-100">
+                  <h4 className="text-sm font-bold text-gray-900 mb-4">Media & Files</h4>
+                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 text-center">
+                    <p className="text-sm text-gray-500">
+                      To update the product file or cover image, please delete this product and upload a new one.
+                      <br /><span className="text-xs opacity-75">(File replacement feature coming soon)</span>
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Footer / Guidelines */}
+            <div className="px-8 pb-8">
+              <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5 mb-6">
+                <h4 className="flex items-center gap-2 text-sm font-bold text-gray-900 mb-2">
+                  <ShieldCheckIcon className="w-5 h-5 text-gray-600" />
+                  3. Copyright & DMCA Compliance
+                </h4>
+                <p className="text-xs leading-relaxed text-gray-600">
+                  By uploading content to this platform, you certify that you own the rights to this content or have explicit permission to use it.
+                  Uploading copyrighted material without permission is a violation of our terms and may result in account termination.
+                  Please ensure your content adheres to all community guidelines and local laws.
                 </p>
               </div>
-            </div>
 
-            {/* Tags */}
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-700">
-                Tags (comma-separated)
-              </label>
-              <input
-                type="text"
-                value={formData.tags}
-                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                placeholder="tag1, tag2, tag3"
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent text-gray-900 placeholder-gray-400"
-              />
-            </div>
-
-            {/* Actions */}
-            <div className="flex gap-4 pt-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 px-6 py-3 rounded-lg font-semibold transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200"
-                disabled={updating}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="flex-1 px-6 py-3 rounded-lg font-semibold text-white transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed bg-gray-900 hover:bg-black flex items-center justify-center gap-2"
-                disabled={updating || !formData.title.trim()}
-              >
-                {updating ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Updating...
-                  </>
-                ) : (
-                  'Update Product'
-                )}
-              </button>
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-8 py-4 rounded-xl font-bold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  disabled={updating}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-8 py-4 rounded-xl font-bold text-white bg-gray-900 hover:bg-black transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                  disabled={updating || !formData.title.trim()}
+                >
+                  {updating ? 'Updating...' : 'Save Changes'}
+                </button>
+              </div>
             </div>
           </form>
         </div>
       </div>
 
-      {/* Error Modal */}
       {showErrorModal && (
         <ErrorModal
           isOpen={showErrorModal}
@@ -974,6 +1107,52 @@ function ProductEditModal({
           message={errorMessage}
         />
       )}
-    </>
+    </ModalPortal>
+  );
+}
+
+// Delete Confirmation Modal Component
+function DeleteConfirmationModal({
+  isOpen,
+  onClose,
+  onConfirm,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  if (!isOpen) return null;
+
+  return (
+    <ModalPortal>
+      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div className="relative w-full max-w-md rounded-2xl shadow-2xl bg-white animate-in fade-in zoom-in duration-200">
+          <div className="p-6 text-center">
+            <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <TrashIcon className="h-8 w-8 text-red-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Product?</h3>
+            <p className="text-gray-600 mb-8">
+              Are you sure you want to delete this product? This action cannot be undone and the file will be permanently removed.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={onConfirm}
+                className="flex-1 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors shadow-lg shadow-red-200"
+              >
+                Delete Forever
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ModalPortal>
   );
 }
