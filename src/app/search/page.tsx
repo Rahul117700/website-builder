@@ -1,14 +1,13 @@
 import React from 'react';
-import HomeContent from '@/components/home/HomeContent';
+import SearchResultsContent from '@/components/search/SearchResultsContent';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import {
-    getSubscribedProducts,
     getRecommendedProducts,
-    getTrendingEbooks,
     getUserSubscriptions,
     getUserNotifications,
-    searchProducts
+    searchProducts,
+    searchChannels
 } from '@/app/actions/homepage';
 
 export default async function SearchPage({
@@ -21,27 +20,27 @@ export default async function SearchPage({
     const query = typeof searchParams.q === 'string' ? searchParams.q : '';
 
     const [
-        searchResults,
+        products,
+        channels,
         recommendedProducts,
-        trendingEbooks,
         userSubscriptions,
         notifications
     ] = await Promise.all([
         searchProducts(query),
+        searchChannels(query),
         getRecommendedProducts(),
-        getTrendingEbooks(),
         userId ? getUserSubscriptions(userId) : [],
         userId ? getUserNotifications(userId) : []
     ]);
 
     return (
-        <HomeContent
-            subscribedProducts={searchResults}
+        <SearchResultsContent
+            query={query}
+            products={products}
+            channels={channels}
             recommendedProducts={recommendedProducts}
-            trendingEbooks={trendingEbooks}
             userSubscriptions={userSubscriptions}
             notifications={notifications}
-            feedTitle={`Search Results for "${query}"`}
         />
     );
 }

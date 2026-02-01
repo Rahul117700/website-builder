@@ -18,7 +18,8 @@ import {
     GlobeAltIcon,
     QuestionMarkCircleIcon,
     ChatBubbleLeftRightIcon,
-    ArrowRightOnRectangleIcon
+    ArrowRightOnRectangleIcon,
+    ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import Logo from '@/components/Logo';
 import { Sidebar } from './Sidebar';
@@ -47,6 +48,7 @@ export default function MainLayout({
     const [searchQuery, setSearchQuery] = useState('');
     const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
     const [playlistRefreshKey, setPlaylistRefreshKey] = useState(0);
+    const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
     // Close mobile menu on resize
     useEffect(() => {
@@ -98,36 +100,72 @@ export default function MainLayout({
                 </div>
 
                 {/* Center Section - Enhanced Search Bar */}
-                <div className="flex-1 max-w-2xl mx-4 hidden md:flex">
-                    <form onSubmit={handleSearch} className="flex w-full group relative">
-                        <div className="relative w-full">
-                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-indigo-500 transition-colors duration-200" />
+                <div className={`flex-1 max-w-2xl mx-2 md:mx-4 ${isMobileSearchOpen ? 'flex absolute inset-x-0 top-0 bottom-0 bg-white z-[60] px-4 items-center gap-2' : 'hidden md:flex'} items-center gap-4`}>
+                    <form onSubmit={handleSearch} className="flex-1 group relative flex items-center gap-2">
+                        <div className="relative flex-1">
+                            {isMobileSearchOpen && (
+                                <button
+                                    type="button"
+                                    onClick={() => setIsMobileSearchOpen(false)}
+                                    className="absolute left-0 top-1/2 -translate-y-1/2 p-2 md:hidden"
+                                >
+                                    <XMarkIcon className="w-5 h-5 text-gray-500" />
+                                </button>
+                            )}
+                            <MagnifyingGlassIcon className={`absolute ${isMobileSearchOpen ? 'left-8' : 'left-3'} top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-indigo-500 transition-colors duration-200`} />
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search channels, products, videos..."
-                                className="w-full pl-10 pr-3 py-2 border-2 border-gray-200 rounded-full focus:border-indigo-500 focus:outline-none bg-gray-50/50 focus:bg-white transition-all duration-300 text-sm placeholder:text-gray-400 hover:border-gray-300 shadow-sm focus:shadow-md"
+                                placeholder="Search channels, products..."
+                                className={`w-full ${isMobileSearchOpen ? 'pl-14' : 'pl-10'} pr-3 py-2 border-2 border-gray-200 rounded-full focus:border-indigo-500 focus:outline-none bg-gray-50/50 focus:bg-white transition-all duration-300 text-sm placeholder:text-gray-400 hover:border-gray-300 shadow-sm focus:shadow-md`}
+                                autoFocus={isMobileSearchOpen}
                             />
                         </div>
                         <button
                             type="submit"
-                            className="ml-2 px-4 py-2 bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900 text-white rounded-full font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg active:scale-95 flex items-center justify-center"
+                            className="p-2 bg-gray-900 hover:bg-black text-white rounded-full transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center shadow-lg"
                         >
-                            <MagnifyingGlassIcon className="w-4 h-4" />
+                            <MagnifyingGlassIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                     </form>
+                    {isMobileSearchOpen && (
+                        <button
+                            onClick={() => setIsMobileSearchOpen(false)}
+                            className="md:hidden p-2 text-sm font-bold text-gray-500"
+                        >
+                            Cancel
+                        </button>
+                    )}
                 </div>
 
-                {/* Right Section - Actions */}
-                <div className="flex items-center gap-2 lg:gap-3">
-                    {/* Premium Create Button */}
-                    <Link
-                        href="/auth/dashboard/my-channel"
-                        className="hidden sm:flex items-center gap-2 px-3 lg:px-4 py-2 bg-gradient-to-r from-gray-900 to-black hover:from-gray-800 hover:to-gray-900 text-white rounded-full text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 group"
+                {/* Mobile Search Trigger */}
+                {!isMobileSearchOpen && (
+                    <button
+                        onClick={() => setIsMobileSearchOpen(true)}
+                        className="md:hidden p-2 hover:bg-gray-100 rounded-xl transition-all mr-1"
                     >
-                        <VideoCameraIcon className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
-                        <span>Create</span>
+                        <MagnifyingGlassIcon className="w-5 h-5 text-gray-700" />
+                    </button>
+                )}
+
+                {/* Right Section - Actions */}
+                <div className="flex items-center gap-4 lg:gap-6">
+                    {/* Navigation Links */}
+                    <div className="hidden xl:flex items-center gap-6 mr-2">
+                        <Link href="/docs" className="text-sm font-bold text-gray-500 hover:text-indigo-600 transition-colors">Docs</Link>
+                        <Link href="/blog" className="text-sm font-bold text-gray-500 hover:text-indigo-600 transition-colors">Blog</Link>
+                        <Link href="/about" className="text-sm font-bold text-gray-500 hover:text-indigo-600 transition-colors">About</Link>
+                        <Link href="/contact" className="text-sm font-bold text-gray-500 hover:text-indigo-600 transition-colors">Contact</Link>
+                    </div>
+
+                    {/* Create Button - Visible on Mobile */}
+                    <Link
+                        href="/create"
+                        className="p-2 sm:p-2.5 bg-gray-900 border border-black text-white rounded-2xl sm:rounded-xl font-bold text-xs sm:text-sm hover:bg-black transition-all shadow-xl flex items-center gap-2 group whitespace-nowrap"
+                    >
+                        <VideoCameraIcon className="w-5 h-5 sm:w-4 sm:h-4" />
+                        <span className="hidden sm:inline">Create</span>
                     </Link>
 
                     {session ? (
@@ -178,20 +216,22 @@ export default function MainLayout({
                             </div>
 
                             {/* Enhanced Profile Menu */}
-                            <div className="relative ml-2">
+                            <div className="relative -ml-1">
                                 <button
                                     onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                                    className="flex items-center gap-2 p-1 rounded-full hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 transition-all duration-200 hover:scale-105 active:scale-95"
+                                    className="flex items-center gap-2 p-0.5 rounded-full hover:bg-gray-100 transition-all duration-200 hover:scale-105 active:scale-95"
                                 >
                                     {session.user?.image ? (
-                                        <img
-                                            src={session.user.image}
-                                            alt={session.user.name || "User"}
-                                            className="w-8 h-8 rounded-full object-cover border-2 border-gray-200 hover:border-indigo-400 transition-colors"
-                                        />
+                                        <div className="relative w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden border-2 border-gray-200 hover:border-indigo-400 transition-colors shadow-sm">
+                                            <img
+                                                src={session.user.image}
+                                                alt={session.user.name || "User"}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
                                     ) : (
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-indigo-600">
-                                            <UserIcon className="w-4 h-4" />
+                                        <div className="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-indigo-600 shadow-sm">
+                                            <UserIcon className="w-4 h-4 md:w-5 md:h-5" />
                                         </div>
                                     )}
                                 </button>
@@ -243,6 +283,16 @@ export default function MainLayout({
                                         </div>
 
                                         <div className="border-t border-gray-100 py-2">
+                                            {session?.user?.role === 'SUPER_ADMIN' && (
+                                                <Link
+                                                    href="/auth/dashboard/super-admin"
+                                                    className="flex items-center gap-3 px-4 py-2 text-sm text-purple-600 font-bold hover:bg-purple-50 transition-colors"
+                                                    onClick={() => setProfileMenuOpen(false)}
+                                                >
+                                                    <ShieldCheckIcon className="w-5 h-5 text-purple-600" />
+                                                    Super Admin Dashboard
+                                                </Link>
+                                            )}
                                             <Link
                                                 href="/landing"
                                                 className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"

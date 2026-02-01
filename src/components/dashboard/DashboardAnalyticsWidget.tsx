@@ -210,15 +210,6 @@ export default function DashboardAnalyticsWidget({ currentViewers }: DashboardAn
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Users Live</p>
             </div>
           </div>
-          <div className="h-8 w-24 flex items-end gap-0.5">
-            {[0.4, 0.7, 0.5, 0.9, 0.6, 0.8, 0.4, 1].map((h, i) => (
-              <div
-                key={i}
-                className="flex-1 bg-green-500/40 rounded-t-sm animate-bounce"
-                style={{ height: `${h * 100}%`, animationDelay: `${i * 0.1}s`, animationDuration: '1.5s' }}
-              ></div>
-            ))}
-          </div>
         </div>
       </div>
 

@@ -22,9 +22,11 @@ const ModalPortal = ({ children }: { children: React.ReactNode }) => {
 interface ProductsTabProps {
   channel: any;
   onUpdate: (updates: Partial<any>) => void;
+  subscriptionData?: any;
+  onShowPlans?: () => void;
 }
 
-export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
+export default function ProductsTab({ channel, onUpdate, subscriptionData, onShowPlans }: ProductsTabProps) {
   const [products, setProducts] = useState<any[]>([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -116,6 +118,23 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
     }
   };
 
+  const handleOpenUploadModal = () => {
+    // Check product limits
+    const productCount = products.length;
+
+    // Default to free tier limits if no subscription data
+    const isPremium = subscriptionData?.hasActivePlan;
+    const maxProducts = isPremium ? (subscriptionData?.activeSubscription?.plan?.maxProducts ?? -1) : 1;
+
+    if (maxProducts !== -1 && productCount >= maxProducts) {
+      setErrorMessage(`You've reached the ${isPremium ? 'maximum' : 'free'} limit of ${maxProducts} product${maxProducts === 1 ? '' : 's'}. Upgrade your plan to add more products to your channel!`);
+      setShowErrorModal(true);
+      return;
+    }
+
+    setShowUploadModal(true);
+  };
+
   const handleEdit = (product: any) => {
     setEditingProduct(product);
     setShowEditModal(true);
@@ -179,10 +198,15 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
           <h3 className="text-lg font-bold text-gray-900">Products & Content</h3>
           <p className="text-sm text-gray-600 mt-1">
             {products.length} {products.length === 1 ? 'product' : 'products'} added
+            {(() => {
+              const isPremium = subscriptionData?.hasActivePlan;
+              const maxProducts = isPremium ? (subscriptionData?.activeSubscription?.plan?.maxProducts ?? -1) : 1;
+              return maxProducts !== -1 ? ` / ${maxProducts} limit` : '';
+            })()}
           </p>
         </div>
         <button
-          onClick={() => setShowUploadModal(true)}
+          onClick={handleOpenUploadModal}
           className="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-black transition-colors flex items-center gap-2"
         >
           <PlusIcon className="h-5 w-5" />
@@ -251,7 +275,7 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
             Products will be displayed in a beautiful grid on your channel
           </p>
           <button
-            onClick={() => setShowUploadModal(true)}
+            onClick={handleOpenUploadModal}
             className="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-black transition-colors flex items-center gap-2 mx-auto"
           >
             <PlusIcon className="h-5 w-5" />
@@ -315,6 +339,11 @@ export default function ProductsTab({ channel, onUpdate }: ProductsTabProps) {
           isOpen={showErrorModal}
           onClose={() => setShowErrorModal(false)}
           message={errorMessage}
+          onUpgrade={() => {
+            setShowErrorModal(false);
+            onShowPlans?.();
+          }}
+          isLimitError={errorMessage.includes('limit')}
         />
       )}
 
@@ -795,10 +824,14 @@ function ErrorModal({
   isOpen,
   onClose,
   message,
+  onUpgrade,
+  isLimitError,
 }: {
   isOpen: boolean;
   onClose: () => void;
   message: string;
+  onUpgrade?: () => void;
+  isLimitError?: boolean;
 }) {
   if (!isOpen) return null;
 
@@ -814,7 +847,9 @@ function ErrorModal({
                 </div>
               </div>
               <div className="ml-4 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Error</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  {isLimitError ? 'Plan Limit Reached' : 'Error'}
+                </h3>
                 <p className="text-sm text-gray-600">{message}</p>
               </div>
               <button
@@ -825,13 +860,21 @@ function ErrorModal({
               </button>
             </div>
           </div>
-          <div className="px-6 py-4 bg-red-50 rounded-b-2xl flex justify-end">
+          <div className="px-6 py-4 bg-gray-50 rounded-b-2xl flex justify-end gap-3">
             <button
               onClick={onClose}
-              className="px-6 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+              className="px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition-colors"
             >
-              OK
+              Close
             </button>
+            {isLimitError && onUpgrade && (
+              <button
+                onClick={onUpgrade}
+                className="px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-100"
+              >
+                Upgrade Plan
+              </button>
+            )}
           </div>
         </div>
       </div>

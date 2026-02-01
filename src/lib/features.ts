@@ -75,37 +75,73 @@ export function hasActivePaidSubscription(userSubscriptions: any[]): boolean {
 // Check if user can create more funnels
 export function canCreateFunnel(userFunnelCount: number, userSubscriptions: any[]): { canCreate: boolean; reason?: string } {
   const hasPaidPlan = hasActivePaidSubscription(userSubscriptions);
-  
+
   if (hasPaidPlan) {
     // Check plan limits
-    const activePlan = userSubscriptions.find(sub => 
+    const activePlan = userSubscriptions.find(sub =>
       sub.status === 'ACTIVE' && new Date(sub.endDate) > new Date()
     );
-    
+
     if (activePlan) {
       const maxFunnels = activePlan.plan.maxFunnels;
       if (maxFunnels === -1) {
         return { canCreate: true }; // Unlimited
       }
       if (userFunnelCount >= maxFunnels) {
-        return { 
-          canCreate: false, 
-          reason: `You've reached the maximum limit of ${maxFunnels} funnels for your plan. Upgrade to create more.` 
+        return {
+          canCreate: false,
+          reason: `You've reached the maximum limit of ${maxFunnels} funnels for your plan. Upgrade to create more.`
         };
       }
     }
     return { canCreate: true };
   }
-  
+
   // Free tier - allow only 1 funnel
   if (userFunnelCount >= FREE_TIER_LIMITS.maxFunnels) {
-    return { 
-      canCreate: false, 
-      reason: 'You\'ve reached the free tier limit of 1 funnel. Upgrade to create unlimited funnels!' 
+    return {
+      canCreate: false,
+      reason: 'You\'ve reached the free tier limit of 1 funnel. Upgrade to create unlimited funnels!'
     };
   }
-  
+
   return { canCreate: true };
+}
+
+// Check if user can add more products to a channel
+export function canAddProduct(currentProductCount: number, userSubscriptions: any[]): { canAdd: boolean; reason?: string } {
+  const hasPaidPlan = hasActivePaidSubscription(userSubscriptions);
+
+  if (hasPaidPlan) {
+    // Check plan limits
+    const activePlan = userSubscriptions.find(sub =>
+      sub.status === 'ACTIVE' && new Date(sub.endDate) > new Date()
+    );
+
+    if (activePlan) {
+      const maxProducts = activePlan.plan.maxProducts;
+      if (maxProducts === -1) {
+        return { canAdd: true }; // Unlimited
+      }
+      if (currentProductCount >= maxProducts) {
+        return {
+          canAdd: false,
+          reason: `You've reached the maximum limit of ${maxProducts} products for your plan. Upgrade to add more.`
+        };
+      }
+    }
+    return { canAdd: true };
+  }
+
+  // Free tier - allow only 1 product
+  if (currentProductCount >= FREE_TIER_LIMITS.maxProducts) {
+    return {
+      canAdd: false,
+      reason: 'You\'ve reached the free tier limit of 1 product. Upgrade to add unlimited products!'
+    };
+  }
+
+  return { canAdd: true };
 }
 
 // Check if user can use a specific feature
@@ -114,15 +150,15 @@ export function canUseFeature(
   userSubscriptions: any[]
 ): { canUse: boolean; feature?: typeof PREMIUM_FEATURES[keyof typeof PREMIUM_FEATURES] } {
   const hasPaidPlan = hasActivePaidSubscription(userSubscriptions);
-  
+
   if (hasPaidPlan) {
     return { canUse: true };
   }
-  
+
   // Free tier restrictions
-  return { 
-    canUse: false, 
-    feature: PREMIUM_FEATURES[featureName] 
+  return {
+    canUse: false,
+    feature: PREMIUM_FEATURES[featureName]
   };
 }
 
@@ -133,12 +169,12 @@ export function getUserTier(userSubscriptions: any[]): {
   limits: typeof FREE_TIER_LIMITS;
 } {
   const hasPaidPlan = hasActivePaidSubscription(userSubscriptions);
-  
+
   if (hasPaidPlan) {
-    const activePlan = userSubscriptions.find(sub => 
+    const activePlan = userSubscriptions.find(sub =>
       sub.status === 'ACTIVE' && new Date(sub.endDate) > new Date()
     );
-    
+
     return {
       tier: 'premium',
       planName: activePlan?.plan.name || 'Premium',
@@ -158,7 +194,7 @@ export function getUserTier(userSubscriptions: any[]): {
       }
     };
   }
-  
+
   return {
     tier: 'free',
     planName: 'Free',

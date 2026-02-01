@@ -38,78 +38,32 @@ export default function AnalyticsTab({ channel, onUpdate }: AnalyticsTabProps) {
     const loadData = async () => {
         try {
             setLoading(true);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            generateMockData();
+            const response = await fetch('/api/channels/analytics/comprehensive');
+            if (!response.ok) throw new Error('Failed to fetch analytics');
+
+            const data = await response.json();
+
+            // Map real data to states
+            if (data.dailyStats) {
+                setChartData(data.dailyStats.map((item: any) => ({
+                    ...item,
+                    dayName: new Date(item.date).toLocaleDateString('en-US', { weekday: 'short' }),
+                    orders: item.conversions // Alias for compatibility
+                })));
+            }
+
+            if (data.trafficSources) setTrafficSources(data.trafficSources);
+            if (data.geographicData) setGeoData(data.geographicData);
+            if (data.topProducts) setTopProducts(data.topProducts);
+
         } catch (error) {
             console.error('Error loading analytics data:', error);
-            generateMockData();
         } finally {
             setLoading(false);
         }
     };
 
-    const generateMockData = () => {
-        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const data: ChartDataPoint[] = [];
-        for (let i = 6; i >= 0; i--) {
-            const d = new Date();
-            d.setDate(d.getDate() - i);
-            data.push({
-                date: d.toISOString().split('T')[0],
-                dayName: days[d.getDay()],
-                revenue: Math.floor(Math.random() * 5000) + 1000,
-                orders: Math.floor(Math.random() * 20) + 5,
-                views: Math.floor(Math.random() * 500) + 100,
-                conversions: Math.floor(Math.random() * 15) + 2
-            });
-        }
-        setChartData(data);
 
-        setTrafficSources([
-            { source: 'Direct', visits: 1200, percentage: 40, conversions: 50 },
-            { source: 'Social Media', visits: 900, percentage: 30, conversions: 35 },
-            { source: 'Organic Search', visits: 600, percentage: 20, conversions: 20 },
-            { source: 'Referral', visits: 300, percentage: 10, conversions: 10 },
-        ]);
-
-        setGeoData([
-            { country: 'United States', visitors: 1500, percentage: 45, revenue: 12000, flag: '🇺🇸' },
-            { country: 'India', visitors: 800, percentage: 25, revenue: 5000, flag: '🇮🇳' },
-            { country: 'United Kingdom', visitors: 400, percentage: 12, revenue: 3500, flag: '🇬🇧' },
-            { country: 'Germany', visitors: 300, percentage: 9, revenue: 2000, flag: '🇩🇪' },
-            { country: 'Canada', visitors: 200, percentage: 6, revenue: 1500, flag: '🇨🇦' },
-        ]);
-
-        setTopProducts([
-            {
-                id: '1',
-                title: 'Premium Subscription',
-                channelName: 'Main Channel',
-                views: 1200,
-                conversions: 85,
-                revenue: 4250,
-                conversionRate: 7.0
-            },
-            {
-                id: '2',
-                title: 'E-Book Bundle',
-                channelName: 'Edu Channel',
-                views: 800,
-                conversions: 45,
-                revenue: 1350,
-                conversionRate: 5.6
-            },
-            {
-                id: '3',
-                title: 'Consultation Call',
-                channelName: 'Consulting',
-                views: 300,
-                conversions: 12,
-                revenue: 2400,
-                conversionRate: 4.0
-            }
-        ]);
-    };
 
     return (
         <div className="space-y-6">

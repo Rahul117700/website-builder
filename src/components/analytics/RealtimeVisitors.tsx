@@ -66,15 +66,6 @@ export default function RealtimeVisitors() {
         </div>
       ) : activeCount > 0 ? (
         <div className="space-y-6">
-          <div className="h-12 flex items-end gap-1 px-2">
-            {[0.4, 0.7, 0.5, 0.9, 0.6, 1, 0.8, 0.4, 0.7, 0.5, 0.9, 0.6, 0.8, 1].map((h, i) => (
-              <div
-                key={i}
-                className="flex-1 bg-blue-500/40 rounded-t-sm animate-bounce"
-                style={{ height: `${h * 100}%`, animationDelay: `${i * 0.1}s`, animationDuration: '1.5s' }}
-              ></div>
-            ))}
-          </div>
           <div className="p-4 bg-slate-900/50 rounded-2xl border border-slate-800 backdrop-blur-md">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">

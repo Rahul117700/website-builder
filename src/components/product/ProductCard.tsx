@@ -95,7 +95,6 @@ export default function ProductCard({ id, title, thumbnail, channelName, channel
             setIsSaved(previousState);
             console.error('Error toggling save:', error);
         } finally {
-            setLiking(false); // [FIX] This was setLiking(false) instead of setSaving(false) in original code
             setSaving(false);
         }
     };
@@ -125,8 +124,9 @@ export default function ProductCard({ id, title, thumbnail, channelName, channel
             className="group cursor-pointer flex flex-col h-full relative"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onClick={() => router.push(targetHref)}
         >
-            {/* Main Card Link (Stretched) */}
+            {/* Main Card Link (Stretched) - Fallback for SEO */}
             <Link href={targetHref} className="absolute inset-0 z-0">
                 <span className="sr-only">View Product</span>
             </Link>
@@ -191,45 +191,50 @@ export default function ProductCard({ id, title, thumbnail, channelName, channel
                 )}
 
                 {/* Action Buttons - Raised Index */}
-                <div className="absolute bottom-2 right-2 flex gap-2 z-10">
+                <div className="absolute bottom-2 right-2 flex gap-1.5 sm:gap-2 z-10">
                     {/* Like Button */}
                     <button
                         onClick={handleLike}
-                        className="p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all hover:scale-110 shadow-sm relative"
+                        className="p-1.5 sm:p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all hover:scale-110 shadow-sm relative"
                         disabled={liking}
                     >
                         {isLiked ? (
-                            <HeartIconSolid className="w-5 h-5 text-red-500" />
+                            <HeartIconSolid className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
                         ) : (
-                            <HeartIcon className="w-5 h-5 text-gray-600 hover:text-red-500" />
+                            <HeartIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 hover:text-red-500" />
                         )}
                     </button>
 
                     {/* Save Button */}
                     <button
                         onClick={handleSave}
-                        className="p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all hover:scale-110 shadow-sm relative"
+                        className="p-1.5 sm:p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all hover:scale-110 shadow-sm relative"
                         disabled={saving}
                     >
                         {isSaved ? (
-                            <BookmarkIconSolid className="w-5 h-5 text-blue-600" />
+                            <BookmarkIconSolid className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
                         ) : (
-                            <BookmarkIcon className="w-5 h-5 text-gray-600 hover:text-blue-600" />
+                            <BookmarkIcon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 hover:text-blue-600" />
                         )}
                     </button>
                 </div>
             </div>
 
-            {/* Info */}
-            <div className="flex gap-3 items-start flex-1 pointer-events-none">
-                <div className="relative w-9 h-9 flex-shrink-0">
-                    <Image
-                        src={channelAvatar}
-                        alt={channelName}
-                        fill
-                        className="rounded-full object-cover border border-gray-100"
-                        unoptimized
-                    />
+            <div className="flex gap-2 sm:gap-3 items-start flex-1 pointer-events-none">
+                <div className="relative w-7 h-7 sm:w-9 sm:h-9 flex-shrink-0">
+                    {channelAvatar ? (
+                        <Image
+                            src={channelAvatar}
+                            alt={channelName}
+                            fill
+                            className="rounded-full object-cover border border-gray-100"
+                            unoptimized
+                        />
+                    ) : (
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 border border-gray-100 flex items-center justify-center text-white font-black text-[10px] sm:text-sm">
+                            {channelName.charAt(0).toUpperCase()}
+                        </div>
+                    )}
                 </div>
                 <div className="flex-1 min-w-0">
                     <h3 className="text-gray-900 font-bold text-sm leading-tight line-clamp-2 mb-1 group-hover:text-indigo-600 transition-colors">

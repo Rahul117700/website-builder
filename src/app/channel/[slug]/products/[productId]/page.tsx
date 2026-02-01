@@ -30,6 +30,7 @@ import {
 import { PlusCircleIcon } from '@heroicons/react/24/outline';
 import MainLayout from '@/components/layout/MainLayout';
 import SaveToPlaylistModal from '@/components/modals/SaveToPlaylistModal';
+import OptimizedMediaLoader from '@/components/ui/OptimizedMediaLoader';
 
 export default function ProductPage() {
   const params = useParams();
@@ -649,7 +650,7 @@ export default function ProductPage() {
     if (productType === 'VIDEO' || productType === 'VIDEOS') {
       return (
         <div className="w-full relative">
-          <div className="relative w-full rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%' }}>
+          <OptimizedMediaLoader type="video">
             {canAccess ? (
               normalizedVideoUrl ? (
                 <div className="absolute inset-0">
@@ -657,7 +658,7 @@ export default function ProductPage() {
                     ref={(el) => {
                       if (el) setVideoElement(el);
                     }}
-                    src={normalizedVideoUrl}
+                    src={normalizedVideoUrl || ''}
                     controls
                     autoPlay
                     playsInline
@@ -669,34 +670,6 @@ export default function ProductPage() {
                     onError={(e) => {
                       console.error('Video playback error:', e);
                       console.error('Video source:', normalizedVideoUrl);
-                      const video = e.currentTarget;
-                      console.error('Video error details:', {
-                        error: video.error,
-                        networkState: video.networkState,
-                        readyState: video.readyState,
-                        src: video.src,
-                        errorCode: video.error?.code,
-                        errorMessage: video.error?.message,
-                      });
-                    }}
-                    onLoadStart={() => {
-                      console.log('Video loading started:', normalizedVideoUrl);
-                    }}
-                    onLoadedData={() => {
-                      console.log('Video loaded successfully:', normalizedVideoUrl);
-                    }}
-                    onLoadedMetadata={(e) => {
-                      console.log('Video metadata loaded:', {
-                        duration: e.currentTarget.duration,
-                        videoWidth: e.currentTarget.videoWidth,
-                        videoHeight: e.currentTarget.videoHeight,
-                      });
-                    }}
-                    onCanPlay={() => {
-                      console.log('Video can play');
-                    }}
-                    onCanPlayThrough={() => {
-                      console.log('Video can play through');
                     }}
                     style={{ objectFit: 'cover', backgroundColor: 'transparent' }}
                   >
@@ -704,7 +677,7 @@ export default function ProductPage() {
                     Your browser does not support the video tag.
                   </video>
 
-                  {/* Quality Selector - YouTube-style */}
+                  {/* Quality Selector */}
                   <div className="absolute bottom-16 right-4 z-10">
                     <div className="relative">
                       <button
@@ -712,98 +685,18 @@ export default function ProductPage() {
                           e.stopPropagation();
                           setShowQualityMenu(!showQualityMenu);
                         }}
-                        onBlur={() => {
-                          // Delay closing to allow menu clicks
-                          setTimeout(() => setShowQualityMenu(false), 200);
-                        }}
                         className="px-3 py-1.5 bg-black/70 hover:bg-black/90 text-white text-sm font-medium rounded flex items-center gap-2 transition-colors backdrop-blur-sm"
-                        title="Quality"
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
                         <span>{selectedQuality === 'auto' ? 'Auto' : selectedQuality}</span>
-                        <svg
-                          className={`w-4 h-4 transition-transform ${showQualityMenu ? 'rotate-180' : ''}`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
                       </button>
-
-                      {showQualityMenu && (
-                        <div className="absolute bottom-full right-0 mb-2 bg-black/95 rounded-lg overflow-hidden shadow-xl min-w-[140px] backdrop-blur-sm border border-white/10">
-                          {[
-                            { label: 'Auto', value: 'auto', description: 'Recommended' },
-                            { label: '1080p', value: '1080p', description: 'HD' },
-                            { label: '720p', value: '720p', description: 'HD' },
-                            { label: '480p', value: '480p', description: 'SD' },
-                            { label: '360p', value: '360p', description: 'SD' },
-                            { label: '240p', value: '240p', description: 'Low' },
-                          ].map((option) => (
-                            <button
-                              key={option.value}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedQuality(option.value);
-                                setShowQualityMenu(false);
-
-                                // For now, all qualities use the same source
-                                // In future, this can be enhanced to switch between different quality URLs
-                                if (videoElement) {
-                                  // Pause and reload video when quality changes
-                                  const wasPlaying = !videoElement.paused;
-                                  const currentTime = videoElement.currentTime;
-
-                                  // In future implementation:
-                                  // videoElement.src = getQualityUrl(option.value);
-                                  // For now, just reload the same source
-                                  videoElement.load();
-
-                                  if (wasPlaying) {
-                                    videoElement.play().then(() => {
-                                      videoElement.currentTime = currentTime;
-                                    });
-                                  } else {
-                                    videoElement.currentTime = currentTime;
-                                  }
-                                }
-                              }}
-                              className={`w-full px-4 py-2.5 text-left text-sm text-white hover:bg-white/10 transition-colors flex items-center justify-between ${selectedQuality === option.value ? 'bg-white/20' : ''
-                                }`}
-                            >
-                              <div className="flex flex-col">
-                                <span className="font-medium">{option.label}</span>
-                                {option.description && (
-                                  <span className="text-xs text-white/70">{option.description}</span>
-                                )}
-                              </div>
-                              {selectedQuality === option.value && (
-                                <svg className="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
                   <div className="text-center">
                     <VideoCameraIcon className="h-16 w-16 text-gray-600 mx-auto mb-4" />
                     <p className="text-gray-400">Video not available</p>
-                    <p className="text-gray-500 text-sm mt-2">No video URL found</p>
-                    {product.fileUrl && (
-                      <p className="text-gray-500 text-xs mt-1">File URL: {product.fileUrl}</p>
-                    )}
-                    {product.videoUrl && (
-                      <p className="text-gray-500 text-xs mt-1">Video URL: {product.videoUrl}</p>
-                    )}
                   </div>
                 </div>
               )
@@ -821,7 +714,7 @@ export default function ProductPage() {
                 </div>
               </div>
             )}
-          </div>
+          </OptimizedMediaLoader>
         </div>
       );
     }
@@ -829,48 +722,51 @@ export default function ProductPage() {
     if (productType === 'DOCUMENT' || productType === 'DOCUMENTS') {
       return (
         <div className="w-full h-[600px] bg-gray-100 overflow-hidden">
-          {canAccess ? (
-            fileUrl ? (
-              fileUrl.endsWith('.pdf') ? (
-                <iframe
-                  src={`${fileUrl}#toolbar=1`}
-                  className="w-full h-full border-0"
-                  title={product.title}
-                  allow="fullscreen"
-                />
+          <OptimizedMediaLoader type="pdf" aspectRatio="h-full">
+            {canAccess ? (
+              fileUrl ? (
+                fileUrl.endsWith('.pdf') ? (
+                  <iframe
+                    src={`${fileUrl}#toolbar=1`}
+                    className="w-full h-full border-0"
+                    title={product.title}
+                    allow="fullscreen"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center p-8">
+                    <DocumentTextIcon className="h-16 w-16 text-gray-400 mb-4" />
+                    <p className="text-gray-600 mb-4">Document Preview</p>
+                    <a
+                      href={fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Open Document
+                    </a>
+                  </div>
+                )
               ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center p-8">
-                  <DocumentTextIcon className="h-16 w-16 text-gray-400 mb-4" />
-                  <p className="text-gray-600 mb-4">Document Preview</p>
-                  <a
-                    href={fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Open Document
-                  </a>
+                <div className="w-full h-full flex items-center justify-center">
+                  <DocumentTextIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 </div>
               )
             ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <DocumentTextIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <div className="w-full h-full flex items-center justify-center bg-gray-900">
+                <div className="text-center">
+                  <DocumentTextIcon className="h-16 w-16 text-white/50 mx-auto mb-4" />
+                  <p className="text-white/70 text-lg font-medium mb-4">Subscribe to view</p>
+                  <button
+                    onClick={() => setShowSubscriptionModal(true)}
+                    className="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition"
+                  >
+                    Subscribe Now
+                  </button>
+                </div>
               </div>
-            )
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-900">
-              <div className="text-center">
-                <DocumentTextIcon className="h-16 w-16 text-white/50 mx-auto mb-4" />
-                <p className="text-white/70 text-lg font-medium mb-4">Subscribe to view</p>
-                <button
-                  onClick={() => setShowSubscriptionModal(true)}
-                  className="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition"
-                >
-                  Subscribe Now
-                </button>
-              </div>
-            </div>
-          )}
+            )}
+          </OptimizedMediaLoader>
         </div>
       );
     }
@@ -878,33 +774,36 @@ export default function ProductPage() {
     if (productType === 'CODE') {
       return (
         <div className="w-full h-[600px] bg-gray-900 overflow-hidden">
-          {canAccess ? (
-            fileUrl ? (
-              <iframe
-                src={fileUrl}
-                className="w-full h-full border-0"
-                title={product.title}
-                allow="fullscreen"
-              />
+          <OptimizedMediaLoader type="code" aspectRatio="h-full">
+            {canAccess ? (
+              fileUrl ? (
+                <iframe
+                  src={fileUrl}
+                  className="w-full h-full border-0"
+                  title={product.title}
+                  allow="fullscreen"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <CodeBracketIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                </div>
+              )
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <CodeBracketIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <div className="text-center">
+                  <CodeBracketIcon className="h-16 w-16 text-white/50 mx-auto mb-4" />
+                  <p className="text-white/70 text-lg font-medium mb-4">Subscribe to view</p>
+                  <button
+                    onClick={() => setShowSubscriptionModal(true)}
+                    className="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition"
+                  >
+                    Subscribe Now
+                  </button>
+                </div>
               </div>
-            )
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="text-center">
-                <CodeBracketIcon className="h-16 w-16 text-white/50 mx-auto mb-4" />
-                <p className="text-white/70 text-lg font-medium mb-4">Subscribe to view</p>
-                <button
-                  onClick={() => setShowSubscriptionModal(true)}
-                  className="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition"
-                >
-                  Subscribe Now
-                </button>
-              </div>
-            </div>
-          )}
+            )}
+          </OptimizedMediaLoader>
         </div>
       );
     }

@@ -14,17 +14,26 @@ function generateSlug(name: string): string {
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
-    const { name, description, templateId } = body;
+    let { name, description, templateId } = body;
 
-    if (!name || !templateId) {
+    // Generate a random name if not provided
+    if (!name) {
+      const adjectives = ['Creative', 'Awesome', 'Modern', 'Elite', 'Global', 'Digital', 'Smart', 'Ultimate', 'Prime'];
+      const nouns = ['Studio', 'Hub', 'Channel', 'Space', 'Arena', 'Center', 'Academy', 'World', 'Port'];
+      const randomAdj = adjectives[Math.floor(Math.random() * adjectives.length)];
+      const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+      name = `${randomAdj} ${randomNoun} ${Math.floor(Math.random() * 900) + 100}`;
+    }
+
+    if (!templateId) {
       return NextResponse.json(
-        { error: 'Name and template are required' },
+        { error: 'Template is required' },
         { status: 400 }
       );
     }
@@ -82,7 +91,7 @@ export async function POST(request: Request) {
     let slugExists = await prisma.channel.findUnique({
       where: { slug },
     });
-    
+
     let counter = 1;
     while (slugExists) {
       slug = `${generateSlug(name)}-${counter}`;
@@ -100,8 +109,8 @@ export async function POST(request: Request) {
         description: description || null,
         userId: session.user.id,
         templateId,
-        status: 'DRAFT',
-        published: false,
+        status: 'ACTIVE',
+        published: true,
       },
       include: {
         template: {

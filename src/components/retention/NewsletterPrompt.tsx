@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react';
 import { XMarkIcon, EnvelopeIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 /**
  * Newsletter Prompt
  * Non-intrusive bottom banner that encourages users to subscribe
  */
 export default function NewsletterPrompt() {
+  const { data: session } = useSession();
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -17,40 +19,59 @@ export default function NewsletterPrompt() {
   useEffect(() => {
     // Check if user has already subscribed (from localStorage or database)
     const checkSubscription = async () => {
-      const hasSubscribed = localStorage.getItem('newsletter_subscribed');
+      // 1. Check local storage first
+      const hasSubscribedLocal = localStorage.getItem('newsletter_subscribed');
       const savedEmail = localStorage.getItem('newsletter_email');
+      const dismissed = sessionStorage.getItem('newsletter_dismissed');
 
-      // If we have a saved email, verify it's still subscribed
-      if (savedEmail && hasSubscribed) {
+      if (hasSubscribedLocal === 'true' || dismissed === 'true') return;
+
+      // 2. If session email exists, check the database
+      let alreadyInDb = false;
+      if (session?.user?.email) {
         try {
-          const response = await fetch(`/api/newsletter/subscribe?email=${encodeURIComponent(savedEmail)}`);
-          const data = await response.json();
-
-          if (data.subscribed) {
-            // Still subscribed, don't show popup
-            return;
-          } else {
-            // No longer subscribed, clear localStorage
-            localStorage.removeItem('newsletter_subscribed');
-            localStorage.removeItem('newsletter_email');
+          const response = await fetch(`/api/newsletter/subscribe?email=${encodeURIComponent(session.user.email)}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.subscribed) {
+              localStorage.setItem('newsletter_subscribed', 'true');
+              localStorage.setItem('newsletter_email', session.user.email);
+              alreadyInDb = true;
+            }
           }
         } catch (error) {
-          console.error('Error checking subscription:', error);
+          console.error('Error checking session subscription:', error);
+        }
+      }
+
+      if (alreadyInDb) return;
+
+      // 3. If we have a saved email but local subscribed flag is false (edge case)
+      if (savedEmail && !hasSubscribedLocal) {
+        try {
+          const response = await fetch(`/api/newsletter/subscribe?email=${encodeURIComponent(savedEmail)}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.subscribed) {
+              localStorage.setItem('newsletter_subscribed', 'true');
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Error checking saved email:', error);
         }
       }
 
       // Show after 45 seconds if user hasn't subscribed
       const timer = setTimeout(() => {
-        if (!hasSubscribed) {
-          setShow(true);
-        }
+        setShow(true);
       }, 45000);
 
       return () => clearTimeout(timer);
     };
 
     checkSubscription();
-  }, []);
+  }, [session]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,4 +206,3 @@ export default function NewsletterPrompt() {
     </div>
   );
 }
-

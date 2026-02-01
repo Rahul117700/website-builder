@@ -1738,12 +1738,12 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                           color: textColor,
                         }}
                       >
-                        {session.user.image ? (
+                        {session?.user?.image ? (
                           <div className="relative">
                             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-300"></div>
                             <img
-                              src={session.user.image}
-                              alt={session.user.name || 'User'}
+                              src={session?.user?.image ?? undefined}
+                              alt={session?.user?.name || 'User'}
                               className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover transition-transform duration-300 group-hover:scale-110"
                             />
                           </div>
@@ -1757,7 +1757,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                             <UserCircleIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                           </div>
                         )}
-                        <span className="hidden lg:block text-xs sm:text-sm font-semibold truncate max-w-[100px]">{session.user.name || 'User'}</span>
+                        <span className="hidden lg:block text-xs sm:text-sm font-semibold truncate max-w-[100px]">{session?.user?.name || 'User'}</span>
                         <ChevronDownIcon className={`w-3 h-3 sm:w-4 sm:h-4 transition-all duration-300 ${showUserMenu ? 'rotate-180' : ''}`} />
                       </button>
 
@@ -1786,10 +1786,10 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                               {/* User Info Header */}
                               <div className="p-4 border-b" style={{ borderColor: `${textColor}15` }}>
                                 <div className="flex items-center gap-3 mb-2">
-                                  {session.user.image ? (
+                                  {session?.user?.image ? (
                                     <img
-                                      src={session.user.image}
-                                      alt={session.user.name || 'User'}
+                                      src={session?.user?.image ?? undefined}
+                                      alt={session?.user?.name || 'User'}
                                       className="w-10 h-10 rounded-full object-cover"
                                     />
                                   ) : (
@@ -1804,10 +1804,10 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                   )}
                                   <div className="flex-1 min-w-0">
                                     <p className="font-semibold text-sm truncate" style={{ color: textColor }}>
-                                      {session.user.name || 'User'}
+                                      {session?.user?.name || 'User'}
                                     </p>
                                     <p className="text-xs truncate" style={{ color: `${textColor}70` }}>
-                                      {session.user.email}
+                                      {session?.user?.email}
                                     </p>
                                   </div>
                                 </div>
@@ -2571,7 +2571,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       <h2 className="text-xl font-bold text-gray-900">Latest Videos</h2>
                     </div>
                     {allProducts.filter(p => p.type === 'VIDEO' || p.type === 'VIDEOS').length > 0 ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {allProducts
                           .filter((p: any) => p.type === 'VIDEO' || p.type === 'VIDEOS')
                           .slice(0, 4)
@@ -2618,7 +2618,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                     </div>
 
                     {allProducts.length > 0 ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {allProducts.slice(0, 8).map((product: any) => (
                           <div key={product.id} className="group cursor-pointer" onClick={() => router.push(`/channel/${channel.slug}/products/${product.id}`)}>
                             <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3">
@@ -2683,7 +2683,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
               {activeTab === 'videos' && (
                 <div>
                   <h2 className="text-xl font-bold text-gray-900 mb-6">All Products</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {allProducts.map((product: any) => (
                       <div key={product.id} className="group cursor-pointer" onClick={() => router.push(`/channel/${channel.slug}/products/${product.id}`)}>
                         <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3">
@@ -2741,7 +2741,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                 <div>
                   <h2 className="text-xl font-bold text-gray-900 mb-6">Playlists</h2>
                   {playlists.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                       {playlists.map((playlist) => (
                         <div key={playlist.id} className="group cursor-pointer">
                           <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
@@ -2872,7 +2872,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                           <div className="flex items-center gap-3 sm:gap-4">
                             <div className="relative">
                               <img
-                                src={sellerImage}
+                                src={sellerImage ?? undefined}
                                 alt={sellerName}
                                 className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full border-4 border-white shadow-2xl object-cover"
                               />
@@ -3047,7 +3047,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                     My Subscriptions
                   </h2>
                   {channelSubscriptions.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                       {channelSubscriptions
                         .filter((sub: any) => sub.status === 'ACTIVE' && new Date(sub.endDate) > new Date())
                         .map((subscription: any) => (
@@ -3326,7 +3326,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                   {/* Products Grid/List - Mobile Optimized */}
                   {filteredProducts.length > 0 ? (
                     <div className={viewMode === 'grid'
-                      ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 px-2 sm:px-0'
+                      ? 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 px-2 sm:px-0'
                       : 'space-y-3 sm:space-y-4 px-2 sm:px-0'
                     }>
                       {filteredProducts.map((product: any, index: number) => {
@@ -3998,7 +3998,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
         {channel.products && channel.products.length > 0 && (
           <section className="py-12 sm:py-20 px-4 bg-gray-50">
             <div className="max-w-7xl mx-auto">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {channel.products.map((product: any, index: number) => (
                   <div key={index} className="group bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
                     {product.previewImage && (

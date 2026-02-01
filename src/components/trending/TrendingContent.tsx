@@ -5,6 +5,7 @@ import MainLayout from '@/components/layout/MainLayout';
 import ProductCard from '@/components/product/ProductCard';
 import { ProductCardData, SubscriptionData, NotificationData } from '@/app/actions/homepage';
 import { FireIcon, MusicalNoteIcon, TrophyIcon, VideoCameraIcon, NewspaperIcon, LightBulbIcon } from '@heroicons/react/24/outline';
+import MobileTrendingWidget from '@/components/trending/MobileTrendingWidget';
 
 interface TrendingContentProps {
     overallTrending: ProductCardData[];
@@ -66,8 +67,8 @@ export default function TrendingContent({
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-all whitespace-nowrap ${isActive
-                                        ? 'bg-gray-900 text-white shadow-lg scale-105'
-                                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                    ? 'bg-gray-900 text-white shadow-lg scale-105'
+                                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                                     }`}
                             >
                                 <Icon className={`w-5 h-5 ${isActive ? 'text-white' : tab.color}`} />
@@ -78,9 +79,12 @@ export default function TrendingContent({
                 </div>
 
                 {activeTabData.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-4 gap-y-8">
-                        {activeTabData.map((product) => (
-                            <ProductCard key={product.id} {...product} />
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-4 gap-y-8">
+                        {activeTabData.map((product, index) => (
+                            <React.Fragment key={product.id}>
+                                <ProductCard {...product} />
+                                {index === 0 && <MobileTrendingWidget items={activeTabData.slice(0, 5)} />}
+                            </React.Fragment>
                         ))}
                     </div>
                 ) : (

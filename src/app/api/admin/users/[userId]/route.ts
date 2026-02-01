@@ -20,7 +20,7 @@ export async function GET(
 
     const userId = params.userId;
 
-    // Fetch user with subscriptions
+    // Fetch user with subscriptions, funnels, and products
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -32,10 +32,21 @@ export async function GET(
             createdAt: 'desc'
           }
         },
+        funnels: {
+          orderBy: {
+            createdAt: 'desc'
+          }
+        },
+        products: {
+          orderBy: {
+            createdAt: 'desc'
+          }
+        },
         _count: {
           select: {
             channels: true,
-            products: true
+            products: true,
+            funnels: true
           }
         }
       }
@@ -94,26 +105,26 @@ export async function GET(
       },
       channels: channels.map((channel: any) => ({
         ...channel,
-        subscriptionPrice: channel.subscriptionPrice 
+        subscriptionPrice: channel.subscriptionPrice
           ? (typeof channel.subscriptionPrice === 'object' && 'toNumber' in channel.subscriptionPrice
-              ? channel.subscriptionPrice.toNumber()
-              : typeof channel.subscriptionPrice === 'string'
+            ? channel.subscriptionPrice.toNumber()
+            : typeof channel.subscriptionPrice === 'string'
               ? parseFloat(channel.subscriptionPrice)
               : Number(channel.subscriptionPrice))
           : null,
         totalRevenue: channel.totalRevenue
           ? (typeof channel.totalRevenue === 'object' && 'toNumber' in channel.totalRevenue
-              ? channel.totalRevenue.toNumber()
-              : typeof channel.totalRevenue === 'string'
+            ? channel.totalRevenue.toNumber()
+            : typeof channel.totalRevenue === 'string'
               ? parseFloat(channel.totalRevenue)
               : Number(channel.totalRevenue))
           : 0,
         products: (channel.products || []).map((product: any) => ({
           ...product,
-          price: product.price 
+          price: product.price
             ? (typeof product.price === 'object' && 'toNumber' in product.price
-                ? product.price.toNumber()
-                : typeof product.price === 'string'
+              ? product.price.toNumber()
+              : typeof product.price === 'string'
                 ? parseFloat(product.price)
                 : Number(product.price))
             : null,

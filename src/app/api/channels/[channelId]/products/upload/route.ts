@@ -35,6 +35,29 @@ export async function POST(
       return NextResponse.json({ error: 'Channel not found or unauthorized' }, { status: 404 });
     }
 
+    // Check product limits
+    const activeSubscription = await prisma.userSubscription.findFirst({
+      where: {
+        userId: session.user.id,
+        status: 'ACTIVE',
+        endDate: { gte: new Date() }
+      },
+      include: { plan: true }
+    });
+
+    const productCount = await prisma.channelProduct.count({
+      where: { channelId: params.channelId }
+    });
+
+    const maxProducts = activeSubscription ? (activeSubscription.plan.maxProducts ?? -1) : 1;
+
+    if (maxProducts !== -1 && productCount >= maxProducts) {
+      return NextResponse.json(
+        { error: `You've reached your plan limit of ${maxProducts} products. Please upgrade to add more.` },
+        { status: 403 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const coverImage = formData.get('coverImage') as File;

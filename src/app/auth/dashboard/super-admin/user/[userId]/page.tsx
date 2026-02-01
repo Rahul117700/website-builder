@@ -1,11 +1,12 @@
 'use client';
+
 import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import DashboardLayout from '@/components/layouts/dashboard-layout';
+import SuperAdminLayout from '@/components/layouts/super-admin-layout';
 import toast from 'react-hot-toast';
-import { 
-  ArrowLeftIcon, 
-  UserCircleIcon, 
+import {
+  ArrowLeftIcon,
+  UserCircleIcon,
   CreditCardIcon,
   ChartBarIcon,
   DocumentTextIcon,
@@ -14,8 +15,18 @@ import {
   ShoppingCartIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ClockIcon
+  ClockIcon,
+  XMarkIcon,
+  PresentationChartLineIcon,
+  EnvelopeIcon,
+  IdentificationIcon,
+  RocketLaunchIcon,
+  ShieldCheckIcon,
+  PlayIcon,
+  ArrowDownTrayIcon,
+  ArrowTopRightOnSquareIcon
 } from '@heroicons/react/24/outline';
+import { PulseCard, GlassContainer, CommandButton, NeonBadge, TerminalText } from '@/components/super-admin/ui-kit';
 
 export default function SuperAdminUserView() {
   const router = useRouter();
@@ -24,12 +35,24 @@ export default function SuperAdminUserView() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [plans, setPlans] = useState<any[]>([]);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [assigning, setAssigning] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState('');
+  const [duration, setDuration] = useState('30');
+
+  useEffect(() => {
+    fetch('/api/admin/subscription-plans?activeOnly=true')
+      .then(r => r.json())
+      .then(data => setPlans(data.plans || []))
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     if (!userId) return;
     setLoading(true);
     setError('');
-    
+
     fetch(`/api/admin/users/${userId}`)
       .then(async r => {
         if (!r.ok) {
@@ -39,22 +62,6 @@ export default function SuperAdminUserView() {
         return r.json();
       })
       .then(data => {
-        console.log('[User Detail Page] Full API response:', data);
-        console.log('[User Detail Page] User data:', {
-          userId: data.user?.id,
-          email: data.user?.email,
-          channelsCount: data.user?.channels?.length || 0,
-          _countChannels: data.user?._count?.channels || 0,
-          hasChannelsArray: Array.isArray(data.user?.channels),
-          channels: data.user?.channels?.map((c: any) => ({ 
-            id: c.id, 
-            name: c.name, 
-            slug: c.slug,
-            productsCount: c.products?.length || 0,
-            _countProducts: c._count?.products || 0
-          })) || []
-        });
-        
         if (data.user) {
           setUser(data.user);
         } else {
@@ -69,6 +76,47 @@ export default function SuperAdminUserView() {
       .finally(() => setLoading(false));
   }, [userId]);
 
+  const handleAssignPlan = async () => {
+    if (!selectedPlanId) return;
+    setAssigning(true);
+    try {
+      const res = await fetch('/api/admin/users/assign-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          planId: selectedPlanId,
+          duration: parseInt(duration)
+        })
+      });
+      if (!res.ok) throw new Error('Failed to assign plan');
+      toast.success('Plan assigned successfully');
+      setShowAssignModal(false);
+      // Refresh user data
+      window.location.reload();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const handleToggleUserStatus = async () => {
+    const newStatus = user.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE';
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, status: newStatus })
+      });
+      if (!res.ok) throw new Error('Update failed');
+      toast.success(`User status updated to ${newStatus}`);
+      setUser({ ...user, status: newStatus });
+    } catch (err) {
+      toast.error('Moderation protocol failure');
+    }
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success('Copied to clipboard!');
@@ -76,327 +124,334 @@ export default function SuperAdminUserView() {
 
   if (loading) {
     return (
-      <DashboardLayout>
-        <div className="py-20 text-center text-gray-500 bg-white min-h-screen w-full">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-4">Loading user details...</p>
+      <SuperAdminLayout>
+        <div className="flex flex-col items-center justify-center h-[60vh] gap-6">
+          <div className="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+          <p className="text-xs font-bold text-slate-500 tracking-[0.3em] uppercase">Accessing User Record...</p>
         </div>
-      </DashboardLayout>
+      </SuperAdminLayout>
     );
   }
 
   if (error || !user) {
     return (
-      <DashboardLayout>
-        <div className="py-20 text-center text-red-500 bg-white min-h-screen w-full">
-          <XCircleIcon className="h-16 w-16 mx-auto mb-4" />
-          <p className="text-xl">{error || 'User not found'}</p>
-          <button
-            onClick={() => router.push('/auth/dashboard/super-admin')}
-            className="mt-6 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-          >
-            Back to Dashboard
-          </button>
+      <SuperAdminLayout>
+        <div className="max-w-xl mx-auto py-20 text-center space-y-8 animate-in fade-in zoom-in-95">
+          <div className="w-24 h-24 bg-red-500/10 rounded-[2rem] flex items-center justify-center mx-auto border border-red-500/20 shadow-2xl shadow-red-500/10">
+            <XCircleIcon className="h-12 w-12 text-red-500" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase">Data Access Breach</h2>
+            <p className="text-slate-500 font-bold">{error || 'User entity not found in main terminal'}</p>
+          </div>
+          <CommandButton onClick={() => router.push('/auth/dashboard/super-admin')} variant="danger" icon={ArrowLeftIcon}>
+            Abort & Return
+          </CommandButton>
         </div>
-      </DashboardLayout>
+      </SuperAdminLayout>
     );
   }
 
-  const activePlan = user.subscriptions?.find((sub: any) => 
+  const activePlan = user.subscriptions?.find((sub: any) =>
     new Date(sub.endDate) > new Date() && sub.status === 'ACTIVE'
   );
 
+  const allChannelProducts = user.channels?.flatMap((channel: any) =>
+    (channel.products || []).map((p: any) => ({ ...p, channelName: channel.name }))
+  ) || [];
+
   return (
-    <DashboardLayout>
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 p-4 sm:p-6 lg:p-8">
-        {/* Header */}
-        <div className="mb-6">
-          <button
-            onClick={() => router.push('/auth/dashboard/super-admin')}
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-4 transition-colors"
-          >
-            <ArrowLeftIcon className="h-5 w-5 mr-2" />
-            Back to Dashboard
-          </button>
-          
-          <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-purple-100">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center">
-                <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span className="text-purple-600 font-bold text-2xl">
-                    {user.name?.charAt(0) || user.email.charAt(0)}
-                  </span>
-                </div>
-                <div className="ml-4">
-                  <h1 className="text-2xl font-bold text-gray-900">{user.name || 'No name'}</h1>
-                  <p className="text-gray-600">{user.email}</p>
-                  <div className="flex items-center mt-2 space-x-2">
-                    <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
-                      user.role === 'SUPER_ADMIN' ? 'bg-purple-100 text-purple-800' :
-                      user.role === 'ADMIN' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {user.role}
-                    </span>
-                    <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
-                      user.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
-                      user.status === 'DISABLED' ? 'bg-red-100 text-red-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {user.status}
-                    </span>
+    <SuperAdminLayout>
+      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        {/* Header with Back & Action */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-800/50">
+          <div className="flex items-center gap-6">
+            <button
+              onClick={() => router.push('/auth/dashboard/super-admin')}
+              className="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-all hover:scale-110 active:scale-90 shadow-xl"
+            >
+              <ArrowLeftIcon className="w-6 h-6" />
+            </button>
+            <div>
+              <div className="flex items-center gap-3 mb-1">
+                <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic">{user.name || 'Anonymous User'}</h1>
+                <NeonBadge color={user.status === 'ACTIVE' ? 'emerald' : 'rose'}>{user.status}</NeonBadge>
+              </div>
+              <div className="flex items-center gap-4">
+                <p className="text-slate-500 font-mono text-sm tracking-tight">{user.email}</p>
+                <div className="w-1 h-1 rounded-full bg-slate-700"></div>
+                <p className="text-xs font-bold text-indigo-400 tracking-widest uppercase">ID: {user.id.slice(-8)}</p>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <CommandButton
+              onClick={handleToggleUserStatus}
+              variant={user.status === 'ACTIVE' ? 'danger' : 'primary'}
+              icon={user.status === 'ACTIVE' ? ShieldCheckIcon : CheckCircleIcon}
+            >
+              {user.status === 'ACTIVE' ? 'Suspend Identity' : 'Restore Identity'}
+            </CommandButton>
+            <CommandButton
+              onClick={() => setShowAssignModal(true)}
+              variant="secondary"
+              icon={CreditCardIcon}
+            >
+              Manual Plan Allotment
+            </CommandButton>
+          </div>
+        </div>
+
+        {/* User Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <PulseCard
+            title="Total Channels"
+            value={user._count?.channels || 0}
+            icon={RocketLaunchIcon}
+            color="indigo"
+          />
+          <PulseCard
+            title="Production Units"
+            value={allChannelProducts.length}
+            icon={ShoppingCartIcon}
+            color="cyan"
+          />
+          <PulseCard
+            title="Current Protocol"
+            value={activePlan ? activePlan.plan.name : 'Free Tier'}
+            subValue={activePlan ? `Expires: ${new Date(activePlan.endDate).toLocaleDateString()}` : 'No active subscription'}
+            icon={ShieldCheckIcon}
+            color="amber"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Channels & Products Flow */}
+          <GlassContainer title="Resource Deployment" subtitle="Active Channels & Product Distribution" className="lg:col-span-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {user.channels?.map((channel: any) => (
+                <div key={channel.id} className="p-6 rounded-[2rem] bg-slate-900/40 border border-slate-800/80 hover:border-indigo-500/30 transition-all group">
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <h4 className="text-xl font-black text-white mb-2">{channel.name}</h4>
+                      <div className="flex flex-wrap gap-2">
+                        <NeonBadge color={channel.status === 'ACTIVE' ? 'indigo' : 'slate'}>{channel.status}</NeonBadge>
+                        {channel.published && <NeonBadge color="emerald">Published</NeonBadge>}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => router.push(`/auth/dashboard/super-admin/channels?search=${channel.slug}`)}
+                        className="p-2.5 rounded-xl bg-slate-800 text-slate-400 hover:scale-110 hover:bg-indigo-600 hover:text-white transition-all shadow-lg"
+                        title="Audit Channel"
+                      >
+                        <ShieldCheckIcon className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-slate-950/40 rounded-2xl p-4 border border-slate-800/50">
+                      <p className="text-[10px] font-bold text-slate-600 uppercase mb-1">Products</p>
+                      <p className="text-xl font-black text-white">{channel._count?.products || 0}</p>
+                    </div>
+                    <div className="bg-slate-950/40 rounded-2xl p-4 border border-slate-800/50">
+                      <p className="text-[10px] font-bold text-slate-600 uppercase mb-1">Subscribers</p>
+                      <p className="text-xl font-black text-white">{channel._count?.subscribers || 0}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-2">
+                      <LinkIcon className="w-3 h-3" /> External Access Link
+                    </p>
+                    <div className="flex items-center gap-2 bg-slate-950/60 rounded-xl p-2 pl-4 border border-slate-800 overflow-hidden">
+                      <code className="text-xs text-indigo-400 truncate flex-1 font-mono">
+                        {`${process.env.NEXT_PUBLIC_APP_URL || 'https://sellearndirect.com'}/channel/${channel.slug}`}
+                      </code>
+                      <button
+                        onClick={() => copyToClipboard(`${process.env.NEXT_PUBLIC_APP_URL || 'https://sellearndirect.com'}/channel/${channel.slug}`)}
+                        className="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-[10px] font-black uppercase hover:bg-indigo-500 transition-colors"
+                      >
+                        Copy
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-gray-500">Joined</p>
-                <p className="text-sm font-medium text-gray-900">
-                  {new Date(user.createdAt).toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}
-                </p>
-              </div>
+              ))}
+              {(!user.channels || user.channels.length === 0) && (
+                <div className="md:col-span-2 text-center py-20 opacity-30">
+                  <PresentationChartLineIcon className="w-16 h-16 mx-auto mb-4" />
+                  <p className="text-sm font-black tracking-widest uppercase">No Resource Deployments Detected</p>
+                </div>
+              )}
             </div>
-          </div>
-        </div>
+          </GlassContainer>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-blue-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Total Channels</p>
-                <p className="text-3xl font-bold text-blue-600">{user._count?.channels || 0}</p>
-              </div>
-              <ChartBarIcon className="h-12 w-12 text-blue-400" />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-green-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Total Products</p>
-                <p className="text-3xl font-bold text-green-600">
-                  {user.channels?.reduce((sum: number, ch: any) => sum + (ch._count?.products || 0), 0) || 0}
-                </p>
-              </div>
-              <ShoppingCartIcon className="h-12 w-12 text-green-400" />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-purple-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Current Plan</p>
-                <p className="text-xl font-bold text-purple-600">
-                  {activePlan ? activePlan.plan.name : 'Free Tier'}
-                </p>
-                {activePlan && (
-                  <p className="text-xs text-gray-500 mt-1">
-                    Expires: {new Date(activePlan.endDate).toLocaleDateString()}
-                  </p>
-                )}
-              </div>
-              <CreditCardIcon className="h-12 w-12 text-purple-400" />
-            </div>
-          </div>
-        </div>
-
-        {/* Subscription Details */}
-        {user.subscriptions && user.subscriptions.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-xl p-6 mb-6 border-2 border-purple-100">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-              <CreditCardIcon className="h-6 w-6 mr-2 text-purple-600" />
-              Subscription History
-            </h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Plan</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Start Date</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">End Date</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {user.subscriptions.map((sub: any) => (
-                    <tr key={sub.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{sub.plan.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {sub.plan.currency} {sub.plan.price.toLocaleString()}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {new Date(sub.startDate).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {new Date(sub.endDate).toLocaleDateString()}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          new Date(sub.endDate) > new Date() && sub.status === 'ACTIVE'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {new Date(sub.endDate) > new Date() && sub.status === 'ACTIVE' ? 'Active' : 'Expired'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Channels Section */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 border-2 border-blue-100">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-            <ChartBarIcon className="h-6 w-6 mr-2 text-blue-600" />
-            Channels ({user.channels?.length || 0})
-          </h2>
-          
-          {user.channels && user.channels.length > 0 ? (
+          {/* Funnels Moderation */}
+          <GlassContainer title="Funnel Hub" subtitle="Growth & Revenue Streams">
             <div className="space-y-4">
-              {user.channels.map((channel: any) => {
-                const channelUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://sellearndirect.com'}/channel/${channel.slug}`;
-                const totalViews = channel.products?.reduce((sum: number, p: any) => sum + (p.viewCount || 0), 0) || 0;
-                
-                return (
-                  <div 
-                    key={channel.id} 
-                    className="border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{channel.name}</h3>
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            channel.status === 'ACTIVE' 
-                              ? 'bg-green-100 text-green-800' 
-                              : channel.status === 'DRAFT'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {channel.status}
-                          </span>
-                          {channel.published && (
-                            <span className="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                              <CheckCircleIcon className="h-3 w-3 mr-1" />
-                              Published
-                            </span>
-                          )}
-                        </div>
-                        
-                        {channel.description && (
-                          <p className="text-sm text-gray-600 mb-2">{channel.description}</p>
-                        )}
-                        
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                          <div className="flex items-center">
-                            <ClockIcon className="h-4 w-4 mr-1" />
-                            Created: {new Date(channel.createdAt).toLocaleDateString()}
-                          </div>
-                          {channel.template && (
-                            <div className="flex items-center">
-                              <DocumentTextIcon className="h-4 w-4 mr-1" />
-                              Template: {channel.template.name}
-                            </div>
-                          )}
-                          <div className="flex items-center">
-                            <ShoppingCartIcon className="h-4 w-4 mr-1" />
-                            Products: {channel._count?.products || 0}
-                          </div>
-                          <div className="flex items-center">
-                            <UserCircleIcon className="h-4 w-4 mr-1" />
-                            Subscribers: {channel._count?.subscribers || 0}
-                          </div>
-                          <div className="flex items-center">
-                            <EyeIcon className="h-4 w-4 mr-1" />
-                            Total Views: {totalViews}
-                          </div>
-                        </div>
+              {user.funnels?.map((funnel: any) => (
+                <div key={funnel.id} className="p-5 rounded-3xl bg-slate-900/40 border border-slate-800/50 hover:bg-slate-900/60 transition-all flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                      <ChartBarIcon className="w-6 h-6 text-indigo-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-white">{funnel.name}</p>
+                      <div className="flex items-center gap-3">
+                        <span className="text-[10px] font-bold text-slate-500 italic">ID: {funnel.id.slice(-6)}</span>
+                        <NeonBadge color={funnel.published ? 'emerald' : 'slate'}>{funnel.published ? 'LIVE' : 'DRAFT'}</NeonBadge>
                       </div>
                     </div>
-
-                    {/* Channel Link */}
-                    <div className="mt-3 pt-3 border-t border-gray-200">
-                      <p className="text-xs font-medium text-gray-700 mb-2 flex items-center">
-                        <LinkIcon className="h-4 w-4 mr-1" />
-                        Channel Link:
-                      </p>
-                      <div className="flex items-center space-x-2">
-                        <div className="flex-1 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
-                          <code className="text-sm text-blue-600 break-all">
-                            {channelUrl}
-                          </code>
-                        </div>
-                        <button
-                          onClick={() => copyToClipboard(channelUrl)}
-                          className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                        >
-                          Copy
-                        </button>
-                        {channel.published && channel.status === 'ACTIVE' && (
-                          <a
-                            href={channelUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                          >
-                            View
-                          </a>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Channel Products */}
-                    {channel.products && channel.products.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-gray-200">
-                        <p className="text-xs font-medium text-gray-700 mb-2">Products in this channel:</p>
-                        <div className="space-y-2">
-                          {channel.products.map((product: any) => (
-                            <div key={product.id} className="bg-gray-50 rounded-lg p-3 flex items-center justify-between">
-                              <div className="flex-1">
-                                <p className="text-sm font-medium text-gray-900">{product.title}</p>
-                                <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                                  <span>Views: {product.viewCount || 0}</span>
-                                  {product.price && (
-                                    <span>Price: ₹{typeof product.price === 'object' && 'toNumber' in product.price ? product.price.toNumber() : product.price}</span>
-                                  )}
-                                  {product.type && (
-                                    <span className="capitalize">Type: {product.type}</span>
-                                  )}
-                                </div>
-                              </div>
-                              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                                product.published 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-gray-100 text-gray-800'
-                              }`}>
-                                {product.published ? 'Published' : 'Draft'}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
-                );
-              })}
+                  <div className="text-right">
+                    <p className="text-lg font-black text-indigo-400 tracking-tighter">₹{funnel.revenue || 0}</p>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase">{funnel.visitors || 0} VISITS</p>
+                  </div>
+                </div>
+              ))}
+              {(!user.funnels || user.funnels.length === 0) && (
+                <p className="text-center py-10 text-slate-600 font-bold uppercase tracking-widest text-xs">Awaiting Funnel Logic...</p>
+              )}
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <ChartBarIcon className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-500">No channels created yet</p>
+          </GlassContainer>
+
+          {/* Marketplace Content */}
+          <GlassContainer title="Product Repository" subtitle="Global Marketplace Inventory">
+            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-hide">
+              {allChannelProducts.map((product: any) => (
+                <div key={product.id} className="p-5 rounded-3xl bg-slate-900/40 border border-slate-800/50 hover:bg-slate-900/60 transition-all flex items-center justify-between group">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform">
+                      <ShoppingCartIcon className="w-6 h-6 text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-white line-clamp-1">{product.title || product.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">{product.type}</p>
+                        <span className="text-slate-800">•</span>
+                        <p className="text-[9px] font-bold text-indigo-500/60 uppercase truncate w-32">{product.channelName}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 mr-2">
+                      {product.videoUrl && (
+                        <button
+                          onClick={() => window.open(product.videoUrl, '_blank')}
+                          className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all border border-indigo-500/20"
+                          title="Watch Video"
+                        >
+                          <PlayIcon className="w-4 h-4" />
+                        </button>
+                      )}
+                      {product.fileUrl && (
+                        <button
+                          onClick={() => window.open(product.fileUrl, '_blank')}
+                          className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all border border-emerald-500/20"
+                          title="Download File"
+                        >
+                          <ArrowDownTrayIcon className="w-4 h-4" />
+                        </button>
+                      )}
+                      {!product.videoUrl && !product.fileUrl && (
+                        <button
+                          onClick={() => router.push(`/channel/${product.channelName.toLowerCase().replace(/\s+/g, '-')}/products/${product.id}`)}
+                          className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white transition-all border border-slate-700"
+                          title="Check on Channel"
+                        >
+                          <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="text-right mr-3 shrink-0">
+                      <p className="text-sm font-black text-white">₹{product.price}</p>
+                      <p className="text-[8px] font-bold text-slate-600 uppercase">Price</p>
+                    </div>
+                    <NeonBadge color={product.published ? 'emerald' : 'rose'}>{product.published ? 'PUBLISHED' : 'HIDDEN'}</NeonBadge>
+                  </div>
+                </div>
+              ))}
+              {allChannelProducts.length === 0 && (
+                <p className="text-center py-10 text-slate-600 font-bold uppercase tracking-widest text-xs">No Channel Content Detected</p>
+              )}
             </div>
-          )}
+          </GlassContainer>
         </div>
       </div>
-    </DashboardLayout>
+
+      {/* Modern Manual Assignment Modal */}
+      {showAssignModal && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[70] flex items-center justify-center p-4">
+          <div className="bg-[#0f172a] rounded-[3rem] w-full max-w-md shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-slate-800 overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-8 border-b border-slate-800">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                    <CreditCardIcon className="w-6 h-6 text-indigo-400" />
+                  </div>
+                  <h3 className="text-2xl font-black text-white tracking-tighter italic">MANUAL ALLOTMENT</h3>
+                </div>
+                <button onClick={() => setShowAssignModal(false)} className="p-2 rounded-xl bg-slate-900 text-slate-500 hover:text-white transition-all">
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-8 space-y-6">
+              <div className="space-y-2">
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Select Protocol Tier</label>
+                <select
+                  value={selectedPlanId}
+                  onChange={(e) => setSelectedPlanId(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-white font-bold appearance-none cursor-pointer"
+                >
+                  <option value="" className="bg-slate-950">Choose a plan...</option>
+                  {plans.map(plan => (
+                    <option key={plan.id} value={plan.id} className="bg-slate-950">{plan.name} - ₹{plan.price}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.2em] ml-2">Authorization Duration (Days)</label>
+                <input
+                  type="number"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl px-6 py-4 outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-white font-bold placeholder:text-slate-700"
+                  placeholder="30"
+                />
+              </div>
+
+              <div className="bg-amber-500/5 rounded-2xl p-5 border border-amber-500/20 flex gap-4">
+                <ShieldCheckIcon className="w-8 h-8 text-amber-500 shrink-0" />
+                <p className="text-[10px] text-amber-200/60 font-medium leading-relaxed uppercase tracking-wider font-mono">
+                  <strong>SYSTEM WARNING:</strong> OVERRIDING PAYMENT GATEWAY PROTOCOLS. THE SELECTED RESOURCE TIER WILL BE IMMEDIATELY AUTHENTICATED.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-8 border-t border-slate-800 bg-slate-950/20 flex gap-4">
+              <button
+                onClick={() => setShowAssignModal(false)}
+                className="flex-1 px-6 py-4 border border-slate-800 text-slate-400 rounded-2xl hover:bg-slate-900 transition-all font-black text-sm uppercase tracking-widest"
+              >
+                Cancel
+              </button>
+              <CommandButton
+                onClick={handleAssignPlan}
+                loading={assigning}
+                variant="primary"
+                icon={CheckCircleIcon}
+              >
+                Confirm
+              </CommandButton>
+            </div>
+          </div>
+        </div>
+      )}
+    </SuperAdminLayout>
   );
 }
-

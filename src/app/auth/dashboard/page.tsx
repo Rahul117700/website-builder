@@ -796,16 +796,12 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-
-        <RazorpayConnectModal
-          isOpen={isRazorpayModalOpen}
-          onClose={() => setIsRazorpayModalOpen(false)}
-          onSuccess={() => {
-            checkRazorpayConfig();
-          }}
-        />
       </motion.div>
+      <RazorpayConnectModal
+        isOpen={isRazorpayModalOpen}
+        onClose={() => setIsRazorpayModalOpen(false)}
+        onSuccess={checkRazorpayConfig}
+      />
     </DashboardLayout>
   );
 }
-

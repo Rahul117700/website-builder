@@ -96,7 +96,7 @@ export default async function ProductDetailsPage({ params }: Props) {
                         <div className="aspect-video bg-black rounded-2xl overflow-hidden shadow-lg relative group">
                             {product.previewImage || product.fileUrl ? (
                                 <img
-                                    src={product.previewImage || (product.type === 'VIDEO' ? product.previewImage : 'https://via.placeholder.com/800x450?text=No+Preview')}
+                                    src={product.previewImage ?? (product.type === 'VIDEO' ? product.previewImage ?? 'https://via.placeholder.com/800x450?text=No+Preview' : 'https://via.placeholder.com/800x450?text=No+Preview')}
                                     alt={product.title}
                                     className="w-full h-full object-cover"
                                 />

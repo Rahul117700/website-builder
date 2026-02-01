@@ -5,6 +5,7 @@ import MainLayout from '@/components/layout/MainLayout';
 import ProductCard from '@/components/product/ProductCard';
 import { ProductCardData, SubscriptionData, NotificationData } from '@/app/actions/homepage';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import MobileTrendingWidget from '@/components/trending/MobileTrendingWidget';
 
 interface ExploreContentProps {
     tag: string;
@@ -37,9 +38,12 @@ export default function ExploreContent({
                 </div>
 
                 {products.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-4 gap-y-8">
-                        {products.map((product) => (
-                            <ProductCard key={product.id} {...product} />
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-4 gap-y-8">
+                        {products.map((product, index) => (
+                            <React.Fragment key={product.id}>
+                                <ProductCard {...product} />
+                                {index === 0 && <MobileTrendingWidget items={products.slice(0, 5)} />}
+                            </React.Fragment>
                         ))}
                     </div>
                 ) : (

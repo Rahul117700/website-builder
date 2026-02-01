@@ -45,6 +45,13 @@ import PlansView from '@/components/dashboard/views/PlansView';
 import SettingsView from '@/components/dashboard/views/SettingsView';
 import AnalyticsTab from '@/components/channel-editor/AnalyticsTab';
 
+// Add Razorpay type definition
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 type DeviceType = 'desktop' | 'tablet' | 'mobile';
 type TabType = 'basic' | 'theme' | 'layout' | 'products' | 'subscription' | 'settings' | 'analytics' | 'profile' | null;
 
@@ -72,13 +79,24 @@ export default function ChannelEditorPage() {
   const [subscriptionData, setSubscriptionData] = useState<any>(null);
   const [showPlansModal, setShowPlansModal] = useState(false);
   const [plans, setPlans] = useState<any[]>([]);
+  const [purchasing, setPurchasing] = useState<string | null>(null);
 
   // Default to Analytics tab on desktop
   useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
       setActiveTab('analytics');
     }
+    loadRazorpayScript();
   }, []);
+
+  const loadRazorpayScript = () => {
+    if (typeof window === 'undefined') return;
+    if (window.Razorpay) return;
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    document.body.appendChild(script);
+  };
 
   // Close publishing modal when clicking outside and prevent body scroll
   useEffect(() => {
@@ -467,6 +485,80 @@ export default function ChannelEditorPage() {
     }
   };
 
+  const handlePurchase = async (planId: string) => {
+    try {
+      setPurchasing(planId);
+
+      // Create order
+      const orderResponse = await fetch('/api/user/subscriptions/purchase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId })
+      });
+
+      if (!orderResponse.ok) {
+        const error = await orderResponse.json();
+        toast.error(error.error || 'Failed to create order');
+        return;
+      }
+
+      const orderData = await orderResponse.json();
+
+      // Initialize Razorpay
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Funnel Builder Subscription',
+        description: `Subscribe to ${orderData.planDetails.name}`,
+        order_id: orderData.orderId,
+        handler: async function (response: any) {
+          // Verify payment
+          try {
+            const verifyResponse = await fetch('/api/user/subscriptions/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                planId: planId
+              })
+            });
+
+            if (verifyResponse.ok) {
+              toast.success('🎉 Subscription activated successfully!');
+              loadSubscriptionData();
+              setShowPlansModal(false);
+            } else {
+              toast.error('Payment verification failed');
+            }
+          } catch (error) {
+            console.error('Error verifying payment:', error);
+            toast.error('Failed to verify payment');
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setPurchasing(null);
+          }
+        },
+        theme: {
+          color: '#9333ea'
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+
+    } catch (error) {
+      console.error('Error purchasing plan:', error);
+      toast.error('Failed to initiate purchase');
+    } finally {
+      setPurchasing(null);
+    }
+  };
+
   const getPreviewWidth = () => {
     // Always return desktop width
     return '100%';
@@ -538,29 +630,42 @@ export default function ChannelEditorPage() {
           <div className="flex items-center justify-between gap-2 mb-2 sm:mb-0">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <div className="min-w-0 flex-1">
-                <h1 className="text-base sm:text-lg font-bold text-gray-900 truncate">
-                  {viewMode === 'editor' ? (channel ? channel.name || 'Untitled Channel' : 'Loading...') :
-                    viewMode === 'analytics' ? 'Channel Analytics' :
-                      viewMode === 'channels' ? 'My Channels' :
-                        viewMode === 'plans' ? 'Subscription Plans' :
-                          viewMode === 'settings' ? 'Settings' : ''}
-                </h1>
-                {viewMode === 'editor' && (
-                  <div className="flex items-center gap-2 text-xs text-gray-600">
-                    {saving ? (
-                      <>
-                        <CloudArrowUpIcon className="h-3.5 w-3.5 animate-pulse flex-shrink-0" />
-                        <span className="truncate">Saving...</span>
-                      </>
-                    ) : lastSaved ? (
-                      <>
-                        <CheckCircleIcon className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
-                        <span className="truncate hidden sm:inline">Saved {lastSaved.toLocaleTimeString()}</span>
-                        <span className="truncate sm:hidden">Saved</span>
-                      </>
-                    ) : null}
+                <div className="flex items-center gap-2">
+                  <h1 className="text-sm sm:text-lg font-bold text-gray-900 truncate">
+                    {viewMode === 'editor' ? (channel ? channel.name || 'Untitled Channel' : 'Loading...') :
+                      viewMode === 'analytics' ? 'Channel Analytics' :
+                        viewMode === 'channels' ? 'My Channels' :
+                          viewMode === 'plans' ? 'Subscription Plans' :
+                            viewMode === 'settings' ? 'Settings' : ''}
+                  </h1>
+                  {viewMode === 'editor' && (
+                    <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-600">
+                      {saving ? (
+                        <CloudArrowUpIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-pulse" />
+                      ) : lastSaved ? (
+                        <CheckCircleIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-green-600" />
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+
+                {/* Mobile Status Bar - Metrics visible on small screens */}
+                <div className="flex sm:hidden items-center gap-1.5 mt-1">
+                  <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 border border-emerald-100 rounded-full">
+                    <BanknotesIcon className="h-3 w-3 text-emerald-600" />
+                    <span className="text-[10px] font-bold text-emerald-700">
+                      ₹{channel?.totalRevenue?.toLocaleString() || '0'}
+                    </span>
                   </div>
-                )}
+                  {subscriptionData?.hasActivePlan && (
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-indigo-50 border border-indigo-100 rounded-full">
+                      <SparklesIcon className="h-3 w-3 text-indigo-600" />
+                      <span className="text-[10px] font-bold text-indigo-700">
+                        {subscriptionData.tier?.planName || 'Active'}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Gross Revenue & Plan Info */}
@@ -596,12 +701,12 @@ export default function ChannelEditorPage() {
               {/* Publishing Options Button - Opens Modal */}
               <button
                 onClick={() => setShowPublishingModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors touch-manipulation text-sm font-medium text-gray-700 relative z-10"
-                aria-label="Open Publishing Options"
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors touch-manipulation text-xs sm:text-sm font-medium text-gray-700 relative z-10"
+                aria-label="Open Channel Options"
               >
-                <RocketLaunchIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Publishing Options</span>
-                <span className="sm:hidden">Publish</span>
+                <RocketLaunchIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">{channel.published ? 'Live Options' : 'Options'}</span>
+                <span className="xs:hidden">Options</span>
               </button>
 
               {/* Publishing Options Modal - All Screen Sizes - Rendered via Portal */}
@@ -642,8 +747,8 @@ export default function ChannelEditorPage() {
                     <div className="px-6 py-5 border-b border-gray-200 bg-white flex-shrink-0 relative z-10">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1 relative z-10">
-                          <h3 className="text-lg font-bold text-gray-900 break-words relative z-10">Publishing Options</h3>
-                          <p className="text-sm text-gray-500 mt-1.5 break-words relative z-10">Manage your channel publishing settings</p>
+                          <h3 className="text-lg font-bold text-gray-900 break-words relative z-10">Channel Options</h3>
+                          <p className="text-sm text-gray-500 mt-1.5 break-words relative z-10">Manage your channel settings and visibility</p>
                         </div>
                         <button
                           onClick={() => setShowPublishingModal(false)}
@@ -740,18 +845,30 @@ export default function ChannelEditorPage() {
                         </div>
                       </div>
 
-                      {/* Publish Button - Always Visible */}
+                      {/* View Link - More Prominent if not published, but by default it should be */}
                       <div className="px-6 py-5 bg-gradient-to-br from-gray-50 to-white border-t border-gray-200 flex-shrink-0">
-                        <button
-                          onClick={() => {
-                            handlePublish();
-                            setShowPublishingModal(false);
-                          }}
-                          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all text-sm font-bold shadow-lg touch-manipulation active:scale-95"
-                        >
-                          <RocketLaunchIcon className="h-5 w-5 flex-shrink-0" />
-                          <span className="truncate">Publish Channel</span>
-                        </button>
+                        {channel.published ? (
+                          <Link
+                            href={`/channel/${channel.slug}`}
+                            target="_blank"
+                            onClick={() => setShowPublishingModal(false)}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:from-emerald-500 hover:to-teal-500 transition-all text-sm font-bold shadow-lg touch-manipulation active:scale-95"
+                          >
+                            <EyeIcon className="h-5 w-5 flex-shrink-0" />
+                            <span className="truncate">View Live Channel</span>
+                          </Link>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              handlePublish();
+                              setShowPublishingModal(false);
+                            }}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all text-sm font-bold shadow-lg touch-manipulation active:scale-95"
+                          >
+                            <RocketLaunchIcon className="h-5 w-5 flex-shrink-0" />
+                            <span className="truncate">Publish Channel</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -782,7 +899,15 @@ export default function ChannelEditorPage() {
                     <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between shrink-0">
                       <div>
                         <h2 className="text-2xl font-black text-gray-900 tracking-tight">Subscription Plans</h2>
-                        <p className="text-sm text-gray-500 font-medium mt-1">Scale your business with the perfect plan</p>
+                        <div className="flex flex-col gap-1 mt-1">
+                          <p className="text-sm text-gray-500 font-medium">Scale your business with the perfect plan</p>
+                          {subscriptionData?.hasActivePlan && (
+                            <div className="flex items-center gap-2 text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full w-fit">
+                              <span className="flex h-2 w-2 rounded-full bg-indigo-600 animate-pulse"></span>
+                              Current: {subscriptionData.activeSubscription.plan.name} (Expires: {new Date(subscriptionData.activeSubscription.endDate).toLocaleDateString()})
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <button
                         onClick={() => setShowPlansModal(false)}
@@ -835,20 +960,22 @@ export default function ChannelEditorPage() {
                             </div>
 
                             <button
-                              onClick={async () => {
-                                // Close modal and redirect to purchase or handle inline
-                                setShowPlansModal(false);
-                                toast.loading('Initializing checkout...');
-                                // Re-using purchase logic from PlansView would be ideal
-                                // For now, directing to dashboard/plans if it's simpler or implementing here
-                                router.push('/auth/dashboard?view=plans');
-                              }}
-                              className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-[0.98] ${index === 1
-                                ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-200 hover:bg-indigo-700'
-                                : 'bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200'
+                              onClick={() => handlePurchase(plan.id)}
+                              disabled={purchasing === plan.id || (subscriptionData?.hasActivePlan && subscriptionData.activeSubscription.planId === plan.id)}
+                              className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-[0.98] flex items-center justify-center ${subscriptionData?.hasActivePlan && subscriptionData.activeSubscription.planId === plan.id
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-2 border-gray-200'
+                                : index === 1
+                                  ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-200 hover:bg-indigo-700'
+                                  : 'bg-gray-900 text-white hover:bg-black shadow-lg shadow-gray-200'
                                 }`}
                             >
-                              Get Started
+                              {purchasing === plan.id ? (
+                                <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                              ) : subscriptionData?.hasActivePlan && subscriptionData.activeSubscription.planId === plan.id ? (
+                                'Current Plan'
+                              ) : (
+                                'Get Started'
+                              )}
                             </button>
                           </div>
                         ))}
@@ -928,41 +1055,49 @@ export default function ChannelEditorPage() {
                 <span className="hidden md:inline">Preview</span>
               </Link>
 
-              {/* Publish Button - Hidden on mobile (shown in dropdown) */}
+              {/* View/Publish Button - Hidden on mobile (shown in dropdown) */}
               <div className="hidden md:block">
-                <button
-                  onClick={handlePublish}
-                  className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all text-xs sm:text-sm font-bold shadow-lg touch-manipulation active:scale-95"
-                >
-                  <RocketLaunchIcon className="h-4 w-4" />
-                  <span className="hidden sm:inline">Publish</span>
-                </button>
+                {channel.published ? (
+                  <Link
+                    href={`/channel/${channel.slug}`}
+                    target="_blank"
+                    className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg hover:from-emerald-500 hover:to-teal-500 transition-all text-xs sm:text-sm font-bold shadow-lg touch-manipulation active:scale-95"
+                  >
+                    <EyeIcon className="h-4 w-4" />
+                    <span className="hidden sm:inline">View Live</span>
+                  </Link>
+                ) : (
+                  <button
+                    onClick={handlePublish}
+                    className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all text-xs sm:text-sm font-bold shadow-lg touch-manipulation active:scale-95"
+                  >
+                    <RocketLaunchIcon className="h-4 w-4" />
+                    <span className="hidden sm:inline">Publish</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
 
           {/* Edit Options Tabs in Header - Mobile Optimized */}
           {/* Edit Options Tabs in Header - Mobile Optimized */}
-          <div className="flex items-center gap-2 relative z-20 pb-2 -mx-3 sm:-mx-4 px-3 sm:px-4">
-            <nav className="flex-1 flex items-center gap-2 sm:gap-2.5 overflow-x-auto scrollbar-hide snap-x snap-mandatory pr-2">
+          <div className="flex items-center gap-2 relative z-20 pb-2 -mx-3 sm:-mx-4 px-3 sm:px-4 scrollbar-hide">
+            <nav className="flex-1 flex items-center gap-1.5 sm:gap-2.5 overflow-x-auto scrollbar-hide snap-x snap-mandatory pr-2 scroll-smooth">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => handleTabClick(tab.id)}
-                    className={`group relative flex items-center gap-2 px-4 sm:px-4 py-2.5 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap touch-manipulation active:scale-95 snap-start flex-shrink-0 ${activeTab === tab.id
+                    className={`group relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-sm font-bold transition-all whitespace-nowrap touch-manipulation active:scale-95 snap-start flex-shrink-0 ${activeTab === tab.id
                       ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/40'
                       : 'bg-slate-100 text-slate-700 active:bg-slate-200'
                       }`}
                     title={tab.title}
                     style={{ minWidth: 'max-content' }}
                   >
-                    {activeTab === tab.id && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-xl blur-lg opacity-50 -z-10"></div>
-                    )}
-                    <Icon className={`h-4 w-4 sm:h-4 sm:w-4 flex-shrink-0 ${activeTab === tab.id ? 'text-white' : 'text-slate-600'}`} />
-                    <span className="block">{tab.label}</span>
+                    <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0 ${activeTab === tab.id ? 'text-white' : 'text-slate-600'}`} />
+                    <span>{tab.label}</span>
                   </button>
                 );
               })}
@@ -975,12 +1110,10 @@ export default function ChannelEditorPage() {
             <div className="relative flex-shrink-0">
               <button
                 onClick={() => setShowStudioMenu(!showStudioMenu)}
-                className="group relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all whitespace-nowrap touch-manipulation active:scale-95 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-transparent hover:border-slate-300"
+                className="group relative flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-[11px] sm:text-sm font-bold transition-all whitespace-nowrap touch-manipulation active:scale-95 bg-slate-900 text-white hover:bg-black border border-transparent shadow-md"
               >
-                <span className="flex items-center gap-2">
-                  Studio
-                  <ChevronDownIcon className={`w-3.5 h-3.5 transition-transform duration-200 ${showStudioMenu ? 'rotate-180' : ''}`} />
-                </span>
+                <span>Studio</span>
+                <ChevronDownIcon className={`w-3 h-3 transition-transform duration-200 ${showStudioMenu ? 'rotate-180' : ''}`} />
               </button>
 
               {/* Dropdown Menu */}
@@ -1183,10 +1316,15 @@ export default function ChannelEditorPage() {
                         style={{ width: `${completionData.percentage}%` }}
                       />
                     </div>
-                    {completionData.canPublish && (
-                      <p className="text-xs text-green-600 mt-2 flex items-center gap-1.5">
+                    {channel?.published ? (
+                      <p className="text-xs text-emerald-600 mt-2 flex items-center gap-1.5 font-bold">
                         <CheckCircleSolid className="h-3.5 w-3.5" />
-                        Ready to publish!
+                        Channel is Live
+                      </p>
+                    ) : completionData.canPublish && (
+                      <p className="text-xs text-blue-600 mt-2 flex items-center gap-1.5 font-bold">
+                        <RocketLaunchIcon className="h-3.5 w-3.5" />
+                        Ready to launch!
                       </p>
                     )}
                   </div>
@@ -1205,7 +1343,12 @@ export default function ChannelEditorPage() {
                       <LayoutTab channel={channel} onUpdate={handleChannelUpdate} />
                     )}
                     {activeTab === 'products' && (
-                      <ProductsTab channel={channel} onUpdate={handleChannelUpdate} />
+                      <ProductsTab
+                        channel={channel}
+                        onUpdate={handleChannelUpdate}
+                        subscriptionData={subscriptionData}
+                        onShowPlans={() => setShowPlansModal(true)}
+                      />
                     )}
                     {activeTab === 'subscription' && (
                       <SubscriptionTab channel={channel} onUpdate={handleChannelUpdate} />

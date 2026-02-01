@@ -85,13 +85,19 @@ export function Sidebar({
                             {userSubscriptions.map(sub => (
                                 <Link key={sub.channelId} href={`/channel/${sub.slug}`} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-xl group">
                                     <div className="relative w-6 h-6 flex-shrink-0">
-                                        <Image
-                                            src={sub.channelAvatar}
-                                            alt={sub.channelName}
-                                            fill
-                                            className="rounded-full object-cover"
-                                            unoptimized
-                                        />
+                                        {sub.channelAvatar ? (
+                                            <Image
+                                                src={sub.channelAvatar}
+                                                alt={sub.channelName}
+                                                fill
+                                                className="rounded-full object-cover"
+                                                unoptimized
+                                            />
+                                        ) : (
+                                            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-[10px]">
+                                                {sub.channelName.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
                                     </div>
                                     <span className="text-sm text-gray-700 font-medium truncate group-hover:text-black">{sub.channelName}</span>
                                 </Link>

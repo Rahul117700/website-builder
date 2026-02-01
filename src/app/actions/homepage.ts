@@ -203,6 +203,7 @@ export async function searchProducts(query: string): Promise<ProductCardData[]> 
                 OR: [
                     { title: { contains: query, mode: 'insensitive' } },
                     { description: { contains: query, mode: 'insensitive' } },
+                    { tags: { has: query.toUpperCase() } },
                     { channel: { name: { contains: query, mode: 'insensitive' } } }
                 ],
                 published: true,
@@ -215,13 +216,59 @@ export async function searchProducts(query: string): Promise<ProductCardData[]> 
                     }
                 }
             },
-            orderBy: { createdAt: 'desc' },
-            take: 20
+            orderBy: { viewCount: 'desc' },
+            take: 40
         });
 
         return products.map(mapToCardData);
     } catch (error) {
         console.error('Error searching products:', error);
+        return [];
+    }
+}
+
+export async function searchChannels(query: string): Promise<any[]> {
+    if (!query) return [];
+
+    try {
+        const channels = await prisma.channel.findMany({
+            where: {
+                OR: [
+                    { name: { contains: query, mode: 'insensitive' } },
+                    { slug: { contains: query, mode: 'insensitive' } },
+                    { description: { contains: query, mode: 'insensitive' } },
+                    { tags: { has: query.toUpperCase() } }
+                ],
+                published: true,
+                status: 'ACTIVE'
+            },
+            include: {
+                user: { select: { image: true, name: true } },
+                _count: {
+                    select: {
+                        subscribers: { where: { status: 'ACTIVE' } },
+                        products: { where: { published: true, status: 'ACTIVE' } }
+                    }
+                }
+            },
+            orderBy: {
+                subscribers: { _count: 'desc' }
+            },
+            take: 10
+        });
+
+        return channels.map(c => ({
+            id: c.id,
+            name: c.name,
+            slug: c.slug,
+            avatar: c.profileImage || c.user?.image || '',
+            subscribers: c._count.subscribers,
+            productsCount: c._count.products,
+            description: c.description || '',
+            tags: c.tags
+        }));
+    } catch (error) {
+        console.error('Error searching channels:', error);
         return [];
     }
 }
@@ -313,7 +360,14 @@ export async function getMarketplaceChannels(): Promise<any[]> {
     try {
         const channels = await prisma.channel.findMany({
             where: {
-                status: 'ACTIVE'
+                status: 'ACTIVE',
+                published: true,
+                products: {
+                    some: {
+                        published: true,
+                        status: 'ACTIVE'
+                    }
+                }
             },
             include: {
                 user: { select: { image: true, name: true } },
@@ -322,6 +376,10 @@ export async function getMarketplaceChannels(): Promise<any[]> {
                         subscribers: { where: { status: 'ACTIVE' } },
                         products: { where: { published: true, status: 'ACTIVE' } }
                     }
+                },
+                products: {
+                    where: { published: true, status: 'ACTIVE' },
+                    select: { isSubscriberOnly: true, isFree: true }
                 }
             },
             orderBy: {
@@ -330,15 +388,25 @@ export async function getMarketplaceChannels(): Promise<any[]> {
             take: 50
         });
 
-        return channels.map(c => ({
-            id: c.id,
-            name: c.name,
-            slug: c.slug,
-            avatar: c.profileImage || c.user?.image || '',
-            subscribers: c._count.subscribers,
-            productsCount: c._count.products,
-            description: c.description || ''
-        }));
+        return channels.map(c => {
+            const freeProducts = c.products.filter(p => !p.isSubscriberOnly).length;
+            const subscriberProducts = c.products.filter(p => p.isSubscriberOnly).length;
+
+            return {
+                id: c.id,
+                name: c.name,
+                slug: c.slug,
+                avatar: c.profileImage || c.user?.image || '',
+                subscribers: c._count.subscribers,
+                productsCount: c._count.products,
+                freeProductsCount: freeProducts,
+                subscriberProductsCount: subscriberProducts,
+                subscriptionEnabled: c.subscriptionEnabled,
+                subscriptionPrice: c.subscriptionPrice ? Number(c.subscriptionPrice) : null,
+                subscriptionCurrency: c.subscriptionCurrency,
+                description: c.description || ''
+            };
+        });
     } catch (error) {
         console.error('Error fetching marketplace channels:', error);
         return [];

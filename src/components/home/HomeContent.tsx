@@ -21,6 +21,8 @@ import Image from 'next/image';
 import MainLayout from '@/components/layout/MainLayout';
 import { ProductCardData, SubscriptionData, NotificationData } from '@/app/actions/homepage';
 import ProductCard from '@/components/product/ProductCard';
+import TrendingCarousel from '@/components/home/TrendingCarousel';
+import MobileTrendingWidget from '@/components/trending/MobileTrendingWidget';
 
 // Props Interface
 interface HomeContentProps {
@@ -47,6 +49,16 @@ export default function HomeContent({
     const others = recommendedProducts.filter(p => p.type !== 'EBOOK' && p.type !== 'DOCUMENT');
     const documents = recommendedProducts.filter(p => p.type === 'DOCUMENT');
 
+    const trendingItems = [...recommendedProducts, ...subscribedProducts]
+        .filter((v, i, a) => a.findIndex(t => t.id === v.id) === i) // Unique
+        .sort((a, b) => {
+            // Prefer videos, then by views
+            const aVal = (a.type === 'VIDEO' || a.type === 'VIDEOS') ? 10 : 0;
+            const bVal = (b.type === 'VIDEO' || b.type === 'VIDEOS') ? 10 : 0;
+            return bVal - aVal || (parseInt(b.views) || 0) - (parseInt(a.views) || 0);
+        })
+        .slice(0, 5);
+
     return (
         <MainLayout
             userSubscriptions={userSubscriptions}
@@ -70,9 +82,12 @@ export default function HomeContent({
                                             <UserIcon className="w-6 h-6 text-indigo-600" />
                                             From Your Subscriptions
                                         </h2>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8">
-                                            {subscribedProducts.map((product) => (
-                                                <ProductCard key={product.id} {...product} />
+                                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-3 sm:gap-x-4 gap-y-6 sm:gap-y-8">
+                                            {subscribedProducts.map((product, index) => (
+                                                <React.Fragment key={product.id}>
+                                                    <ProductCard {...product} />
+                                                    {index === 0 && <MobileTrendingWidget items={trendingItems} />}
+                                                </React.Fragment>
                                             ))}
                                         </div>
                                     </section>
@@ -85,9 +100,12 @@ export default function HomeContent({
                                             <FireIcon className="w-6 h-6 text-orange-500" />
                                             Recommended for You
                                         </h2>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8">
-                                            {others.map((product) => (
-                                                <ProductCard key={product.id} {...product} />
+                                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-3 sm:gap-x-4 gap-y-6 sm:gap-y-8">
+                                            {others.map((product, index) => (
+                                                <React.Fragment key={product.id}>
+                                                    <ProductCard {...product} />
+                                                    {subscribedProducts.length === 0 && index === 0 && <MobileTrendingWidget items={trendingItems} />}
+                                                </React.Fragment>
                                             ))}
                                         </div>
                                     </section>
@@ -107,26 +125,28 @@ export default function HomeContent({
                                         <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
                                             {trendingEbooks.map((product) => (
                                                 <div key={product.id} className="min-w-[200px] w-[200px] flex-shrink-0">
-                                                    <div className="aspect-[3/4] bg-gray-200 rounded-lg shadow-md mb-3 overflow-hidden transition-transform hover:-translate-y-1 relative group">
-                                                        <Image
-                                                            src={product.thumbnail}
-                                                            alt={product.title}
-                                                            fill
-                                                            className="object-cover"
-                                                            unoptimized
-                                                        />
-                                                        {product.isSubscriberOnly ? (
-                                                            <div className="absolute top-2 right-2 bg-indigo-600/90 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm backdrop-blur-md">
-                                                                Sub
-                                                            </div>
-                                                        ) : (product.isFree || product.price === 0) && (
-                                                            <div className="absolute top-2 right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
-                                                                Free
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <h3 className="font-semibold text-sm line-clamp-2 mb-1">{product.title}</h3>
-                                                    <p className="text-xs text-gray-500">{product.channelName}</p>
+                                                    <Link href={`/channel/${product.channelSlug}/products/${product.id}`} className="block group">
+                                                        <div className="aspect-[3/4] bg-gray-200 rounded-lg shadow-md mb-3 overflow-hidden transition-transform hover:-translate-y-1 relative cursor-pointer">
+                                                            <Image
+                                                                src={product.thumbnail}
+                                                                alt={product.title}
+                                                                fill
+                                                                className="object-cover"
+                                                                unoptimized
+                                                            />
+                                                            {product.isSubscriberOnly ? (
+                                                                <div className="absolute top-2 right-2 bg-indigo-600/90 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm backdrop-blur-md">
+                                                                    Sub
+                                                                </div>
+                                                            ) : (product.isFree || product.price === 0) && (
+                                                                <div className="absolute top-2 right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
+                                                                    Free
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <h3 className="font-semibold text-sm line-clamp-2 mb-1 group-hover:text-emerald-600 transition-colors">{product.title}</h3>
+                                                        <p className="text-xs text-gray-500">{product.channelName}</p>
+                                                    </Link>
                                                 </div>
                                             ))}
                                         </div>
@@ -194,91 +214,48 @@ export default function HomeContent({
                                         </h3>
 
                                         {(() => {
-                                            // Find a video to feature
-                                            const featureVideo = [...recommendedProducts, ...subscribedProducts]
-                                                .find(p => (p.type === 'VIDEO' || p.type === 'VIDEOS') && p.videoUrl);
+                                            // Get top 5 trending products (prefer videos)
+                                            const trendingItems = [...recommendedProducts, ...subscribedProducts]
+                                                .filter((v, i, a) => a.findIndex(t => t.id === v.id) === i) // Unique
+                                                .sort((a, b) => {
+                                                    // Prefer videos, then by views
+                                                    const aVal = (a.type === 'VIDEO' || a.type === 'VIDEOS') ? 10 : 0;
+                                                    const bVal = (b.type === 'VIDEO' || b.type === 'VIDEOS') ? 10 : 0;
+                                                    return bVal - aVal || (parseInt(b.views) || 0) - (parseInt(a.views) || 0);
+                                                })
+                                                .slice(0, 5);
 
-                                            // Fallback to first product if no video
-                                            const item = featureVideo || recommendedProducts[0] || subscribedProducts[0];
-
-                                            if (!item) return (
+                                            if (trendingItems.length === 0) return (
                                                 <div className="aspect-[4/5] bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
                                                     No content trending
                                                 </div>
                                             );
 
-                                            return (
-                                                <div className="group relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-900 shadow-md">
-                                                    {/* Video or Image */}
-                                                    {(item.type === 'VIDEO' || item.type === 'VIDEOS') && item.videoUrl ? (
-                                                        <video
-                                                            src={item.videoUrl}
-                                                            className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
-                                                            autoPlay
-                                                            muted
-                                                            loop
-                                                            playsInline
-                                                        />
-                                                    ) : (
-                                                        <img
-                                                            src={item.thumbnail}
-                                                            alt={item.title}
-                                                            className="absolute inset-0 w-full h-full object-cover"
-                                                        />
-                                                    )}
-
-                                                    {/* Gradient Overlay */}
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80" />
-
-                                                    {/* Content */}
-                                                    <div className="absolute bottom-0 left-0 right-0 p-5">
-                                                        <div className="flex items-center gap-2 mb-2">
-                                                            <span className="px-2 py-0.5 rounded-md bg-white/20 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-wider border border-white/10">
-                                                                Spotlight
-                                                            </span>
-                                                        </div>
-                                                        <h4 className="text-white font-bold text-lg leading-tight line-clamp-2 mb-2 drop-shadow-md">
-                                                            {item.title}
-                                                        </h4>
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="relative w-6 h-6 rounded-full overflow-hidden border border-white/50">
-                                                                <img src={item.channelAvatar || '/placeholder-user.jpg'} alt={item.channelName} className="w-full h-full object-cover" />
-                                                            </div>
-                                                            <span className="text-gray-200 text-xs font-medium">{item.channelName}</span>
-                                                        </div>
-
-                                                        <button
-                                                            className="mt-4 w-full py-2.5 bg-white text-gray-900 rounded-lg font-bold text-sm hover:bg-gray-100 transition-colors shadow-lg active:scale-95"
-                                                            onClick={() => router.push(`/channel/${item.channelSlug}/products/${item.id}`)}
-                                                        >
-                                                            Watch Now
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            );
+                                            return <TrendingCarousel items={trendingItems} />;
                                         })()}
                                     </div>
 
                                     {/* Mini Suggestions */}
-                                    <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden group cursor-pointer">
+                                    <div
+                                        className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden group cursor-pointer active:scale-95 transition-transform"
+                                        onClick={() => router.push('/auth/dashboard/my-channel')}
+                                    >
                                         <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
 
-                                        <h3 className="font-bold text-lg mb-1 relative z-10">Creator Fund</h3>
-                                        <p className="text-indigo-100 text-sm mb-4 relative z-10">Join our creator program and start monetizing today.</p>
-                                        <div className="flex items-center gap-2 font-bold text-sm relative z-10">
-                                            <span>Learn more</span>
+                                        <h3 className="font-black text-lg mb-1 relative z-10">Creator Fund</h3>
+                                        <p className="text-indigo-100 text-xs font-medium mb-4 relative z-10 leading-relaxed">Join our creator program, add products, and start earning today.</p>
+                                        <div className="flex items-center gap-2 font-black text-xs uppercase tracking-widest relative z-10">
+                                            <span>Get Started</span>
                                             <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </>
             )}
         </MainLayout>
     );
 }
-
-
-

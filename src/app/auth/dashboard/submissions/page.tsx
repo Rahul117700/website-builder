@@ -28,7 +28,7 @@ export default function SubmissionsPage() {
         if (!sitesRes.ok) throw new Error('Failed to fetch sites');
         const sitesData = await sitesRes.json();
         setSites(sitesData);
-        
+
         // Fetch submissions for each site
         const allSubmissions: Submission[] = [];
         for (const site of sitesData) {
@@ -39,6 +39,7 @@ export default function SubmissionsPage() {
             allSubmissions.push({ ...submission, siteName: site.name });
           }
         }
+        allSubmissions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setSubmissions(allSubmissions);
       } catch (err: any) {
         setError(err.message || 'Failed to fetch submissions');
@@ -105,4 +106,4 @@ export default function SubmissionsPage() {
       </div>
     </DashboardLayout>
   );
-} 
+}

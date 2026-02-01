@@ -20,23 +20,23 @@ export async function GET(request: Request) {
     // Get counts
     const totalUsers = await prisma.user.count();
     console.log('Total users:', totalUsers);
-    
+
     const totalChannels = await prisma.channel.count();
     console.log('Total channels:', totalChannels);
-    
+
     const totalProducts = await prisma.digitalProduct.count();
     console.log('Total products:', totalProducts);
-    
+
     const activeChannels = await prisma.channel.count({
       where: { status: 'ACTIVE' }
     });
     console.log('Active channels:', activeChannels);
-    
+
     const publishedChannels = await prisma.channel.count({
       where: { published: true }
     });
     console.log('Published channels:', publishedChannels);
-    
+
     const activeUsers = await prisma.user.count({
       where: { status: 'ACTIVE' }
     });
@@ -49,8 +49,8 @@ export async function GET(request: Request) {
         status: true,
       }
     });
-    
-    const completedOrders = allOrders.filter(order => 
+
+    const completedOrders = allOrders.filter(order =>
       order.status && order.status.toUpperCase() === 'COMPLETED'
     );
     const transactionRevenue = completedOrders.reduce((sum, order) => sum + order.amount, 0);
@@ -66,17 +66,91 @@ export async function GET(request: Request) {
     const activeSubscriptions = subscriptionPayments.filter(sub => sub.status === 'ACTIVE').length;
     const totalSubscriptions = subscriptionPayments.length;
 
+    // Calculate expected revenue for next month (sum of active subscriptions)
+    const expectedNextMonthRevenue = subscriptionPayments
+      .filter(sub => sub.status === 'ACTIVE')
+      .reduce((sum, sub) => sum + sub.amount, 0);
+
+    // Get monthly revenue for the last 6 months for the growth chart
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const monthlyOrders = await prisma.funnelOrder.findMany({
+      where: {
+        status: 'COMPLETED',
+        createdAt: { gte: sixMonthsAgo }
+      },
+      select: {
+        amount: true,
+        createdAt: true
+      }
+    });
+
+    const monthlySubscriptions = await prisma.userSubscription.findMany({
+      where: {
+        status: 'ACTIVE',
+        createdAt: { gte: sixMonthsAgo }
+      },
+      select: {
+        amount: true,
+        createdAt: true
+      }
+    });
+
+    // Group revenue by month
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const growthDataMap: Record<string, { revenue: number, subscriptions: number, transactions: number }> = {};
+
+    // Initialize last 6 months
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const monthLabel = `${months[d.getMonth()]} ${d.getFullYear()}`;
+      growthDataMap[monthLabel] = { revenue: 0, subscriptions: 0, transactions: 0 };
+    }
+
+    monthlyOrders.forEach(order => {
+      const date = new Date(order.createdAt);
+      const monthLabel = `${months[date.getMonth()]} ${date.getFullYear()}`;
+      if (growthDataMap[monthLabel]) {
+        growthDataMap[monthLabel].revenue += order.amount;
+        growthDataMap[monthLabel].transactions += order.amount;
+      }
+    });
+
+    monthlySubscriptions.forEach(sub => {
+      const date = new Date(sub.createdAt);
+      const monthLabel = `${months[date.getMonth()]} ${date.getFullYear()}`;
+      if (growthDataMap[monthLabel]) {
+        growthDataMap[monthLabel].revenue += sub.amount;
+        growthDataMap[monthLabel].subscriptions += sub.amount;
+      }
+    });
+
+    const growthData = Object.entries(growthDataMap).map(([name, data]) => ({
+      name,
+      ...data
+    }));
+
+    // Calculate plan distribution
+    const planCounts = await prisma.userSubscription.groupBy({
+      by: ['planId'],
+      where: { status: 'ACTIVE' },
+      _count: true
+    });
+
+    const activePlans = await prisma.subscriptionPlan.findMany({
+      where: { id: { in: planCounts.map(p => p.planId) } },
+      select: { id: true, name: true }
+    });
+
+    const planDistribution = planCounts.map(pc => ({
+      name: activePlans.find(p => p.id === pc.planId)?.name || 'Unknown',
+      value: pc._count
+    }));
+
     // Total platform revenue
     const totalRevenue = transactionRevenue + subscriptionRevenue;
-
-    console.log('Revenue calculation:', {
-      transactionRevenue,
-      subscriptionRevenue,
-      totalRevenue,
-      orderCount: completedOrders.length,
-      subscriptionCount: totalSubscriptions,
-      activeSubscriptions
-    });
 
     // Calculate platform-wide conversion metrics
     const totalViews = await prisma.funnelAnalytics.count({
@@ -90,11 +164,9 @@ export async function GET(request: Request) {
       }
     });
     const platformConversionRate = totalViews > 0 ? (totalConversions / totalViews) * 100 : 0;
-    console.log('Platform conversion rate:', platformConversionRate);
 
     // Calculate average revenue per user
     const averageRevenuePerUser = activeUsers > 0 ? totalRevenue / activeUsers : 0;
-    console.log('Average revenue per user:', averageRevenuePerUser);
 
     // Get recent channels with user info
     const recentChannels = await prisma.channel.findMany({
@@ -135,48 +207,30 @@ export async function GET(request: Request) {
     // Calculate revenue and metrics for each user
     const usersWithMetrics = await Promise.all(
       allUsers.map(async (user) => {
-        // Get all channel IDs for this user
         const userChannelIds = user.channels.map(c => c.id);
-
         let userRevenue = 0;
         let userSubscribers = 0;
 
-        // Only query if user has channels
         if (userChannelIds.length > 0) {
-          // Get active subscriptions for this user's channels
           const channelSubscriptions = await prisma.channelSubscription.findMany({
             where: {
-              channelId: {
-                in: userChannelIds
-              },
+              channelId: { in: userChannelIds },
               status: 'ACTIVE',
-              endDate: {
-                gt: new Date()
-              }
+              endDate: { gt: new Date() }
             },
-            select: {
-              amount: true,
-            }
+            select: { amount: true }
           });
 
-          // Calculate total revenue from subscriptions
           channelSubscriptions.forEach(sub => {
             const amount = typeof sub.amount === 'object' && 'toNumber' in sub.amount
               ? sub.amount.toNumber()
               : typeof sub.amount === 'string'
-              ? parseFloat(sub.amount)
-              : Number(sub.amount || 0);
+                ? parseFloat(sub.amount)
+                : Number(sub.amount || 0);
             userRevenue += amount;
           });
           userSubscribers = channelSubscriptions.length;
         }
-
-        // Debug logging
-        console.log(`User ${user.email} (${user.id}):`);
-        console.log(`  - Channels: ${user._count.channels}`);
-        console.log(`  - Channel IDs: [${userChannelIds.join(', ')}]`);
-        console.log(`  - Active subscribers: ${userSubscribers}`);
-        console.log(`  - Revenue: ₹${userRevenue}`);
 
         return {
           id: user.id,
@@ -185,25 +239,16 @@ export async function GET(request: Request) {
           channels: user._count.channels,
           products: 0,
           revenue: userRevenue,
-          conversionRate: 0, // Not applicable for channels
+          conversionRate: 0,
         };
       })
     );
-
-    // Log total stats before sorting
-    console.log(`\nTotal users processed: ${usersWithMetrics.length}`);
-    console.log(`Users with revenue > 0: ${usersWithMetrics.filter(u => u.revenue > 0).length}`);
 
     // Sort by revenue (descending) and take top 10
     const formattedTopUsers = usersWithMetrics
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 10);
 
-    console.log('Top users summary:');
-    formattedTopUsers.forEach((user, index) => {
-      console.log(`${index + 1}. ${user.email}: ₹${user.revenue} (${user.channels} channels)`);
-    });
-    
     // Calculate some basic metrics
     const publishedChannelsRatio = totalChannels > 0 ? (publishedChannels / totalChannels) * 100 : 0;
     const activeUsersRatio = totalUsers > 0 ? (activeUsers / totalUsers) * 100 : 0;
@@ -216,6 +261,7 @@ export async function GET(request: Request) {
         activeChannels,
         publishedChannels,
         totalRevenue: totalRevenue,
+        expectedNextMonthRevenue,
         subscriptionRevenue: subscriptionRevenue,
         transactionRevenue: transactionRevenue,
         activeSubscriptions: activeSubscriptions,
@@ -229,6 +275,8 @@ export async function GET(request: Request) {
         }
       },
       analytics: {
+        growthData,
+        planDistribution,
         topUsers: formattedTopUsers,
         recentChannels: recentChannels.map(channel => ({
           id: channel.id,

@@ -194,8 +194,6 @@ export default function ChannelsView() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    name: 'My First Channel',
-                    description: 'Your personal content hub',
                     templateId: templatesData[0].id,
                 }),
             });
@@ -248,21 +246,7 @@ export default function ChannelsView() {
             return;
         }
 
-        if (!newChannelName.trim()) {
-            toast.error('⚠️ Please enter a channel name', {
-                duration: 3000,
-                icon: '⚠️',
-            });
-            return;
-        }
-
-        if (newChannelName.trim().length < 3) {
-            toast.error('⚠️ Channel name must be at least 3 characters', {
-                duration: 3000,
-                icon: '⚠️',
-            });
-            return;
-        }
+        // name is now optional as backend will generate a random one if missing
 
         try {
             setCreating(true);
@@ -773,7 +757,7 @@ export default function ChannelsView() {
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-bold text-gray-900 mb-1.5">
-                                        Channel Name <span className="text-red-500">*</span>
+                                        Channel Name (Leave empty for a random name)
                                     </label>
                                     <input
                                         type="text"

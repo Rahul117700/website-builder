@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { 
-  PhotoIcon, 
+import {
+  PhotoIcon,
   CloudArrowUpIcon,
   CheckCircleIcon,
   XMarkIcon,
@@ -23,17 +23,17 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
   // Helper function to get proper image URL
   const getImageUrl = (url: string | null | undefined): string => {
     if (!url) return '';
-    
+
     // If already absolute URL, return as is
     if (url.startsWith('http://') || url.startsWith('https://')) {
       return url;
     }
-    
+
     // Ensure relative URLs start with /
     if (!url.startsWith('/')) {
       return `/${url}`;
     }
-    
+
     return url;
   };
 
@@ -92,7 +92,7 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
 
   const handleImageUpload = async (file: File, type: 'cover' | 'profile') => {
     const setUploading = type === 'cover' ? setUploadingCover : setUploadingProfile;
-    
+
     try {
       setUploading(true);
 
@@ -139,13 +139,13 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
 
       // Verify the image URL is correct
       console.log('Uploaded image URL:', imageUrl);
-      
+
       // Verify image is accessible before updating
       const verifyImage = (url: string): Promise<boolean> => {
         return new Promise((resolve) => {
           const img = new Image();
           let resolved = false;
-          
+
           img.onload = () => {
             if (!resolved) {
               resolved = true;
@@ -153,7 +153,7 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
               resolve(true);
             }
           };
-          
+
           img.onerror = () => {
             if (!resolved) {
               resolved = true;
@@ -161,7 +161,7 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
               resolve(false);
             }
           };
-          
+
           // Set timeout to prevent hanging
           setTimeout(() => {
             if (!resolved) {
@@ -170,7 +170,7 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
               resolve(false);
             }
           }, 3000);
-          
+
           // Try with cache busting first
           const cacheBuster = `?v=${Date.now()}`;
           img.src = url + (url.includes('?') ? '&' : '?') + cacheBuster.replace('?', '');
@@ -179,12 +179,12 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
 
       // Verify image accessibility
       const isAccessible = await verifyImage(imageUrl);
-      
+
       if (!isAccessible) {
         // Try again after a short delay (file might still be writing)
         await new Promise(resolve => setTimeout(resolve, 500));
         const retryAccessible = await verifyImage(imageUrl);
-        
+
         if (!retryAccessible) {
           console.warn('Image may not be immediately accessible, but proceeding with update');
           toast('Image uploaded but may take a moment to appear', {
@@ -284,9 +284,9 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
                 // Try with absolute URL if relative fails
                 const img = e.target as HTMLImageElement;
                 const imageUrl = getImageUrl(channel.coverImage);
-                
+
                 if (imageUrl && !imageUrl.startsWith('http')) {
-                  const absoluteUrl = typeof window !== 'undefined' 
+                  const absoluteUrl = typeof window !== 'undefined'
                     ? `${window.location.origin}${imageUrl}`
                     : imageUrl;
                   console.log('Trying absolute URL:', absoluteUrl);
@@ -364,9 +364,9 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
                   // Try with absolute URL if relative fails
                   const img = e.target as HTMLImageElement;
                   const imageUrl = getImageUrl(channel.profileImage);
-                  
+
                   if (imageUrl && !imageUrl.startsWith('http')) {
-                    const absoluteUrl = typeof window !== 'undefined' 
+                    const absoluteUrl = typeof window !== 'undefined'
                       ? `${window.location.origin}${imageUrl}`
                       : imageUrl;
                     console.log('Trying absolute URL for profile:', absoluteUrl);
@@ -425,15 +425,20 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
           <span className="text-lg font-bold text-purple-600">{progressPercentage}%</span>
         </div>
         <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div 
+          <div
             className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-600 to-pink-600 rounded-full transition-all duration-500"
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
-        {canPublish && (
+        {channel.published ? (
+          <p className="text-xs text-emerald-600 mt-2 flex items-center gap-1 font-bold">
+            <CheckCircleIcon className="h-3.5 w-3.5" />
+            Channel is Live
+          </p>
+        ) : canPublish && (
           <p className="text-xs text-green-600 mt-2 flex items-center gap-1">
             <CheckCircleIcon className="h-3.5 w-3.5" />
-            Ready to publish!
+            Ready to launch!
           </p>
         )}
       </div>
