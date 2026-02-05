@@ -306,6 +306,7 @@ export default function VideoPreviewPlayer({
               </div>
             </div>
           </div>
+        )}
       </OptimizedMediaLoader>
     </div>
   );

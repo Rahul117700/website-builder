@@ -11,7 +11,7 @@ export const metadata = generateSEOMetadata({
     'mission',
     'values'
   ],
-  image: '/logo/logo.png',
+  image: '/logo/logo.gif',
   url: '/about',
   type: 'website',
 });

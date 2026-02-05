@@ -31,7 +31,7 @@ export function generateSEOMetadata(config: SEOConfig): Metadata {
     availability = 'in stock',
   } = config;
 
-  const siteName = 'SellEarnDirect';
+  const siteName = 'sedStudios';
   const fullTitle = `${title} | ${siteName}`;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
   const fullUrl = url ? `${baseUrl}${url}` : baseUrl;
@@ -129,8 +129,8 @@ export function generateProductSchema(config: {
     image,
     price,
     currency = 'INR',
-    brand = 'SellEarnDirect',
-    seller = 'SellEarnDirect',
+    brand = 'sedStudios',
+    seller = 'sedStudios',
     url,
     availability = 'InStock',
     rating,

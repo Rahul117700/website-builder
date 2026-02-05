@@ -18,13 +18,13 @@ interface BrandConfig {
 
 // Default configuration (used as fallback)
 const DEFAULT_CONFIG: BrandConfig = {
-  siteName: 'SellEarnDirect',
-  siteTagline: 'Sell Digital Products with Ease',
+  siteName: 'sedStudios',
+  siteTagline: 'Professional Digital Studio & Marketplace',
   siteDescription: 'Create sales funnels and sell digital products directly to your customers',
-  supportEmail: 'support@sellearndirect.com',
-  companyName: 'SellEarnDirect',
-  footerText: '© 2024 SellEarnDirect. All rights reserved.',
-  logoUrl: '/logo.svg',
+  supportEmail: 'support@sedstudios.com',
+  companyName: 'sedStudios',
+  footerText: `© ${new Date().getFullYear()} sedStudios. All rights reserved.`,
+  logoUrl: '/logo/logo.gif',
   faviconUrl: '/favicon.ico',
 };
 
@@ -39,7 +39,7 @@ async function fetchBrandConfig(): Promise<BrandConfig> {
   try {
     // Import Prisma dynamically to avoid circular dependencies
     const { prisma } = await import('@/lib/prisma');
-    
+
     // Fetch branding settings from PlatformSettings
     const settings = await prisma.platformSettings.findMany({
       where: {
@@ -123,7 +123,7 @@ export function getBrandConfigSync(): BrandConfig {
 export async function updateBrandConfig(config: Partial<BrandConfig>): Promise<void> {
   try {
     const { prisma } = await import('@/lib/prisma');
-    
+
     // Update each setting
     const updates = Object.entries(config).map(([key, value]) => ({
       where: { key: `brand.${key}` },
@@ -141,7 +141,7 @@ export async function updateBrandConfig(config: Partial<BrandConfig>): Promise<v
     }));
 
     await Promise.all(
-      updates.map(update => 
+      updates.map(update =>
         prisma.platformSettings.upsert(update)
       )
     );
@@ -161,7 +161,7 @@ export async function updateBrandConfig(config: Partial<BrandConfig>): Promise<v
 export async function initializeBrandConfig(): Promise<void> {
   try {
     const { prisma } = await import('@/lib/prisma');
-    
+
     // Check if branding settings already exist
     const existingSettings = await prisma.platformSettings.count({
       where: {
@@ -174,7 +174,7 @@ export async function initializeBrandConfig(): Promise<void> {
     // If no branding settings exist, seed defaults
     if (existingSettings === 0) {
       console.log('Seeding default brand configuration...');
-      
+
       const settings = [
         { key: 'brand.siteName', value: DEFAULT_CONFIG.siteName, description: 'Site name displayed throughout the platform' },
         { key: 'brand.siteTagline', value: DEFAULT_CONFIG.siteTagline, description: 'Site tagline or short description' },

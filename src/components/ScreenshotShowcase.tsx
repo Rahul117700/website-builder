@@ -129,7 +129,7 @@ export default function ScreenshotShowcase({ isOpen, onClose }: ScreenshotShowca
             alt={currentSlide.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = '/logo/logo.png'; // Fallback
+              (e.target as HTMLImageElement).src = '/logo/logo.gif'; // Fallback
             }}
           />
           {/* Gradient Overlay for text readability if needed */}
@@ -267,8 +267,8 @@ export default function ScreenshotShowcase({ isOpen, onClose }: ScreenshotShowca
                   key={idx}
                   onClick={() => setCurrentIndex(idx)}
                   className={`w-2 h-2 rounded-full transition-all duration-300 ${currentIndex === idx
-                      ? 'w-6 bg-gray-800'
-                      : 'bg-gray-300 hover:bg-gray-400'
+                    ? 'w-6 bg-gray-800'
+                    : 'bg-gray-300 hover:bg-gray-400'
                     }`}
                 />
               ))}

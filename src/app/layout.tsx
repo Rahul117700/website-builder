@@ -34,7 +34,7 @@ export const metadata = {
       'India ecommerce',
       'digital marketplace',
     ],
-    image: '/logo/logo.png',
+    image: '/logo/logo.gif',
     url: '/',
     type: 'website',
   }),
@@ -48,16 +48,16 @@ export default function RootLayout({
 }) {
   // Generate structured data schemas
   const websiteSchema = generateWebsiteSchema({
-    name: 'SellEarnDirect',
+    name: 'sedStudios',
     url: '/',
     description: 'Create sales funnels and sell digital products online with ease.',
     searchUrl: '/marketplace',
   });
 
   const organizationSchema = generateOrganizationSchema({
-    name: 'SellEarnDirect',
+    name: 'sedStudios',
     url: '/',
-    logo: '/logo/logo.png',
+    logo: '/logo/logo.gif',
     description: 'Digital product selling platform with integrated payment processing and analytics.',
   });
 
@@ -86,27 +86,27 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
-        
+
         {/* Favicon */}
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="alternate icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/logo.svg" />
-        
+
         {/* Preconnect to improve performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
         <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
-        
+
         {/* Google AdSense */}
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5167608413139807"
           crossOrigin="anonymous"
         />
-        
+
         {/* RSS Feed */}
-        <link rel="alternate" type="application/rss+xml" title="Sell Earn Direct Blog RSS Feed" href="/feed.xml" />
+        <link rel="alternate" type="application/rss+xml" title="sedStudios Blog RSS Feed" href="/feed.xml" />
       </head>
       <body className={`${inter.variable} font-sans`}>
         <Providers>

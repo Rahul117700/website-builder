@@ -115,7 +115,7 @@ html {
 }
 
 /* High-quality image rendering for logos - PREVENT BLUR */
-img[alt*="SellEarnDirect"],
+img[alt*="sedStudios"],
 img[src*="logo"],
 .no-blur {
   image-rendering: -webkit-optimize-contrast;

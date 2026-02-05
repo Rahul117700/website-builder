@@ -10,7 +10,7 @@ export const metadata = generateSEOMetadata({
     'support email',
     'contact form'
   ],
-  image: '/logo/logo.png',
+  image: '/logo/logo.gif',
   url: '/contact',
   type: 'website',
 });

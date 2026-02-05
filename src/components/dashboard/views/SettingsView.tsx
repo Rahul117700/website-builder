@@ -75,11 +75,11 @@ export default function SettingsView() {
 
     const loadPaymentConfig = async () => {
         try {
-            const response = await fetch('/api/user/payment-config');
+            const response = await fetch('/api/razorpay-config');
             if (response.ok) {
                 const data = await response.json();
-                if (data.razorpayKeyId) {
-                    setRazorpayKeyId(data.razorpayKeyId);
+                if (data.hasConfig && data.config) {
+                    setRazorpayKeyId(data.config.keyId);
                     setHasRazorpayConfig(true);
                 }
             }
@@ -179,13 +179,13 @@ export default function SettingsView() {
     const handleUpdatePaymentConfig = async () => {
         try {
             setSavingPayment(true);
-            const response = await fetch('/api/user/payment-config', {
+            const response = await fetch('/api/razorpay-config', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    razorpayKeyId,
-                    razorpayKeySecret: razorpayKeySecret || undefined,
-                    razorpayWebhookSecret: razorpayWebhookSecret || undefined
+                    keyId: razorpayKeyId,
+                    keySecret: razorpayKeySecret || undefined,
+                    webhookSecret: razorpayWebhookSecret || undefined
                 }),
             });
 

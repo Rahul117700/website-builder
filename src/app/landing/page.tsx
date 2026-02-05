@@ -9,6 +9,11 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { TextPlugin } from 'gsap/TextPlugin';
 import * as THREE from 'three';
 import {
+  ComputerDesktopIcon,
+  DevicePhoneMobileIcon,
+  BookOpenIcon,
+  VideoCameraIcon,
+  DocumentTextIcon,
   RocketLaunchIcon,
   GlobeAltIcon,
   ChartBarIcon,
@@ -34,6 +39,7 @@ import Logo from '@/components/Logo';
 import ScreenshotShowcase from '@/components/ScreenshotShowcase';
 import dynamic from 'next/dynamic';
 import { blogPosts } from '@/data/blogs';
+import CinematicAd from '@/components/CinematicAd';
 
 // SaleNotifications removed - flagged as deceptive content by Google Search Console
 // const SaleNotifications = dynamic(() => import('@/components/SaleNotifications'), { ssr: false });
@@ -74,82 +80,6 @@ export default function HomePage() {
     renderer: THREE.WebGLRenderer;
     particles: THREE.Group;
   } | null>(null);
-
-  // Carousel state
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const totalSlides = 4;
-
-  // Chart data for earning education
-  const revenueGrowthData = [
-    { month: "Month 1", revenue: 45, sales: 12 },
-    { month: "Month 2", revenue: 62, sales: 18 },
-    { month: "Month 3", revenue: 78, sales: 24 },
-    { month: "Month 4", revenue: 95, sales: 32 },
-    { month: "Month 5", revenue: 115, sales: 41 },
-    { month: "Month 6", revenue: 142, sales: 52 }
-  ];
-
-  const categoryEarningsData = [
-    { category: "Courses", earnings: 185 },
-    { category: "Software", earnings: 245 },
-    { category: "Code", earnings: 132 },
-    { category: "Digital", earnings: 98 }
-  ];
-
-  const salesGrowthData = [
-    { week: "Week 1", sales: 8, revenue: 32 },
-    { week: "Week 2", sales: 15, revenue: 58 },
-    { week: "Week 3", sales: 24, revenue: 89 },
-    { week: "Week 4", sales: 35, revenue: 142 }
-  ];
-
-  const liveTrackingData = [
-    { time: "9 AM", sales: 2, revenue: 8 },
-    { time: "12 PM", sales: 5, revenue: 18 },
-    { time: "3 PM", sales: 8, revenue: 32 },
-    { time: "6 PM", sales: 12, revenue: 48 },
-    { time: "9 PM", sales: 15, revenue: 62 }
-  ];
-
-  // Main Carousel Categories Data
-  const mainCarouselSlides = [
-    {
-      category: "Channel Dashboard",
-      title: "Your Command Center",
-      description: "Get a comprehensive view of your entire business. Manage channels, products, and performance from a single, intuitive dashboard.",
-      highlights: ["Business Overview", "Quick Actions", "Performance Stats", "Recent Activity"],
-      image: "/screenshots/your channel.png",
-      gradient: "from-indigo-500 to-purple-600",
-      icon: "📊"
-    },
-    {
-      category: "Visual Editor",
-      title: "Customize with Ease",
-      description: "Tailor your channel's look and feel with our powerful visual editor. No coding required—just point, click, and design your perfect storefront.",
-      highlights: ["Drag & Drop", "Real-time Preview", "Theme Control", "Layout Options"],
-      image: "/screenshots/edit channel screen.png",
-      gradient: "from-blue-500 to-cyan-600",
-      icon: "🎨"
-    },
-    {
-      category: "Analytics",
-      title: "Data-Driven Decisions",
-      description: "Track every click, view, and sale in real-time. Our deep analytics give you the insights you need to optimize your funnel and boost revenue.",
-      highlights: ["Live Tracking", "Conversion Rates", "Traffic Sources", "Revenue Reports"],
-      image: "/screenshots/live analytics.png",
-      gradient: "from-green-500 to-emerald-600",
-      icon: "📈"
-    },
-    {
-      category: "Products",
-      title: "Manage Digital Assets",
-      description: "Upload, organize, and sell your digital products effortlessly. Supports courses, ebooks, software, and more with instant delivery.",
-      highlights: ["Instant Delivery", "Secure Storage", "File Protection", "Easy Updates"],
-      image: "/screenshots/created product list.png",
-      gradient: "from-orange-500 to-red-600",
-      icon: "📦"
-    }
-  ];
 
   // Success Stories Carousel state
   const [currentStorySlide, setCurrentStorySlide] = useState(0);
@@ -196,7 +126,7 @@ export default function HomePage() {
       business: "Online Yoga Courses",
       revenue: "₹15 Lakhs",
       timePeriod: "6 months",
-      quote: "I started selling my yoga courses as a side hustle. Now it's my full-time business! SellEarnDirect made everything so simple.",
+      quote: "I started selling my yoga courses as a side hustle. Now it's my full-time business! sedStudios made everything so simple.",
       before: "Part-time instructor",
       after: "Full-time entrepreneur",
       avatar: "🧘‍♀️",
@@ -210,7 +140,7 @@ export default function HomePage() {
       business: "Premium Software Tools",
       revenue: "₹45 Lakhs",
       timePeriod: "12 months",
-      quote: "My software development business exploded after I started selling through SellEarnDirect. Best decision I ever made!",
+      quote: "My software development business exploded after I started selling through sedStudios. Best decision I ever made!",
       before: "Freelance developer",
       after: "SaaS founder",
       avatar: "💻",
@@ -238,7 +168,7 @@ export default function HomePage() {
       business: "Online Photography Course",
       revenue: "₹18 Lakhs",
       timePeriod: "7 months",
-      quote: "From hobby photographer to profitable course creator. SellEarnDirect gave me the tools to monetize my passion.",
+      quote: "From hobby photographer to profitable course creator. sedStudios gave me the tools to monetize my passion.",
       before: "Photography enthusiast",
       after: "Course instructor",
       avatar: "📸",
@@ -337,16 +267,6 @@ export default function HomePage() {
     };
   }, []);
 
-  // Auto-carousel effect
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % totalSlides);
-    }, 5000); // Change slide every 5 seconds
-
-    return () => clearInterval(interval);
-  }, []);
 
   // Auto-rotate Success Stories carousel
   useEffect(() => {
@@ -727,11 +647,11 @@ export default function HomePage() {
 
 
   const productSchema = generateProductSchema({
-    name: 'SellEarnDirect Platform',
+    name: 'sedStudios Platform',
     description: 'Create and sell digital products online. Build sales funnels, manage customers, and grow your revenue.',
-    image: 'https://sellearndirect.com/logo.png',
+    image: 'https://sedstudios.com/logo/logo.gif',
     price: 0,
-    url: 'https://sellearndirect.com',
+    url: 'https://sedstudios.com',
     rating: { value: 4.8, count: 1250 }
   });
 
@@ -1302,637 +1222,489 @@ export default function HomePage() {
       {/* Navigation */}
       <Header />
 
-      {/* Hero Section - Sleek Premium Design */}
-      <section ref={heroRef} className="relative pt-16 pb-6 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
-        <div className="w-full text-center relative z-10">
-          <h1 className="hero-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-2 leading-tight" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-title">
-            Convert Your Traffic Into
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
-              {' '}Revenue
-            </span>
-          </h1>
-          <div className="hero-subtitle text-base sm:text-lg md:text-xl text-gray-600 mb-4 leading-relaxed px-4 sm:px-8 lg:px-16" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-subtitle">
-            Create channels that turn your website visitors into paying customers. A channel is your branded space to share content and build your audience - no technical skills needed!
-          </div>
+      {/* Hero Section - Sleek Premium Split Design */}
+      <section ref={heroRef} className="relative pt-16 pb-12 px-4 sm:px-6 lg:px-12 bg-white overflow-hidden">
+        <div className="max-w-[1500px] mx-auto relative z-10">
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
 
-          {/* Process Flowchart - Mobile Optimized with Animations */}
-          <div className="max-w-6xl mx-auto mb-6 px-4">
-            {/* Subtitle */}
-            <p className="text-center text-xs sm:text-sm font-medium text-gray-500 mb-4 sm:mb-5 tracking-wide uppercase">How It Works</p>
-
-            <div className="relative">
-              {/* Connection Line - Horizontal for desktop, vertical for mobile */}
-              <div className="hidden sm:block absolute top-7 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-gray-200 to-transparent" style={{ zIndex: 0 }}>
-                {/* Animated progress line */}
-                <div className="process-progress-line absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full" style={{ width: '0%' }}></div>
+            {/* LEFT COLUMN: The "Value Proposition" & "Process" */}
+            <div className="w-full lg:w-[45%] space-y-10">
+              <div className="text-left">
+                <h1 className="hero-title text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-gray-900 mb-6 leading-[1.1]" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-title">
+                  Empower Your Creativity,
+                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 mt-2">
+                    Reach Millions, Earn Directly
+                  </span>
+                </h1>
+                <p className="hero-subtitle text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-subtitle">
+                  The all-in-one platform to share your expertise. Reach a global audience and get paid instantly for your <span className="text-indigo-600 font-semibold">courses</span>, <span className="text-purple-600 font-semibold">videos</span>, and <span className="text-pink-600 font-semibold">PDFs</span>.
+                </p>
               </div>
 
-              {/* Vertical connection line for mobile */}
-              <div className="sm:hidden absolute left-7 top-0 bottom-0 w-0.5 bg-gradient-to-b from-transparent via-gray-200 to-transparent" style={{ zIndex: 0 }}>
-                {/* Animated progress line for mobile */}
-                <div className="process-progress-line-mobile absolute top-0 left-0 w-full bg-gradient-to-b from-indigo-500 via-purple-500 to-pink-500 rounded-full" style={{ height: '0%' }}></div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-5 gap-6 sm:gap-4 relative" style={{ zIndex: 1 }}>
-                {/* Step 1 - Create */}
-                <div className="process-step flex flex-row sm:flex-col items-start sm:items-center group opacity-0">
-                  <div className="relative mb-0 sm:mb-4 mr-4 sm:mr-0 flex-shrink-0">
-                    {/* Glow effect on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                    {/* Main card - Sleek compact size */}
-                    <div className="process-step-icon relative w-14 h-14 sm:w-14 sm:h-14 rounded-xl bg-white border-2 border-gray-200 shadow-sm flex items-center justify-center group-hover:scale-110 group-hover:shadow-md group-hover:border-indigo-500 transition-all duration-300">
-                      <RocketLaunchIcon className="w-7 h-7 sm:w-6 sm:h-6 text-gray-700 group-hover:text-indigo-600 transition-colors" />
-                    </div>
-
-                    {/* Step number badge */}
-                    <div className="process-step-badge absolute -top-1.5 -right-1.5 w-6 h-6 sm:w-5 sm:h-5 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-[10px] sm:text-[10px] font-bold flex items-center justify-center shadow-sm scale-0">
-                      1
-                    </div>
-                  </div>
-
-                  <div className="process-step-text text-left sm:text-center space-y-0.5 pt-0.5">
-                    <h4 className="font-semibold text-sm sm:text-xs text-gray-900">Create Channel</h4>
-                    <p className="text-xs sm:text-[10px] text-gray-500">Sign up & start building</p>
-                  </div>
+              {/* Process Flowchart - Vertical for Desktop Column */}
+              {/* <div className="relative space-y-6">
+                <p className="text-xs sm:text-sm font-black text-gray-400 mb-6 tracking-widest uppercase">The Path to Success</p>
+                
+                <div className="absolute left-7 top-12 bottom-0 w-0.5 bg-gradient-to-b from-indigo-500/20 via-purple-500/20 to-pink-500/20" style={{ zIndex: 0 }}>
+                  <div className="process-progress-line-mobile absolute top-0 left-0 w-full bg-gradient-to-b from-indigo-500 via-purple-500 to-pink-500 rounded-full" style={{ height: '100%' }}></div>
                 </div>
 
-                {/* Step 2 - Add Product */}
-                <div className="process-step flex flex-row sm:flex-col items-start sm:items-center group opacity-0">
-                  <div className="relative mb-0 sm:mb-4 mr-4 sm:mr-0 flex-shrink-0">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                    <div className="process-step-icon relative w-14 h-14 sm:w-14 sm:h-14 rounded-xl bg-white border-2 border-gray-200 shadow-sm flex items-center justify-center group-hover:scale-110 group-hover:shadow-md group-hover:border-blue-500 transition-all duration-300">
-                      <ShoppingBagIcon className="w-7 h-7 sm:w-6 sm:h-6 text-gray-700 group-hover:text-blue-600 transition-colors" />
+                <div className="space-y-6 relative" style={{ zIndex: 1 }}>
+                  {[
+                    { id: 1, icon: RocketLaunchIcon, title: "Create Channel", desc: "Launch your brand instantly", color: "indigo" },
+                    { id: 2, icon: ShoppingBagIcon, title: "Add Products", desc: "Upload courses, videos or PDFs", color: "blue" },
+                    { id: 3, icon: Cog6ToothIcon, title: "Customize", desc: "Design your perfect storefront", color: "emerald" },
+                    { id: 4, icon: GlobeAltIcon, title: "Go Live", desc: "Reach customers worldwide", color: "orange" },
+                    { id: 5, icon: CurrencyDollarIcon, title: "Earn Directly", desc: "Get paid with 0% platform fees", color: "yellow", success: true }
+                  ].map((step, idx) => (
+                    <div key={step.id} className={`process-step flex items-center gap-6 group ${step.success ? 'process-step-success' : ''}`}>
+                      <div className="relative flex-shrink-0">
+                        <div className={`process-step-icon relative w-14 h-14 rounded-2xl bg-white border-2 border-gray-100 shadow-sm flex items-center justify-center group-hover:scale-110 group-hover:shadow-md transition-all duration-300 group-hover:border-${step.color}-500`}>
+                          <step.icon className={`w-7 h-7 text-gray-700 group-hover:text-${step.color}-600 transition-colors`} />
+                        </div>
+                      </div>
+                      <div className="process-step-text">
+                        <div className={`w-5 h-5 rounded-full bg-gradient-to-br from-${step.color}-500 to-${step.color}-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm mb-1.5`}>
+                          {step.success ? '✓' : step.id}
+                        </div>
+                        <h4 className={`font-bold text-base ${step.success ? 'text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-amber-600' : 'text-gray-900'} mb-1`}>{step.title}</h4>
+                        <p className="text-sm text-gray-500 font-medium">{step.desc}</p>
+                      </div>
                     </div>
-
-                    <div className="process-step-badge absolute -top-1.5 -right-1.5 w-6 h-6 sm:w-5 sm:h-5 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm scale-0">
-                      2
-                    </div>
-                  </div>
-
-                  <div className="process-step-text text-left sm:text-center space-y-0.5 pt-0.5">
-                    <h4 className="font-semibold text-sm sm:text-xs text-gray-900">Add Product</h4>
-                    <p className="text-xs sm:text-[10px] text-gray-500">Upload your digital file</p>
-                  </div>
+                  ))}
                 </div>
+              </div> */}
 
-                {/* Step 3 - Customize */}
-                <div className="process-step flex flex-row sm:flex-col items-start sm:items-center group opacity-0">
-                  <div className="relative mb-0 sm:mb-4 mr-4 sm:mr-0 flex-shrink-0">
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-green-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="hero-buttons flex flex-col sm:flex-row gap-4 pt-4" style={{ opacity: 1, transform: 'translateY(0)' }}>
+                <CTAButton
+                  onClick={() => router.push(session ? "/auth/dashboard" : "/auth/signin")}
+                  className="group text-base font-bold shadow-xl hover:shadow-2xl px-10 py-5"
+                >
+                  Start Selling Now
+                  <ArrowRightIconSolid className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </CTAButton>
 
-                    <div className="process-step-icon relative w-14 h-14 sm:w-14 sm:h-14 rounded-xl bg-white border-2 border-gray-200 shadow-sm flex items-center justify-center group-hover:scale-110 group-hover:shadow-md group-hover:border-emerald-500 transition-all duration-300">
-                      <Cog6ToothIcon className="w-7 h-7 sm:w-6 sm:h-6 text-gray-700 group-hover:text-emerald-600 transition-colors" />
-                    </div>
-
-                    <div className="process-step-badge absolute -top-1.5 -right-1.5 w-6 h-6 sm:w-5 sm:h-5 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm scale-0">
-                      3
-                    </div>
+                <div className="hidden sm:flex flex-col justify-center gap-1">
+                  <div className="flex -space-x-2">
+                    {[1, 2, 3, 4].map(i => (
+                      <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 overflow-hidden">
+                        <img src={`https://i.pravatar.cc/150?u=${i}`} alt="user" />
+                      </div>
+                    ))}
+                    <div className="w-8 h-8 rounded-full border-2 border-white bg-indigo-600 flex items-center justify-center text-[10px] text-white font-bold">+2k</div>
                   </div>
-
-                  <div className="process-step-text text-left sm:text-center space-y-0.5 pt-0.5">
-                    <h4 className="font-semibold text-sm sm:text-xs text-gray-900">Customize</h4>
-                    <p className="text-xs sm:text-[10px] text-gray-500">Design your page</p>
-                  </div>
-                </div>
-
-                {/* Step 4 - Publish */}
-                <div className="process-step flex flex-row sm:flex-col items-start sm:items-center group opacity-0">
-                  <div className="relative mb-0 sm:mb-4 mr-4 sm:mr-0 flex-shrink-0">
-                    <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-amber-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                    <div className="process-step-icon relative w-14 h-14 sm:w-14 sm:h-14 rounded-xl bg-white border-2 border-gray-200 shadow-sm flex items-center justify-center group-hover:scale-110 group-hover:shadow-md group-hover:border-orange-500 transition-all duration-300">
-                      <GlobeAltIcon className="w-7 h-7 sm:w-6 sm:h-6 text-gray-700 group-hover:text-orange-600 transition-colors" />
-                    </div>
-
-                    <div className="process-step-badge absolute -top-1.5 -right-1.5 w-6 h-6 sm:w-5 sm:h-5 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm scale-0">
-                      4
-                    </div>
-                  </div>
-
-                  <div className="process-step-text text-left sm:text-center space-y-0.5 pt-0.5">
-                    <h4 className="font-semibold text-sm sm:text-xs text-gray-900">Publish</h4>
-                    <p className="text-xs sm:text-[10px] text-gray-500">Go live instantly</p>
-                  </div>
-                </div>
-
-                {/* Step 5 - Earn - Success Step */}
-                <div className="process-step process-step-success flex flex-row sm:flex-col items-start sm:items-center group opacity-0">
-                  <div className="relative mb-0 sm:mb-4 mr-4 sm:mr-0 flex-shrink-0">
-                    <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/30 to-amber-500/30 rounded-3xl blur-2xl opacity-60 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                    <div className="process-step-icon relative w-14 h-14 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-yellow-50 to-amber-50 border-2 border-yellow-300 shadow-sm flex items-center justify-center group-hover:scale-110 group-hover:shadow-md group-hover:border-yellow-400 transition-all duration-300">
-                      <CurrencyDollarIcon className="w-7 h-7 sm:w-6 sm:h-6 text-yellow-600 group-hover:text-yellow-700 transition-colors" />
-                    </div>
-
-                    <div className="process-step-badge absolute -top-1.5 -right-1.5 w-6 h-6 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 text-white text-[10px] sm:text-xs font-bold flex items-center justify-center shadow-sm scale-0">
-                      ✓
-                    </div>
-
-                    {/* Sparkle effects - hidden on mobile */}
-                    <div className="success-sparkle-1 hidden sm:block absolute -top-1 -left-1 text-lg opacity-0">✨</div>
-                    <div className="success-sparkle-2 hidden sm:block absolute -top-1 -right-1 text-lg opacity-0">⭐</div>
-                    <div className="success-sparkle-3 hidden sm:block absolute -bottom-1 left-1 text-lg opacity-0">💫</div>
-                  </div>
-
-                  <div className="process-step-text text-left sm:text-center space-y-0.5 pt-0.5">
-                    <h4 className="font-bold text-sm sm:text-xs bg-gradient-to-r from-yellow-600 to-amber-600 bg-clip-text text-transparent">Get Sales</h4>
-                    <p className="text-xs sm:text-[10px] text-gray-500 font-medium">Start earning!</p>
-                  </div>
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest ml-1">Joined this week</p>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <div className="hero-buttons flex flex-col sm:flex-row gap-2 justify-center mb-4" style={{ opacity: 1, transform: 'translateY(0)' }}>
-            <CTAButton
-              onClick={() => router.push(session ? "/auth/dashboard" : "/auth/signin")}
-              className="group text-sm sm:text-base font-semibold shadow-md hover:shadow-lg"
-            >
-              Start Selling Now
-              <ArrowRightIconSolid className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </CTAButton>
-
-            {/* <button
-              onClick={() => setShowScreenshotShowcase(true)}
-              className="group border-2 border-indigo-600 text-indigo-600 px-5 py-2 rounded-lg text-sm sm:text-base font-semibold hover:bg-indigo-50 transition-all flex items-center justify-center shadow-sm hover:shadow-md"
-            >
-              <PlayIcon className="mr-2 h-4 w-4" />
-              See How It Works
-            </button> */}
-          </div>
-
-          {/* Trust Badges - Improved Visibility - Moved below buttons */}
-          <div className="hidden sm:flex flex-row gap-6 mb-8 justify-center">
-            <div className="flex items-center gap-2 text-sm text-gray-700 font-semibold bg-white shadow-sm px-4 py-2 rounded-full border border-gray-200">
-              <span className="text-green-600 font-bold">✓</span> No Credit Card
+              {/* Trust Badges - Improved Visibility */}
+              <div className="flex flex-wrap gap-4 pt-2">
+                {["No Credit Card", "14-Day Free Trial", "Cancel Anytime"].map(badge => (
+                  <div key={badge} className="flex items-center gap-2 text-[11px] font-black text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100 uppercase tracking-wider">
+                    <span className="text-green-500 font-bold">✓</span> {badge}
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-700 font-semibold bg-white shadow-sm px-4 py-2 rounded-full border border-gray-200">
-              <span className="text-green-600 font-bold">✓</span> 14-Day Free Trial
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-700 font-semibold bg-white shadow-sm px-4 py-2 rounded-full border border-gray-200">
-              <span className="text-green-600 font-bold">✓</span> Cancel Anytime
+
+            {/* RIGHT COLUMN: The "Product Reality" (Carousel) */}
+            <div className="w-full lg:w-[55%]">
+              <div className="hero-visual relative" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-visual">
+                {/* Visual Frame Decorations */}
+                <div className="absolute -inset-4 bg-gradient-to-tr from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-[2.5rem] blur-2xl -z-10"></div>
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-400/10 rounded-full blur-[80px] -z-10 animate-pulse"></div>
+                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-pink-400/10 rounded-full blur-[80px] -z-10 animate-pulse"></div>
+
+                <CinematicAd className="w-full min-h-[500px] sm:min-h-[550px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] border border-gray-100" />
+              </div>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Hero Visual - Auto Carousel */}
-        <div className="hero-visual mt-6 sm:mt-8 relative" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-visual">
-          <div className="w-full relative px-4 sm:px-8 lg:px-16">
-            {/* Background Floating Elements */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              {/* Animated Background Circles */}
-              <div className="absolute top-10 left-10 w-20 h-20 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-full blur-xl animate-pulse"></div>
-              <div className="absolute top-20 right-20 w-16 h-16 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-              <div className="absolute bottom-20 left-20 w-24 h-24 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: '2s' }}></div>
 
-              {/* Floating Particles */}
-              <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-green-300 rounded-full animate-bounce"></div>
-              <div className="absolute top-1/3 right-1/3 w-1.5 h-1.5 bg-blue-300 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }}></div>
-              <div className="absolute bottom-1/4 right-1/4 w-2.5 h-2.5 bg-purple-300 rounded-full animate-bounce" style={{ animationDelay: '1.5s' }}></div>
+
+      {/* Reach Millions Section - Global Impact */}
+      <section className="py-24 bg-gray-50 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 mb-8 leading-tight">
+            Reach <span className="text-indigo-600">Millions</span> Around the Globe
+          </h2>
+          <p className="text-xl sm:text-2xl text-gray-600 mb-16 max-w-4xl mx-auto font-medium">
+            Your expertise has no boundaries. Our platform connects you with millions of learners and customers worldwide, ensuring your content reaches every corner of the planet.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 group hover:-translate-y-2">
+              <div className="w-20 h-20 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-8 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500">
+                <GlobeAltIcon className="h-12 w-12" />
+              </div>
+              <h3 className="text-2xl font-black text-gray-900 mb-4">Global Network</h3>
+              <p className="text-gray-600 text-lg leading-relaxed">Instantly deploy your content to a global CDN for lightning-fast access anywhere in the world.</p>
             </div>
 
-            {/* Carousel Container - 50/50 Split Design - Sleek Premium Height */}
-            <div className="relative min-h-[600px] sm:min-h-[450px] overflow-hidden bg-white rounded-xl sm:rounded-2xl shadow-2xl border border-gray-100">
-              {/* Carousel Slides */}
-              {mainCarouselSlides.map((slide, index) => {
-                // Determine chart type and data based on index, similar to ScreenshotShowcase logic
-                // Using hardcoded data for the hero to ensure it matches the premium look
-                let chartData = [];
-                let chartType = 'line';
-                let highlightColor = '#ec4899';
-                let graphTitle = 'Sales & Revenue Growth';
-
-                if (index === 0) {
-                  // Code Expertise - Matches Slide 1
-                  chartData = [
-                    { week: 'Week 1', revenue: 12, sales: 4 },
-                    { week: 'Week 2', revenue: 45, sales: 15 },
-                    { week: 'Week 3', revenue: 78, sales: 28 },
-                    { week: 'Week 4', revenue: 125, sales: 42 }
-                  ];
-                  chartType = 'line';
-                  highlightColor = '#ec4899';
-                  graphTitle = 'Sales & Revenue Growth';
-                } else if (index === 1) {
-                  // Category Earnings - Matches Slide 2 style
-                  chartData = [
-                    { day: 'Mon', visits: 120, clicks: 45 },
-                    { day: 'Tue', visits: 180, clicks: 68 },
-                    { day: 'Wed', visits: 150, clicks: 55 },
-                    { day: 'Thu', visits: 220, clicks: 89 },
-                    { day: 'Fri', visits: 280, clicks: 112 },
-                    { day: 'Sat', visits: 310, clicks: 145 },
-                    { day: 'Sun', visits: 290, clicks: 130 }
-                  ];
-                  chartType = 'area';
-                  highlightColor = '#8b5cf6';
-                  graphTitle = 'Visitor Engagement';
-                } else if (index === 2) {
-                  // Sales Growth - kept as line
-                  chartData = salesGrowthData;
-                  chartType = 'line';
-                  highlightColor = '#10b981';
-                  graphTitle = 'Weekly Performance';
-                } else {
-                  // Live tracking
-                  chartData = liveTrackingData;
-                  chartType = 'bar'; // map 'live' to bar for simplicity in this shared view
-                  highlightColor = '#f59e0b';
-                  graphTitle = 'Real-time Analytics';
-                }
-
-                return (
-                  <div
-                    key={index}
-                    className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${currentSlide === index
-                      ? 'opacity-100 z-10'
-                      : 'opacity-0 z-0'
-                      }`}
-                  >
-                    <div className="h-full flex flex-col lg:flex-row">
-                      {/* LEFT SIDE: Visual (Image or Gradient) */}
-                      <div className="w-full lg:w-3/5 h-[40%] lg:h-full relative overflow-hidden group">
-                        {/* Image Rendering */}
-                        {slide.image ? (
-                          <img
-                            src={slide.image}
-                            alt={slide.title}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          />
-                        ) : (
-                          // Fallback gradient if no image
-                          <div className={`w-full h-full bg-gradient-to-br ${slide.gradient} opacity-90`}></div>
-                        )}
-
-                        {/* Gradient Overlay for text readability on mobile */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent lg:hidden"></div>
-                      </div>
-
-                      {/* RIGHT SIDE: Content & Graph */}
-                      <div className="w-full lg:w-2/5 h-[60%] lg:h-full bg-white p-5 lg:p-8 flex flex-col justify-center relative">
-                        {/* Slide Content */}
-                        <div className="mb-4 lg:mb-6 relative z-10">
-                          <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 leading-tight">
-                            {slide.title}
-                          </h3>
-                          <p className="text-sm sm:text-base text-gray-600 leading-relaxed line-clamp-3">
-                            {slide.description}
-                          </p>
-                        </div>
-
-                        {/* Graph Container - Premium Card Look */}
-                        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 relative z-10">
-                          <div className="flex items-center gap-2 mb-4">
-                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: highlightColor }}></div>
-                            <h4 className="font-semibold text-gray-800 text-xs sm:text-sm uppercase tracking-wide">
-                              {graphTitle}
-                            </h4>
-                          </div>
-
-                          <div className="h-[120px] sm:h-[140px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                              {chartType === 'line' ? (
-                                <LineChart data={chartData}>
-                                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                                  <XAxis dataKey="week" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 10 }} dy={10} />
-                                  <YAxis hide={true} domain={[0, 'dataMax + 20']} />
-                                  <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} itemStyle={{ fontSize: '12px', fontWeight: 600 }} />
-                                  <Line type="monotone" dataKey="revenue" stroke={highlightColor} strokeWidth={3} dot={{ r: 3, fill: highlightColor, strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 5 }} />
-                                  <Line type="monotone" dataKey="sales" stroke="#cbd5e1" strokeWidth={2} dot={false} />
-                                </LineChart>
-                              ) : chartType === 'area' ? (
-                                <AreaChart data={chartData}>
-                                  <defs>
-                                    <linearGradient id={`colorGradient${index}`} x1="0" y1="0" x2="0" y2="1">
-                                      <stop offset="5%" stopColor={highlightColor} stopOpacity={0.3} />
-                                      <stop offset="95%" stopColor={highlightColor} stopOpacity={0} />
-                                    </linearGradient>
-                                  </defs>
-                                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 10 }} dy={10} />
-                                  <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                                  <Area type="monotone" dataKey="visits" stroke={highlightColor} fillOpacity={1} fill={`url(#colorGradient${index})`} />
-                                </AreaChart>
-                              ) : (
-                                // Fallback/Bar chart for others
-                                <BarChart data={chartData}>
-                                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                                  <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 10 }} />
-                                  <Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                                  <Bar dataKey="sales" fill={highlightColor} radius={[4, 4, 0, 0]} />
-                                </BarChart>
-                              )}
-                            </ResponsiveContainer>
-                          </div>
-
-                          {/* Growth Stat Pilled */}
-                          <div className="absolute top-4 right-4 bg-green-50 text-green-700 px-2 py-1 rounded-md text-xs font-bold border border-green-100">
-                            +215% Growth
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 group hover:-translate-y-2">
+              <div className="w-20 h-20 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-8 group-hover:bg-purple-600 group-hover:text-white transition-all duration-500">
+                <UserGroupIcon className="h-12 w-12" />
+              </div>
+              <h3 className="text-2xl font-black text-gray-900 mb-4">Million+ Community</h3>
+              <p className="text-gray-600 text-lg leading-relaxed">Tap into a thriving ecosystem of creators and learners looking for high-quality digital assets.</p>
             </div>
 
-            {/* Carousel Indicators - Outside */}
-            <div className="flex justify-center mt-6 space-x-2">
-              {mainCarouselSlides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`h-2 rounded-full transition-all duration-300 ${currentSlide === index
-                    ? 'bg-indigo-600 w-8'
-                    : 'bg-gray-300 w-2 hover:bg-gray-400'
-                    }`}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
-              ))}
-              <BoltIcon className="h-5 w-5 text-white" />
-              <span className="text-white font-bold text-sm sm:text-base">
-                <span className="hidden sm:inline">100% DIRECT PAYMENTS - ZERO MIDDLEMAN FEES</span>
-                <span className="sm:hidden">DIRECT PAYMENTS</span>
-              </span>
+            <div className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-300 group hover:-translate-y-2">
+              <div className="w-20 h-20 bg-pink-50 rounded-2xl flex items-center justify-center text-pink-600 mb-8 group-hover:bg-pink-600 group-hover:text-white transition-all duration-500">
+                <ChartBarIcon className="h-12 w-12" />
+              </div>
+              <h3 className="text-2xl font-black text-gray-900 mb-4">Viral Growth</h3>
+              <p className="text-gray-600 text-lg leading-relaxed">Built-in sharing tools and SEO optimization to help your content go viral and attract new customers.</p>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Main Heading - Modern Typography */}
-          <div className="text-center mb-16 relative payment-header">
-            {/* Background Focus Elements */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 select-none pointer-events-none opacity-5">
-              <span className="text-[15rem] sm:text-[25rem] font-black text-orange-500 leading-none">DIRECT</span>
-            </div>
-
-            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-48 bg-orange-400/10 rounded-full blur-3xl"></div>
-
-            {/* Live Indicator */}
-            <div className="flex items-center justify-center gap-2 mb-6 opacity-0 payment-live-indicator">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-              </span>
-              <span className="text-[10px] sm:text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Live Direct Processing</span>
-            </div>
-
-            <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-gray-900 tracking-tight leading-[1] mb-6">
-              Accept Payments
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-amber-600 to-orange-500">
-                Directly
-              </span>
+      {/* Content Type Showcase - Sell Anything */}
+      <section className="py-24 bg-white relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl sm:text-6xl font-black text-gray-900 mb-8 tracking-tight">
+              Sell Any <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">Digital Asset</span>
             </h2>
-            <div className="inline-flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-orange-100 to-amber-100 rounded-full border border-orange-200 shadow-sm">
-              <span className="flex h-2 w-2 rounded-full bg-orange-500 animate-ping"></span>
-              <p className="text-orange-800 font-black text-xs sm:text-sm uppercase tracking-[0.2em]">No Middleman Fees</p>
+            <p className="text-2xl text-gray-600 max-w-4xl mx-auto font-medium leading-relaxed">
+              Whatever your expertise, we have the tools to help you monetize it. From structured courses to high-quality videos and quick-read PDFs.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {/* Courses */}
+            <div className="group relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-[3rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-xl overflow-hidden min-h-[450px] flex flex-col hover:-translate-y-2 transition-all duration-500">
+                <div className="w-20 h-20 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-10 border border-indigo-100 shadow-inner">
+                  <BookOpenIcon className="h-10 w-10" />
+                </div>
+                <h3 className="text-4xl font-black text-gray-900 mb-6">Video Courses</h3>
+                <p className="text-gray-600 mb-auto text-lg font-medium leading-relaxed">
+                  Build comprehensive learning experiences. Batch-upload videos, create modules, and track student progress with ease.
+                </p>
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <span className="px-4 py-1.5 bg-indigo-50 text-indigo-600 text-xs font-black uppercase tracking-widest rounded-full border border-indigo-100">Multi-Lesson</span>
+                  <span className="px-4 py-1.5 bg-indigo-50 text-indigo-600 text-xs font-black uppercase tracking-widest rounded-full border border-indigo-100">Progress Tracking</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Videos */}
+            <div className="group relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-purple-600 rounded-[3rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-xl overflow-hidden min-h-[450px] flex flex-col hover:-translate-y-2 transition-all duration-500">
+                <div className="w-20 h-20 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-10 border border-purple-100 shadow-inner">
+                  <VideoCameraIcon className="h-10 w-10" />
+                </div>
+                <h3 className="text-4xl font-black text-gray-900 mb-6">Exclusive Videos</h3>
+                <p className="text-gray-600 mb-auto text-lg font-medium leading-relaxed">
+                  Market-leading video player for your tutorials, masterclasses, and entertainment content. Adaptive streaming for all devices.
+                </p>
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <span className="px-4 py-1.5 bg-purple-50 text-purple-600 text-xs font-black uppercase tracking-widest rounded-full border border-purple-100">4K Streaming</span>
+                  <span className="px-4 py-1.5 bg-purple-50 text-purple-600 text-xs font-black uppercase tracking-widest rounded-full border border-purple-100">DRM Protected</span>
+                </div>
+              </div>
+            </div>
+
+            {/* PDFs/E-books */}
+            <div className="group relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-pink-500 to-pink-600 rounded-[3rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-xl overflow-hidden min-h-[450px] flex flex-col hover:-translate-y-2 transition-all duration-500">
+                <div className="w-20 h-20 bg-pink-50 rounded-2xl flex items-center justify-center text-pink-600 mb-10 border border-pink-100 shadow-inner">
+                  <DocumentTextIcon className="h-10 w-10" />
+                </div>
+                <h3 className="text-4xl font-black text-gray-900 mb-6">PDFs & E-books</h3>
+                <p className="text-gray-600 mb-auto text-lg font-medium leading-relaxed">
+                  Sell guides, checklists, and e-books. Securely deliver digital files instantly to your customers after payment.
+                </p>
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <span className="px-4 py-1.5 bg-pink-50 text-pink-600 text-xs font-black uppercase tracking-widest rounded-full border border-pink-100">Instant Download</span>
+                  <span className="px-4 py-1.5 bg-pink-50 text-pink-600 text-xs font-black uppercase tracking-widest rounded-full border border-pink-100">Mobile Friendly</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Payment Section */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden" style={{ zIndex: 10 }}>
+        <div className="max-w-7xl mx-auto">
+          {/* Background Focus Elements */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 select-none pointer-events-none opacity-5">
+            <span className="text-[15rem] sm:text-[25rem] font-black text-orange-500 leading-none">DIRECT</span>
+          </div>
+
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-48 bg-orange-400/10 rounded-full blur-3xl"></div>
+
+          {/* Live Indicator */}
+          <div className="flex items-center justify-center gap-2 mb-6 opacity-0 payment-live-indicator">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+            </span>
+            <span className="text-[10px] sm:text-xs font-black text-gray-400 uppercase tracking-[0.2em]">Live Direct Processing</span>
+          </div>
+
+          <h2 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-gray-900 tracking-tight leading-[1] mb-6">
+            Accept Payments
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-amber-600 to-orange-500">
+              Directly
+            </span>
+          </h2>
+          <div className="inline-flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-orange-100 to-amber-100 rounded-full border border-orange-200 shadow-sm">
+            <span className="flex h-2 w-2 rounded-full bg-orange-500 animate-ping"></span>
+            <p className="text-orange-800 font-black text-xs sm:text-sm uppercase tracking-[0.2em]">No Middleman Fees</p>
+          </div>
+        </div>
+
+        {/* Description Card - Clean Design */}
+        <div className="max-w-4xl mx-auto mb-12 payment-desc-card">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 border-2 border-gray-100 shadow-sm transform transition-all duration-500 hover:shadow-md">
+            <p className="text-center text-base sm:text-lg text-gray-700 leading-relaxed">
+              Get paid directly to your bank account. <span className="font-bold text-gray-900">No platform fees, no hidden charges.</span> Keep 100% of your revenue minus standard payment processing fees.
+            </p>
+          </div>
+        </div>
+
+        {/* Payment Methods - Ultra Modern Glass Design */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20 relative">
+          {/* Background Glows */}
+          <div className="absolute top-1/2 left-0 w-64 h-64 bg-blue-400/10 rounded-full blur-[100px] pointer-events-none"></div>
+          <div className="absolute bottom-0 right-0 w-64 h-64 bg-purple-400/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+          {[
+            {
+              title: "Credit/Debit Cards",
+              subtitle: "Direct Processing",
+              description: "Accept Visa, Mastercard, Amex, and more. Secure end-to-end encrypted processing.",
+              details: "Supports 135+ Currencies",
+              icon: <CurrencyDollarIcon className="w-10 h-10" />,
+              accentColor: "blue",
+              gradient: "from-blue-500 to-indigo-600"
+            },
+            {
+              title: "UPI / Net Banking",
+              subtitle: "Local Payments",
+              description: "Direct settlements via PhonePe, GPay, Paytm, and all major Indian banks.",
+              details: "Instant QR Settlements",
+              icon: <BoltIcon className="w-10 h-10" />,
+              accentColor: "green",
+              gradient: "from-emerald-500 to-teal-600"
+            },
+            {
+              title: "Direct Bank Payouts",
+              subtitle: "Account to Account",
+              description: "Automatic daily payouts to any Indian bank account with detailed reconciliation.",
+              details: "T+1 Settlement Cycle",
+              icon: <BanknotesIcon className="w-10 h-10" />,
+              accentColor: "purple",
+              gradient: "from-purple-500 to-pink-600"
+            }
+          ].map((method, index) => (
+            <div
+              key={index}
+              className="group relative bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all duration-500 hover:-translate-y-2 overflow-hidden payment-method-card"
+            >
+              {/* Decorative Accent */}
+              <div className={`absolute -top-12 -right-12 w-32 h-32 bg-gradient-to-br ${method.gradient} opacity-5 group-hover:opacity-10 transition-opacity blur-2xl`}></div>
+
+              {/* Icon Section */}
+              <div className="relative mb-8">
+                <div className={`inline-flex items-center justify-center w-20 h-20 rounded-[1.5rem] bg-gradient-to-br ${method.gradient} text-white shadow-lg transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
+                  {method.icon}
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`text-[10px] font-black uppercase tracking-[0.2em] text-${method.accentColor}-600`}>
+                    {method.subtitle}
+                  </span>
+                  <div className={`h-1 w-1 rounded-full bg-${method.accentColor}-600`}></div>
+                </div>
+                <h3 className="text-2xl font-black text-gray-900 mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-gray-900 group-hover:to-gray-600 transition-all">
+                  {method.title}
+                </h3>
+                <p className="text-gray-500 text-sm leading-relaxed mb-6 font-medium">
+                  {method.description}
+                </p>
+
+                {/* Footer Tag */}
+                <div className="pt-6 border-t border-gray-100 flex items-center justify-between">
+                  <span className="text-xs font-bold text-gray-900">{method.details}</span>
+                  <ArrowRightIcon className="h-4 w-4 text-gray-400 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* 3 Steps Process - Modern Design */}
+        <div className="bg-white rounded-3xl p-8 sm:p-10 mb-10 border-2 border-gray-100 shadow-lg">
+          <div className="text-center mb-10">
+            <h3 className="text-3xl sm:text-4xl font-black text-gray-900 mb-2">
+              Start Earning in
+            </h3>
+            <div className="inline-block px-6 py-2 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full">
+              <p className="text-white font-bold text-2xl">3 Simple Steps</p>
             </div>
           </div>
 
-          {/* Description Card - Clean Design */}
-          <div className="max-w-4xl mx-auto mb-12 payment-desc-card">
-            <div className="bg-white rounded-2xl p-6 sm:p-8 border-2 border-gray-100 shadow-sm transform transition-all duration-500 hover:shadow-md">
-              <p className="text-center text-base sm:text-lg text-gray-700 leading-relaxed">
-                Get paid directly to your bank account. <span className="font-bold text-gray-900">No platform fees, no hidden charges.</span> Keep 100% of your revenue minus standard payment processing fees.
-              </p>
-            </div>
-          </div>
-
-          {/* Payment Methods - Ultra Modern Glass Design */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20 relative">
-            {/* Background Glows */}
-            <div className="absolute top-1/2 left-0 w-64 h-64 bg-blue-400/10 rounded-full blur-[100px] pointer-events-none"></div>
-            <div className="absolute bottom-0 right-0 w-64 h-64 bg-purple-400/10 rounded-full blur-[100px] pointer-events-none"></div>
+          {/* Desktop View (Workflow Design) */}
+          <div className="hidden md:grid grid-cols-3 gap-12 relative pt-10">
+            {/* Connection Line - Professional Gradient */}
+            <div className="absolute top-[108px] left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" style={{ zIndex: 0 }}></div>
+            <div className="absolute top-[108px] left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" style={{ zIndex: 1 }}></div>
 
             {[
               {
-                title: "Credit/Debit Cards",
-                subtitle: "Direct Processing",
-                description: "Accept Visa, Mastercard, Amex, and more. Secure end-to-end encrypted processing.",
-                details: "Supports 135+ Currencies",
-                icon: <CurrencyDollarIcon className="w-10 h-10" />,
-                accentColor: "blue",
-                gradient: "from-blue-500 to-indigo-600"
+                number: "01",
+                title: "Create Your Channel",
+                description: "Launch your brand with a professional, high-converting storefront in minutes.",
+                icon: RocketLaunchIcon,
+                gradient: "from-indigo-600 to-blue-600"
               },
               {
-                title: "UPI / Net Banking",
-                subtitle: "Local Payments",
-                description: "Direct settlements via PhonePe, GPay, Paytm, and all major Indian banks.",
-                details: "Instant QR Settlements",
-                icon: <BoltIcon className="w-10 h-10" />,
-                accentColor: "green",
+                number: "02",
+                title: "Add Payment Method",
+                description: "Securely connect your bank account. No middlemen, no platform tax.",
+                icon: CurrencyDollarIcon,
+                gradient: "from-orange-500 to-amber-600"
+              },
+              {
+                number: "03",
+                title: "Start Earning",
+                description: "Receive instant payouts directly. Keep 100% of what you earn.",
+                icon: BanknotesIcon,
                 gradient: "from-emerald-500 to-teal-600"
-              },
-              {
-                title: "Direct Bank Payouts",
-                subtitle: "Account to Account",
-                description: "Automatic daily payouts to any Indian bank account with detailed reconciliation.",
-                details: "T+1 Settlement Cycle",
-                icon: <BanknotesIcon className="w-10 h-10" />,
-                accentColor: "purple",
-                gradient: "from-purple-500 to-pink-600"
               }
-            ].map((method, index) => (
+            ].map((step, index) => (
               <div
                 key={index}
-                className="group relative bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all duration-500 hover:-translate-y-2 overflow-hidden payment-method-card"
+                className="group text-center relative z-10 payment-workflow-step"
               >
-                {/* Decorative Accent */}
-                <div className={`absolute -top-12 -right-12 w-32 h-32 bg-gradient-to-br ${method.gradient} opacity-5 group-hover:opacity-10 transition-opacity blur-2xl`}></div>
-
-                {/* Icon Section */}
-                <div className="relative mb-8">
-                  <div className={`inline-flex items-center justify-center w-20 h-20 rounded-[1.5rem] bg-gradient-to-br ${method.gradient} text-white shadow-lg transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
-                    {method.icon}
+                {/* Step Number Badge */}
+                <div className="mb-8 relative inline-block">
+                  <div className="absolute -inset-4 bg-gray-50 rounded-full blur-xl group-hover:bg-orange-50 transition-colors"></div>
+                  <div className="w-44 h-44 rounded-full border-2 border-gray-100 bg-white flex items-center justify-center relative shadow-sm group-hover:border-orange-200 group-hover:shadow-xl transition-all duration-500">
+                    <div className={`w-36 h-36 rounded-full bg-gradient-to-tr ${step.gradient} flex items-center justify-center transform group-hover:scale-95 transition-transform duration-500`}>
+                      <step.icon className="h-16 w-16 text-white" />
+                    </div>
+                    {/* Floating Number */}
+                    <div className="absolute -top-2 -right-2 w-14 h-14 bg-white border-4 border-gray-50 rounded-full flex items-center justify-center shadow-lg group-hover:border-orange-100">
+                      <span className="text-xl font-black text-gray-900">{step.number}</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Content */}
-                <div className="relative">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-[10px] font-black uppercase tracking-[0.2em] text-${method.accentColor}-600`}>
-                      {method.subtitle}
-                    </span>
-                    <div className={`h-1 w-1 rounded-full bg-${method.accentColor}-600`}></div>
-                  </div>
-                  <h3 className="text-2xl font-black text-gray-900 mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-gray-900 group-hover:to-gray-600 transition-all">
-                    {method.title}
-                  </h3>
-                  <p className="text-gray-500 text-sm leading-relaxed mb-6 font-medium">
-                    {method.description}
-                  </p>
-
-                  {/* Footer Tag */}
-                  <div className="pt-6 border-t border-gray-100 flex items-center justify-between">
-                    <span className="text-xs font-bold text-gray-900">{method.details}</span>
-                    <ArrowRightIcon className="h-4 w-4 text-gray-400 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </div>
+                <h4 className="text-2xl font-black text-gray-900 mb-4 group-hover:text-orange-600 transition-colors">
+                  {step.title}
+                </h4>
+                <p className="text-gray-500 text-sm leading-relaxed max-w-[240px] mx-auto font-medium">
+                  {step.description}
+                </p>
               </div>
             ))}
           </div>
 
-          {/* 3 Steps Process - Modern Design */}
-          <div className="bg-white rounded-3xl p-8 sm:p-10 mb-10 border-2 border-gray-100 shadow-lg">
-            <div className="text-center mb-10">
-              <h3 className="text-3xl sm:text-4xl font-black text-gray-900 mb-2">
-                Start Earning in
-              </h3>
-              <div className="inline-block px-6 py-2 bg-gradient-to-r from-orange-500 to-amber-500 rounded-full">
-                <p className="text-white font-bold text-2xl">3 Simple Steps</p>
+          {/* Mobile View (Vertical Timeline) - "Cool" Animated Look */}
+          <div className="md:hidden relative px-4 space-y-12">
+            {/* Vertical Connecting Line */}
+            <div className="absolute left-[39px] top-8 bottom-12 w-1 bg-gradient-to-b from-orange-200 via-amber-400 to-orange-200" style={{ zIndex: 0 }}></div>
+
+            {[
+              {
+                number: "1",
+                title: "Create Channel",
+                subtitle: "Sign up & start building",
+                icon: RocketLaunchIcon,
+                gradient: "from-indigo-500 to-purple-500",
+                shadow: "shadow-indigo-200"
+              },
+              {
+                number: "2",
+                title: "Add Product",
+                subtitle: "Upload your digital file",
+                icon: ShoppingBagIcon, // Use ShoppingIcon if defined
+                fallbackIcon: CurrencyDollarIcon, // Fallback if ShoppingIcon isn't available
+                gradient: "from-blue-500 to-cyan-500",
+                shadow: "shadow-blue-200"
+              },
+              {
+                number: "3",
+                title: "Customize",
+                subtitle: "Design your page",
+                icon: Cog6ToothIcon,  // Use Cog icon
+                fallbackIcon: RocketLaunchIcon,
+                gradient: "from-emerald-500 to-teal-500",
+                shadow: "shadow-emerald-200"
+              },
+              {
+                number: "4",
+                title: "Start Earning",
+                subtitle: "Go live instantly",
+                icon: BanknotesIcon,
+                gradient: "from-orange-500 to-amber-500",
+                shadow: "shadow-orange-200"
+              }
+            ].map((step, index) => (
+              <div key={index} className="relative z-10 flex items-center gap-6 group">
+                {/* Left Icon/Number Box */}
+                <div className="relative shrink-0">
+                  <div className={`w-14 h-14 rounded-2xl bg-white border border-gray-100 shadow-xl ${step.shadow} flex items-center justify-center transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6`}>
+                    <step.icon className={`h-6 w-6 text-gray-700`} />
+                    {/* Number Badge */}
+                    <div className={`absolute -top-3 -right-3 w-8 h-8 rounded-full bg-gradient-to-r ${step.gradient} flex items-center justify-center text-white font-bold text-sm shadow-md ring-4 ring-white`}>
+                      {step.number}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Content */}
+                <div className="flex-1 bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-gray-100 shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:translate-x-2">
+                  <h4 className="text-lg font-bold text-gray-900 mb-1">{step.title}</h4>
+                  <p className="text-gray-500 text-sm">{step.subtitle}</p>
+                </div>
               </div>
-            </div>
-
-            {/* Desktop View (Workflow Design) */}
-            <div className="hidden md:grid grid-cols-3 gap-12 relative pt-10">
-              {/* Connection Line - Professional Gradient */}
-              <div className="absolute top-[108px] left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" style={{ zIndex: 0 }}></div>
-              <div className="absolute top-[108px] left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" style={{ zIndex: 1 }}></div>
-
-              {[
-                {
-                  number: "01",
-                  title: "Create Your Channel",
-                  description: "Launch your brand with a professional, high-converting storefront in minutes.",
-                  icon: RocketLaunchIcon,
-                  gradient: "from-indigo-600 to-blue-600"
-                },
-                {
-                  number: "02",
-                  title: "Add Payment Method",
-                  description: "Securely connect your bank account. No middlemen, no platform tax.",
-                  icon: CurrencyDollarIcon,
-                  gradient: "from-orange-500 to-amber-600"
-                },
-                {
-                  number: "03",
-                  title: "Start Earning",
-                  description: "Receive instant payouts directly. Keep 100% of what you earn.",
-                  icon: BanknotesIcon,
-                  gradient: "from-emerald-500 to-teal-600"
-                }
-              ].map((step, index) => (
-                <div
-                  key={index}
-                  className="group text-center relative z-10 payment-workflow-step"
-                >
-                  {/* Step Number Badge */}
-                  <div className="mb-8 relative inline-block">
-                    <div className="absolute -inset-4 bg-gray-50 rounded-full blur-xl group-hover:bg-orange-50 transition-colors"></div>
-                    <div className="w-44 h-44 rounded-full border-2 border-gray-100 bg-white flex items-center justify-center relative shadow-sm group-hover:border-orange-200 group-hover:shadow-xl transition-all duration-500">
-                      <div className={`w-36 h-36 rounded-full bg-gradient-to-tr ${step.gradient} flex items-center justify-center transform group-hover:scale-95 transition-transform duration-500`}>
-                        <step.icon className="h-16 w-16 text-white" />
-                      </div>
-                      {/* Floating Number */}
-                      <div className="absolute -top-2 -right-2 w-14 h-14 bg-white border-4 border-gray-50 rounded-full flex items-center justify-center shadow-lg group-hover:border-orange-100">
-                        <span className="text-xl font-black text-gray-900">{step.number}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <h4 className="text-2xl font-black text-gray-900 mb-4 group-hover:text-orange-600 transition-colors">
-                    {step.title}
-                  </h4>
-                  <p className="text-gray-500 text-sm leading-relaxed max-w-[240px] mx-auto font-medium">
-                    {step.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Mobile View (Vertical Timeline) - "Cool" Animated Look */}
-            <div className="md:hidden relative px-4 space-y-12">
-              {/* Vertical Connecting Line */}
-              <div className="absolute left-[39px] top-8 bottom-12 w-1 bg-gradient-to-b from-orange-200 via-amber-400 to-orange-200" style={{ zIndex: 0 }}></div>
-
-              {[
-                {
-                  number: "1",
-                  title: "Create Channel",
-                  subtitle: "Sign up & start building",
-                  icon: RocketLaunchIcon,
-                  gradient: "from-indigo-500 to-purple-500",
-                  shadow: "shadow-indigo-200"
-                },
-                {
-                  number: "2",
-                  title: "Add Product",
-                  subtitle: "Upload your digital file",
-                  icon: ShoppingBagIcon, // Use ShoppingIcon if defined
-                  fallbackIcon: CurrencyDollarIcon, // Fallback if ShoppingIcon isn't available
-                  gradient: "from-blue-500 to-cyan-500",
-                  shadow: "shadow-blue-200"
-                },
-                {
-                  number: "3",
-                  title: "Customize",
-                  subtitle: "Design your page",
-                  icon: Cog6ToothIcon,  // Use Cog icon
-                  fallbackIcon: RocketLaunchIcon,
-                  gradient: "from-emerald-500 to-teal-500",
-                  shadow: "shadow-emerald-200"
-                },
-                {
-                  number: "4",
-                  title: "Start Earning",
-                  subtitle: "Go live instantly",
-                  icon: BanknotesIcon,
-                  gradient: "from-orange-500 to-amber-500",
-                  shadow: "shadow-orange-200"
-                }
-              ].map((step, index) => (
-                <div key={index} className="relative z-10 flex items-center gap-6 group">
-                  {/* Left Icon/Number Box */}
-                  <div className="relative shrink-0">
-                    <div className={`w-14 h-14 rounded-2xl bg-white border border-gray-100 shadow-xl ${step.shadow} flex items-center justify-center transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6`}>
-                      <step.icon className={`h-6 w-6 text-gray-700`} />
-                      {/* Number Badge */}
-                      <div className={`absolute -top-3 -right-3 w-8 h-8 rounded-full bg-gradient-to-r ${step.gradient} flex items-center justify-center text-white font-bold text-sm shadow-md ring-4 ring-white`}>
-                        {step.number}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right Content */}
-                  <div className="flex-1 bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-gray-100 shadow-sm transition-all duration-300 group-hover:shadow-md group-hover:translate-x-2">
-                    <h4 className="text-lg font-bold text-gray-900 mb-1">{step.title}</h4>
-                    <p className="text-gray-500 text-sm">{step.subtitle}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* CTA Section - Modern Design */}
-          <div className="text-center">
-            <Link
-              href={session ? "/auth/dashboard" : "/auth/signin"}
-              className="group inline-flex items-center justify-center px-10 py-4 rounded-2xl font-black text-lg sm:text-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-lg"
-            >
-              <span className="hidden sm:inline">Start Earning Directly Now</span>
-              <span className="sm:hidden">Start Earning Now</span>
-              <ArrowRightIconSolid className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
-            </Link>
-
-            <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full">
-              <span className="text-2xl">✨</span>
-              <p className="text-gray-700 text-sm font-medium">
-                No credit card required • Free to start • Keep 100% of your revenue
-              </p>
-            </div>
+            ))}
           </div>
         </div>
-      </section >
+
+        {/* CTA Section - Modern Design */}
+        <div className="text-center">
+          <Link
+            href={session ? "/auth/dashboard" : "/auth/signin"}
+            className="group inline-flex items-center justify-center px-10 py-4 rounded-2xl font-black text-lg sm:text-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-lg"
+          >
+            <span className="hidden sm:inline">Start Earning Directly Now</span>
+            <span className="sm:hidden">Start Earning Now</span>
+            <ArrowRightIconSolid className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
+          </Link>
+
+          <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full">
+            <span className="text-2xl">✨</span>
+            <p className="text-gray-700 text-sm font-medium">
+              No credit card required • Free to start • Keep 100% of your revenue
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* Success Stories Section - Premium White Design */}
-      < section className="py-8 sm:py-10 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden" style={{ zIndex: 10 }}>
+      <section className="py-8 sm:py-10 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden" style={{ zIndex: 10 }}>
         {/* Background decorative elements */}
-        < div className="absolute inset-0 overflow-hidden pointer-events-none" >
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-10 right-20 w-96 h-96 bg-indigo-200/15 rounded-full blur-3xl"></div>
           <div className="absolute bottom-10 left-20 w-80 h-80 bg-purple-200/15 rounded-full blur-3xl"></div>
-        </div >
+        </div>
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
@@ -1957,7 +1729,7 @@ export default function HomePage() {
                 </h2>
 
                 <p className="text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0 font-medium italic border-l-4 border-indigo-600 pl-6 bg-gradient-to-r from-indigo-50/50 to-transparent py-4 rounded-r-xl">
-                  "I was a freelancer struggling to find stable income. SellEarnDirect helped me build a scalable digital business in just 48 hours."
+                  "I was a freelancer struggling to find stable income. sedStudios helped me build a scalable digital business in just 48 hours."
                 </p>
 
                 <p className="text-base text-gray-500 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
@@ -2075,16 +1847,16 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </section >
+      </section>
 
       {/* Features Section - Premium White Design */}
-      < section id="features" ref={featuresRef} className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden" style={{ zIndex: 10 }}>
+      <section id="features" ref={featuresRef} className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden" style={{ zIndex: 10 }}>
         {/* Background decorative elements */}
-        < div className="absolute inset-0 overflow-hidden pointer-events-none" >
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 w-72 h-72 bg-indigo-200/20 rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl"></div>
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-pink-200/10 rounded-full blur-3xl"></div>
-        </div >
+        </div>
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-8">
@@ -2148,15 +1920,15 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section >
+      </section>
 
       {/* Blog Section - Premium White Design */}
-      < section id="blog" className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden" style={{ zIndex: 10 }}>
+      <section id="blog" className="py-10 sm:py-12 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden" style={{ zIndex: 10 }}>
         {/* Background decorative elements */}
-        < div className="absolute inset-0 overflow-hidden pointer-events-none" >
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-10 w-96 h-96 bg-purple-200/15 rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-10 w-80 h-80 bg-pink-200/15 rounded-full blur-3xl"></div>
-        </div >
+        </div>
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-8">
@@ -2276,10 +2048,9 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-      </section >
+      </section>
 
-      {/* Footer */}
-      < footer className="bg-gray-900 text-gray-300 py-8 px-4 sm:px-6 lg:px-8" style={{ zIndex: 10 }}>
+      <footer className="bg-gray-900 text-gray-300 py-8 px-4 sm:px-6 lg:px-8" style={{ zIndex: 10 }}>
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
             <div>
@@ -2311,17 +2082,15 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm">
-            <p>&copy; {new Date().getFullYear()} SellEarnDirect. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} sedStudios. All rights reserved.</p>
           </div>
         </div>
-      </footer >
+      </footer>
 
-      {/* Screenshot Showcase Modal */}
-      < ScreenshotShowcase
+      <ScreenshotShowcase
         isOpen={showScreenshotShowcase}
         onClose={() => setShowScreenshotShowcase(false)}
       />
-
-    </div >
+    </div>
   );
 }

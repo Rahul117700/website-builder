@@ -14,6 +14,7 @@ import {
   ArrowPathIcon,
   ComputerDesktopIcon,
   XMarkIcon,
+  FireIcon,
   HomeIcon,
   PaintBrushIcon,
   RectangleStackIcon,
@@ -44,6 +45,8 @@ import ChannelsView from '@/components/dashboard/views/ChannelsView';
 import PlansView from '@/components/dashboard/views/PlansView';
 import SettingsView from '@/components/dashboard/views/SettingsView';
 import AnalyticsTab from '@/components/channel-editor/AnalyticsTab';
+import SharePromoteModal from '@/components/channel-editor/SharePromoteModal';
+import { ShareIcon } from '@heroicons/react/24/outline';
 
 // Add Razorpay type definition
 declare global {
@@ -80,6 +83,7 @@ export default function ChannelEditorPage() {
   const [showPlansModal, setShowPlansModal] = useState(false);
   const [plans, setPlans] = useState<any[]>([]);
   const [purchasing, setPurchasing] = useState<string | null>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Default to Analytics tab on desktop
   useEffect(() => {
@@ -87,7 +91,7 @@ export default function ChannelEditorPage() {
       setActiveTab('analytics');
     }
     loadRazorpayScript();
-  }, []);
+  }, [channelId]);
 
   const loadRazorpayScript = () => {
     if (typeof window === 'undefined') return;
@@ -631,12 +635,18 @@ export default function ChannelEditorPage() {
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-sm sm:text-lg font-bold text-gray-900 truncate">
+                  <h1 className="text-sm sm:text-lg font-bold text-gray-900 truncate flex items-center gap-2">
                     {viewMode === 'editor' ? (channel ? channel.name || 'Untitled Channel' : 'Loading...') :
                       viewMode === 'analytics' ? 'Channel Analytics' :
                         viewMode === 'channels' ? 'My Channels' :
                           viewMode === 'plans' ? 'Subscription Plans' :
                             viewMode === 'settings' ? 'Settings' : ''}
+                    {/* {viewMode === 'editor' && channel?.isPromoted && (
+                      <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-indigo-100 border border-indigo-200 rounded text-[8px] font-black text-indigo-700 uppercase tracking-widest animate-pulse flex-shrink-0">
+                        <FireIcon className="w-2.5 h-2.5" />
+                        Promoted
+                      </span>
+                    )} */}
                   </h1>
                   {viewMode === 'editor' && (
                     <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-600">
@@ -707,6 +717,16 @@ export default function ChannelEditorPage() {
                 <RocketLaunchIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="hidden xs:inline">{channel.published ? 'Live Options' : 'Options'}</span>
                 <span className="xs:hidden">Options</span>
+              </button>
+
+              {/* Share Button - Highly Visible */}
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-lg hover:from-indigo-500 hover:to-violet-500 transition-all shadow-lg shadow-indigo-600/20 text-xs sm:text-sm font-bold active:scale-95 touch-manipulation"
+              >
+                <ShareIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Share Channel</span>
+                <span className="xs:hidden">Share</span>
               </button>
 
               {/* Publishing Options Modal - All Screen Sizes - Rendered via Portal */}
@@ -1125,36 +1145,13 @@ export default function ChannelEditorPage() {
                   />
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
                     <div className="py-1">
-                      <Link
-                        href="/auth/dashboard"
-                        className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="p-1.5 bg-violet-100 rounded-lg text-violet-600">
-                          <HomeIcon className="w-4 h-4" />
-                        </div>
-                        <span className="font-medium">Go To my studio</span>
-                      </Link>
-
-                      <div className="h-px bg-gray-100 my-1"></div>
-
-                      <button
-                        onClick={() => {
-                          setViewMode('channels');
-                          setShowStudioMenu(false);
-                        }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-                      >
-                        <RocketLaunchIcon className="w-4 h-4" />
-                        My Channels
-                      </button>
-
                       <button
                         onClick={() => {
                           setViewMode('editor');
                           setActiveTab('analytics');
                           setShowStudioMenu(false);
                         }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-4 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
                       >
                         <ChartBarIcon className="w-4 h-4" />
                         Analytics
@@ -1170,16 +1167,6 @@ export default function ChannelEditorPage() {
                         <CreditCardIcon className="w-4 h-4" />
                         Plans
                       </button>
-
-                      <Link
-                        href="/auth/dashboard/blog"
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-                      >
-                        <DocumentTextIcon className="w-4 h-4" />
-                        Blog
-                      </Link>
-
-                      <div className="h-px bg-gray-100 my-1"></div>
 
                       <button
                         onClick={() => {
@@ -1369,6 +1356,13 @@ export default function ChannelEditorPage() {
           )}
         </div>
 
+        {/* Share & Promote Modal */}
+        <SharePromoteModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          channel={channel}
+        />
+
         {/* Publish Success Modal */}
         {showPublishSuccessModal && (
           <>
@@ -1429,6 +1423,16 @@ export default function ChannelEditorPage() {
                     <EyeIcon className="h-5 w-5" />
                     Go to Channel
                   </button>
+
+                  {publishedChannelSlug && (
+                    <button
+                      onClick={() => setShowShareModal(true)}
+                      className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all text-sm font-bold shadow-lg shadow-indigo-600/20 touch-manipulation active:scale-95 flex items-center justify-center gap-2"
+                    >
+                      <ShareIcon className="h-5 w-5" />
+                      Share My Channel
+                    </button>
+                  )}
 
                   {publishedChannelSlug && (
                     <button

@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
-import { 
-  Bars3Icon, 
-  XMarkIcon, 
+import {
+  Bars3Icon,
+  XMarkIcon,
   ArrowRightOnRectangleIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
@@ -96,7 +96,7 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
   };
 
   return (
-    <nav 
+    <nav
       ref={headerRef}
       className={`bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50 w-full ${className}`}
     >
@@ -104,20 +104,20 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
         <div className="flex justify-between items-center h-12">
           {/* Logo with Studio Text */}
           <Link href="/" data-tour="logo" className="flex-shrink-0 flex items-center gap-1.5 sm:gap-2 group overflow-hidden min-w-0" ref={logoRef}>
-            <Logo 
-              variant="icon-only" 
+            <Logo
+              variant="icon-only"
               size="md"
               href=""
               showText={false}
             />
-            <span className="text-[9px] sm:text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wide whitespace-nowrap group-hover:text-gray-700 transition-colors flex-shrink-0">Studio</span>
+            <span className="text-[9px] sm:text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wide whitespace-nowrap group-hover:text-gray-700 transition-colors flex-shrink-0">sedStudios</span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-5" data-tour="navigation" ref={navRef}>
             <Link href="/" className="text-indigo-600 font-medium text-sm">Home</Link>
-            <Link 
-              href="/#features" 
+            <Link
+              href="/#features"
               onClick={(e) => {
                 // If already on home page, scroll smoothly
                 if (window.location.pathname === '/') {
@@ -131,7 +131,6 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
               Features
             </Link>
             <Link href="/docs" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium text-sm">Docs</Link>
-            <Link href="/blog" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium text-sm">Blog</Link>
             <Link href="/about" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium text-sm">About</Link>
             <Link href="/contact" className="text-gray-600 hover:text-indigo-600 transition-colors font-medium text-sm">Contact</Link>
           </div>
@@ -170,6 +169,13 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
                       onClick={() => setProfileMenuOpen(false)}
                     >
                       Dashboard
+                    </Link>
+                    <Link
+                      href="/auth/dashboard/my-channel"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      onClick={() => setProfileMenuOpen(false)}
+                    >
+                      My Channel
                     </Link>
                     <Link
                       href="/auth/dashboard/settings"
@@ -215,7 +221,7 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
                 </Link>
               </>
             )}
-            
+
             {/* Mobile menu button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -230,14 +236,14 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
           </div>
         </div>
       </div>
-      
+
       {/* Mobile menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
             <Link href="/" className="block px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-gray-50 rounded-md">Home</Link>
-            <Link 
-              href="/#features" 
+            <Link
+              href="/#features"
               onClick={(e) => {
                 // If already on home page, scroll smoothly
                 if (window.location.pathname === '/') {
@@ -252,10 +258,9 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
               Features
             </Link>
             <Link href="/docs" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Docs</Link>
-            <Link href="/blog" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Blog</Link>
             <Link href="/about" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">About</Link>
             <Link href="/contact" className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-md">Contact</Link>
-            
+
             {/* Mobile Profile Section */}
             {session && showProfile && (
               <>
@@ -285,6 +290,12 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
                   >
                     Dashboard
                   </Link>
+                  <Link
+                    href="/auth/dashboard/my-channel"
+                    className="block px-3 py-2 text-base font-medium text-indigo-600 hover:bg-gray-50 rounded-md"
+                  >
+                    My Channel
+                  </Link>
                   <button
                     onClick={handleSignOut}
                     className="w-full text-left px-3 py-2 text-base font-medium text-red-600 hover:bg-gray-50 rounded-md flex items-center space-x-2"
@@ -295,19 +306,19 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
                 </div>
               </>
             )}
-            
+
             {!session && (
               <>
                 <hr className="my-2" />
                 <div className="px-3 space-y-2">
-                  <Link 
-                    href="/auth/signin" 
+                  <Link
+                    href="/auth/signin"
                     className="block py-3 text-center font-medium text-gray-700 bg-white border-2 border-gray-300 hover:bg-gray-50 hover:border-indigo-600 rounded-lg transition-all"
                   >
                     Sign In
                   </Link>
-                  <Link 
-                    href="/auth/signup" 
+                  <Link
+                    href="/auth/signup"
                     className="block py-3 text-center font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg shadow-md hover:shadow-lg transition-all"
                   >
                     Sign Up Free

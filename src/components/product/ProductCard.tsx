@@ -13,11 +13,12 @@ import {
     PhotoIcon,
     HeartIcon,
     BookmarkIcon,
+    FireIcon,
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid, BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid';
 import { ProductCardData } from '@/app/actions/homepage';
 
-export default function ProductCard({ id, title, thumbnail, channelName, channelAvatar, views, postedAt, duration, price, type, videoUrl, slug, channelSlug, hasAccess, isSubscriberOnly, isFree }: ProductCardData) {
+export default function ProductCard({ id, title, thumbnail, channelName, channelAvatar, views, postedAt, duration, price, type, videoUrl, slug, channelSlug, hasAccess, isSubscriberOnly, isFree, isPromoted }: ProductCardData & { isPromoted?: boolean }) {
     const { data: session } = useSession();
     const router = useRouter();
     const isVideo = type === 'VIDEO' || type === 'VIDEOS' || type === 'COURSE';
@@ -177,8 +178,16 @@ export default function ProductCard({ id, title, thumbnail, channelName, channel
                     </div>
                 )}
 
-                {/* Type Icon Overlay (Only show when not playing) */}
-                {!isPlaying && (
+                {/* Promoted Badge */}
+                {/* {isPromoted && (
+                    <div className="absolute top-2 left-2 bg-slate-900 text-white text-[9px] font-black px-2 py-0.5 rounded shadow-lg z-20 flex items-center gap-1">
+                        <FireIcon className="w-3 h-3 text-orange-400" />
+                        PROMOTED
+                    </div>
+                )} */}
+
+                {/* Type Icon Overlay (Only show when not playing and NOT promoted to avoid overlap) */}
+                {!isPlaying && !isPromoted && (
                     <div className="absolute top-2 left-2 bg-black/40 backdrop-blur-sm p-1.5 rounded-lg text-white">
                         {type === 'VIDEO' && <VideoCameraIcon className="w-3 h-3" />}
                         {type === 'VIDEOS' && <VideoCameraIcon className="w-3 h-3" />}

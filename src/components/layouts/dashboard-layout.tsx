@@ -259,13 +259,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         description: 'View and manage your subscription'
       },
       {
-        name: 'Blog',
-        href: '/blog',
-        icon: DocumentTextIcon,
-        current: pathname?.startsWith('/blog'),
-        description: 'Read helpful articles and guides'
-      },
-      {
         name: 'Settings',
         href: '/auth/dashboard/settings',
         icon: Cog6ToothIcon,
@@ -414,7 +407,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="flex-shrink-0 flex items-center px-6 mb-8">
                 <Link href="/" className="flex items-center justify-center w-full" onClick={toggleSidebar}>
                   <img
-                    src="/logo/logo.png"
+                    src="/logo/logo.gif"
                     alt="SellEarnDirect - Turn Traffic Into Revenue"
                     className="w-auto object-contain transition-transform hover:scale-105 no-blur"
                     style={{
@@ -594,7 +587,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <Link href="/" className="flex items-center gap-2 flex-shrink-0 min-w-0">
                     <div className="flex items-center gap-2 flex-shrink-0 min-w-0">
                       <img
-                        src="/logo/logo.png"
+                        src="/logo/logo.gif"
                         alt="SellEarnDirect - Turn Traffic Into Revenue"
                         className="object-contain transition-all duration-300 hover:scale-105 no-blur flex-shrink-0"
                         style={{

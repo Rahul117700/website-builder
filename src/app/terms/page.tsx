@@ -65,13 +65,13 @@ export default function TermsPage() {
   const termsSections = [
     {
       title: "Acceptance of Terms",
-      content: `By accessing and using SellEarnDirect's services, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.`,
+      content: `By accessing and using sedStudios's services, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.`,
       icon: CheckCircleIcon,
       color: "from-green-500 to-emerald-600"
     },
     {
       title: "Description of Service",
-      content: `SellEarnDirect provides a platform for creating sales funnels and selling digital products. Our services include funnel templates, payment processing (Razorpay), analytics, and automated digital product delivery. We reserve the right to modify, suspend, or discontinue any aspect of our service at any time.`,
+      content: `sedStudios provides a platform for creating sales funnels and selling digital products. Our services include funnel templates, payment processing (Razorpay), analytics, and automated digital product delivery. We reserve the right to modify, suspend, or discontinue any aspect of our service at any time.`,
       icon: DocumentTextIcon,
       color: "from-blue-500 to-indigo-600"
     },
@@ -89,7 +89,7 @@ export default function TermsPage() {
     },
     {
       title: "Intellectual Property",
-      content: `All content, features, and functionality of our platform are owned by SellEarnDirect and are protected by international copyright, trademark, and other intellectual property laws. You may not copy, modify, or distribute our content without explicit permission.`,
+      content: `All content, features, and functionality of our platform are owned by sedStudios and are protected by international copyright, trademark, and other intellectual property laws. You may not copy, modify, or distribute our content without explicit permission.`,
       icon: DocumentTextIcon,
       color: "from-indigo-500 to-purple-600"
     },
@@ -116,7 +116,7 @@ export default function TermsPage() {
             </span>
           </h1>
           <p className="terms-subtitle text-lg sm:text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            Please read these terms carefully before using our services. By using SellEarnDirect, 
+            Please read these terms carefully before using our services. By using sedStudios, 
             you agree to be bound by these terms and conditions.
           </p>
           <div className="mt-8 flex items-center justify-center space-x-4 text-sm text-gray-500">
@@ -135,7 +135,7 @@ export default function TermsPage() {
             <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-8 border border-indigo-100">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Important Notice</h2>
               <p className="text-gray-700 leading-relaxed mb-4">
-                These Terms and Conditions govern your use of SellEarnDirect&apos;s services. By accessing or using our platform, 
+                These Terms and Conditions govern your use of sedStudios&apos;s services. By accessing or using our platform, 
                 you acknowledge that you have read, understood, and agree to be bound by these terms.
               </p>
               <p className="text-gray-700 leading-relaxed">
@@ -169,7 +169,7 @@ export default function TermsPage() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Limitation of Liability</h3>
                   <p className="text-gray-700 leading-relaxed">
-                    SellEarnDirect shall not be liable for any indirect, incidental, special, consequential, or punitive damages, 
+                    sedStudios shall not be liable for any indirect, incidental, special, consequential, or punitive damages, 
                     including but not limited to loss of profits, data, or use, incurred by you or any third party.
                   </p>
                 </div>
@@ -186,7 +186,7 @@ export default function TermsPage() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Governing Law</h3>
                   <p className="text-gray-700 leading-relaxed">
                     These terms shall be governed by and construed in accordance with the laws of the jurisdiction in which 
-                    SellEarnDirect operates, without regard to its conflict of law provisions.
+                    sedStudios operates, without regard to its conflict of law provisions.
                   </p>
                 </div>
               </div>

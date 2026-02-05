@@ -11,7 +11,7 @@ export const metadata = generateSEOMetadata({
     'data security',
     'SellEarnDirect privacy'
   ],
-  image: '/logo/logo.png',
+  image: '/logo/logo.gif',
   url: '/privacy',
   type: 'website',
 });

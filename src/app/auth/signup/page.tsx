@@ -20,15 +20,15 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!agreedToTerms) {
       setError('Please agree to the Terms of Service and Privacy Policy');
       return;
     }
-    
+
     setLoading(true);
     setError('');
-    
+
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
@@ -36,13 +36,13 @@ export default function SignUpPage() {
         body: JSON.stringify({ name, email, password }),
       });
       const data = await res.json();
-      
+
       if (!res.ok) {
         setError(data.error || 'Registration failed');
         setLoading(false);
         return;
       }
-      
+
       // Registration successful, redirect to signin with callbackUrl
       router.push(`/auth/signin?signup=success&callbackUrl=${encodeURIComponent(callbackUrl)}`);
     } catch (err) {
@@ -70,9 +70,9 @@ export default function SignUpPage() {
         <div className="text-center mb-8">
           <div className="flex justify-center mb-6">
             <Link href="/">
-              <img 
-                src="/logo/logo.png" 
-                alt="SellEarnDirect - Turn Traffic Into Revenue" 
+              <img
+                src="/logo/logo.gif"
+                alt="sedStudios - Turn Traffic Into Revenue"
                 className="h-20 w-auto object-contain hover:scale-105 transition-transform no-blur"
                 style={{ maxWidth: '250px' }}
               />
@@ -183,7 +183,7 @@ export default function SignUpPage() {
                   )}
                 </button>
               </div>
-              
+
               {/* Password Strength Indicator */}
               {password.length > 0 && (
                 <div className="mt-2">
@@ -192,11 +192,10 @@ export default function SignUpPage() {
                       {[1, 2, 3, 4, 5].map((level) => (
                         <div
                           key={level}
-                          className={`h-1 w-8 rounded-full ${
-                            level <= strength.score
+                          className={`h-1 w-8 rounded-full ${level <= strength.score
                               ? strength.color.replace('text-', 'bg-')
                               : 'bg-gray-200'
-                          }`}
+                            }`}
                         />
                       ))}
                     </div>
@@ -264,12 +263,12 @@ export default function SignUpPage() {
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-600">
               Already have an account?{' '}
-                <Link 
-                  href={`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`}
-                  className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
-                >
-                  Sign in
-                </Link>
+              <Link
+                href={`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+                className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
+              >
+                Sign in
+              </Link>
             </p>
           </div>
         </div>

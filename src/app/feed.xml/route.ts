@@ -3,7 +3,7 @@ import { blogPosts } from '@/data/blogs';
 
 export async function GET() {
   const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  
+
   // Sort posts by published date (newest first)
   const sortedPosts = [...blogPosts].sort(
     (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
@@ -14,7 +14,7 @@ export async function GET() {
     .map((post) => {
       const postUrl = `${baseUrl}/blog/${post.slug}`;
       const pubDate = new Date(post.publishedAt).toUTCString();
-      
+
       // Clean content for RSS (remove markdown formatting)
       const cleanContent = post.content
         .replace(/#{1,6}\s/g, '') // Remove markdown headers
@@ -49,7 +49,7 @@ export async function GET() {
     <pubDate>${new Date().toUTCString()}</pubDate>
     <ttl>60</ttl>
     <image>
-      <url>${baseUrl}/logo/logo.png</url>
+      <url>${baseUrl}/logo/logo.gif</url>
       <title>Sell Earn Direct Blog</title>
       <link>${baseUrl}/blog</link>
     </image>

@@ -12,9 +12,9 @@ interface LogoProps {
   showSubtitle?: boolean;
 }
 
-export default function Logo({ 
+export default function Logo({
   className,
-  showText = true, 
+  showText = true,
   textClassName,
   href = "/",
   variant = 'default',
@@ -28,37 +28,37 @@ export default function Logo({
     lg: { height: 60, width: 200 },
     xl: { height: 70, width: 220 }
   };
-  
+
   const textSizeMap = {
     sm: 'text-sm',
     md: 'text-base sm:text-lg',
     lg: 'text-lg sm:text-xl',
     xl: 'text-xl sm:text-2xl'
   };
-  
+
   const dimensions = sizeMap[size];
-  // Use custom logo from public/logo/logo.png (this path works on login page)
-  const logoSrc = '/logo/logo.png';
-  
+  // Use custom logo from public/logo/logo.gif
+  const logoSrc = '/logo/logo.gif';
+
   const textStyles = textClassName || (
-    variant === 'gradient' 
+    variant === 'gradient'
       ? `${textSizeMap[size]} font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent`
       : variant === 'white'
-      ? `${textSizeMap[size]} font-bold text-white`
-      : `${textSizeMap[size]} font-bold text-gray-900`
+        ? `${textSizeMap[size]} font-bold text-white`
+        : `${textSizeMap[size]} font-bold text-gray-900`
   );
-  
+
   const content = (
     <>
       <div className={className || ''} style={{ position: 'relative', height: `${dimensions.height}px`, width: `${dimensions.width}px` }}>
         {/* Use regular img tag for better server compatibility */}
-        <img 
-          src={logoSrc} 
-          alt="SellEarnDirect - Turn Traffic Into Revenue" 
+        <img
+          src={logoSrc}
+          alt="sedStudios - Professional Digital Studio"
           width={dimensions.width}
           height={dimensions.height}
           className="object-contain transition-transform hover:scale-105"
-          style={{ 
+          style={{
             imageRendering: 'crisp-edges',
             width: '100%',
             height: '100%',
@@ -72,10 +72,10 @@ export default function Logo({
       {showText && variant !== 'icon-only' && (
         <div className="ml-2 sm:ml-3">
           <span className={textStyles}>
-            SellEarnDirect
+            sedStudios
           </span>
           {showSubtitle && (
-            <p className="text-xs text-gray-500 mt-0.5">Turn Traffic Into Revenue</p>
+            <p className="text-xs text-gray-500 mt-0.5">Professional Digital Studio</p>
           )}
         </div>
       )}

@@ -17,7 +17,7 @@ const nextConfig = {
   generateEtags: false,
   poweredByHeader: false,
   compress: false,
-  
+
   // Exclude template folders from compilation
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
   onDemandEntries: {
@@ -26,7 +26,7 @@ const nextConfig = {
     // Number of pages that should be kept simultaneously without being disposed
     pagesBufferLength: 2,
   },
-  
+
   // Exclude template folders from Next.js compilation
   webpack: (config, { isServer }) => {
     // Set watch options to ignore template folders
@@ -38,10 +38,10 @@ const nextConfig = {
         '**/.next/**'
       ]
     };
-    
+
     return config;
   },
-  
+
   async headers() {
     return [
       {
@@ -134,7 +134,7 @@ const nextConfig = {
       },
     ];
   },
-  
+
   images: {
     domains: [
       'images.pexels.com',
@@ -143,7 +143,7 @@ const nextConfig = {
     ].filter(Boolean),
     unoptimized: true, // Disable image optimization for better compatibility
   },
-  
+
   async rewrites() {
     return [
       // Rewrite API requests to the Express server
@@ -153,12 +153,12 @@ const nextConfig = {
       },
     ];
   },
-  
+
   // Enable experimental features for App Router
   experimental: {
     serverActions: true,
   },
-  
+
   // Configure for large file uploads (500MB)
   serverRuntimeConfig: {
     maxFileSize: 500 * 1024 * 1024, // 500MB

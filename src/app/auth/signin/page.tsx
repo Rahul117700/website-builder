@@ -22,14 +22,14 @@ export default function SignInPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
+
     const res = await signIn('credentials', {
       redirect: false,
       email,
       password,
       callbackUrl: callbackUrl, // Pass callbackUrl to signIn
     });
-    
+
     if (res?.error) {
       setError(res.error);
       toast.error(res.error);
@@ -42,13 +42,13 @@ export default function SignInPage() {
         // Use window.location for a full page reload to ensure session is properly set
         if (decodedCallbackUrl && decodedCallbackUrl !== '/') {
           // Ensure URL is absolute
-          const redirectUrl = decodedCallbackUrl.startsWith('http') 
-            ? decodedCallbackUrl 
+          const redirectUrl = decodedCallbackUrl.startsWith('http')
+            ? decodedCallbackUrl
             : `${window.location.origin}${decodedCallbackUrl.startsWith('/') ? '' : '/'}${decodedCallbackUrl}`;
           window.location.href = redirectUrl;
         } else {
           router.push('/');
-        router.refresh();
+          router.refresh();
         }
       }, 200);
     }
@@ -64,9 +64,9 @@ export default function SignInPage() {
           <div className="text-center mb-8">
             <div className="flex justify-center mb-6">
               <Link href="/">
-                <img 
-                  src="/logo/logo.png" 
-                  alt="SellEarnDirect - Turn Traffic Into Revenue" 
+                <img
+                  src="/logo/logo.gif"
+                  alt="sedStudios - Turn Traffic Into Revenue"
                   className="h-20 w-auto object-contain hover:scale-105 transition-transform no-blur"
                   style={{ maxWidth: '250px' }}
                 />
@@ -87,9 +87,9 @@ export default function SignInPage() {
                 onClick={() => {
                   // Ensure callbackUrl is properly passed
                   const url = callbackUrl && callbackUrl !== '/' ? callbackUrl : window.location.origin;
-                  signIn('google', { 
+                  signIn('google', {
                     callbackUrl: url,
-                    redirect: true 
+                    redirect: true
                   });
                 }}
               >
@@ -103,9 +103,9 @@ export default function SignInPage() {
                 onClick={() => {
                   // Ensure callbackUrl is properly passed
                   const url = callbackUrl && callbackUrl !== '/' ? callbackUrl : window.location.origin;
-                  signIn('github', { 
+                  signIn('github', {
                     callbackUrl: url,
-                    redirect: true 
+                    redirect: true
                   });
                 }}
               >
@@ -193,8 +193,8 @@ export default function SignInPage() {
                     Remember me
                   </label>
                 </div>
-                <Link 
-                  href="/auth/forgot-password" 
+                <Link
+                  href="/auth/forgot-password"
                   className="text-sm text-indigo-600 hover:text-indigo-500 hover:underline"
                 >
                   Forgot password?
@@ -222,7 +222,7 @@ export default function SignInPage() {
             <div className="mt-8 text-center">
               <p className="text-sm text-gray-600">
                 Don&apos;t have an account?{' '}
-                <Link 
+                <Link
                   href={`/auth/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`}
                   className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
                 >

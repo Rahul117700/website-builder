@@ -22,6 +22,7 @@ export type ProductCardData = {
     hasAccess?: boolean; // [NEW] Check if user has access (subscribed)
     isSubscriberOnly?: boolean;
     isFree?: boolean;
+    isPromoted?: boolean;
 };
 
 export type SubscriptionData = {
@@ -143,7 +144,10 @@ export async function getUserSubscriptions(userId: string): Promise<Subscription
         const subscriptions = await prisma.channelSubscription.findMany({
             where: {
                 userId: userId,
-                status: 'ACTIVE'
+                status: 'ACTIVE',
+                endDate: {
+                    gt: new Date()
+                }
             },
             include: {
                 channel: {
@@ -342,13 +346,17 @@ export async function getTrendingProducts(tag?: string, userId?: string): Promis
                     },
                 },
             },
-            orderBy: { viewCount: 'desc' },
+            orderBy: [
+                { channel: { isPromoted: 'desc' } },
+                { viewCount: 'desc' }
+            ],
             take: 20,
         });
 
         return products.map(p => ({
             ...mapToCardData(p),
-            hasAccess: p.channel.subscribers && p.channel.subscribers.length > 0
+            hasAccess: p.channel.subscribers && p.channel.subscribers.length > 0,
+            isPromoted: p.channel.isPromoted
         }));
     } catch (error) {
         console.error('Error fetching trending products:', error);
@@ -382,9 +390,10 @@ export async function getMarketplaceChannels(): Promise<any[]> {
                     select: { isSubscriberOnly: true, isFree: true }
                 }
             },
-            orderBy: {
-                subscribers: { _count: 'desc' }
-            },
+            orderBy: [
+                { isPromoted: 'desc' },
+                { subscribers: { _count: 'desc' } }
+            ],
             take: 50
         });
 
@@ -404,7 +413,8 @@ export async function getMarketplaceChannels(): Promise<any[]> {
                 subscriptionEnabled: c.subscriptionEnabled,
                 subscriptionPrice: c.subscriptionPrice ? Number(c.subscriptionPrice) : null,
                 subscriptionCurrency: c.subscriptionCurrency,
-                description: c.description || ''
+                description: c.description || '',
+                isPromoted: c.isPromoted
             };
         });
     } catch (error) {

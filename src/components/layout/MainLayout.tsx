@@ -154,14 +154,13 @@ export default function MainLayout({
                     {/* Navigation Links */}
                     <div className="hidden xl:flex items-center gap-6 mr-2">
                         <Link href="/docs" className="text-sm font-bold text-gray-500 hover:text-indigo-600 transition-colors">Docs</Link>
-                        <Link href="/blog" className="text-sm font-bold text-gray-500 hover:text-indigo-600 transition-colors">Blog</Link>
                         <Link href="/about" className="text-sm font-bold text-gray-500 hover:text-indigo-600 transition-colors">About</Link>
                         <Link href="/contact" className="text-sm font-bold text-gray-500 hover:text-indigo-600 transition-colors">Contact</Link>
                     </div>
 
                     {/* Create Button - Visible on Mobile */}
                     <Link
-                        href="/create"
+                        href="/auth/dashboard/my-channel"
                         className="p-2 sm:p-2.5 bg-gray-900 border border-black text-white rounded-2xl sm:rounded-xl font-bold text-xs sm:text-sm hover:bg-black transition-all shadow-xl flex items-center gap-2 group whitespace-nowrap"
                     >
                         <VideoCameraIcon className="w-5 h-5 sm:w-4 sm:h-4" />
@@ -269,7 +268,6 @@ export default function MainLayout({
                                                 My Channel
                                             </Link>
                                         </div>
-
                                         <div className="border-t border-gray-100 py-2">
                                             <p className="px-4 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Subscriptions</p>
                                             <Link

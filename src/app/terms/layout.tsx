@@ -10,7 +10,7 @@ export const metadata = generateSEOMetadata({
     'SellEarnDirect terms',
     'legal'
   ],
-  image: '/logo/logo.png',
+  image: '/logo/logo.gif',
   url: '/terms',
   type: 'website',
 });

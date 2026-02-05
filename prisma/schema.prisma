@@ -774,6 +774,11 @@ model Channel {
   status    ChannelStatus @default(DRAFT)
   published Boolean       @default(false)
 
+  // Promotions & Ads
+  isPromoted      Boolean      @default(false)
+  promotionExpiry DateTime?
+  adCampaigns     AdCampaign[]
+
   // Relations
   user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   products    ChannelProduct[]
@@ -785,7 +790,86 @@ model Channel {
   @@index([userId])
   @@index([slug])
   @@index([status])
+  @@index([isPromoted])
   @@map("channels")
+}
+
+model AdCampaign {
+  id        String         @id @default(cuid())
+  channelId String
+  userId    String
+  type      AdCampaignType
+  status    AdStatus       @default(PENDING)
+  goal      AdGoal
+
+  // Budget & Duration
+  budget   Float
+  currency String @default("INR")
+  spent    Float  @default(0)
+
+  startDate DateTime
+  endDate   DateTime
+
+  // Targeting & Metadata
+  targeting Json? // { interests: [], regions: [], etc }
+  metadata  Json? // For external ad IDs or creative details
+
+  // Payment Tracking
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+
+  // Performance Metrics
+  impressions Int @default(0)
+  clicks      Int @default(0)
+  conversions Int @default(0)
+
+  // Relations
+  channel          Channel              @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  performanceDaily AdPerformanceDaily[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([channelId])
+  @@index([userId])
+  @@index([status])
+  @@map("ad_campaigns")
+}
+
+model AdPerformanceDaily {
+  id         String   @id @default(cuid())
+  campaignId String
+  date       DateTime @default(now()) // Stored as midnight of each day
+
+  impressions Int   @default(0)
+  clicks      Int   @default(0)
+  conversions Int   @default(0)
+  spent       Float @default(0)
+
+  campaign AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, date])
+  @@index([campaignId])
+  @@map("ad_performance_daily")
+}
+
+enum AdCampaignType {
+  INTERNAL // SellEarnDirect Network
+  EXTERNAL // Google, Meta, etc.
+}
+
+enum AdStatus {
+  PENDING
+  ACTIVE
+  PAUSED
+  COMPLETED
+  FAILED
+}
+
+enum AdGoal {
+  GET_SUBSCRIBERS
+  SELL_PRODUCT
+  BRAND_AWARENESS
 }
 
 model ChannelTemplate {

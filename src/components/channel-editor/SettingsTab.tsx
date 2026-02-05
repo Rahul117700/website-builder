@@ -1,6 +1,6 @@
 'use client';
 
-import { LinkIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
+import { LinkIcon, GlobeAltIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 
 interface SettingsTabProps {
   channel: any;
@@ -48,7 +48,7 @@ export default function SettingsTab({ channel, onUpdate }: SettingsTabProps) {
           </span>
         </div>
         <p className="text-xs text-gray-500 mt-2">
-          {channel.published 
+          {channel.published
             ? 'Your channel is live and visible to everyone'
             : 'Your channel is in draft mode and not yet published'}
         </p>
@@ -111,6 +111,61 @@ export default function SettingsTab({ channel, onUpdate }: SettingsTabProps) {
               {(channel.customizations?.seo?.metaDescription || channel.description || '').length}/160 characters
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Marketing & Analytics Section */}
+      <div className="pt-6 border-t border-gray-100">
+        <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <ChartBarIcon className="h-4 w-4 text-indigo-600" />
+          Marketing Tracking
+        </h3>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wide">
+              Meta Pixel ID
+            </label>
+            <input
+              type="text"
+              value={channel.customizations?.marketing?.metaPixelId || ''}
+              onChange={(e) => onUpdate({
+                customizations: {
+                  ...channel.customizations,
+                  marketing: {
+                    ...(channel.customizations?.marketing || {}),
+                    metaPixelId: e.target.value,
+                  },
+                },
+              })}
+              placeholder="e.g., 1234567890"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 text-sm text-gray-900"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wide">
+              Google Analytics ID
+            </label>
+            <input
+              type="text"
+              value={channel.customizations?.marketing?.googleAnalyticsId || ''}
+              onChange={(e) => onUpdate({
+                customizations: {
+                  ...channel.customizations,
+                  marketing: {
+                    ...(channel.customizations?.marketing || {}),
+                    googleAnalyticsId: e.target.value,
+                  },
+                },
+              })}
+              placeholder="e.g., G-XXXXXXXXXX"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 text-sm text-gray-900"
+            />
+          </div>
+          <p className="text-[10px] text-gray-500 italic bg-gray-50 p-2 rounded-lg">
+            Note: These IDs will be automatically integrated into your channel and used to attribute conversions to your ad campaigns.
+          </p>
         </div>
       </div>
 

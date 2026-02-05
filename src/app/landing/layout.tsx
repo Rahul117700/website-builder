@@ -11,7 +11,7 @@ export const metadata = generateSEOMetadata({
     'high converting',
     'conversion optimization'
   ],
-  image: '/logo/logo.png',
+  image: '/logo/logo.gif',
   url: '/landing',
   type: 'website',
 });
