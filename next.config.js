@@ -64,10 +64,6 @@ const nextConfig = {
             value: '1; mode=block',
           },
           {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains',
-          },
-          {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
@@ -85,8 +81,7 @@ const nextConfig = {
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
-              "frame-ancestors 'none'",
-              "upgrade-insecure-requests"
+              "frame-ancestors 'none'"
             ].join('; '),
           },
           // Enhanced no-store headers as suggested by ChatGPT
