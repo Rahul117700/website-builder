@@ -644,6 +644,9 @@ model AdCampaign {
   goal              AdGoal
   budget            Float
   currency          String         @default("INR")
+  impressions       Int            @default(0)
+  clicks            Int            @default(0)
+  conversions       Int            @default(0)
   spent             Float          @default(0)
   startDate         DateTime
   endDate           DateTime
@@ -654,11 +657,27 @@ model AdCampaign {
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
   channel           Channel        @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  performanceDaily  AdPerformanceDaily[]
 
   @@index([channelId])
   @@index([userId])
   @@index([status])
   @@map("ad_campaigns")
+}
+
+model AdPerformanceDaily {
+  id          String     @id @default(cuid())
+  campaignId  String
+  date        DateTime
+  impressions Int        @default(0)
+  clicks      Int        @default(0)
+  conversions Int        @default(0)
+  spent       Float      @default(0)
+  campaign    AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, date])
+  @@index([campaignId])
+  @@map("ad_performance_daily")
 }
 
 model ChannelTemplate {
