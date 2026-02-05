@@ -25,26 +25,26 @@ model User {
   communityLikes       CommunityPostLike[]
   accounts             Account[]
   apiKeys              ApiKey[]
+  channelSubscriptions ChannelSubscription[] @relation("UserChannelSubscriptions")
+  channels             Channel[]
   products             DigitalProduct[]
   domains              Domain[]              @relation("UserDomains")
   funnels              Funnel[]
   assignedInstances    Instance[]            @relation("UserInstance")
   platformTransactions PlatformTransaction[]
+  playlists            Playlist[]            @relation("UserPlaylists")
+  productComments      ProductComment[]      @relation("ProductComments")
+  productLikes         ProductLike[]         @relation("ProductLikes")
+  channelPurchases     ProductPurchase[]     @relation("UserProductPurchases")
+  productReviews       ProductReview[]       @relation("ProductReviews")
+  savedProducts        ProductSave[]         @relation("UserSavedProducts")
   razorpayConfigs      RazorpayConfig[]
   sessions             Session[]
   sites                Site[]
   transactions         Transaction[]
+  history              UserHistory[]         @relation("UserHistory")
   notifications        UserNotification[]    @relation("UserNotifications")
   subscriptions        UserSubscription[]
-  channels             Channel[]
-  channelSubscriptions ChannelSubscription[] @relation("UserChannelSubscriptions")
-  channelPurchases     ProductPurchase[]     @relation("UserProductPurchases")
-  productReviews       ProductReview[]       @relation("ProductReviews")
-  productComments      ProductComment[]      @relation("ProductComments")
-  productLikes         ProductLike[]         @relation("ProductLikes")
-  playlists            Playlist[]            @relation("UserPlaylists")
-  savedProducts        ProductSave[]         @relation("UserSavedProducts")
-  history              UserHistory[]         @relation("UserHistory")
 
   @@map("User")
 }
@@ -489,9 +489,8 @@ model SubscriptionPlan {
   id               String             @id @default(cuid())
   name             String
   description      String?
-  price            Float // Base price (INR)
-  currency         String             @default("INR") // Base currency
-  regionalPricing  Json? // Stores {USD: 9, EUR: 9, GBP: 7, ...}
+  price            Float
+  currency         String             @default("INR")
   duration         Int
   features         Json
   isActive         Boolean            @default(true)
@@ -501,6 +500,7 @@ model SubscriptionPlan {
   priority         Int                @default(0)
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
+  regionalPricing  Json?
   subscriptions    UserSubscription[]
 
   @@map("subscription_plans")
@@ -594,6 +594,287 @@ model CommunityPostLike {
 
   @@unique([userId, postId])
   @@map("CommunityPostLike")
+}
+
+model Channel {
+  id                   String                @id @default(cuid())
+  userId               String
+  name                 String
+  slug                 String                @unique
+  description          String?
+  welcomeMessage       String?
+  coverImage           String?
+  profileImage         String?
+  theme                Json?
+  templateId           String
+  customizations       Json?
+  subscriptionPrice    Decimal?
+  subscriptionCurrency String                @default("INR")
+  subscriptionEnabled  Boolean               @default(false)
+  tags                 String[]
+  category             String?
+  totalViews           Int                   @default(0)
+  totalSubscribers     Int                   @default(0)
+  totalRevenue         Decimal               @default(0)
+  status               ChannelStatus         @default(DRAFT)
+  published            Boolean               @default(false)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  isPromoted           Boolean               @default(false)
+  promotionExpiry      DateTime?
+  adCampaigns          AdCampaign[]
+  products             ChannelProduct[]
+  subscribers          ChannelSubscription[]
+  template             ChannelTemplate       @relation(fields: [templateId], references: [id])
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([slug])
+  @@index([status])
+  @@index([isPromoted])
+  @@map("channels")
+}
+
+model AdCampaign {
+  id                String         @id @default(cuid())
+  channelId         String
+  userId            String
+  type              AdCampaignType
+  status            AdStatus       @default(PENDING)
+  goal              AdGoal
+  budget            Float
+  currency          String         @default("INR")
+  spent             Float          @default(0)
+  startDate         DateTime
+  endDate           DateTime
+  targeting         Json?
+  metadata          Json?
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  channel           Channel        @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@index([channelId])
+  @@index([userId])
+  @@index([status])
+  @@map("ad_campaigns")
+}
+
+model ChannelTemplate {
+  id           String    @id @default(cuid())
+  name         String
+  description  String?
+  category     String
+  previewImage String?
+  layout       Json
+  sections     Json
+  defaultTheme Json
+  isDefault    Boolean   @default(false)
+  isActive     Boolean   @default(true)
+  isPremium    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  channels     Channel[]
+
+  @@map("channel_templates")
+}
+
+model ChannelProduct {
+  id               String               @id @default(cuid())
+  channelId        String
+  title            String
+  description      String?
+  type             ChannelProductType
+  price            Decimal
+  currency         String               @default("INR")
+  isSubscriberOnly Boolean              @default(false)
+  isFree           Boolean              @default(false)
+  fileUrl          String?
+  fileType         String?
+  fileSize         Int?
+  downloadLimit    Int?
+  videoUrl         String?
+  videoDuration    Int?
+  videoProvider    String?
+  previewImage     String?
+  previewText      String?
+  slug             String?
+  tags             String[]
+  viewCount        Int                  @default(0)
+  purchaseCount    Int                  @default(0)
+  status           ChannelProductStatus @default(DRAFT)
+  published        Boolean              @default(false)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  likeCount        Int                  @default(0)
+  saveCount        Int                  @default(0)
+  channel          Channel              @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  playlistItems    PlaylistItem[]
+  comments         ProductComment[]
+  likes            ProductLike[]
+  purchases        ProductPurchase[]
+  reviews          ProductReview[]
+  saves            ProductSave[]
+  history          UserHistory[]        @relation("ProductHistory")
+
+  @@index([channelId])
+  @@index([status])
+  @@index([published])
+  @@map("channel_products")
+}
+
+model ChannelSubscription {
+  id              String                    @id @default(cuid())
+  channelId       String
+  userId          String
+  status          ChannelSubscriptionStatus
+  startDate       DateTime                  @default(now())
+  endDate         DateTime
+  autoRenew       Boolean                   @default(true)
+  amount          Decimal
+  currency        String
+  paymentId       String?
+  razorpayOrderId String?
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  channel         Channel                   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user            User                      @relation("UserChannelSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([channelId, userId])
+  @@index([userId])
+  @@index([status])
+  @@map("channel_subscriptions")
+}
+
+model ProductPurchase {
+  id              String                @id @default(cuid())
+  productId       String
+  userId          String
+  amount          Decimal
+  currency        String
+  paymentId       String
+  razorpayOrderId String?
+  status          ProductPurchaseStatus
+  downloadCount   Int                   @default(0)
+  lastDownloadAt  DateTime?
+  createdAt       DateTime              @default(now())
+  product         ChannelProduct        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user            User                  @relation("UserProductPurchases", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+  @@index([userId])
+  @@index([status])
+  @@map("product_purchases")
+}
+
+model ProductReview {
+  id        String         @id @default(cuid())
+  productId String
+  userId    String
+  rating    Int
+  comment   String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  product   ChannelProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User           @relation("ProductReviews", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+  @@index([productId])
+  @@index([userId])
+  @@map("product_reviews")
+}
+
+model ProductComment {
+  id        String           @id @default(cuid())
+  productId String
+  userId    String
+  content   String
+  parentId  String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  parent    ProductComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   ProductComment[] @relation("CommentReplies")
+  product   ChannelProduct   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User             @relation("ProductComments", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([userId])
+  @@index([parentId])
+  @@map("product_comments")
+}
+
+model ProductLike {
+  id        String         @id @default(cuid())
+  productId String
+  userId    String
+  createdAt DateTime       @default(now())
+  product   ChannelProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User           @relation("ProductLikes", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, userId])
+  @@index([productId])
+  @@index([userId])
+  @@map("product_likes")
+}
+
+model Playlist {
+  id          String         @id @default(cuid())
+  name        String
+  description String?
+  userId      String
+  isPublic    Boolean        @default(false)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  items       PlaylistItem[]
+  user        User           @relation("UserPlaylists", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("playlists")
+}
+
+model PlaylistItem {
+  id         String         @id @default(cuid())
+  playlistId String
+  productId  String
+  order      Int            @default(0)
+  createdAt  DateTime       @default(now())
+  playlist   Playlist       @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  product    ChannelProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, productId])
+  @@index([playlistId])
+  @@index([productId])
+  @@map("playlist_items")
+}
+
+model ProductSave {
+  id        String         @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime       @default(now())
+  product   ChannelProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User           @relation("UserSavedProducts", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+  @@map("product_saves")
+}
+
+model UserHistory {
+  id        String         @id @default(cuid())
+  userId    String
+  productId String
+  viewedAt  DateTime       @default(now())
+  product   ChannelProduct @relation("ProductHistory", fields: [productId], references: [id], onDelete: Cascade)
+  user      User           @relation("UserHistory", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([productId])
+  @@index([viewedAt])
+  @@index([userId, viewedAt])
+  @@map("user_history")
 }
 
 enum UserRole {
@@ -734,128 +1015,9 @@ enum NewsletterStatus {
   SPAM
 }
 
-// ============================================
-// 🎬 CHANNEL SYSTEM (YouTube-Style Platform)
-// ============================================
-
-model Channel {
-  id             String  @id @default(cuid())
-  userId         String
-  name           String
-  slug           String  @unique
-  description    String? @db.Text
-  welcomeMessage String? @db.Text
-
-  // Visual branding
-  coverImage   String?
-  profileImage String?
-  theme        Json? // Color scheme, fonts
-
-  // Template
-  templateId     String
-  template       ChannelTemplate @relation(fields: [templateId], references: [id])
-  customizations Json?
-
-  // Monetization
-  subscriptionPrice    Decimal?
-  subscriptionCurrency String   @default("INR")
-  subscriptionEnabled  Boolean  @default(false)
-
-  // SEO & Discovery
-  tags     String[]
-  category String?
-
-  // Analytics
-  totalViews       Int     @default(0)
-  totalSubscribers Int     @default(0)
-  totalRevenue     Decimal @default(0)
-
-  // Status
-  status    ChannelStatus @default(DRAFT)
-  published Boolean       @default(false)
-
-  // Promotions & Ads
-  isPromoted      Boolean      @default(false)
-  promotionExpiry DateTime?
-  adCampaigns     AdCampaign[]
-
-  // Relations
-  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  products    ChannelProduct[]
-  subscribers ChannelSubscription[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([userId])
-  @@index([slug])
-  @@index([status])
-  @@index([isPromoted])
-  @@map("channels")
-}
-
-model AdCampaign {
-  id        String         @id @default(cuid())
-  channelId String
-  userId    String
-  type      AdCampaignType
-  status    AdStatus       @default(PENDING)
-  goal      AdGoal
-
-  // Budget & Duration
-  budget   Float
-  currency String @default("INR")
-  spent    Float  @default(0)
-
-  startDate DateTime
-  endDate   DateTime
-
-  // Targeting & Metadata
-  targeting Json? // { interests: [], regions: [], etc }
-  metadata  Json? // For external ad IDs or creative details
-
-  // Payment Tracking
-  razorpayOrderId   String?
-  razorpayPaymentId String?
-
-  // Performance Metrics
-  impressions Int @default(0)
-  clicks      Int @default(0)
-  conversions Int @default(0)
-
-  // Relations
-  channel          Channel              @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  performanceDaily AdPerformanceDaily[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([channelId])
-  @@index([userId])
-  @@index([status])
-  @@map("ad_campaigns")
-}
-
-model AdPerformanceDaily {
-  id         String   @id @default(cuid())
-  campaignId String
-  date       DateTime @default(now()) // Stored as midnight of each day
-
-  impressions Int   @default(0)
-  clicks      Int   @default(0)
-  conversions Int   @default(0)
-  spent       Float @default(0)
-
-  campaign AdCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-
-  @@unique([campaignId, date])
-  @@index([campaignId])
-  @@map("ad_performance_daily")
-}
-
 enum AdCampaignType {
-  INTERNAL // SellEarnDirect Network
-  EXTERNAL // Google, Meta, etc.
+  INTERNAL
+  EXTERNAL
 }
 
 enum AdStatus {
@@ -871,207 +1033,6 @@ enum AdGoal {
   SELL_PRODUCT
   BRAND_AWARENESS
 }
-
-model ChannelTemplate {
-  id           String  @id @default(cuid())
-  name         String
-  description  String? @db.Text
-  category     String // Tech, Education, Creative, Business, Minimal
-  previewImage String?
-
-  // Template structure
-  layout       Json // Layout configuration
-  sections     Json // Available sections
-  defaultTheme Json // Default colors, fonts
-
-  isDefault Boolean @default(false)
-  isActive  Boolean @default(true)
-  isPremium Boolean @default(false)
-
-  channels Channel[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("channel_templates")
-}
-
-model ChannelProduct {
-  id        String @id @default(cuid())
-  channelId String
-
-  title       String
-  description String?            @db.Text
-  type        ChannelProductType
-
-  // Pricing
-  price    Decimal
-  currency String  @default("INR")
-
-  // Access control
-  isSubscriberOnly Boolean @default(false)
-  isFree           Boolean @default(false)
-
-  // File/Content
-  fileUrl       String?
-  fileType      String?
-  fileSize      Int?
-  downloadLimit Int? // Max downloads per purchase
-
-  // For videos
-  videoUrl      String?
-  videoDuration Int? // in seconds
-  videoProvider String? // youtube, vimeo, custom
-
-  // Preview
-  previewImage String?
-  previewText  String? @db.Text
-
-  // SEO
-  slug String?
-  tags String[]
-
-  // Analytics
-  viewCount     Int @default(0)
-  purchaseCount Int @default(0)
-  likeCount     Int @default(0)
-  saveCount     Int @default(0)
-
-  // Status
-  status    ChannelProductStatus @default(DRAFT)
-  published Boolean              @default(false)
-
-  // Relations
-  channel       Channel           @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  purchases     ProductPurchase[]
-  reviews       ProductReview[]
-  comments      ProductComment[]
-  likes         ProductLike[]
-  playlistItems PlaylistItem[]
-  saves         ProductSave[]
-  history       UserHistory[]     @relation("ProductHistory")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([channelId])
-  @@index([status])
-  @@index([published])
-  @@map("channel_products")
-}
-
-model ChannelSubscription {
-  id        String @id @default(cuid())
-  channelId String
-  userId    String
-
-  // Subscription details
-  status    ChannelSubscriptionStatus
-  startDate DateTime                  @default(now())
-  endDate   DateTime
-  autoRenew Boolean                   @default(true)
-
-  // Payment
-  amount          Decimal
-  currency        String
-  paymentId       String?
-  razorpayOrderId String?
-
-  // Relations
-  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  user    User    @relation("UserChannelSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([channelId, userId])
-  @@index([userId])
-  @@index([status])
-  @@map("channel_subscriptions")
-}
-
-model ProductPurchase {
-  id        String @id @default(cuid())
-  productId String
-  userId    String
-
-  amount          Decimal
-  currency        String
-  paymentId       String
-  razorpayOrderId String?
-  status          ProductPurchaseStatus
-
-  // Download tracking
-  downloadCount  Int       @default(0)
-  lastDownloadAt DateTime?
-
-  product ChannelProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user    User           @relation("UserProductPurchases", fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
-  @@unique([productId, userId])
-  @@index([userId])
-  @@index([status])
-  @@map("product_purchases")
-}
-
-model ProductReview {
-  id        String   @id @default(cuid())
-  productId String
-  userId    String
-  rating    Int // 1-5 stars
-  comment   String?  @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  product ChannelProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user    User           @relation("ProductReviews", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([productId, userId])
-  @@index([productId])
-  @@index([userId])
-  @@map("product_reviews")
-}
-
-model ProductComment {
-  id        String   @id @default(cuid())
-  productId String
-  userId    String
-  content   String   @db.Text
-  parentId  String? // For nested replies
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  product ChannelProduct   @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user    User             @relation("ProductComments", fields: [userId], references: [id], onDelete: Cascade)
-  parent  ProductComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies ProductComment[] @relation("CommentReplies")
-
-  @@index([productId])
-  @@index([userId])
-  @@index([parentId])
-  @@map("product_comments")
-}
-
-model ProductLike {
-  id        String   @id @default(cuid())
-  productId String
-  userId    String
-  createdAt DateTime @default(now())
-
-  product ChannelProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user    User           @relation("ProductLikes", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([productId, userId])
-  @@index([productId])
-  @@index([userId])
-  @@map("product_likes")
-}
-
-// ============================================
-// 🎬 CHANNEL SYSTEM ENUMS
-// ============================================
 
 enum ChannelStatus {
   DRAFT
@@ -1111,67 +1072,4 @@ enum ProductPurchaseStatus {
   REFUNDED
   FAILED
   PENDING
-}
-
-model Playlist {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  userId      String
-  isPublic    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user  User           @relation("UserPlaylists", fields: [userId], references: [id], onDelete: Cascade)
-  items PlaylistItem[]
-
-  @@index([userId])
-  @@map("playlists")
-}
-
-model PlaylistItem {
-  id         String   @id @default(cuid())
-  playlistId String
-  productId  String
-  order      Int      @default(0)
-  createdAt  DateTime @default(now())
-
-  playlist Playlist       @relation(fields: [playlistId], references: [id], onDelete: Cascade)
-  product  ChannelProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@unique([playlistId, productId])
-  @@index([playlistId])
-  @@index([productId])
-  @@map("playlist_items")
-}
-
-model ProductSave {
-  id        String   @id @default(cuid())
-  userId    String
-  productId String
-  createdAt DateTime @default(now())
-
-  user    User           @relation("UserSavedProducts", fields: [userId], references: [id], onDelete: Cascade)
-  product ChannelProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, productId])
-  @@index([userId])
-  @@index([productId])
-  @@map("product_saves")
-}
-
-model UserHistory {
-  id        String   @id @default(cuid())
-  userId    String
-  productId String
-  viewedAt  DateTime @default(now())
-
-  user    User           @relation("UserHistory", fields: [userId], references: [id], onDelete: Cascade)
-  product ChannelProduct @relation("ProductHistory", fields: [productId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([productId])
-  @@index([viewedAt])
-  @@index([userId, viewedAt])
-  @@map("user_history")
 }

@@ -1277,7 +1277,7 @@ export default function HomePage() {
 
               <div className="hero-buttons flex flex-col sm:flex-row gap-4 pt-4" style={{ opacity: 1, transform: 'translateY(0)' }}>
                 <CTAButton
-                  onClick={() => router.push(session ? "/auth/dashboard" : "/auth/signin")}
+                  onClick={() => router.push(session ? "/auth/dashboard/my-channel" : "/auth/signin?callbackUrl=/auth/dashboard/my-channel")}
                   className="group text-base font-bold shadow-xl hover:shadow-2xl px-10 py-5"
                 >
                   Start Selling Now
@@ -1681,7 +1681,7 @@ export default function HomePage() {
         {/* CTA Section - Modern Design */}
         <div className="text-center">
           <Link
-            href={session ? "/auth/dashboard" : "/auth/signin"}
+            href={session ? "/auth/dashboard/my-channel" : "/auth/signin?callbackUrl=/auth/dashboard/my-channel"}
             className="group inline-flex items-center justify-center px-10 py-4 rounded-2xl font-black text-lg sm:text-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-lg"
           >
             <span className="hidden sm:inline">Start Earning Directly Now</span>
