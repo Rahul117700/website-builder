@@ -158,8 +158,11 @@ export default function ChannelsView() {
                 const data = await response.json();
                 setChannels(data);
 
-                // Auto-create if empty and not yet attempted
-                if (data.length === 0 && !autoCreateAttempted.current) {
+                if (data.length === 1 && !autoCreateAttempted.current) {
+                    // If exactly one channel exists, jump straight to the editor
+                    console.log('[ChannelsView] Exactly one channel found. Redirecting to editor...');
+                    router.push(`/auth/dashboard/channels/${data[0].id}/customize`);
+                } else if (data.length === 0 && !autoCreateAttempted.current) {
                     autoCreateAttempted.current = true;
                     createDefaultChannel();
                 }

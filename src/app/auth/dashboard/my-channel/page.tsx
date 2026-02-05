@@ -25,6 +25,8 @@ export default async function MyChannelRedirect() {
         take: 2 // We just need to know if there's 0, 1, or more
     });
 
+    let newChannelId = null;
+
     if (channels.length === 1) {
         // If exactly one channel, go directly to customization
         redirect(`/auth/dashboard/channels/${channels[0].id}/customize`);
@@ -33,13 +35,19 @@ export default async function MyChannelRedirect() {
         redirect('/auth/dashboard/channels');
     } else {
         // FALLBACK: Auto-create a default channel for new users
+        console.log(`[MyChannel] No channels found for user ${session.user.id}. Attempting auto-creation...`);
         try {
             // 1. Get the first available template
-            const template = await prisma.channelTemplate.findFirst();
+            const template = await prisma.channelTemplate.findFirst({
+                where: { isActive: true }
+            });
+
             if (!template) {
-                console.error('No channel templates found in database');
+                console.error('[MyChannel] CRITICAL: No active channel templates found in database');
                 redirect('/auth/dashboard/channels');
             }
+
+            console.log(`[MyChannel] Using template: ${template.name} (${template.id})`);
 
             // 2. Generate a default professional name
             const adjectives = ['Creative', 'Awesome', 'Modern', 'Elite', 'Global', 'Digital', 'Smart', 'Ultimate', 'Prime'];
@@ -63,6 +71,8 @@ export default async function MyChannelRedirect() {
                 counter++;
             }
 
+            console.log(`[MyChannel] Creating channel with name "${baseName}" and slug "${slug}"`);
+
             // 4. Create the channel record
             const newChannel = await prisma.channel.create({
                 data: {
@@ -75,12 +85,20 @@ export default async function MyChannelRedirect() {
                 },
             });
 
-            // 5. Redirect to the editor for the newly created channel
-            redirect(`/auth/dashboard/channels/${newChannel.id}/customize`);
+            console.log(`[MyChannel] Successfully created channel ${newChannel.id}`);
+            newChannelId = newChannel.id;
 
         } catch (error) {
-            console.error('Failed to auto-create channel:', error);
+            // Check if it's a redirect error (which we should NOT catch or should re-throw)
+            if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+                throw error;
+            }
+            console.error('[MyChannel] Failed to auto-create channel:', error);
             redirect('/auth/dashboard/channels');
+        }
+
+        if (newChannelId) {
+            redirect(`/auth/dashboard/channels/${newChannelId}/customize`);
         }
     }
 }

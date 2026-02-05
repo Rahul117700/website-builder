@@ -24,7 +24,8 @@ import {
   ShieldCheckIcon,
   PlayIcon,
   ArrowDownTrayIcon,
-  ArrowTopRightOnSquareIcon
+  ArrowTopRightOnSquareIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 import { PulseCard, GlassContainer, CommandButton, NeonBadge, TerminalText } from '@/components/super-admin/ui-kit';
 
@@ -117,6 +118,26 @@ export default function SuperAdminUserView() {
     }
   };
 
+  const handleDeleteUser = async () => {
+    if (!confirm(`CRITICAL: Are you sure you want to permanently remove entity "${user.name || user.email}" from the registry? \n\nThis action will delete all associated data including channels, products, and subscriptions. This CANNOT be undone.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/admin/users?userId=${userId}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Delete failed');
+
+      toast.success('Entity purged from registry');
+      router.push('/auth/dashboard/super-admin/users');
+    } catch (err: any) {
+      toast.error(`System failure: ${err.message || 'Delete command rejected'}`);
+    }
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success('Copied to clipboard!');
@@ -191,6 +212,13 @@ export default function SuperAdminUserView() {
               icon={user.status === 'ACTIVE' ? ShieldCheckIcon : CheckCircleIcon}
             >
               {user.status === 'ACTIVE' ? 'Suspend Identity' : 'Restore Identity'}
+            </CommandButton>
+            <CommandButton
+              onClick={handleDeleteUser}
+              variant="danger"
+              icon={TrashIcon}
+            >
+              Purge User
             </CommandButton>
             <CommandButton
               onClick={() => setShowAssignModal(true)}

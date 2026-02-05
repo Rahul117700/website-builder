@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 // GET - Fetch all users (Super Admin only)
 export async function GET(request: NextRequest) {
@@ -11,7 +9,7 @@ export async function GET(request: NextRequest) {
     console.log('=== API /admin/users called ===');
     const session = await getServerSession(authOptions);
     console.log('Session in API:', session);
-    
+
     if (!session?.user?.email) {
       console.log('No session or email found');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -39,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     // Build where clause
     const where: any = {};
-    
+
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -137,7 +135,7 @@ export async function GET(request: NextRequest) {
         breakdown: stats
       }
     };
-    
+
     console.log('Returning users data:', result);
     return NextResponse.json(result);
 
@@ -147,8 +145,6 @@ export async function GET(request: NextRequest) {
       { error: 'Internal server error' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -156,7 +152,7 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -207,8 +203,8 @@ export async function PUT(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: 'User updated successfully',
       user: updatedUser
     });
@@ -219,7 +215,53 @@ export async function PUT(request: NextRequest) {
       { error: 'Internal server error' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
+  }
+}
+// DELETE - Remove user permanently
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Check if current user is SUPER_ADMIN
+    const currentUser = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    });
+
+    if (!currentUser || currentUser.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: 'Forbidden - Super Admin access required' }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId');
+
+    if (!userId) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
+
+    // Prevent deleting self
+    if (userId === currentUser.id) {
+      return NextResponse.json({ error: 'Cannot delete own account' }, { status: 400 });
+    }
+
+    // Delete user (Prisma will handle cascading deletes if configured in schema)
+    await prisma.user.delete({
+      where: { id: userId }
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'User permanently removed from registry'
+    });
+
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }

@@ -17,7 +17,8 @@ import {
     RocketLaunchIcon,
     BanknotesIcon,
     EnvelopeIcon,
-    IdentificationIcon
+    IdentificationIcon,
+    TrashIcon
 } from '@heroicons/react/24/outline';
 import { PulseCard, GlassContainer, CommandButton, NeonBadge, TerminalText } from '@/components/super-admin/ui-kit';
 
@@ -67,6 +68,26 @@ export default function UserManagementPage() {
             fetchUsers();
         } catch (err) {
             toast.error('Protocol failure: Update rejected');
+        }
+    };
+
+    const handleDeleteUser = async (userId: string, userName: string) => {
+        if (!confirm(`CRITICAL: Are you sure you want to permanently remove entity "${userName}" from the registry? \n\nThis action will delete all associated data including channels, products, and subscriptions. This CANNOT be undone.`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/admin/users?userId=${userId}`, {
+                method: 'DELETE'
+            });
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.error || 'Delete failed');
+
+            toast.success('Entity purged from registry');
+            fetchUsers();
+        } catch (err: any) {
+            toast.error(`System failure: ${err.message || 'Delete command rejected'}`);
         }
     };
 
@@ -215,6 +236,13 @@ export default function UserManagementPage() {
                                                 >
                                                     Access
                                                 </CommandButton>
+                                                <button
+                                                    onClick={() => handleDeleteUser(user.id, user.name || user.email)}
+                                                    className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-500 hover:text-rose-500 hover:border-rose-500/50 transition-all group/delete"
+                                                    title="Purge Entity"
+                                                >
+                                                    <TrashIcon className="w-5 h-5 group-hover/delete:scale-110 transition-transform" />
+                                                </button>
                                                 <button className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-500 hover:text-white transition-all">
                                                     <EllipsisHorizontalIcon className="w-5 h-5" />
                                                 </button>
