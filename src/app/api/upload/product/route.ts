@@ -4,6 +4,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { prisma } from '@/lib/prisma';
 import { uploadFileWithFallback, hasS3Credentials, getUploadStatusMessage } from '@/lib/s3';
 
 export const runtime = 'nodejs';
@@ -12,16 +13,12 @@ export const maxDuration = 600; // 10 minutes for large file uploads
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Ensure user exists in database
-    const { PrismaClient } = require('@prisma/client');
-    const prisma = new PrismaClient();
-    
-    let user = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email: session.user.email }
     });
 
@@ -80,7 +77,7 @@ export async function POST(request: NextRequest) {
       data: {
         name: productName,
         description: productDescription || '',
-        type: productType,
+        type: productType as any,
         price: productPrice,
         currency: 'INR',
         fileUrl: uploadResult.url,
@@ -98,10 +95,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    await prisma.$disconnect();
-
     // Return the product data
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       product: {
         id: product.id,

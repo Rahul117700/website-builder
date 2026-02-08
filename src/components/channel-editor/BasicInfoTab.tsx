@@ -117,11 +117,11 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Upload failed');
+      }
 
       // Ensure URL doesn't have /public prefix
       let imageUrl = data.url;

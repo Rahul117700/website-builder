@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { convertPlanForDisplay, getPriceForCurrency } from '@/lib/geo-pricing';
-
-const prisma = new PrismaClient();
 
 // GET - Fetch all active subscription plans for users
 export async function GET(request: NextRequest) {
@@ -28,7 +26,7 @@ export async function GET(request: NextRequest) {
       ? plans.map(plan => convertPlanForDisplay(plan, requestedCurrency))
       : plans; // If no currency requested, return raw plans
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       plans: convertedPlans,
       detectedCurrency: requestedCurrency || null
     });
@@ -39,8 +37,6 @@ export async function GET(request: NextRequest) {
       { error: 'Internal server error' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

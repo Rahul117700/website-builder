@@ -7,7 +7,14 @@ import {
   Bars3Icon,
   XMarkIcon,
   ArrowRightOnRectangleIcon,
-  UserIcon
+  UserIcon,
+  UserCircleIcon,
+  FolderIcon,
+  CreditCardIcon,
+  ShieldCheckIcon,
+  GlobeAltIcon,
+  QuestionMarkCircleIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 import { RocketLaunchIcon } from '@heroicons/react/24/solid';
 import Logo from '@/components/Logo';
@@ -110,7 +117,6 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
               href=""
               showText={false}
             />
-            <span className="text-[9px] sm:text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-wide whitespace-nowrap group-hover:text-gray-700 transition-colors flex-shrink-0">sedStudios</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -160,41 +166,99 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
                   </span>
                 </button>
 
-                {/* Profile Dropdown Menu */}
+                {/* Profile Dropdown Menu - Enhanced to match MainLayout */}
                 {profileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                    <Link
-                      href="/auth/dashboard"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      onClick={() => setProfileMenuOpen(false)}
-                    >
-                      Dashboard
-                    </Link>
-                    <Link
-                      href="/auth/dashboard/my-channel"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      onClick={() => setProfileMenuOpen(false)}
-                    >
-                      My Channel
-                    </Link>
-                    <Link
-                      href="/auth/dashboard/settings"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      onClick={() => setProfileMenuOpen(false)}
-                    >
-                      Profile Settings
-                    </Link>
-                    <hr className="my-1" />
-                    <button
-                      onClick={() => {
-                        handleSignOut();
-                        setProfileMenuOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2 transition-colors"
-                    >
-                      <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                      <span>Sign Out</span>
-                    </button>
+                  <div className="absolute right-0 mt-3 w-72 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 py-2 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="px-4 py-3 border-b border-gray-100 flex items-start gap-3">
+                      {session.user?.image ? (
+                        <img
+                          src={session.user.image}
+                          alt={session.user.name || "User"}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                          <UserCircleIcon className="w-6 h-6" />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-gray-900 truncate">{session.user?.name}</p>
+                        <p className="text-xs text-gray-500 truncate">{session.user?.email}</p>
+                      </div>
+                    </div>
+
+                    <div className="py-2">
+                      <Link
+                        href="/auth/dashboard/my-channel"
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 bg-gray-50 mx-2 rounded-lg mb-1"
+                        onClick={() => setProfileMenuOpen(false)}
+                      >
+                        <FolderIcon className="w-5 h-5" />
+                        My Channel
+                      </Link>
+                    </div>
+
+                    <div className="border-t border-gray-100 py-2">
+                      <p className="px-4 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider">Subscriptions</p>
+                      <Link
+                        href="/subscriptions"
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setProfileMenuOpen(false)}
+                      >
+                        <CreditCardIcon className="w-5 h-5" />
+                        My Subscriptions
+                      </Link>
+                    </div>
+
+                    <div className="border-t border-gray-100 py-2">
+                      {session?.user?.role === 'SUPER_ADMIN' && (
+                        <Link
+                          href="/auth/dashboard/super-admin"
+                          className="flex items-center gap-3 px-4 py-2 text-sm text-purple-600 font-bold hover:bg-purple-50 transition-colors"
+                          onClick={() => setProfileMenuOpen(false)}
+                        >
+                          <ShieldCheckIcon className="w-5 h-5 text-purple-600" />
+                          Super Admin Dashboard
+                        </Link>
+                      )}
+                      <Link
+                        href="/auth/dashboard"
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setProfileMenuOpen(false)}
+                      >
+                        <RocketLaunchIcon className="w-5 h-5 text-indigo-600" />
+                        Dashboard
+                      </Link>
+                      <Link
+                        href="/help"
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setProfileMenuOpen(false)}
+                      >
+                        <QuestionMarkCircleIcon className="w-5 h-5" />
+                        Help
+                      </Link>
+                      <Link
+                        href="/feedback"
+                        className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setProfileMenuOpen(false)}
+                      >
+                        <ChatBubbleLeftRightIcon className="w-5 h-5" />
+                        Send feedback
+                      </Link>
+                    </div>
+
+                    <div className="border-t border-gray-100 pt-2 pb-1">
+                      <button
+                        onClick={() => {
+                          handleSignOut();
+                          setProfileMenuOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 text-left"
+                      >
+                        <ArrowRightOnRectangleIcon className="w-5 h-5" />
+                        Sign out
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

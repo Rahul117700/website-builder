@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-
-const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -22,7 +20,7 @@ export async function POST(request: NextRequest) {
     if (!user) {
       // Create user if they don't exist
       const hashedPassword = await bcrypt.hash('temp_password_' + Date.now(), 12);
-      
+
       user = await prisma.user.create({
         data: {
           name: session.user.name || 'User',
