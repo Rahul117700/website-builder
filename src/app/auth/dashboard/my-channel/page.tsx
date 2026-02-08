@@ -18,9 +18,32 @@ export default async function MyChannelRedirect() {
         redirect('/login');
     }
 
+    // Verify user exists and get correct ID (handle stale sessions)
+    let userId = session.user.id;
+    const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true }
+    });
+
+    if (!user) {
+        console.warn(`[MyChannel] User ID ${userId} from session not found in DB. Searching by email...`);
+        const userByEmail = await prisma.user.findUnique({
+            where: { email: session.user.email as string },
+            select: { id: true }
+        });
+
+        if (userByEmail) {
+            userId = userByEmail.id;
+            console.log(`[MyChannel] Found real user ID ${userId} for email ${session.user.email}`);
+        } else {
+            console.error(`[MyChannel] User ${session.user.email} not found in database. Redirecting to login.`);
+            redirect('/login');
+        }
+    }
+
     // Fetch user's channels
     const channels = await prisma.channel.findMany({
-        where: { userId: session.user.id },
+        where: { userId },
         select: { id: true },
         take: 2 // We just need to know if there's 0, 1, or more
     });
@@ -35,7 +58,7 @@ export default async function MyChannelRedirect() {
         redirect('/auth/dashboard/channels');
     } else {
         // FALLBACK: Auto-create a default channel for new users
-        console.log(`[MyChannel] No channels found for user ${session.user.id}. Attempting auto-creation...`);
+        console.log(`[MyChannel] No channels found for user ${userId}. Attempting auto-creation...`);
         try {
             // 1. Get the first available template
             const template = await prisma.channelTemplate.findFirst({
@@ -78,7 +101,7 @@ export default async function MyChannelRedirect() {
                 data: {
                     name: baseName,
                     slug,
-                    userId: session.user.id,
+                    userId: userId,
                     templateId: template.id,
                     status: 'ACTIVE',
                     published: true,
