@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { XMarkIcon, SparklesIcon, RocketLaunchIcon, GiftIcon, FireIcon, StarIcon, CircleStackIcon, ChartBarIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, SparklesIcon, RocketLaunchIcon, GiftIcon, FireIcon, StarIcon, CircleStackIcon, ChartBarIcon, BanknotesIcon, MegaphoneIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
+import { UserEngagementStatus } from '@/app/actions/user-status';
 
 interface Notification {
   id: string;
@@ -18,16 +19,23 @@ interface Notification {
   duration?: number;
 }
 
+interface EngagementNotifierProps {
+  userStatus?: UserEngagementStatus | null;
+}
+
 /**
  * Engagement Notifier
  * Shows engaging notifications to keep users on the site
  */
-export default function EngagementNotifier() {
+export default function EngagementNotifier({ userStatus }: EngagementNotifierProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [timeOnPage, setTimeOnPage] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [shownNotifications, setShownNotifications] = useState<Set<string>>(new Set());
+
+  const isCreatorWithProducts = userStatus?.hasChannel && userStatus.productCount > 0;
+  const needsRazorpay = isCreatorWithProducts && !userStatus?.hasRazorpay;
 
   useEffect(() => {
     // Track time on page
@@ -66,37 +74,80 @@ export default function EngagementNotifier() {
   useEffect(() => {
     if (!hasInteracted) return;
 
-    // After 10 seconds - Welcome message (only once)
+    // After 10 seconds - Context Aware Welcome
     if (timeOnPage === 10 && !shownNotifications.has('welcome')) {
-      showNotification({
-        id: 'welcome',
-        type: 'info',
-        title: '🚀 Scale Your Influence',
-        message: 'Channels with frequent updates see 5x more engagement. Start your journey now!',
-        icon: <SparklesIcon className="h-5 w-5" />,
-        action: {
-          label: 'Explore Dashboard',
-          href: '/auth/dashboard/my-channel',
-        },
-        duration: 8000,
-      });
+      if (needsRazorpay) {
+        showNotification({
+          id: 'welcome',
+          type: 'warning',
+          title: '💰 Start Getting Paid',
+          message: 'You have products but no payment account! Connect Razorpay to start earning.',
+          icon: <BanknotesIcon className="h-5 w-5" />,
+          action: {
+            label: 'Setup Payments',
+            href: '/auth/dashboard/settings',
+          },
+          duration: 10000,
+        });
+      } else if (isCreatorWithProducts) {
+        showNotification({
+          id: 'welcome',
+          type: 'success',
+          title: '📣 Boost Your Sales',
+          message: 'Active creators use advertisements to reach 10x more customers. Check out our ad tips!',
+          icon: <MegaphoneIcon className="h-5 w-5" />,
+          action: {
+            label: 'View Ad Tips',
+            href: '/auth/dashboard/ads',
+          },
+          duration: 10000,
+        });
+      } else {
+        showNotification({
+          id: 'welcome',
+          type: 'info',
+          title: '🚀 Scale Your Influence',
+          message: 'Channels with frequent updates see 5x more engagement. Start your journey now!',
+          icon: <SparklesIcon className="h-5 w-5" />,
+          action: {
+            label: 'Explore Dashboard',
+            href: '/auth/dashboard/my-channel',
+          },
+          duration: 8000,
+        });
+      }
       setShownNotifications(prev => new Set(prev).add('welcome'));
     }
 
     // After 30 seconds - Engagement prompt
     if (timeOnPage === 30 && !shownNotifications.has('monetization') && notifications.length === 0) {
-      showNotification({
-        id: 'monetization',
-        type: 'success',
-        title: '💰 Monetize Your Passion',
-        message: 'Turn your content into revenue. Setup your subscription and start earning today.',
-        icon: <CircleStackIcon className="h-5 w-5" />,
-        action: {
-          label: 'Get Started',
-          href: '/auth/dashboard/my-channel',
-        },
-        duration: 8000,
-      });
+      if (isCreatorWithProducts) {
+        showNotification({
+          id: 'monetization',
+          type: 'achievement',
+          title: '📈 Grow Your Audience',
+          message: 'Did you know that offering a free sample product increases sales by 40%?',
+          icon: <StarIcon className="h-5 w-5" />,
+          action: {
+            label: 'Add Freebie',
+            href: '/auth/dashboard/my-channel',
+          },
+          duration: 8000,
+        });
+      } else {
+        showNotification({
+          id: 'monetization',
+          type: 'success',
+          title: '💰 Monetize Your Passion',
+          message: 'Turn your content into revenue. Setup your subscription and start earning today.',
+          icon: <CircleStackIcon className="h-5 w-5" />,
+          action: {
+            label: 'Get Started',
+            href: '/auth/dashboard/my-channel',
+          },
+          duration: 8000,
+        });
+      }
       setShownNotifications(prev => new Set(prev).add('monetization'));
     }
 
@@ -109,8 +160,8 @@ export default function EngagementNotifier() {
         message: 'Unlock detailed analytics for your products and track your growth in real-time.',
         icon: <ChartBarIcon className="h-5 w-5" />,
         action: {
-          label: 'Go to Channel',
-          href: '/auth/dashboard/my-channel',
+          label: 'View Analytics',
+          href: '/auth/dashboard',
         },
         duration: 8000,
       });

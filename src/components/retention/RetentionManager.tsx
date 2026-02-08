@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import ExitIntentPopup from './ExitIntentPopup';
 import EngagementNotifier from './EngagementNotifier';
+import { getUserEngagementStatus, UserEngagementStatus } from '@/app/actions/user-status';
 // SocialProof removed - flagged as deceptive content by Google Search Console
 // import SocialProof from './SocialProof';
 import NewsletterPrompt from './NewsletterPrompt';
@@ -19,10 +20,18 @@ export default function RetentionManager() {
   const [hasInteracted, setHasInteracted] = useState(false);
   const [timeOnPage, setTimeOnPage] = useState(0);
   const [isDashboard, setIsDashboard] = useState(false);
+  const [userStatus, setUserStatus] = useState<UserEngagementStatus | null>(null);
 
   useEffect(() => {
     // Check if we're on a dashboard page (less retention needed)
     setIsDashboard(window.location.pathname.includes('/dashboard'));
+
+    // Fetch user status if logged in
+    if (session) {
+      getUserEngagementStatus().then(status => {
+        if (status) setUserStatus(status);
+      });
+    }
 
     // Track time on page
     const startTime = Date.now();
@@ -80,7 +89,7 @@ export default function RetentionManager() {
       {showExitIntent && <ExitIntentPopup onClose={() => setShowExitIntent(false)} />}
 
       {/* Engagement Notifications - Only on public pages */}
-      {!isDashboard && <EngagementNotifier />}
+      {!isDashboard && <EngagementNotifier userStatus={userStatus} />}
 
       {/* Social Proof removed - flagged as deceptive content by Google */}
       {/* {!isDashboard && <SocialProof />} */}

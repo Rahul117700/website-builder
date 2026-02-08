@@ -192,88 +192,145 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-bold text-gray-900">Products & Content</h3>
-          <p className="text-sm text-gray-600 mt-1">
-            {(() => {
-              const isPremium = subscriptionData?.hasActivePlan;
-              const maxProducts = isPremium ? (subscriptionData?.activeSubscription?.plan?.maxProducts ?? -1) : 1;
-              const productCount = products.length;
-              const remaining = maxProducts === -1 ? '∞' : Math.max(0, maxProducts - productCount);
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {(() => {
+          const isPremium = subscriptionData?.hasActivePlan;
+          const maxProducts = isPremium ? (subscriptionData?.activeSubscription?.plan?.maxProducts ?? -1) : 1;
+          const productCount = products.length;
+          const remaining = maxProducts === -1 ? '∞' : Math.max(0, maxProducts - productCount);
 
-              return (
-                <span className="flex items-center gap-2">
-                  <span>{productCount} Products Added</span>
-                  <span className="text-gray-300">|</span>
-                  <span>{maxProducts === -1 ? 'Unlimited' : `${maxProducts} Total`}</span>
-                  <span className="text-gray-300">|</span>
-                  <span className={remaining === 0 ? 'text-red-600 font-bold' : 'text-emerald-600 font-bold'}>
-                    {remaining} Remaining
-                  </span>
-                </span>
-              );
-            })()}
-          </p>
-        </div>
-        <button
-          onClick={handleOpenUploadModal}
-          className="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-black transition-colors flex items-center gap-2"
-        >
-          <PlusIcon className="h-5 w-5" />
-          Add Product
-        </button>
+          return (
+            <>
+              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Products Added</span>
+                <div className="flex items-end gap-2 mt-2">
+                  <span className="text-3xl font-black text-gray-900 leading-none">{productCount}</span>
+                  <span className="text-xs font-bold text-gray-400 mb-0.5">items</span>
+                </div>
+              </div>
+              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Storage Limit</span>
+                <div className="flex items-end gap-2 mt-2">
+                  <span className="text-3xl font-black text-gray-900 leading-none">{maxProducts === -1 ? '∞' : maxProducts}</span>
+                  <span className="text-xs font-bold text-gray-400 mb-0.5">total</span>
+                </div>
+              </div>
+              <div className={`p-4 rounded-2xl border shadow-sm flex flex-col justify-between ${remaining === 0 ? 'bg-red-50 border-red-100' : 'bg-emerald-50 border-emerald-100'}`}>
+                <span className={`text-[10px] font-black uppercase tracking-widest ${remaining === 0 ? 'text-red-400' : 'text-emerald-500'}`}>Available Slots</span>
+                <div className="flex items-end gap-2 mt-2">
+                  <span className={`text-3xl font-black leading-none ${remaining === 0 ? 'text-red-600' : 'text-emerald-600'}`}>{remaining}</span>
+                  <span className={`text-xs font-bold mb-0.5 ${remaining === 0 ? 'text-red-400' : 'text-emerald-500'}`}>remaining</span>
+                </div>
+              </div>
+              <button
+                onClick={handleOpenUploadModal}
+                className="group relative h-full min-h-[80px] bg-gray-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 p-4"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 via-transparent to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <PlusIcon className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-left">
+                  <span className="block text-sm font-black text-white leading-tight">Add New</span>
+                  <span className="block text-[10px] font-medium text-white/60 uppercase tracking-wider">Product</span>
+                </div>
+              </button>
+            </>
+          );
+        })()}
       </div>
 
-      {/* Products List */}
+      {/* Products Grid */}
       {products.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {products.map((product) => (
             <div
               key={product.id}
-              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+              className="group relative bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-2xl hover:border-transparent transition-all duration-500 flex flex-col"
             >
-              <div className="flex items-start justify-between mb-2">
-                <h4 className="font-semibold text-gray-900 line-clamp-2">{product.title}</h4>
-                <div className="flex gap-2">
+              {/* Image Preview */}
+              <div className="relative aspect-video w-full overflow-hidden bg-gray-50">
+                {product.thumbnailUrl ? (
+                  <img
+                    src={product.thumbnailUrl}
+                    alt={product.title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <ShoppingBagIcon className="w-10 h-10 text-gray-200" />
+                  </div>
+                )}
+
+                {/* Modern Badges */}
+                <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+                  <span className="px-2 py-1 rounded-lg bg-black/50 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest border border-white/20">
+                    {product.type}
+                  </span>
+                  {product.isSubscriberOnly && (
+                    <span className="px-2 py-1 rounded-lg bg-emerald-500/80 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest border border-emerald-400/30">
+                      Premium
+                    </span>
+                  )}
+                </div>
+
+                {/* Quick Actions (On Hover) */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
                   <button
                     onClick={() => handleEdit(product)}
-                    className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                    title="Edit product"
+                    className="w-10 h-10 rounded-full bg-white text-gray-900 flex items-center justify-center shadow-xl hover:scale-110 transition-transform"
+                    title="Edit Product"
                   >
-                    <PencilIcon className="h-4 w-4" />
+                    <PencilIcon className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => handleDelete(product.id)}
                     disabled={deleting === product.id}
-                    className="p-1 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
-                    title="Delete product"
+                    className="w-10 h-10 rounded-full bg-white text-red-600 flex items-center justify-center shadow-xl hover:scale-110 transition-transform disabled:opacity-50"
+                    title="Delete Product"
                   >
                     {deleting === product.id ? (
-                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
                     ) : (
-                      <TrashIcon className="h-4 w-4" />
+                      <TrashIcon className="w-5 h-5" />
                     )}
                   </button>
                 </div>
               </div>
-              {product.description && (
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
-              )}
-              <div className="flex items-center justify-between">
-                <div className="flex gap-2">
-                  <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
-                    {product.type}
-                  </span>
-                  {product.tags && product.tags.length > 0 && (
-                    <span className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-700 font-medium">
-                      {product.tags[0]}
-                    </span>
+
+              {/* Content */}
+              <div className="p-4 flex-1 flex flex-col">
+                <div className="flex-1">
+                  <h4 className="font-bold text-gray-900 text-sm leading-tight group-hover:text-primary transition-colors line-clamp-2 mb-1.5">
+                    {product.title}
+                  </h4>
+                  {product.description && (
+                    <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed">
+                      {product.description}
+                    </p>
                   )}
+                </div>
+
+                {/* Footer Info */}
+                <div className="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
+                  <div className="flex gap-1.5">
+                    {product.tags && product.tags.length > 0 ? (
+                      <span className="text-[9px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-md">
+                        {product.tags[0]}
+                      </span>
+                    ) : (
+                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md">
+                        No Tag
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] font-bold text-gray-300">
+                    ID: {product.id.substring(0, 6)}
+                  </span>
                 </div>
               </div>
             </div>

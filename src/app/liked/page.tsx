@@ -22,6 +22,7 @@ interface LikedProduct {
             id: string;
             name: string;
             slug: string;
+            profileImage?: string;
             user: {
                 name: string;
                 image: string;
@@ -129,7 +130,7 @@ export default function LikedProductsPage() {
                                         <div className="flex items-center gap-2 mb-2">
                                             <div className="relative w-6 h-6 flex-shrink-0">
                                                 <Image
-                                                    src={item.product.channel.user.image || '/default-avatar.png'}
+                                                    src={item.product.channel.profileImage || item.product.channel.user.image || '/default-avatar.png'}
                                                     alt={item.product.channel.name}
                                                     fill
                                                     className="rounded-full object-cover"

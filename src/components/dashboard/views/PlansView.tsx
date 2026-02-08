@@ -320,9 +320,6 @@ export default function PlansView() {
                                         {plan.maxProducts === -1 ? 'Unlimited' : plan.maxProducts} {plan.maxProducts === 1 ? 'Product' : 'Products'}
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-1.5 text-gray-700 italic">
-                                    <span className="text-[10px] text-gray-500">{plan.description}</span>
-                                </div>
                             </div>
 
                             {/* CTA Button */}

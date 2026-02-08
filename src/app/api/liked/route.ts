@@ -24,7 +24,11 @@ export async function GET(req: Request) {
                 product: {
                     include: {
                         channel: {
-                            include: {
+                            select: {
+                                id: true,
+                                name: true,
+                                slug: true,
+                                profileImage: true,
                                 user: {
                                     select: {
                                         id: true,

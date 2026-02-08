@@ -23,6 +23,8 @@ export type ProductCardData = {
     isSubscriberOnly?: boolean;
     isFree?: boolean;
     isPromoted?: boolean;
+    isLiked?: boolean;
+    isSaved?: boolean;
 };
 
 export type SubscriptionData = {
@@ -198,7 +200,7 @@ export async function getUserNotifications(userId: string): Promise<Notification
     }
 }
 
-export async function searchProducts(query: string): Promise<ProductCardData[]> {
+export async function searchProducts(query: string, userId?: string): Promise<ProductCardData[]> {
     if (!query) return [];
 
     try {
@@ -218,7 +220,9 @@ export async function searchProducts(query: string): Promise<ProductCardData[]> 
                     include: {
                         user: { select: { image: true, name: true } }
                     }
-                }
+                },
+                likes: userId ? { where: { userId: userId } } : false,
+                saves: userId ? { where: { userId: userId } } : false,
             },
             orderBy: { viewCount: 'desc' },
             take: 40
@@ -302,6 +306,8 @@ export async function getProductsByTag(tag: string, userId?: string): Promise<Pr
                         } : false
                     },
                 },
+                likes: userId ? { where: { userId: userId } } : false,
+                saves: userId ? { where: { userId: userId } } : false,
             },
             orderBy: { createdAt: 'desc' },
             take: 40,
@@ -345,9 +351,10 @@ export async function getTrendingProducts(tag?: string, userId?: string): Promis
                         } : false
                     },
                 },
+                likes: userId ? { where: { userId: userId } } : false,
+                saves: userId ? { where: { userId: userId } } : false,
             },
             orderBy: [
-                { channel: { isPromoted: 'desc' } },
                 { viewCount: 'desc' }
             ],
             take: 20,
@@ -440,6 +447,8 @@ function mapToCardData(product: any): ProductCardData {
         channelSlug: product.channel.slug, // [NEW] Map channel slug
         isSubscriberOnly: product.isSubscriberOnly,
         isFree: product.isFree,
+        isLiked: product.likes && product.likes.length > 0,
+        isSaved: product.saves && product.saves.length > 0,
     };
 }
 
