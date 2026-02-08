@@ -6,6 +6,7 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { mkdir } from 'fs/promises';
 import { uploadFileWithFallback, getUploadStatusMessage } from '@/lib/s3';
+import { compressImage } from '@/lib/compression';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60; // 60 seconds
@@ -44,25 +45,33 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Generate unique filename
+    // Generate unique filename components
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2, 15);
-    const fileExtension = file.name.split('.').pop() || 'jpg';
-    const filename = `image-${timestamp}-${randomString}.${fileExtension}`;
+    const originalExtension = file.name.split('.').pop() || 'jpg';
+    const tempFilename = `image-${timestamp}-${randomString}.${originalExtension}`;
+
+    // Compress and convert to WebP
+    const compressionResult = await compressImage(buffer);
+    const compressedBuffer = Buffer.from(compressionResult.buffer);
+    const { contentType: newContentType, extension: newExtension } = compressionResult;
+
+    // Final filename with .webp
+    const finalFilename = `image-${timestamp}-${randomString}.${newExtension}`;
 
     // Create uploads directory for fallback
     const uploadsDir = join(process.cwd(), 'public', 'uploads', 'images');
     if (!existsSync(uploadsDir)) {
       await mkdir(uploadsDir, { recursive: true });
     }
-    const filepath = join(uploadsDir, filename);
+    const finalFilepath = join(uploadsDir, finalFilename);
 
     // Upload using fallback mechanism (S3 preferred, local as fallback)
     const uploadResult = await uploadFileWithFallback(
-      buffer,
-      filename,
-      file.type,
-      filepath,
+      compressedBuffer,
+      finalFilename,
+      newContentType,
+      finalFilepath,
       'images'
     );
 
@@ -76,9 +85,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       url: uploadResult.url,
-      filename,
-      size: file.size,
-      type: file.type,
+      filename: finalFilename,
+      size: compressedBuffer.length,
+      type: newContentType,
       storageType: uploadResult.storageType,
       message: getUploadStatusMessage(uploadResult.storageType)
     });

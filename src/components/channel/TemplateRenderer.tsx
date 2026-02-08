@@ -283,6 +283,15 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
     const imageIndex = channelIdHash % defaultCoverImages.length;
     return defaultCoverImages[imageIndex];
   }, [channel.id]);
+
+  // Current active cover image with fallback and cache-busting
+  const activeCoverImage = useMemo(() => {
+    if (!channel.coverImage) return fallbackCoverImage;
+    if (channel.coverImage.startsWith('http')) return channel.coverImage;
+    // Use updatedAt as cache buster if available, otherwise current time
+    const cacheBuster = channel.updatedAt ? new Date(channel.updatedAt).getTime() : Date.now();
+    return `${channel.coverImage}?t=${cacheBuster}`;
+  }, [channel.coverImage, channel.updatedAt, fallbackCoverImage]);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedType, setSelectedType] = useState<string>('all');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -774,7 +783,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
         {/* Banner Image */}
         <div className="relative w-full h-48 sm:h-56 md:h-72 lg:h-80 bg-gray-100 group overflow-hidden">
           <img
-            src={channel.coverImage ? (channel.coverImage.startsWith('http') ? channel.coverImage : `${channel.coverImage}?t=${channel.updatedAt ? new Date(channel.updatedAt).getTime() : Date.now()}`) : fallbackCoverImage}
+            src={activeCoverImage}
             alt="Channel Cover"
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             onError={(e) => {
@@ -932,7 +941,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
           {/* Background */}
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${getCoverImage})` }}
+            style={{ backgroundImage: `url(${activeCoverImage})` }}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"></div>
           </div>
@@ -2865,7 +2874,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                     <div
                       className="absolute inset-0"
                       style={{
-                        backgroundImage: `url(${getCoverImage})`,
+                        backgroundImage: `url(${activeCoverImage})`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                         backgroundRepeat: 'no-repeat',
@@ -3899,7 +3908,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
         {/* Full-Screen Hero */}
         <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
           <img
-            src={getCoverImage}
+            src={activeCoverImage}
             alt="Hero"
             className="absolute inset-0 w-full h-full object-cover"
           />
@@ -3998,7 +4007,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
             </div>
             <div className="rounded-3xl overflow-hidden">
               <img
-                src={getCoverImage}
+                src={activeCoverImage}
                 alt="Hero"
                 className="w-full h-full object-cover"
               />
@@ -4414,7 +4423,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
           {/* Cover Image */}
           <div className="absolute inset-0">
             <img
-              src={getCoverImage}
+              src={activeCoverImage}
               alt="Cover"
               className="w-full h-full object-cover opacity-20"
             />

@@ -6,6 +6,7 @@ import { writeFile, mkdir, unlink } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { uploadFileWithFallback, hasS3Credentials, getUploadStatusMessage } from '@/lib/s3';
+import { compressImage } from '@/lib/compression';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60; // 60 seconds
@@ -48,9 +49,14 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Generate unique filename
-    const fileExtension = file.name.split('.').pop()?.toLowerCase();
-    const fileName = `profile-${user.id}-${Date.now()}${fileExtension ? '.' + fileExtension : ''}`;
+    // Compress and convert to WebP
+    // Profile images can be smaller, let's limit to 500x500
+    const compressionResult = await compressImage(buffer, { maxWidth: 500, maxHeight: 500 });
+    const compressedBuffer = Buffer.from(compressionResult.buffer);
+    const { contentType: newContentType, extension: newExtension } = compressionResult;
+
+    // Generate unique filename with .webp
+    const fileName = `profile-${user.id}-${Date.now()}.${newExtension}`;
 
     // Create uploads directory for fallback
     const uploadsDir = join(process.cwd(), 'public', 'uploads', 'profile-images');
@@ -61,9 +67,9 @@ export async function POST(request: NextRequest) {
 
     // Upload to S3 with fallback to local
     const uploadResult = await uploadFileWithFallback(
-      buffer,
+      compressedBuffer,
       fileName,
-      file.type,
+      newContentType,
       filePath,
       'profile-images'
     );

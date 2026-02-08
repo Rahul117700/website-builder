@@ -6,6 +6,10 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { prisma } from '@/lib/prisma';
 import { uploadFileWithFallback, hasS3Credentials, getUploadStatusMessage } from '@/lib/s3';
+import { compressImage, compressVideo } from '@/lib/compression';
+import { readFile, unlink } from 'fs/promises';
+import { v4 as uuidv4 } from 'uuid';
+import os from 'os';
 
 export const runtime = 'nodejs';
 export const maxDuration = 600; // 10 minutes for large file uploads
@@ -45,9 +49,40 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Generate unique filename
-    const fileExtension = file.name.split('.').pop();
-    const fileName = `product-${user.id}-${Date.now()}.${fileExtension}`;
+    // Compression logic
+    let finalBuffer = buffer;
+    let finalMimeType = file.type;
+    let finalExtension = file.name.split('.').pop() || '';
+    let tempFiles: string[] = [];
+
+    try {
+      if (file.type.startsWith('image/')) {
+        // Compress image
+        const compressionResult = await compressImage(buffer);
+        finalBuffer = Buffer.from(compressionResult.buffer);
+        finalMimeType = compressionResult.contentType;
+        finalExtension = compressionResult.extension;
+      } else if (file.type.startsWith('video/')) {
+        // Compress video
+        const tempId = uuidv4();
+        const inputPath = join(os.tmpdir(), `${tempId}-input.${finalExtension}`);
+        const outputPath = join(os.tmpdir(), `${tempId}-output.mp4`);
+        tempFiles.push(inputPath, outputPath);
+
+        await writeFile(inputPath, buffer);
+        await compressVideo(inputPath, outputPath);
+
+        finalBuffer = await readFile(outputPath);
+        finalMimeType = 'video/mp4';
+        finalExtension = 'mp4';
+      }
+    } catch (compressionError) {
+      console.error('Compression failed, using original file:', compressionError);
+      // Fallback to original buffer and types (already set)
+    }
+
+    // Generate unique filename with potentially new extension
+    const fileName = `product-${user.id}-${Date.now()}.${finalExtension}`;
 
     // Create products directory for fallback
     const productsDir = join(process.cwd(), 'public', 'uploads', 'products');
@@ -58,12 +93,21 @@ export async function POST(request: NextRequest) {
 
     // Upload to S3 with fallback to local
     const uploadResult = await uploadFileWithFallback(
-      buffer,
+      finalBuffer,
       fileName,
-      file.type,
+      finalMimeType,
       filePath,
       'products'
     );
+
+    // Cleanup temp files
+    for (const tempFile of tempFiles) {
+      try {
+        if (existsSync(tempFile)) await unlink(tempFile);
+      } catch (e) {
+        console.warn('Failed to cleanup temp file:', tempFile, e);
+      }
+    }
 
     if (!uploadResult.success) {
       return NextResponse.json(
