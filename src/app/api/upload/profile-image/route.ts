@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     // Prepare file for upload
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const buffer = Buffer.from(new Uint8Array(bytes));
 
     // Compress and convert to WebP
     // Profile images can be smaller, let's limit to 500x500

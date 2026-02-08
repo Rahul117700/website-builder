@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     // Prepare file for upload
     const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const buffer = Buffer.from(new Uint8Array(bytes));
 
     // Generate unique filename components
     const timestamp = Date.now();

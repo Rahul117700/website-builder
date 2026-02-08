@@ -6,14 +6,17 @@ import os from 'os';
 import { v4 as uuidv4 } from 'uuid';
 
 // Setup ffmpeg paths if available
-try {
-    // Only attempt to set paths if we're not in a limited environment
-    const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
-    const ffprobeInstaller = require('@ffprobe-installer/ffprobe');
-    ffmpeg.setFfmpegPath(ffmpegInstaller.path);
-    ffmpeg.setFfprobePath(ffprobeInstaller.path);
-} catch (e) {
-    console.warn('FFmpeg installer not found, relying on system ffmpeg');
+if (typeof window === 'undefined') {
+    try {
+        // We use eval('require') to prevent Webpack from trying to bundle these during build
+        // which causes issues with their README/JSON files
+        const ffmpegInstaller = eval('require')('@ffmpeg-installer/ffmpeg');
+        const ffprobeInstaller = eval('require')('@ffprobe-installer/ffprobe');
+        ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+        ffmpeg.setFfprobePath(ffprobeInstaller.path);
+    } catch (e) {
+        console.warn('FFmpeg installer not found, relying on system ffmpeg');
+    }
 }
 
 /**

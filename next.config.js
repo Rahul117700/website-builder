@@ -11,7 +11,6 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   experimental: {
-    appDir: true,
     serverActions: true,
   },
   // Disable Next.js caching completely
@@ -39,6 +38,19 @@ const nextConfig = {
         '**/.next/**'
       ]
     };
+
+    // Exclude ffmpeg/ffprobe installers from frontend bundling
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        child_process: false,
+        crypto: false,
+      };
+    }
+
+    config.externals = [...(config.externals || []), 'canvas', 'jsdom', '@ffmpeg-installer/ffmpeg', '@ffprobe-installer/ffprobe'];
 
     return config;
   },
