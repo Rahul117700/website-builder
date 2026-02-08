@@ -152,9 +152,19 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
                 >
                   {session.user?.image ? (
                     <img
-                      src={session.user.image}
+                      src={session.user.image.startsWith('/') ? `${session.user.image}?t=${Date.now()}` : session.user.image}
                       alt="Profile"
                       className="h-7 w-7 rounded-full object-cover border-2 border-gray-200"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        const parent = e.currentTarget.parentElement;
+                        if (parent) {
+                          const placeholder = document.createElement('div');
+                          placeholder.className = 'h-7 w-7 rounded-full bg-indigo-100 flex items-center justify-center';
+                          placeholder.innerHTML = '<svg class="h-4 w-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>';
+                          parent.appendChild(placeholder);
+                        }
+                      }}
                     />
                   ) : (
                     <div className="h-7 w-7 rounded-full bg-indigo-100 flex items-center justify-center">
@@ -172,7 +182,7 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
                     <div className="px-4 py-3 border-b border-gray-100 flex items-start gap-3">
                       {session.user?.image ? (
                         <img
-                          src={session.user.image}
+                          src={session.user.image.startsWith('/') ? `${session.user.image}?t=${Date.now()}` : session.user.image}
                           alt={session.user.name || "User"}
                           className="w-10 h-10 rounded-full object-cover"
                         />

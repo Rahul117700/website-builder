@@ -7,6 +7,9 @@ import { existsSync } from 'fs';
 import { mkdir } from 'fs/promises';
 import { uploadFileWithFallback, getUploadStatusMessage } from '@/lib/s3';
 
+export const runtime = 'nodejs';
+export const maxDuration = 60; // 60 seconds
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -28,12 +31,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Only image files are allowed' }, { status: 400 });
     }
 
-    // Validate file size (5MB max)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Validate file size (50MB max)
+    const maxSize = 50 * 1024 * 1024; // 50MB
     if (file.size > maxSize) {
       return NextResponse.json({
         error: 'File too large',
-        message: 'Image must be less than 5MB'
+        message: 'Image must be less than 50MB'
       }, { status: 400 });
     }
 

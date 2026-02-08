@@ -277,17 +277,12 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
     'https://images.pexels.com/photos/2444429/pexels-photo-2444429.jpeg'
   ];
 
-  // Get cover image with fallback to random default
-  // Use channel ID as seed to ensure same channel always gets same default image
-  const getCoverImage = useMemo(() => {
-    if (channel.coverImage) {
-      return channel.coverImage;
-    }
-    // Use channel ID to deterministically select a default image
+  // Get a fallback cover image based on channel ID
+  const fallbackCoverImage = useMemo(() => {
     const channelIdHash = channel.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     const imageIndex = channelIdHash % defaultCoverImages.length;
     return defaultCoverImages[imageIndex];
-  }, [channel.coverImage, channel.id]);
+  }, [channel.id]);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedType, setSelectedType] = useState<string>('all');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -778,14 +773,19 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
       <div className="bg-white">
         {/* Banner Image */}
         <div className="relative w-full h-48 sm:h-56 md:h-72 lg:h-80 bg-gray-100 group overflow-hidden">
-          {channel.coverImage || getCoverImage ? (
-            <div
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 group-hover:scale-105"
-              style={{ backgroundImage: `url(${channel.coverImage || getCoverImage})` }}
-            />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-r from-gray-200 to-gray-300 animate-pulse" />
-          )}
+          <img
+            src={channel.coverImage ? (channel.coverImage.startsWith('http') ? channel.coverImage : `${channel.coverImage}?t=${channel.updatedAt ? new Date(channel.updatedAt).getTime() : Date.now()}`) : fallbackCoverImage}
+            alt="Channel Cover"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            onError={(e) => {
+              // If the custom image fails, use the fallback
+              const target = e.currentTarget;
+              if (target.src !== fallbackCoverImage) {
+                console.log('Cover image failed to load, using fallback');
+                target.src = fallbackCoverImage;
+              }
+            }}
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60" />
         </div>
 
@@ -797,9 +797,21 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
               <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
                 {channel.profileImage || channel.user?.image ? (
                   <img
-                    src={channel.profileImage || channel.user?.image || ''}
-                    alt={channel.name}
+                    src={channel.profileImage ? `${channel.profileImage}?t=${Date.now()}` : (channel.user?.image || '')}
+                    alt={channel.name || 'Channel'}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback to placeholder if image fails
+                      e.currentTarget.style.display = 'none';
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) {
+                        parent.innerHTML = `
+                          <div class="w-full h-full flex items-center justify-center bg-indigo-100 uppercase text-indigo-600 font-bold text-4xl">
+                            ${(channel.name || 'C').charAt(0)}
+                          </div>
+                        `;
+                      }
+                    }}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">

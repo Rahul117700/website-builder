@@ -102,8 +102,8 @@ export default function BasicInfoTab({ channel, onUpdate }: BasicInfoTabProps) {
         return;
       }
 
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('Image size should be less than 5MB');
+      if (file.size > 50 * 1024 * 1024) {
+        toast.error('Image size should be less than 50MB');
         return;
       }
 

@@ -14,7 +14,7 @@ import {
 export default function ViewerSettingsPage() {
   const { data: session } = useSession();
   const router = useRouter();
-  
+
   // User Profile State
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
@@ -42,16 +42,16 @@ export default function ViewerSettingsPage() {
     try {
       setProfileLoading(true);
       const response = await fetch('/api/user/profile');
-      
+
       if (response.ok) {
         const profileData = await response.json();
         let imageUrl = profileData.image || '';
         if (imageUrl && imageUrl.startsWith('/public')) {
           imageUrl = imageUrl.replace('/public', '');
         }
-        
+
         const imagePreview = imageUrl ? `${imageUrl}?t=${Date.now()}` : '';
-        
+
         setUserName(profileData.name || '');
         setUserEmail(profileData.email || '');
         setUserImage(imageUrl);
@@ -78,10 +78,10 @@ export default function ViewerSettingsPage() {
       return;
     }
 
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Validate file size (max 20MB)
+    const maxSize = 20 * 1024 * 1024; // 20MB
     if (file.size > maxSize) {
-      setImageUploadMessage({ type: 'error', text: 'Image size must be less than 5MB' });
+      setImageUploadMessage({ type: 'error', text: 'Image size must be less than 20MB' });
       return;
     }
 
@@ -341,7 +341,7 @@ export default function ViewerSettingsPage() {
                       <span className="text-xs text-gray-500">OR</span>
                       <div className="flex-1 h-px bg-gray-200"></div>
                     </div>
-                    
+
                     {/* URL Input */}
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1.5">
@@ -355,18 +355,17 @@ export default function ViewerSettingsPage() {
                         className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 text-gray-900 placeholder-gray-400 bg-white text-sm"
                       />
                       <p className="text-xs text-gray-500 mt-1.5">
-                        Maximum file size: 5MB. Supported formats: JPG, PNG, GIF
+                        Maximum file size: 20MB. Supported formats: JPG, PNG, GIF
                       </p>
                     </div>
 
                     {/* Upload Message */}
                     {imageUploadMessage && (
                       <div
-                        className={`p-3 rounded-lg flex items-start gap-2 text-sm ${
-                          imageUploadMessage.type === 'success'
+                        className={`p-3 rounded-lg flex items-start gap-2 text-sm ${imageUploadMessage.type === 'success'
                             ? 'bg-green-50 border border-green-200 text-green-800'
                             : 'bg-red-50 border border-red-200 text-red-800'
-                        }`}
+                          }`}
                       >
                         {imageUploadMessage.type === 'success' ? (
                           <CheckCircleIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -440,10 +439,10 @@ export default function ViewerSettingsPage() {
               {userCreatedAt && (
                 <div className="pt-4 border-t border-gray-200">
                   <p className="text-sm text-gray-600">
-                    Member since: <span className="font-semibold text-gray-900">{new Date(userCreatedAt).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
+                    Member since: <span className="font-semibold text-gray-900">{new Date(userCreatedAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
                     })}</span>
                   </p>
                 </div>
@@ -452,11 +451,10 @@ export default function ViewerSettingsPage() {
               {/* Message */}
               {profileMessage && (
                 <div
-                  className={`p-4 rounded-lg flex items-center gap-3 ${
-                    profileMessage.type === 'success'
+                  className={`p-4 rounded-lg flex items-center gap-3 ${profileMessage.type === 'success'
                       ? 'bg-green-50 border border-green-200 text-green-800'
                       : 'bg-red-50 border border-red-200 text-red-800'
-                  }`}
+                    }`}
                 >
                   {profileMessage.type === 'success' ? (
                     <CheckCircleIcon className="w-5 h-5 flex-shrink-0" />

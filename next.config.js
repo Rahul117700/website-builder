@@ -12,6 +12,7 @@ const nextConfig = {
   },
   experimental: {
     appDir: true,
+    serverActions: true,
   },
   // Disable Next.js caching completely
   generateEtags: false,
@@ -119,7 +120,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
+            value: 'no-store, no-cache, must-revalidate',
           },
           {
             key: 'Access-Control-Allow-Origin',
@@ -141,17 +142,17 @@ const nextConfig = {
 
   async rewrites() {
     return [
+      // Rewrite /uploads requests to the dynamic image server
+      {
+        source: '/uploads/:path*',
+        destination: '/api/view-image/:path*',
+      },
       // Rewrite API requests to the Express server
       {
         source: '/api/v1/:path*',
         destination: `${process.env.EXPRESS_SERVER_URL || 'http://localhost:3001'}/api/v1/:path*`,
       },
     ];
-  },
-
-  // Enable experimental features for App Router
-  experimental: {
-    serverActions: true,
   },
 
   // Configure for large file uploads (500MB)

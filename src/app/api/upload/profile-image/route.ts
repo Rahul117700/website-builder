@@ -7,6 +7,9 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { uploadFileWithFallback, hasS3Credentials, getUploadStatusMessage } from '@/lib/s3';
 
+export const runtime = 'nodejs';
+export const maxDuration = 60; // 60 seconds
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -35,10 +38,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'File must be an image' }, { status: 400 });
     }
 
-    // Validate file size (max 5MB for profile images)
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    // Validate file size (max 20MB for profile images)
+    const maxSize = 20 * 1024 * 1024; // 20MB
     if (file.size > maxSize) {
-      return NextResponse.json({ error: 'File size must be less than 5MB' }, { status: 400 });
+      return NextResponse.json({ error: 'File size must be less than 20MB' }, { status: 400 });
     }
 
     // Prepare file for upload

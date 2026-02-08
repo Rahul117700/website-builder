@@ -223,9 +223,18 @@ export default function MainLayout({
                                     {session.user?.image ? (
                                         <div className="relative w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden border-2 border-gray-200 hover:border-indigo-400 transition-colors shadow-sm">
                                             <img
-                                                src={session.user.image}
+                                                src={session.user.image.startsWith('/') ? `${session.user.image}?t=${Date.now()}` : session.user.image}
                                                 alt={session.user.name || "User"}
                                                 className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    // Fallback for button image
+                                                    e.currentTarget.style.display = 'none';
+                                                    const parent = e.currentTarget.parentElement;
+                                                    if (parent) {
+                                                        const initials = (session.user?.name || 'U').charAt(0).toUpperCase();
+                                                        parent.innerHTML = `<div class="w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-600 font-bold">${initials}</div>`;
+                                                    }
+                                                }}
                                             />
                                         </div>
                                     ) : (
@@ -240,9 +249,18 @@ export default function MainLayout({
                                         <div className="px-4 py-3 border-b border-gray-100 flex items-start gap-3">
                                             {session.user?.image ? (
                                                 <img
-                                                    src={session.user.image}
+                                                    src={session.user.image.startsWith('/') ? `${session.user.image}?t=${Date.now()}` : session.user.image}
                                                     alt={session.user.name || "User"}
                                                     className="w-10 h-10 rounded-full object-cover"
+                                                    onError={(e) => {
+                                                        // Fallback for menu header image
+                                                        e.currentTarget.style.display = 'none';
+                                                        const parent = e.currentTarget.parentElement;
+                                                        if (parent) {
+                                                            const initials = (session.user?.name || 'U').charAt(0).toUpperCase();
+                                                            parent.insertAdjacentHTML('afterbegin', `<div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">${initials}</div>`);
+                                                        }
+                                                    }}
                                                 />
                                             ) : (
                                                 <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">

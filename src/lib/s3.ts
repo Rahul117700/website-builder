@@ -149,23 +149,18 @@ export async function uploadFileWithFallback(
     await fs.writeFile(localPath, file);
 
     // Return local URL (remove /public from path since Next.js serves public folder at root)
-    // Normalize paths to use forward slashes for URL generation
-    const normalizedLocalPath = localPath.replace(/\\/g, '/');
-    const normalizedCwd = process.cwd().replace(/\\/g, '/');
+    // Use path.relative for more robust relative path calculation
+    let relativePath = path.relative(process.cwd(), localPath).replace(/\\/g, '/');
 
-    let url = normalizedLocalPath.replace(normalizedCwd, '');
+    // If it starts with 'public/', remove it because Next.js serves public at root
+    if (relativePath.startsWith('public/')) {
+      relativePath = relativePath.replace('public/', '');
+    } else if (relativePath.startsWith('public')) {
+      relativePath = relativePath.replace('public', '');
+    }
 
     // Ensure it starts with a slash
-    if (!url.startsWith('/')) {
-      url = '/' + url;
-    }
-
-    // Remove /public prefix if present (it should be for local storage)
-    if (url.startsWith('/public/')) {
-      url = url.replace('/public/', '/');
-    } else if (url === '/public') {
-      url = '/';
-    }
+    const url = relativePath.startsWith('/') ? relativePath : '/' + relativePath;
 
     return {
       success: true,
