@@ -236,15 +236,21 @@ export default function PlansView() {
                             </div>
                             <div className="mt-2 flex flex-col sm:flex-row gap-2">
                                 <div className="bg-white/10 rounded-lg px-3 py-1.5 flex-1 border border-white/20">
-                                    <div className="text-[10px] opacity-90">Funnels Used</div>
+                                    <div className="text-[10px] opacity-90">Total Products</div>
                                     <div className="text-sm font-bold">
-                                        {subscriptionData.usage.funnels} / {subscriptionData.usage.maxFunnels === -1 ? '∞' : subscriptionData.usage.maxFunnels}
+                                        {subscriptionData.usage.maxProducts === -1 ? '∞' : subscriptionData.usage.maxProducts}
                                     </div>
                                 </div>
                                 <div className="bg-white/10 rounded-lg px-3 py-1.5 flex-1 border border-white/20">
                                     <div className="text-[10px] opacity-90">Products Used</div>
                                     <div className="text-sm font-bold">
-                                        {subscriptionData.usage.products} / {subscriptionData.usage.maxProducts === -1 ? '∞' : subscriptionData.usage.maxProducts}
+                                        {subscriptionData.usage.products}
+                                    </div>
+                                </div>
+                                <div className="bg-white/10 rounded-lg px-3 py-1.5 flex-1 border border-white/20">
+                                    <div className="text-[10px] opacity-90">Products Remaining</div>
+                                    <div className="text-sm font-bold">
+                                        {subscriptionData.usage.maxProducts === -1 ? '∞' : Math.max(0, subscriptionData.usage.maxProducts - subscriptionData.usage.products)}
                                     </div>
                                 </div>
                             </div>
@@ -308,39 +314,15 @@ export default function PlansView() {
 
                             {/* Features */}
                             <div className="space-y-1.5 mb-3">
-                                {/* Show custom features from database if they exist */}
-                                {plan.features && Array.isArray(plan.features) && plan.features.length > 0 ? (
-                                    plan.features.map((feature, idx) => (
-                                        <div key={idx} className="flex items-center gap-1.5 text-gray-700">
-                                            <CheckIcon className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
-                                            <span className="text-xs">{feature}</span>
-                                        </div>
-                                    ))
-                                ) : (
-                                    // Default features if none configured
-                                    <>
-                                        <div className="flex items-center gap-1.5 text-gray-700">
-                                            <CheckIcon className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
-                                            <span className="text-xs">
-                                                {plan.maxFunnels === -1 ? 'Unlimited' : plan.maxFunnels} Funnels
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-1.5 text-gray-700">
-                                            <CheckIcon className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
-                                            <span className="text-xs">
-                                                {plan.maxProducts === -1 ? 'Unlimited' : plan.maxProducts} Products
-                                            </span>
-                                        </div>
-                                        {plan.maxCustomDomains > 0 && (
-                                            <div className="flex items-center gap-1.5 text-gray-700">
-                                                <CheckIcon className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
-                                                <span className="text-xs">
-                                                    {plan.maxCustomDomains} Custom Domain{plan.maxCustomDomains > 1 ? 's' : ''}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </>
-                                )}
+                                <div className="flex items-center gap-1.5 text-gray-700">
+                                    <CheckIcon className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
+                                    <span className="text-xs">
+                                        {plan.maxProducts === -1 ? 'Unlimited' : plan.maxProducts} {plan.maxProducts === 1 ? 'Product' : 'Products'}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-1.5 text-gray-700 italic">
+                                    <span className="text-[10px] text-gray-500">{plan.description}</span>
+                                </div>
                             </div>
 
                             {/* CTA Button */}

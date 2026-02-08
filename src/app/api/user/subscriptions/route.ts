@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Get active subscription
+    // Get active subscription - Get the highest priority active plan
     const activeSubscription = await prisma.userSubscription.findFirst({
       where: {
         userId: user.id,
@@ -35,9 +35,10 @@ export async function GET(request: NextRequest) {
       include: {
         plan: true
       },
-      orderBy: {
-        endDate: 'desc'
-      }
+      orderBy: [
+        { plan: { priority: 'desc' } },
+        { endDate: 'desc' }
+      ]
     });
 
     // Get all subscriptions history
@@ -54,13 +55,22 @@ export async function GET(request: NextRequest) {
     });
 
     // Calculate usage statistics
-    const [funnelCount, productCount] = await Promise.all([
+    const [funnelCount, digitalProductCount, channelProductCount] = await Promise.all([
       prisma.funnel.count({ where: { userId: user.id } }),
-      prisma.digitalProduct.count({ where: { userId: user.id } })
+      prisma.digitalProduct.count({ where: { userId: user.id } }),
+      prisma.channelProduct.count({
+        where: {
+          channel: {
+            userId: user.id
+          }
+        }
+      })
     ]);
 
+    const productCount = digitalProductCount + channelProductCount;
+
     const hasActivePlan = activeSubscription !== null;
-    const daysRemaining = activeSubscription 
+    const daysRemaining = activeSubscription
       ? Math.ceil((activeSubscription.endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
       : 0;
 
@@ -81,8 +91,8 @@ export async function GET(request: NextRequest) {
       usage: {
         funnels: funnelCount,
         products: productCount,
-        maxFunnels: hasActivePlan ? (activeSubscription?.plan.maxFunnels || 0) : FREE_TIER_LIMITS.maxFunnels,
-        maxProducts: hasActivePlan ? (activeSubscription?.plan.maxProducts || 0) : FREE_TIER_LIMITS.maxProducts,
+        maxFunnels: hasActivePlan ? (activeSubscription?.plan.maxFunnels ?? -1) : FREE_TIER_LIMITS.maxFunnels,
+        maxProducts: hasActivePlan ? (activeSubscription?.plan.maxProducts ?? -1) : FREE_TIER_LIMITS.maxProducts,
         daysRemaining
       }
     });

@@ -76,41 +76,23 @@ export default function PricingPlans() {
     }).format(price);
   };
 
-  const getFeatures = (plan: Plan) => {
+  const getFeatures = (plan: any) => {
     const features = [];
-    
-    if (plan.unlimitedWebsites) {
-      features.push('Unlimited Websites');
+
+    // Show description as the primary feature
+    if (plan.description) {
+      features.push(plan.description);
+    }
+
+    // Show product limit
+    if (plan.maxProducts === -1) {
+      features.push('Unlimited Products');
+    } else if (plan.maxProducts) {
+      features.push(`${plan.maxProducts} Product${plan.maxProducts > 1 ? 's' : ''}`);
     } else if (plan.numberOfWebsites) {
-      features.push(`${plan.numberOfWebsites} Website${plan.numberOfWebsites > 1 ? 's' : ''}`);
-    } else {
-      features.push('1 Website');
-    }
-
-    if (plan.supportLevel) {
-      features.push(`${plan.supportLevel} Support`);
-    } else {
-      features.push('Basic Support');
-    }
-
-    if (plan.customDomain) {
-      features.push('Custom Domain');
-    }
-
-    if (plan.advancedAnalytics) {
-      features.push('Advanced Analytics');
-    }
-
-    if (plan.customIntegrations) {
-      features.push('Custom Integrations');
-    }
-
-    if (plan.teamManagement) {
-      features.push('Team Management');
-    }
-
-    if (plan.communityAccess) {
-      features.push('Community Access');
+      // Fallback for older plan structures if strictly necessary, 
+      // but prefer current naming.
+      features.push(`${plan.numberOfWebsites} Product${plan.numberOfWebsites > 1 ? 's' : ''}`);
     }
 
     return features;
@@ -118,15 +100,15 @@ export default function PricingPlans() {
 
   const handlePlanSelect = (plan: Plan) => {
     if (status === 'loading' || redirecting) return; // Wait for session to load or prevent double clicks
-    
+
     setRedirecting(true);
-    
+
     if (!session) {
       // User not logged in - redirect to signup
       router.push('/auth/signup');
       return;
     }
-    
+
     if (plan.price === 0) {
       // Free plan - redirect to billing page to activate
       router.push('/auth/dashboard/billing');
@@ -172,19 +154,18 @@ export default function PricingPlans() {
         <div className="text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Pricing Plans</h2>
           <p className="text-xl text-white mb-12">Choose the perfect plan for your business</p>
-          
+
           <div className="flex flex-col lg:flex-row justify-center items-center space-y-8 lg:space-y-0 lg:space-x-8">
             {plans.map((plan, index) => {
               const isPopular = plan.name.toLowerCase().includes('pro');
               const color = getPlanColor(plan.name);
               const icon = getPlanIcon(plan.name);
-              
+
               return (
                 <div
                   key={plan.id}
-                  className={`relative bg-white rounded-lg shadow-lg p-8 w-full max-w-sm ${
-                    isPopular ? 'ring-2 ring-orange-500 scale-105' : ''
-                  }`}
+                  className={`relative bg-white rounded-lg shadow-lg p-8 w-full max-w-sm ${isPopular ? 'ring-2 ring-orange-500 scale-105' : ''
+                    }`}
                 >
                   {isPopular && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -222,15 +203,14 @@ export default function PricingPlans() {
                   <button
                     onClick={() => handlePlanSelect(plan)}
                     disabled={redirecting || status === 'loading'}
-                    className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-colors flex items-center justify-center gap-2 ${
-                      plan.price === 0
+                    className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-colors flex items-center justify-center gap-2 ${plan.price === 0
                         ? 'bg-green-600 hover:bg-green-700'
                         : color === 'orange'
-                        ? 'bg-orange-600 hover:bg-orange-700'
-                        : color === 'blue'
-                        ? 'bg-blue-600 hover:bg-blue-700'
-                        : 'bg-purple-600 hover:bg-purple-700'
-                    } ${(redirecting || status === 'loading') ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          ? 'bg-orange-600 hover:bg-orange-700'
+                          : color === 'blue'
+                            ? 'bg-blue-600 hover:bg-blue-700'
+                            : 'bg-purple-600 hover:bg-purple-700'
+                      } ${(redirecting || status === 'loading') ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {redirecting ? (
                       <>

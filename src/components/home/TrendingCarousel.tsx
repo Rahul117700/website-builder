@@ -106,6 +106,7 @@ export default function TrendingCarousel({ items, isCompact = false, isLoading =
                                 muted
                                 loop
                                 playsInline
+                                preload="metadata"
                             />
                         ) : (
                             <img

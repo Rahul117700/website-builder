@@ -35,25 +35,40 @@ export async function POST(
       return NextResponse.json({ error: 'Channel not found or unauthorized' }, { status: 404 });
     }
 
-    // Check product limits
+    // Check product limits - Get the highest priority active plan
     const activeSubscription = await prisma.userSubscription.findFirst({
       where: {
         userId: session.user.id,
         status: 'ACTIVE',
         endDate: { gte: new Date() }
       },
-      include: { plan: true }
+      include: {
+        plan: true
+      },
+      orderBy: [
+        { plan: { priority: 'desc' } },
+        { endDate: 'desc' }
+      ]
     });
 
-    const productCount = await prisma.channelProduct.count({
-      where: { channelId: params.channelId }
-    });
+    const [digitalProductCount, channelProductCount] = await Promise.all([
+      prisma.digitalProduct.count({ where: { userId: session.user.id } }),
+      prisma.channelProduct.count({
+        where: {
+          channel: {
+            userId: session.user.id
+          }
+        }
+      })
+    ]);
+
+    const productCount = digitalProductCount + channelProductCount;
 
     const maxProducts = activeSubscription ? (activeSubscription.plan.maxProducts ?? -1) : 1;
 
     if (maxProducts !== -1 && productCount >= maxProducts) {
       return NextResponse.json(
-        { error: `You've reached your plan limit of ${maxProducts} products. Please upgrade to add more.` },
+        { error: `You've reached your account-wide limit of ${maxProducts} products. Please upgrade to add more.` },
         { status: 403 }
       );
     }

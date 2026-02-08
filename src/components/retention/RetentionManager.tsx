@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import ExitIntentPopup from './ExitIntentPopup';
 import EngagementNotifier from './EngagementNotifier';
 // SocialProof removed - flagged as deceptive content by Google Search Console
@@ -13,6 +14,7 @@ import NewsletterPrompt from './NewsletterPrompt';
  * Combines multiple retention mechanisms to keep users engaged
  */
 export default function RetentionManager() {
+  const { data: session, status } = useSession();
   const [showExitIntent, setShowExitIntent] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [timeOnPage, setTimeOnPage] = useState(0);
@@ -66,6 +68,11 @@ export default function RetentionManager() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [hasInteracted, timeOnPage, showExitIntent, isDashboard]);
+
+  // Hide for guests as per user request
+  if (status === 'loading' || !session) {
+    return null;
+  }
 
   return (
     <>

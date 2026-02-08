@@ -137,7 +137,7 @@ const VideoHoverPreview = ({ product, primaryColor, getContentIcon }: { product:
       )}
 
       {/* Video Overlay (Visible on Hover) */}
-      {isVideo && hasVideoSource && (
+      {isVideo && hasVideoSource && isHovered && (
         <video
           ref={videoRef}
           src={product.videoUrl || product.fileUrl}
@@ -145,6 +145,7 @@ const VideoHoverPreview = ({ product, primaryColor, getContentIcon }: { product:
           muted
           loop
           playsInline
+          preload="none"
         // Removed autoPlay here, controlled by ref
         />
       )}

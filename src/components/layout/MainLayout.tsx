@@ -150,7 +150,7 @@ export default function MainLayout({
                 )}
 
                 {/* Right Section - Actions */}
-                <div className="flex items-center gap-4 lg:gap-6">
+                <div className="flex items-center gap-1.5 sm:gap-4 lg:gap-6 flex-shrink-0">
                     {/* Navigation Links */}
                     <div className="hidden xl:flex items-center gap-6 mr-2">
                         <Link href="/docs" className="text-sm font-bold text-gray-500 hover:text-indigo-600 transition-colors">Docs</Link>
@@ -161,9 +161,9 @@ export default function MainLayout({
                     {/* Create Button - Visible on Mobile */}
                     <Link
                         href="/auth/dashboard/my-channel"
-                        className="p-2 sm:p-2.5 bg-gray-900 border border-black text-white rounded-2xl sm:rounded-xl font-bold text-xs sm:text-sm hover:bg-black transition-all shadow-xl flex items-center gap-2 group whitespace-nowrap"
+                        className="p-1.5 sm:p-2.5 bg-gray-900 border border-black text-white rounded-xl sm:rounded-xl font-bold text-xs sm:text-sm hover:bg-black transition-all shadow-xl flex items-center gap-1.5 sm:gap-2 group whitespace-nowrap flex-shrink-0"
                     >
-                        <VideoCameraIcon className="w-5 h-5 sm:w-4 sm:h-4" />
+                        <VideoCameraIcon className="w-5 h-5 sm:w-4 sm:h-4 flex-shrink-0" />
                         <span className="hidden sm:inline">Create</span>
                     </Link>
 
@@ -173,7 +173,7 @@ export default function MainLayout({
                             <div className="relative">
                                 <button
                                     onClick={() => setNotiMenuOpen(!notiMenuOpen)}
-                                    className="p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 relative"
+                                    className="p-1.5 sm:p-2 hover:bg-gray-100/80 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 relative flex-shrink-0"
                                 >
                                     <BellIcon className="w-5 h-5 text-gray-700" />
                                     {notifications && notifications.some(n => !n.read) && (
@@ -218,10 +218,10 @@ export default function MainLayout({
                             <div className="relative -ml-1">
                                 <button
                                     onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                                    className="flex items-center gap-2 p-0.5 rounded-full hover:bg-gray-100 transition-all duration-200 hover:scale-105 active:scale-95"
+                                    className="flex items-center gap-2 p-0.5 rounded-full hover:bg-gray-100 transition-all duration-200 hover:scale-105 active:scale-95 flex-shrink-0"
                                 >
                                     {session.user?.image ? (
-                                        <div className="relative w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden border-2 border-gray-200 hover:border-indigo-400 transition-colors shadow-sm">
+                                        <div className="relative w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden border-2 border-gray-200 hover:border-indigo-400 transition-colors shadow-sm flex-shrink-0">
                                             <img
                                                 src={session.user.image.startsWith('/') ? `${session.user.image}?t=${Date.now()}` : session.user.image}
                                                 alt={session.user.name || "User"}

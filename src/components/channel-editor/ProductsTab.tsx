@@ -119,15 +119,15 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
   };
 
   const handleOpenUploadModal = () => {
-    // Check product limits
-    const productCount = products.length;
+    // Check product limits - Use account-wide usage if available
+    const productCount = subscriptionData?.usage?.products ?? products.length;
 
     // Default to free tier limits if no subscription data
     const isPremium = subscriptionData?.hasActivePlan;
-    const maxProducts = isPremium ? (subscriptionData?.activeSubscription?.plan?.maxProducts ?? -1) : 1;
+    const maxProducts = isPremium ? (subscriptionData?.usage?.maxProducts ?? -1) : 1;
 
     if (maxProducts !== -1 && productCount >= maxProducts) {
-      setErrorMessage(`You've reached the ${isPremium ? 'maximum' : 'free'} limit of ${maxProducts} product${maxProducts === 1 ? '' : 's'}. Upgrade your plan to add more products to your channel!`);
+      setErrorMessage(`You've reached the ${isPremium ? 'maximum' : 'free'} limit of ${maxProducts} product${maxProducts === 1 ? '' : 's'} across your account. Upgrade your plan to add more products!`);
       setShowErrorModal(true);
       return;
     }
@@ -197,11 +197,23 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
         <div>
           <h3 className="text-lg font-bold text-gray-900">Products & Content</h3>
           <p className="text-sm text-gray-600 mt-1">
-            {products.length} {products.length === 1 ? 'product' : 'products'} added
             {(() => {
               const isPremium = subscriptionData?.hasActivePlan;
               const maxProducts = isPremium ? (subscriptionData?.activeSubscription?.plan?.maxProducts ?? -1) : 1;
-              return maxProducts !== -1 ? ` / ${maxProducts} limit` : '';
+              const productCount = products.length;
+              const remaining = maxProducts === -1 ? '∞' : Math.max(0, maxProducts - productCount);
+
+              return (
+                <span className="flex items-center gap-2">
+                  <span>{productCount} Products Added</span>
+                  <span className="text-gray-300">|</span>
+                  <span>{maxProducts === -1 ? 'Unlimited' : `${maxProducts} Total`}</span>
+                  <span className="text-gray-300">|</span>
+                  <span className={remaining === 0 ? 'text-red-600 font-bold' : 'text-emerald-600 font-bold'}>
+                    {remaining} Remaining
+                  </span>
+                </span>
+              );
             })()}
           </p>
         </div>

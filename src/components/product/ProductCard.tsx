@@ -144,14 +144,15 @@ export default function ProductCard({ id, title, thumbnail, channelName, channel
                     unoptimized
                 />
 
-                {/* Video Preview */}
-                {videoUrl && (
+                {/* Video Preview - Only render when hovered to save resources */}
+                {videoUrl && isHovered && (
                     <video
                         ref={videoRef}
                         src={videoUrl}
                         muted
                         playsInline
                         loop
+                        preload="none"
                         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-100' : 'opacity-0'}`}
                     />
                 )}
