@@ -1092,3 +1092,21 @@ enum ProductPurchaseStatus {
   FAILED
   PENDING
 }
+model ContactForm {
+  id        String            @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  status    ContactFormStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@map("contact_forms")
+}
+
+enum ContactFormStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+}

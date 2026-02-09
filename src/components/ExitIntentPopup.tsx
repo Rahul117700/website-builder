@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import analytics from './analytics/analytics';
 
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 interface ExitIntentPopupProps {
     discount?: string; // e.g. '10%'
@@ -13,6 +14,7 @@ const ExitIntentPopup: React.FC<ExitIntentPopupProps> = ({ discount = '51%', onA
     const [countdown, setCountdown] = useState(10);
     const [isDealUnlocked, setIsDealUnlocked] = useState(false);
     const router = useRouter();
+    const { data: session, status } = useSession();
 
     useEffect(() => {
         // Check if already dismissed
@@ -56,7 +58,7 @@ const ExitIntentPopup: React.FC<ExitIntentPopupProps> = ({ discount = '51%', onA
         analytics.track('exit_intent_accept');
     };
 
-    if (!visible) return null;
+    if (status === 'loading' || !session || !visible) return null;
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 transition-opacity duration-300">

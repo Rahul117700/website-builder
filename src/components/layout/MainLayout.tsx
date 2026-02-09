@@ -223,7 +223,7 @@ export default function MainLayout({
                                     {session.user?.image ? (
                                         <div className="relative w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden border-2 border-gray-200 hover:border-indigo-400 transition-colors shadow-sm flex-shrink-0">
                                             <img
-                                                src={session.user.image.startsWith('/') ? `${session.user.image}?t=${Date.now()}` : session.user.image}
+                                                src={session.user.image}
                                                 alt={session.user.name || "User"}
                                                 className="w-full h-full object-cover"
                                                 onError={(e) => {
@@ -249,7 +249,7 @@ export default function MainLayout({
                                         <div className="px-4 py-3 border-b border-gray-100 flex items-start gap-3">
                                             {session.user?.image ? (
                                                 <img
-                                                    src={session.user.image.startsWith('/') ? `${session.user.image}?t=${Date.now()}` : session.user.image}
+                                                    src={session.user.image}
                                                     alt={session.user.name || "User"}
                                                     className="w-10 h-10 rounded-full object-cover"
                                                     onError={(e) => {

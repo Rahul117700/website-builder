@@ -42,6 +42,11 @@ export async function GET(request: Request) {
     });
     console.log('Active users:', activeUsers);
 
+    const pendingInquiries = await prisma.contactForm.count({
+      where: { status: 'PENDING' }
+    });
+    console.log('Pending inquiries:', pendingInquiries);
+
     // Calculate total revenue from completed orders (case-insensitive check)
     const allOrders = await prisma.funnelOrder.findMany({
       select: {
@@ -267,6 +272,7 @@ export async function GET(request: Request) {
         activeSubscriptions: activeSubscriptions,
         totalSubscriptions: totalSubscriptions,
         activeUsers,
+        pendingInquiries,
         platformHealth: {
           activeUsersRatio,
           publishedChannelsRatio,

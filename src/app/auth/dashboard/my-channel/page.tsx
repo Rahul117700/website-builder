@@ -15,7 +15,7 @@ export default async function MyChannelRedirect() {
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-        redirect('/login');
+        redirect('/auth/signin');
     }
 
     // Verify user exists and get correct ID (handle stale sessions)
@@ -37,7 +37,7 @@ export default async function MyChannelRedirect() {
             console.log(`[MyChannel] Found real user ID ${userId} for email ${session.user.email}`);
         } else {
             console.error(`[MyChannel] User ${session.user.email} not found in database. Redirecting to login.`);
-            redirect('/login');
+            redirect('/auth/signin');
         }
     }
 

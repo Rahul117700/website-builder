@@ -21,6 +21,11 @@ export default function RetentionManager() {
   const [timeOnPage, setTimeOnPage] = useState(0);
   const [isDashboard, setIsDashboard] = useState(false);
   const [userStatus, setUserStatus] = useState<UserEngagementStatus | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     // Check if we're on a dashboard page (less retention needed)
@@ -79,7 +84,7 @@ export default function RetentionManager() {
   }, [hasInteracted, timeOnPage, showExitIntent, isDashboard]);
 
   // Hide for guests as per user request
-  if (status === 'loading' || !session) {
+  if (!mounted || status === 'loading' || !session) {
     return null;
   }
 

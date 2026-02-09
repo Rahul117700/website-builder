@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { 
-  RocketLaunchIcon, 
+import {
+  RocketLaunchIcon,
   EnvelopeIcon,
   PhoneIcon,
   MapPinIcon,
@@ -38,9 +38,9 @@ export default function ContactPage() {
     gsap.registerPlugin();
 
     // Set initial visibility
-    gsap.set('.contact-title, .contact-subtitle, .contact-form, .contact-info, .contact-method', { 
-      opacity: 1, 
-      y: 0 
+    gsap.set('.contact-title, .contact-subtitle, .contact-form, .contact-info, .contact-method', {
+      opacity: 1,
+      y: 0
     });
 
     // Contact section animations
@@ -48,21 +48,21 @@ export default function ContactPage() {
     contactTl
       .set('.contact-title', { opacity: 0, y: 50 })
       .set('.contact-subtitle', { opacity: 0, y: 30 })
-      .to('.contact-title', { 
-        duration: 1, 
-        y: 0, 
-        opacity: 1, 
-        ease: 'power3.out' 
+      .to('.contact-title', {
+        duration: 1,
+        y: 0,
+        opacity: 1,
+        ease: 'power3.out'
       })
-      .to('.contact-subtitle', { 
-        duration: 0.8, 
-        y: 0, 
-        opacity: 1, 
-        ease: 'power2.out' 
+      .to('.contact-subtitle', {
+        duration: 0.8,
+        y: 0,
+        opacity: 1,
+        ease: 'power2.out'
       }, '-=0.5');
 
     // Form animations
-    gsap.fromTo('.contact-form', 
+    gsap.fromTo('.contact-form',
       { opacity: 0, y: 30 },
       {
         duration: 0.8,
@@ -74,7 +74,7 @@ export default function ContactPage() {
     );
 
     // Contact info animations
-    gsap.fromTo('.contact-info', 
+    gsap.fromTo('.contact-info',
       { opacity: 0, y: 30 },
       {
         duration: 0.8,
@@ -86,7 +86,7 @@ export default function ContactPage() {
     );
 
     // Contact methods animations
-    gsap.fromTo('.contact-method', 
+    gsap.fromTo('.contact-method',
       { opacity: 0, y: 30 },
       {
         duration: 0.8,
@@ -111,16 +111,31 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit form');
+      }
+
       setSubmitSuccess(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
-      
+
       // Reset success message after 5 seconds
       setTimeout(() => setSubmitSuccess(false), 5000);
-    }, 2000);
+    } catch (error) {
+      console.error('Submission error:', error);
+      alert('Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactMethods = [
@@ -167,23 +182,99 @@ export default function ContactPage() {
                 </div>
 
                 {/* Email Contact - Large and Prominent */}
-                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-8 border-2 border-indigo-200 mb-8">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
-                    <EnvelopeIcon className="h-8 w-8 text-indigo-600" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Email Us</h3>
-                  <p className="text-gray-600 mb-4">
-                    Get help with your funnels, payments, or technical issues
-                  </p>
-                  <a 
-                    href="mailto:i.am.rahul4550@gmail.com"
-                    className="text-2xl sm:text-3xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors break-all"
-                  >
-                    i.am.rahul4550@gmail.com
-                  </a>
-                  <p className="text-sm text-gray-500 mt-4">
-                    Response within 24-48 hours
-                  </p>
+                {/* Contact Form */}
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-6 sm:p-10 border border-indigo-100 mb-8 text-left">
+                  {submitSuccess ? (
+                    <div className="text-center py-10 animate-in fade-in zoom-in duration-500">
+                      <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
+                        <CheckCircleIcon className="h-10 w-10 text-green-600" />
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">Message Sent!</h3>
+                      <p className="text-gray-600">
+                        Thank you for reaching out. Our team will get back to you within 24-48 hours.
+                      </p>
+                      <button
+                        onClick={() => setSubmitSuccess(false)}
+                        className="mt-8 text-indigo-600 font-semibold hover:underline"
+                      >
+                        Send another message
+                      </button>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                          <label htmlFor="name" className="block text-sm font-bold text-gray-700 mb-2">Full Name</label>
+                          <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            required
+                            value={formData.name}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none text-gray-900"
+                            placeholder="Your Name"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
+                          <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            required
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none text-gray-900"
+                            placeholder="your@email.com"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label htmlFor="subject" className="block text-sm font-bold text-gray-700 mb-2">Subject</label>
+                        <input
+                          type="text"
+                          id="subject"
+                          name="subject"
+                          required
+                          value={formData.subject}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none text-gray-900"
+                          placeholder="How can we help?"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="message" className="block text-sm font-bold text-gray-700 mb-2">Your Message</label>
+                        <textarea
+                          id="message"
+                          name="message"
+                          required
+                          rows={5}
+                          value={formData.message}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all outline-none text-gray-900 resize-none"
+                          placeholder="Tell us more about your inquiry..."
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className={`w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            Sending Message...
+                          </>
+                        ) : (
+                          <>
+                            <EnvelopeIcon className="h-5 w-5" />
+                            Send Message
+                          </>
+                        )}
+                      </button>
+                    </form>
+                  )}
                 </div>
 
                 {/* Quick Info Cards */}
@@ -218,7 +309,7 @@ export default function ContactPage() {
               Quick answers to common questions about our platform and services.
             </p>
           </div>
-          
+
           <div className="space-y-6">
             {[
               {
@@ -278,8 +369,8 @@ export default function ContactPage() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="text-center sm:text-left">
-              <Logo 
-                variant="white" 
+              <Logo
+                variant="white"
                 size="lg"
                 href=""
               />
@@ -287,7 +378,7 @@ export default function ContactPage() {
                 Create sales funnels and sell digital products with ease.
               </p>
             </div>
-            
+
             <div className="text-center sm:text-left">
               <h3 className="text-sm sm:text-base font-semibold mb-3">Support</h3>
               <ul className="space-y-2 text-gray-400">
@@ -295,7 +386,7 @@ export default function ContactPage() {
                 <li><Link href="/about" className="hover:text-white transition-colors text-xs sm:text-sm">About</Link></li>
               </ul>
             </div>
-            
+
             <div className="text-center sm:text-left">
               <h3 className="text-sm sm:text-base font-semibold mb-3">Legal</h3>
               <ul className="space-y-2 text-gray-400">
@@ -304,7 +395,7 @@ export default function ContactPage() {
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-gray-800 mt-8 pt-6 text-center text-gray-400">
             <p className="text-xs sm:text-sm">&copy; 2025 sedStudios. All rights reserved.</p>
           </div>

@@ -1,6 +1,7 @@
 import './globals.css';
 import { Inter } from 'next/font/google';
 import { Providers } from '@/components/providers';
+import Script from 'next/script';
 import FacebookPixel from '@/components/analytics/FacebookPixel';
 import RetentionManager from '@/components/retention/RetentionManager';
 import PageViewTracker from '@/components/PageViewTracker';
@@ -64,18 +65,19 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Google tag (gtag.js) */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-KMVVHTV8MX"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-KMVVHTV8MX');
-            `,
-          }}
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-KMVVHTV8MX"
+          strategy="afterInteractive"
         />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-KMVVHTV8MX');
+          `}
+        </Script>
 
         {/* Structured Data */}
         <script
@@ -92,16 +94,16 @@ export default function RootLayout({
         <link rel="alternate icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/logo.svg" />
 
-        {/* Preconnect to improve performance */}
+        {/* Preconnect */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
         <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
 
         {/* Google AdSense */}
-        <script
-          async
+        <Script
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5167608413139807"
+          strategy="afterInteractive"
           crossOrigin="anonymous"
         />
 

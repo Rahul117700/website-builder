@@ -125,12 +125,12 @@ export default function SuperAdminDashboard() {
             loading={loading}
           />
           <PulseCard
-            title="Health Index"
-            value={`${Math.round(health.publishedChannelsRatio || 0)}%`}
-            subValue="Production deployment"
-            icon={ShieldCheckIcon}
-            color="amber"
-            trend={-2}
+            title="Pending Inquiries"
+            value={(overview.pendingInquiries || 0).toLocaleString()}
+            subValue="Unresolved transmissions"
+            icon={InboxIcon}
+            color="rose"
+            trend={0}
             loading={loading}
           />
         </div>

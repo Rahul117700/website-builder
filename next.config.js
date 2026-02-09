@@ -58,11 +58,11 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: '/:path*',
         headers: [
           {
             key: 'X-Frame-Options',
-            value: 'DENY',
+            value: 'SAMEORIGIN', // Changed from DENY to allow framing on same origin (better for some previews)
           },
           {
             key: 'X-Content-Type-Options',
@@ -70,7 +70,7 @@ const nextConfig = {
           },
           {
             key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
+            value: 'no-referrer-when-downgrade',
           },
           {
             key: 'X-XSS-Protection',
@@ -84,20 +84,19 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.google.com https://adservice.google.com https://adservice.google.co.in",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://checkout.razorpay.com",
-              "img-src 'self' data: blob: https: http:",
+              "img-src 'self' data: blob: https: http: https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.google.com",
               "font-src 'self' data: https://fonts.gstatic.com https://checkout.razorpay.com",
-              "connect-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.google-analytics.com https://www.googletagmanager.com https://connect.facebook.net",
-              "frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.youtube.com",
+              "connect-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.google-analytics.com https://www.googletagmanager.com https://connect.facebook.net https://googleads.g.doubleclick.net https://www.google.com https://pagead2.googlesyndication.com https://stats.g.doubleclick.net",
+              "frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.youtube.com https://googleads.g.doubleclick.net https://www.google.com https://tpc.googlesyndication.com",
               "media-src 'self' blob: data: https:",
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
-              "frame-ancestors 'none'"
+              "frame-ancestors 'self'" // Changed from none to self
             ].join('; '),
           },
-          // Enhanced no-store headers as suggested by ChatGPT
           {
             key: 'Cache-Control',
             value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
@@ -116,7 +115,7 @@ const nextConfig = {
           },
         ],
       },
-      // Allow static assets to be cached for performance
+      // Keep your existing static assets rule
       {
         source: '/_next/static/:path*',
         headers: [

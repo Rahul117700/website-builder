@@ -152,7 +152,7 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
                 >
                   {session.user?.image ? (
                     <img
-                      src={session.user.image.startsWith('/') ? `${session.user.image}?t=${Date.now()}` : session.user.image}
+                      src={session.user.image}
                       alt="Profile"
                       className="h-7 w-7 rounded-full object-cover border-2 border-gray-200"
                       onError={(e) => {
@@ -182,7 +182,7 @@ export default function Header({ showProfile = true, className = "" }: HeaderPro
                     <div className="px-4 py-3 border-b border-gray-100 flex items-start gap-3">
                       {session.user?.image ? (
                         <img
-                          src={session.user.image.startsWith('/') ? `${session.user.image}?t=${Date.now()}` : session.user.image}
+                          src={session.user.image}
                           alt={session.user.name || "User"}
                           className="w-10 h-10 rounded-full object-cover"
                         />
