@@ -127,43 +127,89 @@ export default function UserManagementPage() {
                     title="Entity Directory"
                     subtitle="Direct Control Over Platform Identities"
                     headerAction={
-                        <div className="flex flex-wrap items-center gap-4">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
                             <div className="relative group">
                                 <input
                                     type="text"
-                                    placeholder="Search ID / Email / Name..."
-                                    className="bg-slate-900 border border-slate-800 rounded-2xl px-12 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none w-64 lg:w-80 group-hover:border-slate-700 transition-all font-bold placeholder:text-slate-600"
+                                    placeholder="Search ID / Email..."
+                                    className="bg-slate-900 border border-slate-800 rounded-2xl pl-12 pr-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none w-full sm:w-64 lg:w-80 group-hover:border-slate-700 transition-all font-bold placeholder:text-slate-600"
                                     value={filters.search}
                                     onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value, page: 1 }))}
                                 />
                                 <MagnifyingGlassIcon className="w-5 h-5 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2 group-hover:text-indigo-400 transition-colors" />
                             </div>
 
-                            <select
-                                className="bg-slate-900 border border-slate-800 rounded-2xl px-6 py-3 text-sm text-white font-bold outline-none cursor-pointer focus:ring-2 focus:ring-indigo-500"
-                                value={filters.role}
-                                onChange={(e) => setFilters(prev => ({ ...prev, role: e.target.value, page: 1 }))}
-                            >
-                                <option value="">All Roles</option>
-                                <option value="USER">User</option>
-                                <option value="ADMIN">Admin</option>
-                                <option value="SUPER_ADMIN">Super Admin</option>
-                            </select>
+                            <div className="flex gap-2">
+                                <select
+                                    className="flex-1 sm:flex-none bg-slate-900 border border-slate-800 rounded-2xl px-4 sm:px-6 py-3 text-sm text-white font-bold outline-none cursor-pointer focus:ring-2 focus:ring-indigo-500"
+                                    value={filters.role}
+                                    onChange={(e) => setFilters(prev => ({ ...prev, role: e.target.value, page: 1 }))}
+                                >
+                                    <option value="">Roles</option>
+                                    <option value="USER">User</option>
+                                    <option value="ADMIN">Admin</option>
+                                    <option value="SUPER_ADMIN">Ops</option>
+                                </select>
 
-                            <select
-                                className="bg-slate-900 border border-slate-800 rounded-2xl px-6 py-3 text-sm text-white font-bold outline-none cursor-pointer focus:ring-2 focus:ring-indigo-500"
-                                value={filters.status}
-                                onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value, page: 1 }))}
-                            >
-                                <option value="">All Status</option>
-                                <option value="ACTIVE">Active</option>
-                                <option value="DISABLED">Disabled</option>
-                                <option value="SUSPENDED">Suspended</option>
-                            </select>
+                                <select
+                                    className="flex-1 sm:flex-none bg-slate-900 border border-slate-800 rounded-2xl px-4 sm:px-6 py-3 text-sm text-white font-bold outline-none cursor-pointer focus:ring-2 focus:ring-indigo-500"
+                                    value={filters.status}
+                                    onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value, page: 1 }))}
+                                >
+                                    <option value="">Status</option>
+                                    <option value="ACTIVE">Active</option>
+                                    <option value="DISABLED">Off</option>
+                                </select>
+                            </div>
                         </div>
                     }
                 >
-                    <div className="overflow-x-auto min-h-[400px]">
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-4">
+                        {users.map((user) => (
+                            <div key={user.id} className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 space-y-4" onClick={() => router.push(`/auth/dashboard/super-admin/user/${user.id}`)}>
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-slate-800 flex items-center justify-center font-black text-indigo-400 overflow-hidden">
+                                        {user.image ? <img src={user.image} className="w-full h-full object-cover" /> : user.name?.[0] || 'A'}
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-sm font-black text-white truncate italic">{user.name || 'Anonymous'}</p>
+                                            <NeonBadge color={user.role === 'SUPER_ADMIN' ? 'rose' : 'indigo'}>{user.role}</NeonBadge>
+                                        </div>
+                                        <p className="text-[10px] font-mono text-slate-500 truncate">{user.email}</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2 text-[10px] font-bold uppercase tracking-widest pt-4 border-t border-slate-800/50">
+                                    <div>
+                                        <p className="text-slate-600 mb-1">Activity</p>
+                                        <p className="text-white text-xs font-black">{user._count?.channels || 0} Units</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-slate-600 mb-1">Status</p>
+                                        <div className="flex items-center gap-1.5">
+                                            <div className={`w-1.5 h-1.5 rounded-full ${user.status === 'ACTIVE' ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-rose-500'}`}></div>
+                                            <span className={user.status === 'ACTIVE' ? 'text-emerald-400' : 'text-rose-400'}>{user.status}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-2">
+                                    <div className="text-[10px] font-black text-indigo-400">TOUCH TO MANAGE ADMIN →</div>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleDeleteUser(user.id, user.name || user.email); }}
+                                        className="p-2 text-rose-500 bg-rose-500/10 rounded-lg"
+                                    >
+                                        <TrashIcon className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto min-h-[400px]">
                         <table className="w-full text-left border-separate border-spacing-y-4">
                             <thead>
                                 <tr className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
@@ -263,25 +309,25 @@ export default function UserManagementPage() {
                     </div>
 
                     {/* Registry Pagination */}
-                    <div className="mt-8 pt-8 border-t border-slate-800/50 flex items-center justify-between">
-                        <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">
-                            Showing {users.length} of {pagination.total} Entities
+                    <div className="mt-8 pt-8 border-t border-slate-800/50 flex flex-col sm:flex-row items-center justify-between gap-6">
+                        <div className="text-[10px] sm:text-xs font-black text-slate-500 uppercase tracking-widest">
+                            Syncing {users.length} of {pagination.total} Platform Entities
                         </div>
                         <div className="flex items-center gap-2">
                             <button
                                 disabled={pagination.page <= 1}
                                 onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-                                className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white disabled:opacity-20 transition-all font-black text-sm uppercase"
+                                className="p-2.5 sm:p-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white disabled:opacity-20 transition-all font-black text-sm uppercase"
                             >
                                 <ChevronLeftIcon className="w-5 h-5" />
                             </button>
-                            <div className="px-5 py-3 rounded-xl bg-indigo-600 text-white font-black text-sm shadow-lg shadow-indigo-600/20">
-                                PAGE {pagination.page} / {pagination.pages}
+                            <div className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-indigo-600 text-white font-black text-[10px] sm:text-xs shadow-lg shadow-indigo-600/20 uppercase tracking-widest whitespace-nowrap">
+                                L {pagination.page} / {pagination.pages}
                             </div>
                             <button
                                 disabled={pagination.page >= pagination.pages}
                                 onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-                                className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white disabled:opacity-20 transition-all font-black text-sm uppercase"
+                                className="p-2.5 sm:p-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-400 hover:text-white disabled:opacity-20 transition-all font-black text-sm uppercase"
                             >
                                 <ChevronRightIcon className="w-5 h-5" />
                             </button>

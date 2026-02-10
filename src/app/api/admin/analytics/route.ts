@@ -42,10 +42,15 @@ export async function GET(request: Request) {
     });
     console.log('Active users:', activeUsers);
 
-    const pendingInquiries = await prisma.contactForm.count({
-      where: { status: 'PENDING' }
-    });
-    console.log('Pending inquiries:', pendingInquiries);
+    let pendingInquiries = 0;
+    try {
+      pendingInquiries = await prisma.contactForm.count({
+        where: { status: 'PENDING' }
+      });
+      console.log('Pending inquiries:', pendingInquiries);
+    } catch (e) {
+      console.warn('ContactForm table might not exist yet:', e);
+    }
 
     // Calculate total revenue from completed orders (case-insensitive check)
     const allOrders = await prisma.funnelOrder.findMany({

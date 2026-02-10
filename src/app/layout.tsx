@@ -5,6 +5,7 @@ import Script from 'next/script';
 import FacebookPixel from '@/components/analytics/FacebookPixel';
 import RetentionManager from '@/components/retention/RetentionManager';
 import PageViewTracker from '@/components/PageViewTracker';
+import InstallPWA from '@/components/InstallPWA';
 import { generateSEOMetadata, generateWebsiteSchema, generateOrganizationSchema } from '@/utils/seo';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -89,11 +90,6 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
 
-        {/* Favicon */}
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="alternate icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/logo.svg" />
-
         {/* Preconnect */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -107,14 +103,43 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
 
+        {/* PWA & Mobile Optimization */}
+        <link rel="manifest" href="/manifest.json?v=4" />
+        <meta name="theme-color" content="#6366f1" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        {/* Favicon */}
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="alternate icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/logo/app_logo.gif" />
+
         {/* RSS Feed */}
         <link rel="alternate" type="application/rss+xml" title="sedStudios Blog RSS Feed" href="/feed.xml" />
+
+        {/* Service Worker Registration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                  }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
+                  });
+                });
+              }
+            `,
+          }}
+        />
       </head>
       <body className={`${inter.variable} font-sans`}>
         <Providers>
           <FacebookPixel />
           <PageViewTracker />
           <RetentionManager />
+          <InstallPWA />
           {children}
         </Providers>
       </body>

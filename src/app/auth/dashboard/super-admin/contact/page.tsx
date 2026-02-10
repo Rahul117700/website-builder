@@ -109,7 +109,51 @@ export default function ContactSubmissionsPage() {
                 </div>
 
                 <GlassContainer title="Encrypted Inbound Feed" subtitle="Production communication streams">
-                    <div className="overflow-x-auto">
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden space-y-4">
+                        {submissions.map((sub) => (
+                            <div
+                                key={sub.id}
+                                className="bg-slate-900/50 border border-slate-800 rounded-2xl p-4 space-y-4"
+                                onClick={() => setSelectedSubmission(sub)}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
+                                            <EnvelopeIcon className="w-4 h-4 text-indigo-400" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-black text-white">{sub.name}</p>
+                                            <p className="text-[10px] text-slate-500 font-bold">{sub.email}</p>
+                                        </div>
+                                    </div>
+                                    <NeonBadge color={getStatusColor(sub.status) as any}>{sub.status}</NeonBadge>
+                                </div>
+
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Subject</p>
+                                    <p className="text-xs font-bold text-slate-300 truncate">{sub.subject || 'No Subject'}</p>
+                                </div>
+
+                                <div className="flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-widest pt-2 border-t border-slate-800/50">
+                                    <div className="flex items-center gap-1.5">
+                                        <ClockIcon className="w-3 h-3" />
+                                        {new Date(sub.createdAt).toLocaleDateString()}
+                                    </div>
+                                    <div className="text-indigo-400">View Transmission →</div>
+                                </div>
+                            </div>
+                        ))}
+                        {submissions.length === 0 && !loading && (
+                            <div className="text-center py-10 opacity-50">
+                                <InboxIcon className="w-10 h-10 text-slate-800 mx-auto mb-3" />
+                                <p className="text-[10px] font-mono tracking-widest uppercase italic">Awaiting System Events...</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Desktop Table View */}
+                    <div className="hidden lg:block overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="border-b border-slate-800 text-[10px] uppercase tracking-[0.2em] font-black text-slate-500">
@@ -198,7 +242,7 @@ export default function ContactSubmissionsPage() {
                             initial={{ scale: 0.9, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-[2rem] shadow-2xl overflow-hidden"
+                            className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-[1.5rem] sm:rounded-[2rem] shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
                         >
                             {/* Modal Header */}
                             <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
@@ -220,12 +264,12 @@ export default function ContactSubmissionsPage() {
                             </div>
 
                             {/* Modal Content */}
-                            <div className="p-8 space-y-8">
-                                <div className="grid grid-cols-2 gap-6">
+                            <div className="p-4 sm:p-8 space-y-6 sm:space-y-8 overflow-y-auto overflow-x-hidden">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                                     <div>
                                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 block">Sender Profile</label>
                                         <p className="text-xs font-bold text-white">{selectedSubmission.name}</p>
-                                        <p className="text-[10px] text-indigo-400 font-bold">{selectedSubmission.email}</p>
+                                        <p className="text-[10px] text-indigo-400 font-bold break-all">{selectedSubmission.email}</p>
                                     </div>
                                     <div>
                                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5 block">Timestamp</label>
@@ -238,9 +282,9 @@ export default function ContactSubmissionsPage() {
                                     <p className="text-sm font-black text-indigo-100 italic">"{selectedSubmission.subject || 'No Subject Defined'}"</p>
                                 </div>
 
-                                <div className="p-6 bg-slate-950/50 border border-slate-800 rounded-2xl relative overflow-hidden group">
+                                <div className="p-4 sm:p-6 bg-slate-950/50 border border-slate-800 rounded-2xl relative overflow-hidden group">
                                     <div className="absolute top-0 right-0 p-2 opacity-5 pointer-events-none">
-                                        <ChatBubbleLeftEllipsisIcon className="w-20 h-20 text-white" />
+                                        <ChatBubbleLeftEllipsisIcon className="w-16 sm:w-20 h-16 sm:h-20 text-white" />
                                     </div>
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Decrypted Message</label>
                                     <div className="text-xs text-slate-300 leading-relaxed font-medium whitespace-pre-wrap relative z-10">
@@ -248,9 +292,9 @@ export default function ContactSubmissionsPage() {
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-between pt-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-slate-800/50">
                                     <div className="flex items-center gap-2">
-                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Current Status:</label>
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Status:</label>
                                         <NeonBadge color={getStatusColor(selectedSubmission.status) as any}>
                                             {selectedSubmission.status}
                                         </NeonBadge>
@@ -261,7 +305,7 @@ export default function ContactSubmissionsPage() {
                                             updateStatus(selectedSubmission.id, e.target.value);
                                             setSelectedSubmission({ ...selectedSubmission, status: e.target.value });
                                         }}
-                                        className="bg-slate-950 border border-slate-800 text-[10px] font-black text-indigo-400 rounded-lg px-3 py-1.5 outline-none focus:ring-1 focus:ring-indigo-500"
+                                        className="bg-slate-950 border border-slate-800 text-[10px] font-black text-indigo-400 rounded-lg px-3 py-2 sm:py-1.5 outline-none focus:ring-1 focus:ring-indigo-500 w-full sm:w-auto"
                                     >
                                         <option value="PENDING">MARK AS PENDING</option>
                                         <option value="REVIEWED">MARK AS REVIEWED</option>
@@ -271,10 +315,10 @@ export default function ContactSubmissionsPage() {
                             </div>
 
                             {/* Modal Footer */}
-                            <div className="p-6 bg-slate-950/30 border-t border-slate-800 flex justify-end">
+                            <div className="p-4 sm:p-6 bg-slate-950/30 border-t border-slate-800 flex justify-end">
                                 <button
                                     onClick={() => setSelectedSubmission(null)}
-                                    className="px-8 py-3 bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all active:scale-95"
+                                    className="w-full sm:w-auto px-8 py-3 bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all active:scale-95"
                                 >
                                     Close Terminal
                                 </button>

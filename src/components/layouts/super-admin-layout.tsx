@@ -20,7 +20,8 @@ import {
     Bars3Icon,
     XMarkIcon,
     RocketLaunchIcon,
-    ChatBubbleLeftEllipsisIcon
+    ChatBubbleLeftEllipsisIcon,
+    GlobeAltIcon
 } from '@heroicons/react/24/outline';
 
 
@@ -67,26 +68,32 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
             </div>
 
             {/* Mobile Header */}
-            <header className={`lg:hidden sticky top-0 z-[60] w-full transition-all duration-300 ${scrolled ? 'bg-slate-950/80 backdrop-blur-md border-b border-slate-800' : 'bg-transparent'}`}>
-                <div className="flex items-center justify-between px-4 py-4">
-                    <div className="flex items-center gap-3">
+            <header className={`lg:hidden sticky top-0 z-[60] w-full transition-all duration-300 ${scrolled ? 'bg-slate-950/90 backdrop-blur-xl border-b border-white/5' : 'bg-transparent'}`}>
+                <div className="flex items-center justify-between px-6 py-4">
+                    <div className={`flex items-center gap-3 transition-opacity duration-300 ${isSidebarOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center shadow-lg shadow-indigo-500/20 ring-1 ring-white/20">
                             <ShieldCheckIcon className="w-6 h-6 text-white" />
                         </div>
-                        <span className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">COMMAND</span>
+                        <div className="flex flex-col">
+                            <span className="text-lg font-black tracking-tighter text-white leading-none">COMMAND</span>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">ONLINE</span>
+                            </div>
+                        </div>
                     </div>
                     <button
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                        className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition-colors"
+                        className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 active:scale-95 transition-all"
                     >
-                        {isSidebarOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
+                        {isSidebarOpen ? <XMarkIcon className="w-6 h-6 text-white" /> : <Bars3Icon className="w-6 h-6" />}
                     </button>
                 </div>
             </header>
 
             {/* Sidebar */}
             <aside
-                className={`fixed inset-y-0 left-0 z-50 w-72 transform transition-all duration-500 ease-in-out lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed inset-y-0 left-0 z-[100] w-72 transform transition-all duration-500 ease-in-out lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
                 <div className="h-full bg-slate-950/40 backdrop-blur-xl border-r border-slate-800/50 flex flex-col m-2 lg:m-4 rounded-[2rem] shadow-2xl relative overflow-hidden group">
@@ -105,14 +112,24 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
                             </div>
                         </div>
 
-                        {/* Back to User Dashboard */}
-                        <Link
-                            href="/auth/dashboard"
-                            className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-slate-900/50 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800/50 hover:border-slate-700 transition-all duration-300 mb-8 text-sm group/back"
-                        >
-                            <ArrowLeftIcon className="w-4 h-4 group-hover/back:-translate-x-1 transition-transform" />
-                            <span>User Dashboard</span>
-                        </Link>
+                        {/* Back to Home & User Dashboard */}
+                        <div className="space-y-2 mb-8">
+                            <Link
+                                href="/"
+                                className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-slate-900/50 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800/50 hover:border-slate-700 transition-all duration-300 text-sm group/home"
+                            >
+                                <GlobeAltIcon className="w-4 h-4 group-hover/home:rotate-12 transition-transform" />
+                                <span>Site Home</span>
+                            </Link>
+
+                            <Link
+                                href="/auth/dashboard"
+                                className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 hover:text-white hover:bg-indigo-500/20 transition-all duration-300 text-sm group/back"
+                            >
+                                <ArrowLeftIcon className="w-4 h-4 group-hover/back:-translate-x-1 transition-transform" />
+                                <span>User Dashboard</span>
+                            </Link>
+                        </div>
 
                         {/* Nav Links */}
                         <nav className="space-y-2">
@@ -122,6 +139,7 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
                                     <Link
                                         key={item.name}
                                         href={item.href}
+                                        onClick={() => setIsSidebarOpen(false)}
                                         className={`flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 group/nav ${isActive
                                             ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
                                             : 'text-slate-400 hover:bg-slate-900/50 hover:text-white'
@@ -172,7 +190,7 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
             {/* Sidebar Overlay (Mobile) */}
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm lg:hidden"
+                    className="fixed inset-0 z-[90] bg-slate-950/80 backdrop-blur-sm lg:hidden"
                     onClick={() => setIsSidebarOpen(false)}
                 ></div>
             )}

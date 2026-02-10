@@ -96,7 +96,7 @@ export default function SuperAdminDashboard() {
     <SuperAdminLayout>
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
         {/* Top Tier Status */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <PulseCard
             title="Total Capital"
             value={`₹${(overview.totalRevenue || 0).toLocaleString()}`}
@@ -151,7 +151,7 @@ export default function SuperAdminDashboard() {
               </button>
             </div>
 
-            <div className="h-[350px] w-full mt-4">
+            <div className="h-[250px] sm:h-[350px] w-full mt-4">
               {analyticsData ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={analyticsData.analytics.growthData}>

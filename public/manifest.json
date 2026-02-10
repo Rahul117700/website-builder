@@ -1,0 +1,22 @@
+{
+    "name": "SED STUDIOS",
+    "short_name": "SED STUDIOS",
+    "description": "Premium Video Streaming & Digital Product Platform",
+    "start_url": "/?v=logo4",
+    "display": "standalone",
+    "background_color": "#020617",
+    "theme_color": "#6366f1",
+    "icons": [
+        {
+            "src": "/logo/app_logo.gif",
+            "sizes": "512x512",
+            "type": "image/gif",
+            "purpose": "any"
+        }
+    ],
+    "categories": [
+        "social",
+        "entertainment",
+        "video"
+    ]
+}

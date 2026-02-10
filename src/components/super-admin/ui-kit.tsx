@@ -25,32 +25,32 @@ export const PulseCard = ({ title, value, subValue, trend, icon: Icon, color = '
     const selectedColor = colors[color];
 
     return (
-        <div className={`relative group overflow-hidden bg-slate-950/40 backdrop-blur-xl border border-slate-800 rounded-[2rem] p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:border-slate-700`}>
+        <div className={`relative group overflow-hidden bg-slate-950/40 backdrop-blur-xl border border-slate-800 rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-6 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:border-slate-700`}>
             {/* Background Glow */}
             <div className={`absolute -right-10 -top-10 w-32 h-32 bg-gradient-to-br ${selectedColor.split(' ').slice(0, 2).join(' ')} blur-[60px] opacity-20 transition-opacity duration-500 group-hover:opacity-40 animate-pulse`}></div>
 
             <div className="relative flex items-start justify-between">
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                     <div className="flex items-center gap-2">
-                        <div className={`p-2 rounded-xl bg-slate-900 border border-slate-800 ${selectedColor.split(' ')[2]} group-hover:scale-110 transition-transform duration-300`}>
-                            <Icon className="w-5 h-5" />
+                        <div className={`p-1.5 sm:p-2 rounded-xl bg-slate-900 border border-slate-800 ${selectedColor.split(' ')[2]} group-hover:scale-110 transition-transform duration-300`}>
+                            <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-[0.2em]">{title}</span>
+                        <span className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-[0.2em]">{title}</span>
                     </div>
 
-                    <div className="space-y-1">
+                    <div className="space-y-0.5 sm:space-y-1">
                         {loading ? (
-                            <div className="h-10 w-32 bg-slate-900 animate-pulse rounded-lg"></div>
+                            <div className="h-8 sm:h-10 w-24 sm:w-32 bg-slate-900 animate-pulse rounded-lg"></div>
                         ) : (
-                            <h3 className="text-4xl font-black text-white tracking-tighter">{value}</h3>
+                            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tighter">{value}</h3>
                         )}
-                        {subValue && <p className="text-xs font-bold text-slate-500 tracking-wide">{subValue}</p>}
+                        {subValue && <p className="text-[10px] sm:text-xs font-bold text-slate-500 tracking-wide">{subValue}</p>}
                     </div>
 
                     {!loading && trend !== undefined && (
-                        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${trend >= 0 ? 'text-emerald-400 bg-emerald-500/5 border-emerald-500/10' : 'text-rose-400 bg-rose-500/5 border-rose-500/10'
+                        <div className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-[10px] font-black tracking-widest uppercase border ${trend >= 0 ? 'text-emerald-400 bg-emerald-500/5 border-emerald-500/10' : 'text-rose-400 bg-rose-500/5 border-rose-500/10'
                             }`}>
-                            {trend >= 0 ? <ArrowUpIcon className="w-3 h-3" /> : <ArrowDownIcon className="w-3 h-3" />}
+                            {trend >= 0 ? <ArrowUpIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> : <ArrowDownIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3" />}
                             {Math.abs(trend)}% GROWTH
                         </div>
                     )}
@@ -59,7 +59,7 @@ export const PulseCard = ({ title, value, subValue, trend, icon: Icon, color = '
                 {/* Decorative Element */}
                 <div className="flex flex-col gap-1 items-end opacity-20 group-hover:opacity-40 transition-opacity">
                     {[1, 2, 3].map(i => (
-                        <div key={i} className={`h-1 rounded-full bg-indigo-500`} style={{ width: `${i * 8}px` }}></div>
+                        <div key={i} className={`h-0.5 sm:h-1 rounded-full bg-indigo-500`} style={{ width: `${i * 6}px` }}></div>
                     ))}
                 </div>
             </div>
@@ -76,15 +76,15 @@ export const PulseCard = ({ title, value, subValue, trend, icon: Icon, color = '
 };
 
 export const GlassContainer = ({ children, title, subtitle, className = '', headerAction }: { children: React.ReactNode; title?: string; subtitle?: string; className?: string; headerAction?: React.ReactNode }) => (
-    <div className={`relative bg-slate-950/40 backdrop-blur-2xl border border-slate-800/80 rounded-[2.5rem] p-8 shadow-2xl overflow-hidden group ${className}`}>
+    <div className={`relative bg-slate-950/40 backdrop-blur-2xl border border-slate-800/80 rounded-[1.5rem] sm:rounded-[2.5rem] p-4 sm:p-8 shadow-2xl overflow-hidden group ${className}`}>
         {/* Header Shine */}
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
 
         {(title || headerAction) && (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
                 <div>
-                    {title && <h3 className="text-2xl font-black text-white tracking-tight underline decoration-indigo-500/30 decoration-4 underline-offset-8">{title}</h3>}
-                    {subtitle && <p className="text-xs font-bold text-slate-500 mt-3 tracking-widest uppercase">{subtitle}</p>}
+                    {title && <h3 className="text-lg sm:text-2xl font-black text-white tracking-tight underline transition-all decoration-indigo-500/30 decoration-2 sm:decoration-4 underline-offset-4 sm:underline-offset-8">{title}</h3>}
+                    {subtitle && <p className="text-[10px] sm:text-xs font-bold text-slate-500 mt-2 sm:mt-3 tracking-[0.1em] sm:tracking-widest uppercase truncate">{subtitle}</p>}
                 </div>
                 {headerAction && <div className="flex-shrink-0">{headerAction}</div>}
             </div>
