@@ -44,7 +44,7 @@ export function generateSEOMetadata(config: SEOConfig): Metadata {
     authors: author ? [{ name: author }] : undefined,
     creator: author || siteName,
     publisher: siteName,
-    
+
     // Open Graph
     openGraph: {
       title: fullTitle,
@@ -248,9 +248,57 @@ export function generateWebsiteSchema(config: {
   };
 }
 
+export function generateProfileSchema(config: {
+  name: string;
+  description: string;
+  image: string;
+  url: string;
+}) {
+  const { name, description, image, url } = config;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+  const imageUrl = image.startsWith('http') ? image : `${baseUrl}${image}`;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    mainEntity: {
+      '@type': 'Person',
+      name,
+      description,
+      image: imageUrl,
+      url: fullUrl,
+    },
+  };
+}
+
+export function generateVideoSchema(config: {
+  name: string;
+  description: string;
+  thumbnailUrl: string;
+  uploadDate: string;
+  duration?: string;
+  contentUrl?: string;
+  embedUrl?: string;
+}) {
+  const { name, description, thumbnailUrl, uploadDate, duration, contentUrl, embedUrl } = config;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name,
+    description,
+    thumbnailUrl,
+    uploadDate,
+    ...(duration && { duration }),
+    ...(contentUrl && { contentUrl }),
+    ...(embedUrl && { embedUrl }),
+  };
+}
+
 // Helper to generate schema script tag string
 export function getSchemaScript(schema: any): string {
-  return `<script type="application/ld+json">${JSON.stringify(schema)}</script>`;
+  return JSON.stringify(schema);
 }
 
 // Common SEO configurations

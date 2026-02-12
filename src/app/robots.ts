@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://yourwebsite.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://sedstudios.com';
 
   return {
     rules: [
@@ -9,6 +9,8 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: '*',
         allow: [
           '/',
+          '/channel',
+          '/channel/*',
           '/about',
           '/contact',
           '/terms',
@@ -37,6 +39,8 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: 'Googlebot',
         allow: [
           '/',
+          '/channel',
+          '/channel/*',
           '/about',
           '/contact',
           '/terms',
@@ -58,6 +62,8 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: 'Bingbot',
         allow: [
           '/',
+          '/channel',
+          '/channel/*',
           '/about',
           '/contact',
           '/terms',

@@ -1,11 +1,12 @@
 import { MetadataRoute } from 'next';
+import { prisma } from '@/lib/prisma';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://sedstudios.com';
   const currentDate = new Date();
 
-  return [
-    // Public pages only - DO NOT include dashboard/auth pages
+  // Public static pages
+  const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: currentDate,
@@ -66,7 +67,48 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.7,
     },
-    // Note: Dashboard pages are excluded from sitemap as they are private
-    // They are blocked in robots.txt
   ];
+
+  try {
+    // Dynamic pages: Channels
+    const channels = await prisma.channel.findMany({
+      select: { slug: true, updatedAt: true },
+      where: {
+        status: 'ACTIVE',
+        published: true,
+      }
+    });
+
+    const channelEntries: MetadataRoute.Sitemap = channels.map((channel) => ({
+      url: `${baseUrl}/channel/${channel.slug}`,
+      lastModified: channel.updatedAt,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    }));
+
+    // Dynamic pages: Products
+    const products = await prisma.channelProduct.findMany({
+      include: {
+        channel: {
+          select: { slug: true }
+        }
+      },
+      where: {
+        published: true,
+        status: 'ACTIVE'
+      }
+    });
+
+    const productEntries: MetadataRoute.Sitemap = products.map((product: any) => ({
+      url: `${baseUrl}/channel/${product.channel?.slug || 'unknown'}/products/${product.id}`,
+      lastModified: product.updatedAt,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    }));
+
+    return [...staticPages, ...channelEntries, ...productEntries];
+  } catch (error) {
+    console.error('Error generating sitemap:', error);
+    return staticPages;
+  }
 }

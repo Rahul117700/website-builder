@@ -1,76 +1,78 @@
-'use client';
+import { prisma } from '@/lib/prisma';
+import ChannelClient from './ChannelClient';
+import { Metadata } from 'next';
+import { generateSEOMetadata, generateProfileSchema } from '@/utils/seo';
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import TemplateRenderer from '@/components/channel/TemplateRenderer';
-import LogoLoader from '@/components/loaders/LogoLoader';
-import MainLayout from '@/components/layout/MainLayout';
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+interface Props {
+  params: { slug: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+}
 
-export default function PublicChannelPage() {
-  const params = useParams();
-  const slug = params?.slug as string;
+export async function generateMetadata(
+  { params }: Props
+): Promise<Metadata> {
+  const slug = params.slug;
 
-  const [channel, setChannel] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (slug) {
-      loadChannel();
-    }
-  }, [slug]);
-
-  const loadChannel = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`/api/channels/public/${slug}`);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        setError(errorData.error || 'Failed to load channel');
-        return;
+  const channel = await prisma.channel.findUnique({
+    where: { slug },
+    include: {
+      user: {
+        select: {
+          name: true,
+          image: true
+        }
       }
-
-      const data = await response.json();
-      setChannel(data);
-    } catch (error) {
-      console.error('Error loading channel:', error);
-      setError('Failed to load channel');
-    } finally {
-      setLoading(false);
     }
-  };
+  });
 
-  if (loading) {
-    return <LogoLoader fullScreen />;
+  if (!channel) {
+    return generateSEOMetadata({
+      title: 'Channel Not Found',
+      description: 'The requested channel could not be found.',
+    });
   }
 
-  if (error || !channel) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-4">
-          <div className="inline-block p-6 bg-red-100 rounded-full mb-6">
-            <ExclamationTriangleIcon className="h-16 w-16 text-red-600" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Channel Not Found</h1>
-          <p className="text-gray-600 mb-8">
-            {error || 'This channel does not exist or is not available.'}
-          </p>
-          <a
-            href="/"
-            className="inline-block px-6 py-3 bg-gray-900 text-white rounded-lg font-semibold hover:bg-black transition-colors"
-          >
-            Go Home
-          </a>
-        </div>
-      </div>
-    );
-  }
+  return generateSEOMetadata({
+    title: `${channel.name} - Official Channel`,
+    description: channel.description || `Explore premium content and digital resources from ${channel.name} on Sed Studios.`,
+    image: channel.profileImage || channel.user?.image || '/logo/logo.gif',
+    url: `/channel/${channel.slug}`,
+    type: 'website',
+    author: channel.user?.name || channel.name,
+  });
+}
+
+export default async function PublicChannelPage({ params }: Props) {
+  const { slug } = params;
+
+  const channel = await prisma.channel.findUnique({
+    where: { slug },
+    include: {
+      user: {
+        select: {
+          name: true,
+          image: true
+        }
+      }
+    }
+  });
+
+  if (!channel) return <ChannelClient slug={slug} initialChannel={null} />;
+
+  const profileSchema = generateProfileSchema({
+    name: channel.name,
+    description: channel.description || '',
+    image: channel.profileImage || channel.user?.image || '',
+    url: `/channel/${channel.slug}`
+  });
 
   return (
-    <MainLayout>
-      <TemplateRenderer channel={channel} />
-    </MainLayout>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(profileSchema) }}
+      />
+      <ChannelClient slug={slug} initialChannel={null} />
+    </>
   );
 }
