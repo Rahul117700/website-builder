@@ -86,7 +86,7 @@ const nextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.google.com https://adservice.google.com https://adservice.google.co.in",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://checkout.razorpay.com",
-              "img-src 'self' data: blob: https: http: https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.google.com",
+              "img-src 'self' data: blob: *",
               "font-src 'self' data: https://fonts.gstatic.com https://checkout.razorpay.com",
               "connect-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.google-analytics.com https://www.googletagmanager.com https://connect.facebook.net https://googleads.g.doubleclick.net https://www.google.com https://pagead2.googlesyndication.com https://stats.g.doubleclick.net",
               "frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.youtube.com https://googleads.g.doubleclick.net https://www.google.com https://tpc.googlesyndication.com",
@@ -145,6 +145,9 @@ const nextConfig = {
   images: {
     domains: [
       'images.pexels.com',
+      'i.pravatar.cc',
+      'images.unsplash.com',
+      'cloudflare-ipfs.com',
       ...(process.env.IMAGE_DOMAINS?.split(',').map(domain => domain.trim()) || []),
       ...(process.env.NEXTAUTH_URL ? [process.env.NEXTAUTH_URL.replace(/^https?:\/\//, '')] : [])
     ].filter(Boolean),

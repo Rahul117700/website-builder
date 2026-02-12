@@ -163,7 +163,7 @@ export default function HomeContent({
                                         <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
                                             {documents.map((product) => (
                                                 <div key={product.id} className="min-w-[200px] w-[200px] flex-shrink-0">
-                                                    <Link href={`/product/${product.slug}`}>
+                                                    <Link href={`/channel/${product.channelSlug}/products/${product.id}`}>
                                                         <div className="aspect-[3/4] bg-gray-100 rounded-xl shadow-sm border border-gray-200 mb-3 overflow-hidden transition-all hover:-translate-y-1 hover:shadow-md relative group flex flex-col items-center justify-center">
                                                             {/* Document Preview/Icon */}
                                                             {product.thumbnail && product.thumbnail !== '/placeholder-product.jpg' ? (

@@ -30,6 +30,7 @@ import {
   UserCircleIcon,
   BanknotesIcon,
   SparklesIcon,
+  ArrowRightIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
 import MainLayout from '@/components/layout/MainLayout';
@@ -331,17 +332,17 @@ export default function ChannelEditorPage() {
   // Calculate completion percentage based on template requirements
   const completionData = useMemo(() => {
     if (!channel) {
-      return { percentage: 0, canPublish: false };
+      return { percentage: 0, canPublish: false, requirements: [] };
     }
 
     // If template is not loaded yet, use basic calculation
     if (!channel.template) {
       const basicRequirements = [
-        { id: 'name', required: true, completed: channel.name && channel.name.length >= 3, weight: 3 },
-        { id: 'description', required: false, completed: !!(channel.description && channel.description.length > 0), weight: 1 },
-        { id: 'welcomeMessage', required: false, completed: !!(channel.welcomeMessage && channel.welcomeMessage.length > 0), weight: 1 },
-        { id: 'coverImage', required: false, completed: !!channel.coverImage, weight: 1 },
-        { id: 'profileImage', required: false, completed: !!channel.profileImage, weight: 1 },
+        { id: 'name', required: true, completed: !!(channel.name && channel.name.length >= 3), weight: 3, label: 'Channel Name' },
+        { id: 'description', required: false, completed: !!(channel.description && channel.description.length > 0), weight: 1, label: 'Description' },
+        { id: 'welcomeMessage', required: false, completed: !!(channel.welcomeMessage && channel.welcomeMessage.length > 0), weight: 1, label: 'Welcome Message' },
+        { id: 'coverImage', required: false, completed: !!channel.coverImage, weight: 1, label: 'Cover Photo' },
+        { id: 'profileImage', required: false, completed: !!channel.profileImage, weight: 1, label: 'Profile Image' },
       ];
 
       const totalWeight = basicRequirements.reduce((sum, req) => sum + req.weight, 0);
@@ -352,19 +353,20 @@ export default function ChannelEditorPage() {
       const percentage = totalWeight > 0 ? Math.round((completedWeight / totalWeight) * 100) : 0;
       const canPublish = basicRequirements.filter((r) => r.required).every((r) => r.completed);
 
-      return { percentage, canPublish };
+      return { percentage, canPublish, requirements: basicRequirements };
     }
 
     const template = channel.template as any;
     const sections = template.sections || {};
-    const requirements: Array<{ id: string; required: boolean; completed: boolean; weight: number }> = [];
+    const requirements: Array<{ id: string; required: boolean; completed: boolean; weight: number; label?: string }> = [];
 
     // Always required: Channel name
     requirements.push({
       id: 'name',
       required: true,
       completed: !!(channel.name && channel.name.length >= 3),
-      weight: 3
+      weight: 3,
+      label: 'Channel Name'
     });
 
     // Check hero section requirements
@@ -374,7 +376,8 @@ export default function ChannelEditorPage() {
           id: 'coverImage',
           required: false,
           completed: !!channel.coverImage,
-          weight: 1
+          weight: 1,
+          label: 'Cover Photo'
         });
       }
       if (sections.hero.showProfile) {
@@ -382,7 +385,8 @@ export default function ChannelEditorPage() {
           id: 'profileImage',
           required: false,
           completed: !!channel.profileImage,
-          weight: 1
+          weight: 1,
+          label: 'Profile Image'
         });
       }
       if (sections.hero.showWelcome) {
@@ -390,7 +394,8 @@ export default function ChannelEditorPage() {
           id: 'welcomeMessage',
           required: false,
           completed: !!(channel.welcomeMessage && channel.welcomeMessage.length > 0),
-          weight: 1
+          weight: 1,
+          label: 'Welcome Message'
         });
       }
       // Description is often shown in hero
@@ -398,7 +403,8 @@ export default function ChannelEditorPage() {
         id: 'description',
         required: false,
         completed: !!(channel.description && channel.description.length > 0),
-        weight: 1
+        weight: 1,
+        label: 'Description'
       });
     }
 
@@ -409,7 +415,8 @@ export default function ChannelEditorPage() {
         id: 'products',
         required: false,
         completed: productCount > 0,
-        weight: 2
+        weight: 2,
+        label: 'Add Products'
       });
     }
 
@@ -419,7 +426,8 @@ export default function ChannelEditorPage() {
         id: 'subscription',
         required: false,
         completed: !!(channel.subscriptionEnabled && channel.subscriptionPrice),
-        weight: 1
+        weight: 1,
+        label: 'Setup Subscription'
       });
     }
 
@@ -429,7 +437,8 @@ export default function ChannelEditorPage() {
         id: 'about',
         required: false,
         completed: !!(channel.description && channel.description.length > 0),
-        weight: 1
+        weight: 1,
+        label: 'About Section'
       });
     }
 
@@ -443,7 +452,7 @@ export default function ChannelEditorPage() {
     const percentage = totalWeight > 0 ? Math.round((completedWeight / totalWeight) * 100) : 0;
     const canPublish = requirements.filter((r) => r.required).every((r) => r.completed);
 
-    return { percentage, canPublish };
+    return { percentage, canPublish, requirements };
   }, [channel, completionKey]);
 
   const handlePublish = async () => {
@@ -1313,6 +1322,60 @@ export default function ChannelEditorPage() {
                         <RocketLaunchIcon className="h-3.5 w-3.5" />
                         Ready to launch!
                       </p>
+                    )}
+
+                    {/* Next Steps Checklist */}
+                    {completionData.percentage < 100 && (
+                      <div className="mt-4 pt-4 border-t border-gray-50 flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Recommended Steps</span>
+                          <span className="text-[9px] font-medium text-gray-400 px-1.5 py-0.5 bg-gray-50 rounded border border-gray-100">Click to action</span>
+                        </div>
+                        <div className="grid grid-cols-1 gap-1.5">
+                          {completionData.requirements
+                            .filter(r => !r.completed && ['coverImage', 'profileImage', 'products', 'subscription'].includes(r.id))
+                            .map((req) => (
+                              <button
+                                key={req.id}
+                                onClick={() => {
+                                  const tabMap: Record<string, TabType> = {
+                                    coverImage: 'basic',
+                                    profileImage: 'basic',
+                                    products: 'products',
+                                    subscription: 'subscription'
+                                  };
+                                  setActiveTab(tabMap[req.id] || 'basic');
+                                }}
+                                className="flex items-center justify-between p-2 rounded-xl bg-white border border-gray-100 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all group text-left shadow-sm hover:shadow-md"
+                              >
+                                <div className="flex items-center gap-2.5">
+                                  <div className="w-6 h-6 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center group-hover:bg-indigo-100 group-hover:border-indigo-200 transition-all duration-300">
+                                    {req.id === 'coverImage' && <PaintBrushIcon className="w-3.5 h-3.5 text-gray-500 group-hover:text-indigo-600" />}
+                                    {req.id === 'profileImage' && <UserCircleIcon className="w-3.5 h-3.5 text-gray-500 group-hover:text-indigo-600" />}
+                                    {req.id === 'products' && <ShoppingBagIcon className="w-3.5 h-3.5 text-gray-500 group-hover:text-indigo-600" />}
+                                    {req.id === 'subscription' && <CreditCardIcon className="w-3.5 h-3.5 text-gray-500 group-hover:text-indigo-600" />}
+                                  </div>
+                                  <div className="flex flex-col">
+                                    <span className="text-xs font-bold text-gray-700 group-hover:text-indigo-700 transition-colors">
+                                      {req.id === 'coverImage' ? 'Update Cover Photo' :
+                                        req.id === 'profileImage' ? 'Set Profile Picture' :
+                                          req.id === 'products' ? 'Add Your First Product' :
+                                            req.id === 'subscription' ? 'Enable Subscriptions' : req.label}
+                                    </span>
+                                    <span className="text-[9px] text-gray-400 group-hover:text-indigo-500/70 font-medium">In {
+                                      req.id === 'coverImage' || req.id === 'profileImage' ? 'Basic Tab' :
+                                        req.id === 'products' ? 'Products Tab' :
+                                          req.id === 'subscription' ? 'Subscription Tab' : 'Settings'
+                                    }</span>
+                                  </div>
+                                </div>
+                                <div className="w-5 h-5 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300">
+                                  <ArrowRightIcon className="w-2.5 h-2.5" />
+                                </div>
+                              </button>
+                            ))}
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>

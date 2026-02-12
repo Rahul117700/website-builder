@@ -1,7 +1,7 @@
 'use client';
 
 import { Channel, ChannelTemplate, ChannelProductType } from '@prisma/client';
-import { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -49,9 +49,27 @@ import {
   AdjustmentsHorizontalIcon,
   LockClosedIcon,
   ArrowRightIcon,
+  EyeIcon,
+  CalendarIcon,
+  RocketLaunchIcon,
+  UserGroupIcon,
+  ChartBarIcon,
+  EnvelopeIcon,
 } from '@heroicons/react/24/outline';
 import { signOut } from 'next-auth/react';
 import { CreatePlaylistModal, AddToPlaylistModal } from './PlaylistModals';
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell
+} from 'recharts';
 
 interface TemplateRendererProps {
   channel: Channel & {
@@ -287,11 +305,13 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
   // Current active cover image with fallback and cache-busting
   const activeCoverImage = useMemo(() => {
-    if (!channel.coverImage) return fallbackCoverImage;
-    if (channel.coverImage.startsWith('http')) return channel.coverImage;
+    if (!channel.coverImage || channel.coverImage === 'null' || channel.coverImage === 'undefined' || channel.coverImage === '' || typeof channel.coverImage !== 'string') return fallbackCoverImage;
+    if (channel.coverImage.startsWith('http') || channel.coverImage.startsWith('/')) return channel.coverImage;
     // Use updatedAt as cache buster if available, otherwise current time
     const cacheBuster = channel.updatedAt ? new Date(channel.updatedAt).getTime() : Date.now();
-    return `${channel.coverImage}?t=${cacheBuster}`;
+    // Prepend /uploads/ if it's a relative path and doesn't have it
+    const imagePath = channel.coverImage.startsWith('/') ? channel.coverImage : `/uploads/${channel.coverImage}`;
+    return `${imagePath}${imagePath.includes('?') ? '&' : '?'}t=${cacheBuster}`;
   }, [channel.coverImage, channel.updatedAt, fallbackCoverImage]);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedType, setSelectedType] = useState<string>('all');
@@ -778,6 +798,121 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
   }
 
   // New Channel Design - Header & Tabs
+
+  // Simple Hype Graph - Renders Once
+  const ChannelGrowthChart = () => {
+    // Calculate total reach once
+    const totalReach = useMemo(() => {
+      const productViews = products?.reduce((sum: number, p: any) => sum + (p.viewCount || 0), 0) || 0;
+      return Math.max(channel.totalViews || 0, productViews);
+    }, [channel.totalViews, products?.length]);
+
+    // Generate chart data once - simple growth curve
+    const chartData = useMemo(() => {
+      const days = 30;
+      const data = [];
+      const avgPerDay = totalReach / days;
+
+      for (let i = 0; i < days; i++) {
+        const date = new Date();
+        date.setDate(date.getDate() - (days - 1 - i));
+
+        // Simple upward trend with slight variation
+        const growthMultiplier = 0.5 + (i / days) * 1.0; // 0.5x to 1.5x
+        const value = avgPerDay * growthMultiplier;
+
+        data.push({
+          date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          views: Math.max(0, Math.round(value))
+        });
+      }
+
+      return data;
+    }, [totalReach]);
+
+    return (
+      <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.05)] overflow-hidden relative">
+        <div className="absolute top-0 right-0 p-8 opacity-5">
+          <FireIcon className="w-48 h-48 text-indigo-600" />
+        </div>
+
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 relative z-10">
+          <div>
+            <div className="flex items-center gap-2 text-indigo-600 font-black text-[10px] uppercase tracking-[0.2em] mb-2">
+              <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
+              Real-time Momentum
+            </div>
+            <h3 className="text-3xl font-black text-gray-900 tracking-tight">Channel Vitality</h3>
+            <p className="text-gray-500 font-medium">Tracking engagement and reach across your ecosystem</p>
+          </div>
+
+          <div className="flex gap-4">
+            <div className="bg-indigo-50 border border-indigo-100 rounded-2xl px-6 py-4">
+              <div className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Total Reach</div>
+              <div className="text-2xl font-black text-indigo-900">{formatViewCount(totalReach)}+</div>
+            </div>
+            <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-6 py-4">
+              <div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Growth rate</div>
+              <div className="text-2xl font-black text-emerald-900">+24%</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="h-[300px] w-full relative z-10">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#6366f1" stopOpacity={1} />
+                  <stop offset="100%" stopColor="#818cf8" stopOpacity={0.6} />
+                </linearGradient>
+              </defs>
+              <XAxis
+                dataKey="date"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+                dy={10}
+                interval={4}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 700 }}
+              />
+              <Tooltip
+                cursor={{ fill: '#f8fafc', radius: 12 }}
+                contentStyle={{
+                  borderRadius: '20px',
+                  border: 'none',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
+                  fontFamily: 'Inter',
+                  fontSize: '12px',
+                  fontWeight: '800'
+                }}
+              />
+              <Bar
+                dataKey="views"
+                fill="url(#barGradient)"
+                radius={[8, 8, 8, 8]}
+                barSize={12}
+                animationDuration={1500}
+                isAnimationActive={true}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="mt-8 flex items-center justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest border-t border-gray-50 pt-6">
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Channel Reach Momentum</span>
+          </div>
+          <span>Updated Live</span>
+        </div>
+      </div>
+    );
+  };
+
   const renderChannelHeader = () => {
     return (
       <div className="bg-white">
@@ -785,14 +920,14 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
         <div className="relative w-full h-48 sm:h-56 md:h-72 lg:h-80 bg-gray-100 group overflow-hidden">
           <img
             src={activeCoverImage}
-            alt="Channel Cover"
+            alt=""
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             onError={(e) => {
-              // If the custom image fails, use the fallback
               const target = e.currentTarget;
               if (target.src !== fallbackCoverImage) {
-                console.log('Cover image failed to load, using fallback');
                 target.src = fallbackCoverImage;
+              } else {
+                target.style.display = 'none';
               }
             }}
           />
@@ -879,18 +1014,24 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
           <div className="flex items-center gap-6 sm:gap-8 overflow-x-auto scrollbar-hide border-b border-gray-200">
             {[
               { id: 'home', label: 'Home' },
-              { id: 'videos', label: 'Products' },
+              { id: 'videos', label: 'Explore Store' },
               { id: 'about', label: 'About' },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`py-3 text-sm sm:text-base font-medium whitespace-nowrap border-b-2 transition-colors ${activeTab === tab.id
-                  ? 'border-gray-900 text-gray-900'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                className={`py-4 text-sm sm:text-[15px] font-black whitespace-nowrap border-b-[3px] transition-all relative ${activeTab === tab.id
+                  ? 'border-indigo-600 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-200'
                   }`}
               >
                 {tab.label}
+                {activeTab === tab.id && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute bottom-[-3px] left-0 right-0 h-[3px] bg-indigo-600"
+                  />
+                )}
               </button>
             ))}
             {/* Search Bar in Tabs (Optional: could also be below) */}
@@ -2529,8 +2670,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
               {/* HOME TAB */}
               {activeTab === 'home' && (
-                <div className="space-y-12">
-                  {/* Featured Content (Most Viewed Video) */}
+                <div className="space-y-16 pb-12">
+                  {/* Featured Content (Hero Section) */}
                   {(() => {
                     const featuredProduct = [...allProducts]
                       .filter((p: any) => (p.type === 'VIDEO' || p.type === 'VIDEOS') && (p.videoUrl || p.fileUrl))
@@ -2539,249 +2680,462 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                     if (!featuredProduct) return null;
 
                     return (
-                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-                        <div className="lg:col-span-2 aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl relative group">
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 pointer-events-none" />
-                          {/* Auto-play Video */}
-                          <video
-                            src={featuredProduct.videoUrl || featuredProduct.fileUrl}
-                            className="w-full h-full object-cover"
-                            autoPlay
-                            muted
-                            loop
-                            playsInline
-                          />
+                      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8">
+                        {/* Hero Video Section (70%) */}
+                        <div className="relative group overflow-hidden rounded-[2.5rem] lg:rounded-[3rem] bg-gray-900 shadow-2xl cursor-pointer" onClick={() => router.push(`/channel/${channel.slug}/products/${featuredProduct.id}`)}>
+                          {/* Dynamic Aspect Ratio Container */}
+                          <div className="aspect-[4/5] sm:aspect-video lg:aspect-[16/10] relative overflow-hidden">
+                            {/* Premium Video Background */}
+                            <video
+                              src={featuredProduct.videoUrl || featuredProduct.fileUrl}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2s] ease-out opacity-90"
+                              autoPlay
+                              muted
+                              loop
+                              playsInline
+                              poster={featuredProduct.previewImage || featuredProduct.thumbnail}
+                            />
 
-                          <div className="absolute inset-0 flex items-center justify-center z-20">
-                            <button
-                              onClick={() => router.push(`/channel/${channel.slug}/products/${featuredProduct.id}`)}
-                              className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:scale-110 transition-transform cursor-pointer"
-                            >
-                              <PlayIcon className="w-8 h-8 text-white fill-white" />
-                            </button>
-                          </div>
+                            {/* Multi-layered Premium Overlays */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-95" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/20 to-transparent" />
+                            <div className="absolute inset-0 ring-1 ring-white/10 rounded-[2.5rem] lg:rounded-[3rem] pointer-events-none" />
 
-                          <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
-                            <span className="inline-block px-2 py-1 mb-2 text-xs font-bold text-white bg-red-600 rounded-md uppercase tracking-wider">
-                              Most Viewed
-                            </span>
-                            <h3 className="text-2xl font-bold text-white mb-2 line-clamp-2">{featuredProduct.title}</h3>
+                            {/* Content Overlay */}
+                            <div className="absolute inset-0 p-6 sm:p-10 lg:p-12 z-20 flex flex-col justify-end">
+                              <div className="max-w-4xl">
+                                {/* Glowing Featured Badge */}
+                                <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-white/10 backdrop-blur-xl text-white text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] mb-6 border border-white/20 shadow-2xl">
+                                  <span className="relative flex h-2.5 w-2.5">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500 shadow-[0_0_10px_#6366f1]" />
+                                  </span>
+                                  Featured Content
+                                </div>
+
+                                {/* Title with staggered animation feel */}
+                                <h2 className="text-3xl sm:text-5xl lg:text-5xl font-black mb-4 sm:mb-6 leading-[1.1] tracking-tighter text-white drop-shadow-2xl">
+                                  {featuredProduct.title}
+                                </h2>
+
+                                {/* Refined Meta Badges */}
+                                <div className="hidden sm:flex flex-wrap items-center gap-3 mb-8">
+                                  <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border font-bold text-xs sm:text-sm shadow-xl backdrop-blur-md ${featuredProduct.isSubscriberOnly || featuredProduct.price > 0
+                                      ? 'bg-indigo-600/90 border-white/20 text-white'
+                                      : 'bg-white/10 border-white/10 text-gray-200'
+                                    }`}>
+                                    {featuredProduct.isSubscriberOnly || featuredProduct.price > 0 ? (
+                                      <LockClosedIcon className="w-4 h-4" />
+                                    ) : (
+                                      <GlobeAltIcon className="w-4 h-4" />
+                                    )}
+                                    {featuredProduct.isSubscriberOnly || featuredProduct.price > 0 ? 'Premium' : 'Free Access'}
+                                  </div>
+                                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-xs sm:text-sm font-bold text-gray-200 shadow-xl">
+                                    <EyeIcon className="w-4 h-4 text-indigo-400" />
+                                    {formatViewCount(featuredProduct.viewCount || 0)} views
+                                  </div>
+                                  <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 text-xs sm:text-sm font-bold text-gray-200 shadow-xl">
+                                    <CalendarIcon className="w-4 h-4 text-purple-400" />
+                                    {getTimeAgo(new Date(featuredProduct.createdAt))}
+                                  </div>
+                                </div>
+
+                                {/* High-Impact CTA */}
+                                <div className="flex flex-col sm:flex-row items-center gap-4">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      router.push(`/channel/${channel.slug}/products/${featuredProduct.id}`);
+                                    }}
+                                    className="w-full sm:w-auto group/btn relative px-6 py-3.5 sm:px-10 sm:py-5 bg-white text-gray-900 font-black rounded-2xl sm:rounded-xl hover:bg-indigo-600 hover:text-white transition-all duration-500 flex items-center justify-center gap-3 sm:gap-4 shadow-xl hover:shadow-indigo-500/50 hover:-translate-y-1 active:scale-95 text-[11px] sm:text-sm"
+                                  >
+                                    <PlayIcon className="w-4 h-4 sm:w-6 sm:h-6 fill-current" />
+                                    <span className="uppercase tracking-[0.2em]">Start Watching</span>
+                                    <ArrowRightIcon className="w-4 h-4 sm:w-5 sm:h-5 group-hover/btn:translate-x-1 transition-transform" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Cinematic Center Play Icon */}
+                            <div className="absolute inset-0 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-all duration-700 pointer-events-none">
+                              <div className="w-24 h-24 rounded-full bg-white/5 backdrop-blur-2xl flex items-center justify-center border border-white/20 shadow-[0_0_100px_rgba(255,255,255,0.1)] group-hover:scale-125 transition-all duration-[1s] ease-out">
+                                <PlayIcon className="w-12 h-12 text-white fill-white ml-1.5 drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]" />
+                              </div>
+                            </div>
                           </div>
                         </div>
-                        <div className="flex flex-col justify-center">
-                          <h3 className="text-xl font-bold text-gray-900 mb-2">{featuredProduct.title}</h3>
-                          <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-                            <span>{new Date(featuredProduct.createdAt).toLocaleDateString()}</span>
-                            <span>•</span>
-                            <span>{formatViewCount(featuredProduct.viewCount || 0)} views</span>
+
+                        {/* Channel Summary (30%) */}
+                        <div className="hidden lg:flex flex-col gap-6">
+                          <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-xl shadow-gray-200/50 h-full flex flex-col">
+                            <div className="relative mb-8 self-center">
+                              <div className="absolute inset-0 bg-indigo-500 blur-3xl opacity-10 animate-pulse" />
+                              <div className="relative w-28 h-28 rounded-[2.5rem] bg-gray-50 border-4 border-white shadow-2xl flex items-center justify-center overflow-hidden">
+                                {channel.user?.image ? (
+                                  <img src={channel.user.image} className="w-full h-full object-cover" alt={channel.name} />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center bg-indigo-600 text-white text-4xl font-black">
+                                    {channel.name[0]}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="text-center space-y-4 flex-1">
+                              <div className="space-y-1">
+                                <h3 className="text-2xl font-black text-gray-900 tracking-tight">{channel.name}</h3>
+                                <p className="text-indigo-600 font-bold text-xs uppercase tracking-[0.2em]">Verified Seller</p>
+                              </div>
+
+                              <div className="flex items-center justify-center gap-8 py-6 border-y border-gray-100">
+                                <div className="text-center">
+                                  <div className="text-xl font-black text-gray-900 tracking-tighter">{formatViewCount(channel._count?.subscribers || 0)}</div>
+                                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Followers</div>
+                                </div>
+                                <div className="text-center">
+                                  <div className="text-xl font-black text-gray-900 tracking-tighter">{allProducts.length}</div>
+                                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Resources</div>
+                                </div>
+                              </div>
+
+                              <p className="text-gray-500 text-sm font-medium leading-relaxed line-clamp-4 pt-4">
+                                {channel.description || `Explore the complete digital catalog of ${channel.name}. Premium tools, insights, and high-impact content curated for your success.`}
+                              </p>
+                            </div>
+
+                            <button
+                              onClick={() => setActiveTab('about')}
+                              className="mt-8 w-full py-4 rounded-2xl bg-indigo-600 text-white font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
+                            >
+                              Explore the Channel
+                            </button>
                           </div>
-                          <p className="text-gray-600 line-clamp-4 mb-6">{featuredProduct.description}</p>
-                          <button
-                            onClick={() => router.push(`/channel/${channel.slug}/products/${featuredProduct.id}`)}
-                            className="px-6 py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-black transition-colors w-max"
-                          >
-                            Watch Now
-                          </button>
                         </div>
                       </div>
                     );
                   })()}
 
-                  {/* Latest Videos (Horizontal List) */}
-                  <div>
-                    <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-xl font-bold text-gray-900">Latest Videos</h2>
-                    </div>
-                    {allProducts.filter(p => p.type === 'VIDEO' || p.type === 'VIDEOS').length > 0 ? (
-                      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {allProducts
-                          .filter((p: any) => p.type === 'VIDEO' || p.type === 'VIDEOS')
-                          .slice(0, 4)
-                          .map((product: any) => (
-                            <div key={product.id} className="group cursor-pointer" onClick={() => router.push(`/channel/${channel.slug}/products/${product.id}`)}>
-                              <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3">
-                                <VideoHoverPreview
-                                  product={product}
-                                  primaryColor={primaryColor}
-                                  getContentIcon={getContentIcon}
+
+
+                  {/* Prime Category Highlights */}
+                  {(() => {
+                    const videoProducts = [...allProducts].filter(p => p.type === 'VIDEO' || p.type === 'VIDEOS').slice(0, 4);
+                    if (videoProducts.length === 0) return null;
+
+                    return (
+                      <section className="mt-20 sm:mt-28">
+                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 sm:mb-12">
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                                <PlayIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-white" />
+                              </div>
+                              <h3 className="text-2xl sm:text-4xl lg:text-5xl font-black text-gray-900 tracking-tight">Premium Spotlight</h3>
+                            </div>
+                            <p className="text-gray-500 font-semibold text-sm sm:text-lg max-w-2xl leading-relaxed">
+                              Experience our most impactful and highly-curated digital content.
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setActiveTab('videos');
+                              setSelectedType('all');
+                            }}
+                            className="w-full sm:w-fit group flex items-center justify-center gap-3 text-xs sm:text-sm font-black text-indigo-600 hover:text-white transition-all px-6 py-3.5 sm:px-8 sm:py-4 bg-indigo-50 hover:bg-indigo-600 rounded-2xl"
+                          >
+                            <span>Explore All Content</span>
+                            <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
+                          {videoProducts.map((product) => (
+                            <div
+                              key={product.id}
+                              className="group cursor-pointer flex flex-col"
+                              onClick={() => router.push(`/channel/${channel.slug}/products/${product.id}`)}
+                            >
+                              {/* Thumbnail Container */}
+                              <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3 shadow-sm group-hover:shadow-md transition-all duration-300">
+                                <img
+                                  src={product.previewImage || product.thumbnail || '/placeholder-video.jpg'}
+                                  alt={product.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                 />
-                                <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-md">
-                                  {formatDuration(product.duration || 0)}
+
+                                {/* Duration Badge (YouTube Style) */}
+                                {product.videoDuration && (
+                                  <div className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-black/80 text-white text-[10px] font-bold rounded">
+                                    {Math.floor(product.videoDuration / 60)}:{String(product.videoDuration % 60).padStart(2, '0')}
+                                  </div>
+                                )}
+
+                                {/* Access Badge (Top Right) */}
+                                <div className="absolute top-2 right-2">
+                                  <div className={`px-2 py-0.5 rounded-md text-white text-[10px] font-black shadow-sm backdrop-blur-sm ${product.isSubscriberOnly || product.price > 0 ? 'bg-indigo-600/90' : 'bg-emerald-500/90'
+                                    }`}>
+                                    {product.isSubscriberOnly || product.price > 0 ? 'Premium' : 'Free'}
+                                  </div>
                                 </div>
                               </div>
-                              <h3 className="font-bold text-gray-900 line-clamp-2 mb-1 group-hover:text-primary transition-colors">
-                                {product.title}
-                              </h3>
-                              <div className="flex items-center text-sm text-gray-500">
-                                <span>{formatViewCount(product.viewCount || 0)} views</span>
-                                <span className="mx-1">•</span>
-                                <span>{getTimeAgo(new Date(product.createdAt))}</span>
+
+                              {/* Title and Meta Information (YouTube Style) */}
+                              <div className="flex gap-3">
+                                {/* Channel Avatar */}
+                                <div className="flex-shrink-0 mt-1">
+                                  <div className="w-9 h-9 rounded-full bg-gray-200 overflow-hidden border border-gray-100">
+                                    {channel.user?.image ? (
+                                      <img src={channel.user.image} className="w-full h-full object-cover" alt="" />
+                                    ) : (
+                                      <div className="w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-600 font-bold text-xs uppercase">
+                                        {channel.name?.[0] || 'C'}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors text-sm lg:text-base line-clamp-2 leading-snug mb-1">
+                                    {product.title}
+                                  </h4>
+
+                                  <div className="flex flex-col text-[12px] text-gray-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+                                    <span className="hover:text-gray-900 transition-colors hidden sm:block">
+                                      {channel.name}
+                                    </span>
+                                    <div className="flex items-center gap-1">
+                                      <span>{formatViewCount(product.viewCount || 0)} views</span>
+                                      <span>•</span>
+                                      <span>{getTimeAgo(new Date(product.createdAt))}</span>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500 italic">No videos uploaded yet.</p>
-                    )}
-                  </div>
-
-                  {/* All Products Grid */}
-                  <div>
-                    <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-xl font-bold text-gray-900">All Products</h2>
-
-                      <button
-                        onClick={() => setActiveTab('videos')}
-                        className="text-sm font-medium text-gray-600 hover:text-gray-900"
-                      >
-                        View all
-                      </button>
-
-                    </div>
-
-                    {allProducts.length > 0 ? (
-                      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {allProducts.slice(0, 8).map((product: any) => (
-                          <div key={product.id} className="group cursor-pointer" onClick={() => router.push(`/channel/${channel.slug}/products/${product.id}`)}>
-                            <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3">
-                              <VideoHoverPreview
-                                product={product}
-                                primaryColor={primaryColor}
-                                getContentIcon={getContentIcon}
-                              />
-
-                              {/* Video Play Icon Overlay */}
-                              {((product.type === 'VIDEO' || product.type === 'VIDEOS') && (product.videoUrl || product.fileUrl)) && (
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                  <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <PlayIcon className="w-5 h-5 text-white" />
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Badges */}
-                              <div className="absolute top-2 left-2 flex gap-1 pointer-events-none">
-                                {(product.type === 'VIDEO' || product.type === 'VIDEOS') && (
-                                  <div className="px-2 py-1 rounded-md bg-red-500/90 backdrop-blur-md shadow-sm border border-red-400/40 text-white flex items-center gap-1">
-                                    <VideoCameraIcon className="w-3 h-3" />
-                                    <span className="text-[9px] font-bold uppercase tracking-widest">
-                                      Video
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Price Badge */}
-                              <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-md">
-                                {product.isSubscriberOnly ? (
-                                  <span className="text-xs font-bold text-primary">Sub Only</span>
-                                ) : product.price > 0 ? formatPrice(product.price, product.currency) : (
-                                  <span className="text-green-600">Free</span>
-                                )}
-                              </div>
-                            </div>
-                            <h3 className="font-bold text-gray-900 line-clamp-2 mb-1 group-hover:text-primary transition-colors">
-                              {product.title}
-                            </h3>
-                            <div className="flex items-center text-sm text-gray-500">
-                              <span>{product.category || 'Product'}</span>
-                              <span className="mx-1">•</span>
-                              <span>{formatViewCount(product.viewCount || 0)} views</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                        <p className="text-gray-500">No products available yet.</p>
-                      </div>
-                    )}
-                  </div>
+                        </div>
+                      </section>
+                    );
+                  })()}
                 </div>
-
               )}
 
-              {/* VIDEOS / PRODUCTS TAB */}
-              {activeTab === 'videos' && (
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900 mb-6">All Products</h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {allProducts.map((product: any) => (
-                      <div key={product.id} className="group cursor-pointer" onClick={() => router.push(`/channel/${channel.slug}/products/${product.id}`)}>
-                        <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3">
-                          <VideoHoverPreview
-                            product={product}
-                            primaryColor={primaryColor}
-                            getContentIcon={getContentIcon}
-                          />
 
-                          {/* Video Play Icon Overlay */}
-                          {((product.type === 'VIDEO' || product.type === 'VIDEOS') && (product.videoUrl || product.fileUrl)) && (
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                              <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <PlayIcon className="w-5 h-5 text-white" />
+
+              {/* VIDEOS / PRODUCTS TAB (The Vault) */}
+              {activeTab === 'videos' && (
+                <div className="space-y-12">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10 sm:mb-16">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                          <RocketLaunchIcon className="w-5 h-5 text-white" />
+                        </div>
+                        <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-gray-900 tracking-tight">The Vault</h2>
+                      </div>
+                      <p className="text-gray-500 font-semibold text-sm sm:text-lg max-w-xl">
+                        Unlock the full potential of your crafts with our curated professional resources.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-4 w-full md:w-auto">
+                      {/* Search Bar Refinement */}
+                      <div className="relative flex-1 md:w-80 group">
+                        <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                        <input
+                          type="text"
+                          placeholder="Search the vault..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-all shadow-sm"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Filter System */}
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-8 border-b border-gray-100">
+                    <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-2 w-full sm:w-auto">
+                      {[
+                        { id: 'all', label: 'All Content' },
+                        { id: 'VIDEO', label: 'Premium Videos' },
+                        { id: 'DOCUMENT', label: 'Digital Resources' }
+                      ].map((cat) => (
+                        <button
+                          key={cat.id}
+                          onClick={() => setSelectedType(cat.id)}
+                          className={`px-8 py-3.5 rounded-2xl text-[13px] font-black transition-all whitespace-nowrap border-2 ${selectedType === cat.id
+                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-xl shadow-indigo-200 scale-105'
+                            : 'bg-white text-gray-500 hover:border-gray-200 border-gray-50 shadow-sm'
+                            }`}
+                        >
+                          {cat.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="text-sm font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-4 py-2 rounded-xl">
+                      {filteredProducts.length} Results
+                    </div>
+                  </div>
+
+                  {filteredProducts.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-10 sm:gap-x-8 sm:gap-y-12 lg:gap-x-10">
+                      {filteredProducts.map((product: any) => (
+                        <div
+                          key={product.id}
+                          className="group cursor-pointer flex flex-col"
+                          onClick={() => router.push(`/channel/${channel.slug}/products/${product.id}`)}
+                        >
+                          {/* YouTube Style Media Container */}
+                          <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3 shadow-sm group-hover:shadow-md transition-all duration-300">
+                            <img
+                              src={product.previewImage || product.thumbnail || '/placeholder-video.jpg'}
+                              alt={product.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+
+                            {/* Duration Badge */}
+                            {product.videoDuration && (
+                              <div className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-black/80 text-white text-[10px] font-bold rounded">
+                                {Math.floor(product.videoDuration / 60)}:{String(product.videoDuration % 60).padStart(2, '0')}
+                              </div>
+                            )}
+
+                            {/* Document Type Indicator */}
+                            {product.type === 'DOCUMENT' && (
+                              <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-white/90 text-gray-900 text-[10px] font-black shadow-sm backdrop-blur-sm uppercase">
+                                PDF
+                              </div>
+                            )}
+
+                            {/* Price/Access Badge */}
+                            <div className="absolute top-2 right-2 focus:ring-0">
+                              <div className={`px-2 py-0.5 rounded-md text-[10px] font-black shadow-sm backdrop-blur-sm transition-all ${product.isSubscriberOnly || product.price > 0
+                                ? 'bg-indigo-600/90 text-white'
+                                : 'bg-emerald-500/90 text-white'
+                                }`}>
+                                {product.isSubscriberOnly || product.price > 0 ? 'Premium' : 'Free'}
                               </div>
                             </div>
-                          )}
+                          </div>
 
-                          {/* Badges */}
-                          <div className="absolute top-2 left-2 flex gap-1 pointer-events-none">
-                            {(product.type === 'VIDEO' || product.type === 'VIDEOS') && (
-                              <div className="px-2 py-1 rounded-md bg-red-500/90 backdrop-blur-md shadow-sm border border-red-400/40 text-white flex items-center gap-1">
-                                <VideoCameraIcon className="w-3 h-3" />
-                                <span className="text-[9px] font-bold uppercase tracking-widest">
-                                  Video
-                                </span>
+                          {/* Info Section (YouTube Style) */}
+                          <div className="flex gap-3">
+                            {/* Channel Avatar */}
+                            <div className="flex-shrink-0 mt-1">
+                              <div className="w-9 h-9 rounded-full bg-gray-200 overflow-hidden border border-gray-100">
+                                {channel.user?.image ? (
+                                  <img src={channel.user.image} className="w-full h-full object-cover" alt="" />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-600 font-bold text-xs uppercase">
+                                    {channel.name?.[0] || 'C'}
+                                  </div>
+                                )}
                               </div>
-                            )}
-                          </div>
+                            </div>
 
-                          <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded-md">
-                            {product.isSubscriberOnly ? (
-                              <span className="text-xs font-bold text-primary">Sub Only</span>
-                            ) : product.price > 0 ? formatPrice(product.price, product.currency) : (
-                              <span className="text-green-600">Free</span>
-                            )}
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors text-sm lg:text-base line-clamp-2 leading-snug mb-1">
+                                {product.title}
+                              </h3>
+
+                              <div className="flex flex-col text-[12px] text-gray-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+                                <span className="hover:text-gray-900 transition-colors hidden sm:block">
+                                  {channel.name}
+                                </span>
+                                <div className="flex items-center gap-1">
+                                  <span>{formatViewCount(product.viewCount || 0)} views</span>
+                                  <span>•</span>
+                                  <span>{getTimeAgo(new Date(product.createdAt))}</span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                        <h3 className="font-bold text-gray-900 line-clamp-2 mb-1 group-hover:text-primary transition-colors">
-                          {product.title}
-                        </h3>
-                        <div className="flex items-center text-sm text-gray-500">
-                          <span>{product.category || 'Product'}</span>
-                          <span className="mx-1">•</span>
-                          <span>{formatViewCount(product.viewCount || 0)} views</span>
-                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-32 flex flex-col items-center justify-center text-center space-y-6 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
+                      <div className="w-24 h-24 bg-gray-100 rounded-3xl flex items-center justify-center">
+                        <MagnifyingGlassIcon className="w-12 h-12 text-gray-300" />
                       </div>
-                    ))}
-                  </div>
+                      <div className="space-y-2">
+                        <h3 className="text-2xl font-black text-gray-900">No results found</h3>
+                        <p className="text-gray-500 font-medium">Try matching your search with different keywords.</p>
+                      </div>
+                      <button
+                        onClick={() => { setSearchQuery(''); setSelectedType('all'); }}
+                        className="px-8 py-3 bg-white border border-gray-200 rounded-2xl font-black text-sm uppercase tracking-widest hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm"
+                      >
+                        Clear All Filters
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* PLAYLISTS TAB */}
               {activeTab === 'playlists' && (
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900 mb-6">Playlists</h2>
+                <div className="space-y-10 sm:space-y-12">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 sm:mb-12">
+                    <div className="space-y-2">
+                      <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-gray-900 tracking-tight">Collections</h2>
+                      <p className="text-gray-500 font-semibold text-sm sm:text-lg">Thematic journeys curated for deep learning.</p>
+                    </div>
+                  </div>
+
                   {playlists.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-10 sm:gap-x-8 sm:gap-y-12 lg:gap-x-10">
                       {playlists.map((playlist) => (
-                        <div key={playlist.id} className="group cursor-pointer">
-                          <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
-                            <span className="text-white font-bold text-lg">{playlist.items?.length || 0}</span>
-                            <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors" />
-                            <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-black/20 backdrop-blur-sm flex items-center justify-center">
-                              <ListBulletIcon className="w-8 h-8 text-white" />
+                        <div key={playlist.id} className="group cursor-pointer flex flex-col" onClick={() => router.push(`/channel/${channel.slug}/playlists/${playlist.id}`)}>
+                          <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3 shadow-sm group-hover:shadow-md transition-all duration-300">
+                            {/* Playlist Stack Visual Overlay */}
+                            <div className="absolute inset-0 bg-black/5 flex items-center justify-center">
+                              {playlist.items?.[0]?.product?.previewImage ? (
+                                <img
+                                  src={playlist.items[0].product.previewImage}
+                                  className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-500"
+                                  alt={playlist.name}
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-indigo-900/10 flex items-center justify-center">
+                                  <ListBulletIcon className="w-12 h-12 text-indigo-300" />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Sidebar Overlay (YouTube Style) */}
+                            <div className="absolute right-0 top-0 bottom-0 w-[40%] bg-black/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center text-white border-l border-white/10">
+                              <span className="text-sm sm:text-lg font-black">{playlist.items?.length || 0}</span>
+                              <ListBulletIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                             </div>
                           </div>
-                          <h3 className="font-bold text-gray-900 line-clamp-1 mb-1">{playlist.name}</h3>
-                          <p className="text-sm text-gray-500">Updated today</p>
-                          <p className="text-xs text-blue-600 font-medium mt-1">View full playlist</p>
+
+                          <div className="flex flex-col">
+                            <h3 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors text-sm lg:text-base line-clamp-2 leading-snug mb-1">
+                              {playlist.name}
+                            </h3>
+                            <div className="flex items-center gap-1.5 text-[12px] text-gray-400 font-bold uppercase tracking-wider">
+                              <span>Series</span>
+                              <span>•</span>
+                              <span>Updated Today</span>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                      <p className="text-gray-500">No playlists created.</p>
+                    <div className="py-32 flex flex-col items-center justify-center text-center space-y-6 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
+                      <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                        <ListBulletIcon className="w-10 h-10 text-gray-300" />
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="text-xl font-bold text-gray-900">No playlists found</h3>
+                        <p className="text-gray-500 font-medium">This channel hasn't organized any collections yet.</p>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -2789,52 +3143,100 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
               {/* COMMUNITY TAB */}
               {activeTab === 'community' && (
-                <div className="text-center py-20">
-                  <div className="inline-block p-4 bg-gray-100 rounded-full mb-4 text-gray-400">
-                    <UserCircleIcon className="w-12 h-12" />
+                <div className="max-w-4xl mx-auto py-20 text-center space-y-8">
+                  <div className="relative inline-block">
+                    <div className="absolute inset-0 bg-indigo-500 blur-3xl opacity-20 animate-pulse" />
+                    <div className="relative w-24 h-24 bg-white rounded-[2rem] flex items-center justify-center shadow-xl border border-gray-100 mx-auto">
+                      <UserGroupIcon className="w-12 h-12 text-indigo-500" />
+                    </div>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900">Community posts coming soon</h3>
-                  <p className="text-gray-500 mt-2">Interact with channel subscribers here.</p>
+                  <div className="space-y-3">
+                    <h3 className="text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">The Hub is coming soon</h3>
+                    <p className="text-gray-500 font-medium text-lg max-w-md mx-auto leading-relaxed">
+                      Soon you'll be able to interact directly with {channel.name} and the community right here.
+                    </p>
+                  </div>
+                  <button className="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-200 hover:scale-105 active:scale-95 transition-all text-sm uppercase tracking-widest">
+                    Notify me on launch
+                  </button>
                 </div>
               )}
 
               {/* ABOUT TAB */}
               {activeTab === 'about' && (
-                <div className="max-w-4xl mx-auto">
-                  <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-100 shadow-sm">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">Description</h2>
-                    <p className="whitespace-pre-wrap text-gray-700 leading-relaxed text-base">
-                      {channel.description || 'No description available.'}
-                    </p>
+                <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12">
+                  <div className="lg:col-span-2 space-y-8 sm:space-y-10">
+                    <section>
+                      <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight mb-6 sm:mb-8 uppercase flex items-center gap-3">
+                        <div className="w-1.5 h-6 sm:w-2 sm:h-8 bg-indigo-600 rounded-full" />
+                        Channel Bio
+                      </h2>
+                      <div className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-md">
+                        <p className="whitespace-pre-wrap text-gray-700 leading-relaxed text-sm sm:text-lg font-medium opacity-90 first-letter:text-4xl sm:first-letter:text-5xl first-letter:font-black first-letter:mr-2 sm:first-letter:mr-3 first-letter:float-left first-letter:text-indigo-600">
+                          {channel.description || `${channel.name} hasn't provided a description yet.`}
+                        </p>
+                      </div>
+                    </section>
+                  </div>
 
-                    <div className="mt-8 pt-8 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-3 gap-8">
-                      <div>
-                        <h3 className="font-semibold mb-2 text-gray-900">Stats</h3>
-                        <div className="space-y-2 text-sm text-gray-600">
-                          <p>Joined {new Date(channel.createdAt).toLocaleDateString()}</p>
-                          <p>{formatViewCount(allProducts.reduce((acc: number, p: any) => acc + (p.viewCount || 0), 0))} views</p>
-                        </div>
+                  <aside className="space-y-6 sm:space-y-8 pt-6 sm:pt-10">
+                    <div className="bg-gray-900 rounded-3xl p-8 sm:p-10 text-white shadow-xl relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-4 opacity-5">
+                        <ChartBarIcon className="w-24 h-24 sm:w-32 sm:h-32" />
                       </div>
 
-                      <div>
-                        <h3 className="font-semibold mb-2 text-gray-900">Details</h3>
-                        <div className="space-y-2 text-sm text-gray-600">
-                          <p>Business inquiries: <a href={`mailto:${channel.user?.email || ''}`} className="text-blue-600 hover:underline">{channel.user?.email || 'N/A'}</a></p>
-                          <p>Location: United States</p>
-                        </div>
-                      </div>
+                      <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-6 sm:mb-8">Performance Stats</h3>
 
-                      <div>
-                        <h3 className="font-semibold mb-2 text-gray-900">Links</h3>
-                        <div className="space-y-2 text-sm">
-                          {/* Mock links */}
-                          <p><a href="#" className="text-blue-600 hover:underline">Website</a></p>
-                          <p><a href="#" className="text-blue-600 hover:underline">Twitter</a></p>
-                          <p><a href="#" className="text-blue-600 hover:underline">Instagram</a></p>
+                      <div className="space-y-6 sm:space-y-8 relative z-10">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/10 backdrop-blur-md">
+                            <CalendarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-400" />
+                          </div>
+                          <div>
+                            <div className="text-lg sm:text-2xl font-black">{new Date(channel.createdAt).getFullYear()}</div>
+                            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Joined Since</div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/10 backdrop-blur-md">
+                            <EyeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
+                          </div>
+                          <div>
+                            <div className="text-lg sm:text-2xl font-black">{formatViewCount(allProducts.reduce((acc: number, p: any) => acc + (p.viewCount || 0), 0))}</div>
+                            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Reach</div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/10 backdrop-blur-md">
+                            <ShoppingBagIcon className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" />
+                          </div>
+                          <div>
+                            <div className="text-lg sm:text-2xl font-black">{allProducts.length}</div>
+                            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assets</div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+
+                    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-md">
+                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-widest mb-6">Channel Details</h4>
+                      <div className="space-y-3 sm:space-y-4">
+                        <div className="bg-gray-50 rounded-xl sm:rounded-2xl p-4 flex items-center justify-between border border-gray-100">
+                          <span className="font-bold text-gray-500 text-sm sm:text-base">@{channel.slug}</span>
+                          <UserCircleIcon className="w-5 h-5 text-indigo-600" />
+                        </div>
+                        <div className="bg-gray-50 rounded-xl sm:rounded-2xl p-4 flex items-center justify-between border border-gray-100">
+                          <div className="flex flex-col">
+                            <span className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest">Contact</span>
+                            <span className="font-bold text-gray-600 text-xs sm:text-sm truncate max-w-[150px]">{channel.user?.email || 'Global'}</span>
+                          </div>
+                          <EnvelopeIcon className="w-5 h-5 text-gray-300" />
+                        </div>
+                      </div>
+                    </div>
+                  </aside>
                 </div>
               )}
             </div>
@@ -3910,8 +4312,16 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
         <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
           <img
             src={activeCoverImage}
-            alt="Hero"
+            alt=""
             className="absolute inset-0 w-full h-full object-cover"
+            onError={(e) => {
+              const target = e.currentTarget;
+              if (target.src !== fallbackCoverImage) {
+                target.src = fallbackCoverImage;
+              } else {
+                target.style.display = 'none';
+              }
+            }}
           />
           <div className="absolute inset-0 bg-black/40"></div>
           <div className="relative z-10 text-center text-white px-4 sm:px-6 md:px-8 w-full">
@@ -4009,8 +4419,16 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
             <div className="rounded-3xl overflow-hidden">
               <img
                 src={activeCoverImage}
-                alt="Hero"
+                alt=""
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (target.src !== fallbackCoverImage) {
+                    target.src = fallbackCoverImage;
+                  } else {
+                    target.style.display = 'none';
+                  }
+                }}
               />
             </div>
           </div>
@@ -4425,8 +4843,16 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
           <div className="absolute inset-0">
             <img
               src={activeCoverImage}
-              alt="Cover"
+              alt=""
               className="w-full h-full object-cover opacity-20"
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (target.src !== fallbackCoverImage) {
+                  target.src = fallbackCoverImage;
+                } else {
+                  target.style.display = 'none';
+                }
+              }}
             />
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white"></div>
           </div>

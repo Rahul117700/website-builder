@@ -1287,8 +1287,18 @@ export default function HomePage() {
                 <div className="hidden sm:flex flex-col justify-center gap-1">
                   <div className="flex -space-x-2">
                     {[1, 2, 3, 4].map(i => (
-                      <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 overflow-hidden">
-                        <img src={`https://i.pravatar.cc/150?u=${i}`} alt="user" />
+                      <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center overflow-hidden">
+                        <img
+                          src={`https://i.pravatar.cc/150?u=${i}`}
+                          alt="user"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            const parent = e.currentTarget.parentElement;
+                            if (parent) {
+                              parent.innerHTML = '<span class="text-[10px] font-bold text-indigo-600">U</span>';
+                            }
+                          }}
+                        />
                       </div>
                     ))}
                     <div className="w-8 h-8 rounded-full border-2 border-white bg-indigo-600 flex items-center justify-center text-[10px] text-white font-bold">+2k</div>
@@ -1776,8 +1786,19 @@ export default function HomePage() {
                     <div className="bg-white rounded-[2rem] p-6 shadow-xl border border-gray-100 mb-6 group hover:shadow-2xl transition-all duration-500">
                       <div className="flex items-center gap-5">
                         <div className="relative">
-                          <div className="w-20 h-20 rounded-full overflow-hidden ring-4 ring-indigo-50 shadow-inner">
-                            <img src={story.imageUrl} alt={story.name} className="w-full h-full object-cover" />
+                          <div className="w-20 h-20 rounded-full overflow-hidden ring-4 ring-indigo-50 shadow-inner bg-indigo-50 flex items-center justify-center">
+                            <img
+                              src={story.imageUrl}
+                              alt={story.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                const parent = e.currentTarget.parentElement;
+                                if (parent) {
+                                  parent.innerHTML = `<span class="text-3xl font-black text-indigo-200">${story.name.charAt(0)}</span>`;
+                                }
+                              }}
+                            />
                           </div>
                           <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1.5 border-4 border-white shadow-lg">
                             <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg>
