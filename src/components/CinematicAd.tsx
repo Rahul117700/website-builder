@@ -1,134 +1,177 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { ArrowRightIcon, PlayIcon, PauseIcon } from '@heroicons/react/24/solid';
-import Link from 'next/link';
-
-const SCENES = [
-    {
-        id: 1,
-        title: "Keep 100% Revenue",
-        subtitle: "No Platform Fees",
-        desc: "Stop giving away your hard-earned money. Sell directly to your audience.",
-        image: "/sedstudios_scene_revenue_1770285770569.png",
-        accent: "from-indigo-600 to-purple-600",
-    },
-    {
-        id: 2,
-        title: "Futuristic Dashboard",
-        subtitle: "Real-time Analytics",
-        desc: "Global reach with instant payouts and deep insights into your growth.",
-        image: "/sedstudios_scene_dashboard_1770285788523.png",
-        accent: "from-blue-600 to-cyan-500",
-    },
-    {
-        id: 3,
-        title: "Built for Success",
-        subtitle: "Join the Studio Revolution",
-        desc: "Empowering 10,000+ creators to build their dream digital business.",
-        image: "/sedstudios_scene_success_1770285805107.png",
-        accent: "from-orange-500 to-red-600",
-    }
-];
+import {
+    CheckBadgeIcon,
+    StarIcon,
+    PlayIcon,
+    DocumentIcon,
+    ArrowRightIcon,
+    ShoppingCartIcon
+} from '@heroicons/react/24/solid';
 
 export default function CinematicAd({ className = "" }: { className?: string }) {
-    const [currentScene, setCurrentScene] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-    useEffect(() => {
-        timerRef.current = setInterval(() => {
-            setCurrentScene((prev) => (prev + 1) % SCENES.length);
-        }, 5000);
-
-        return () => {
-            if (timerRef.current) clearInterval(timerRef.current);
-        };
-    }, []);
+    const browserRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            // Scene Transition
-            gsap.fromTo(".scene-bg",
-                { scale: 1.2, opacity: 0 },
-                { scale: 1, opacity: 1, duration: 1.5, ease: "power2.out" }
-            );
+            // Entrance animation
+            gsap.from(browserRef.current, {
+                y: 40,
+                opacity: 0,
+                duration: 1.2,
+                ease: "expo.out"
+            });
 
-            // Text Animations
-            gsap.fromTo(".scene-text",
-                { y: 20, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.8, ease: "power3.out", stagger: 0.1, delay: 0.3 }
-            );
+            // Subtle tilt effect on hover logic
+            const handleMouseMove = (e: MouseEvent) => {
+                if (!browserRef.current) return;
+                const { clientX, clientY } = e;
+                const rect = browserRef.current.getBoundingClientRect();
+                const x = (clientX - rect.left) / rect.width - 0.5;
+                const y = (clientY - rect.top) / rect.height - 0.5;
 
-            // Progress Bar
-            gsap.fromTo(".progress-bar-fill",
-                { width: "0%" },
-                { width: "100%", duration: 5, ease: "none" }
-            );
+                gsap.to(browserRef.current, {
+                    rotationY: x * 8,
+                    rotationX: -y * 8,
+                    duration: 1,
+                    ease: "power2.out"
+                });
+            };
+
+            window.addEventListener('mousemove', handleMouseMove);
+            return () => window.removeEventListener('mousemove', handleMouseMove);
         }, containerRef);
-
         return () => ctx.revert();
-    }, [currentScene]);
+    }, []);
 
-    const scene = SCENES[currentScene];
+    const products = [
+        {
+            title: "Mastering Digital Markets",
+            type: "Video Course",
+            price: "₹4,999",
+            icon: PlayIcon,
+            color: "indigo",
+            img: "/hero/digital_marketing.svg"
+        },
+        {
+            title: "The Creator Playbook",
+            type: "PDF E-Book",
+            price: "₹999",
+            icon: DocumentIcon,
+            color: "emerald",
+            img: "/hero/creator_playbook.svg"
+        }
+    ];
 
     return (
-        <div ref={containerRef} className={`relative overflow-hidden rounded-3xl bg-black ${className}`}>
-            {SCENES.map((s, idx) => (
-                <div
-                    key={s.id}
-                    className={`absolute inset-0 transition-opacity duration-1000 ${currentScene === idx ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
-                >
-                    {/* Background Image */}
-                    <div className="absolute inset-0 pointer-events-none">
-                        <img
-                            src={s.image}
-                            alt={s.title}
-                            className="scene-bg w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+        <div ref={containerRef} className={`relative flex items-center justify-center h-[500px] sm:h-[600px] w-full perspective-2000 ${className}`}>
+
+            {/* Background Accent */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-indigo-50/50 rounded-full blur-[120px] -z-10"></div>
+
+            {/* THE STOREFRONT PREVIEW (Browser Frame) */}
+            <div
+                ref={browserRef}
+                className="relative w-full max-w-[550px] bg-white rounded-3xl shadow-[0_40px_100px_-20px_rgba(0,0,0,0.12)] border border-gray-100 overflow-hidden"
+                style={{ transformStyle: 'preserve-3d' }}
+            >
+                {/* Browser Toolbar */}
+                <div className="h-12 bg-gray-50 border-b border-gray-100 flex items-center px-4 gap-2">
+                    <div className="flex gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-400/40"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/40"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-green-400/40"></div>
+                    </div>
+                    <div className="flex-1 max-w-[280px] mx-auto h-6 bg-white rounded-full border border-gray-100 flex items-center px-3 gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full bg-indigo-100 flex items-center justify-center">
+                            <div className="w-1 h-1 rounded-full bg-indigo-400"></div>
+                        </div>
+                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest truncate">sedstudios.com/your-brand</span>
+                    </div>
+                </div>
+
+                {/* Content Area */}
+                <div className="p-6 sm:p-8 space-y-8">
+                    {/* Header */}
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white shadow-xl shadow-indigo-100">
+                                <span className="font-black text-xs">JS</span>
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-black text-gray-900 leading-tight flex items-center gap-1">
+                                    John's Studio <CheckBadgeIcon className="w-3 h-3 text-indigo-500" />
+                                </h3>
+                                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Premium Creator</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-1 px-2 py-1 bg-amber-50 rounded-full border border-amber-100 text-amber-600 text-[10px] font-black">
+                            <StarIcon className="w-3 h-3" /> 4.9 (1.2k)
+                        </div>
                     </div>
 
-                    {/* Content */}
-                    <div className="relative h-full flex flex-col justify-end p-8 sm:p-12">
-                        <div className="space-y-4 max-w-lg">
-                            <span className={`scene-text inline-block px-3 py-1 rounded-full bg-gradient-to-r ${s.accent} text-[10px] font-black uppercase tracking-[0.2em] text-white`}>
-                                {s.subtitle}
-                            </span>
+                    {/* Featured Section */}
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <h4 className="text-xs font-black text-gray-400 uppercase tracking-widest">Available Now</h4>
+                            <span className="text-[10px] font-bold text-indigo-600">See All Assets →</span>
+                        </div>
 
-                            <h2 className="scene-text text-3xl sm:text-4xl font-black tracking-tight text-white leading-tight">
-                                {s.title}
-                            </h2>
-
-                            <p className="scene-text text-sm sm:text-base text-gray-300 font-medium">
-                                {s.desc}
-                            </p>
-
-                            <div className="scene-text pt-4">
-                                <div className="flex items-center gap-2 text-white font-bold text-xs group">
-                                    EXPLORE FEATURE
-                                    <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        {/* Product List */}
+                        <div className="space-y-4">
+                            {products.map((p, i) => (
+                                <div key={i} className="group relative flex items-center gap-4 p-4 rounded-2xl bg-white border border-gray-50 hover:border-indigo-100 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300">
+                                    <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 flex-shrink-0">
+                                        <img
+                                            src={p.img}
+                                            alt={p.title}
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                        />
+                                        <div className={`absolute top-1 right-1 p-1 bg-white rounded shadow-sm`}>
+                                            <p.icon className={`w-3 h-3 text-${p.color}-500`} />
+                                        </div>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <span className={`text-[9px] font-black text-${p.color}-500 uppercase tracking-widest block mb-1`}>{p.type}</span>
+                                        <h5 className="text-sm font-black text-gray-900 leading-tight mb-2 truncate group-hover:text-indigo-600 transition-colors">{p.title}</h5>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm font-black text-gray-900">{p.price}</span>
+                                            <button className="h-8 px-4 rounded-full bg-gray-950 text-white text-[10px] font-black uppercase tracking-wider hover:bg-indigo-600 transition-colors flex items-center gap-2">
+                                                Buy Now
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Footer / Stats */}
+                    <div className="pt-4 border-t border-gray-50 grid grid-cols-2 gap-4">
+                        <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1">Total Sales</span>
+                            <span className="text-[15px] font-black text-gray-900">₹145,210</span>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1">Downloads</span>
+                            <span className="text-[15px] font-black text-gray-900">2,480+</span>
                         </div>
                     </div>
                 </div>
-            ))}
 
-            {/* Progress Indicators */}
-            <div className="absolute top-6 left-8 right-8 z-20 flex gap-2">
-                {SCENES.map((_, idx) => (
-                    <div key={idx} className="h-1 flex-1 bg-white/20 rounded-full overflow-hidden">
-                        {currentScene === idx && (
-                            <div className="progress-bar-fill h-full bg-white"></div>
-                        )}
-                        {currentScene > idx && (
-                            <div className="h-full w-full bg-white opacity-40"></div>
-                        )}
-                    </div>
-                ))}
+                {/* Floating Sales Badge - Grounded in the frame */}
+                <div className="absolute bottom-6 right-6 p-3 bg-indigo-600 rounded-2xl shadow-2xl flex items-center gap-2 animate-bounce cursor-pointer hover:bg-gray-950 transition-colors">
+                    <ShoppingCartIcon className="w-4 h-4 text-white" />
+                    <span className="text-[10px] font-black text-white uppercase tracking-wider">Join 2k sellers</span>
+                </div>
             </div>
+
+            {/* Subtle background decoration to avoid 'empty' feeling */}
+            <div className="absolute -z-20 top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-[80px] opacity-40"></div>
+            <div className="absolute -z-20 bottom-0 left-0 w-48 h-48 bg-purple-50 rounded-full blur-[60px] opacity-30"></div>
         </div>
     );
 }

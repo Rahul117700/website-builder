@@ -20,6 +20,7 @@ import {
   ShoppingBagIcon,
   HeartIcon,
   UserGroupIcon,
+  UserCircleIcon,
   Cog6ToothIcon,
   CurrencyDollarIcon,
   MagnifyingGlassIcon,
@@ -93,29 +94,29 @@ export default function HomePage() {
       name: "Video Course",
       visitors: 3247,
       revenue: 84500,
-      imageUrl: "https://images.pexels.com/photos/1854897/pexels-photo-1854897.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop",
-      backgroundImage: "https://images.pexels.com/photos/516541/pexels-photo-516541.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop"
+      imageUrl: "",
+      backgroundImage: ""
     },
     {
       name: "Premium Software",
       visitors: 2890,
       revenue: 124500,
-      imageUrl: "https://images.pexels.com/photos/2116721/pexels-photo-2116721.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop",
-      backgroundImage: "https://images.pexels.com/photos/1438081/pexels-photo-1438081.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop"
+      imageUrl: "",
+      backgroundImage: ""
     },
     {
       name: "Code Templates",
       visitors: 2156,
       revenue: 98700,
-      imageUrl: "https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop",
-      backgroundImage: "https://images.pexels.com/photos/1181359/pexels-photo-1181359.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop"
+      imageUrl: "",
+      backgroundImage: ""
     },
     {
       name: "Online Course",
       visitors: 1823,
       revenue: 76500,
-      imageUrl: "https://images.pexels.com/photos/4473608/pexels-photo-4473608.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop",
-      backgroundImage: "https://images.pexels.com/photos/317155/pexels-photo-317155.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop"
+      imageUrl: "",
+      backgroundImage: ""
     }
   ];
 
@@ -130,10 +131,10 @@ export default function HomePage() {
       before: "Part-time instructor",
       after: "Full-time entrepreneur",
       avatar: "🧘‍♀️",
-      imageUrl: "https://images.pexels.com/photos/7208625/pexels-photo-7208625.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
+      imageUrl: "/hero/avatar.svg",
       bgGradient: "from-purple-500 to-pink-600",
-      backgroundImage: "https://images.pexels.com/photos/4473608/pexels-photo-4473608.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop",
-      accentImage: "https://images.pexels.com/photos/317155/pexels-photo-317155.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop"
+      backgroundImage: "",
+      accentImage: ""
     },
     {
       name: "Arjun Kapoor",
@@ -144,10 +145,10 @@ export default function HomePage() {
       before: "Freelance developer",
       after: "SaaS founder",
       avatar: "💻",
-      imageUrl: "https://images.pexels.com/photos/709188/pexels-photo-709188.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
+      imageUrl: "/hero/avatar.svg",
       bgGradient: "from-blue-500 to-indigo-600",
-      backgroundImage: "https://images.pexels.com/photos/2116721/pexels-photo-2116721.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop",
-      accentImage: "https://images.pexels.com/photos/1438081/pexels-photo-1438081.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop"
+      backgroundImage: "",
+      accentImage: ""
     },
     {
       name: "Vikram Singh",
@@ -158,10 +159,10 @@ export default function HomePage() {
       before: "Software engineer",
       after: "Product creator",
       avatar: "⚡",
-      imageUrl: "https://images.pexels.com/photos/7581126/pexels-photo-7581126.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
+      imageUrl: "/hero/avatar.svg",
       bgGradient: "from-green-500 to-emerald-600",
-      backgroundImage: "https://images.pexels.com/photos/546819/pexels-photo-546819.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop",
-      accentImage: "https://images.pexels.com/photos/1181359/pexels-photo-1181359.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop"
+      backgroundImage: "",
+      accentImage: ""
     },
     {
       name: "Rahul Reddy",
@@ -172,10 +173,10 @@ export default function HomePage() {
       before: "Photography enthusiast",
       after: "Course instructor",
       avatar: "📸",
-      imageUrl: "https://images.pexels.com/photos/2753381/pexels-photo-2753381.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop",
+      imageUrl: "/hero/avatar.svg",
       bgGradient: "from-indigo-500 to-blue-600",
-      backgroundImage: "https://images.pexels.com/photos/1854897/pexels-photo-1854897.jpeg?auto=compress&cs=tinysrgb&w=1200&h=800&fit=crop",
-      accentImage: "https://images.pexels.com/photos/516541/pexels-photo-516541.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop"
+      backgroundImage: "",
+      accentImage: ""
     }
   ];
 
@@ -657,7 +658,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white overflow-hidden">
-      <div dangerouslySetInnerHTML={{ __html: getSchemaScript(productSchema) }} />
       <ExitIntentPopup discount="51%" />
       <StickyBuyNow />
       {/* Sale Notifications removed - flagged as deceptive content by Google */}
@@ -1223,65 +1223,84 @@ export default function HomePage() {
       <Header />
 
       {/* Hero Section - Sleek Premium Split Design */}
-      <section ref={heroRef} className="relative pt-16 pb-12 px-4 sm:px-6 lg:px-12 bg-white overflow-hidden">
+      <section ref={heroRef} className="relative pt-12 sm:pt-20 pb-12 px-4 sm:px-6 lg:px-12 bg-white overflow-hidden">
         <div className="max-w-[1500px] mx-auto relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
 
-            {/* LEFT COLUMN: The "Value Proposition" & "Process" */}
-            <div className="w-full lg:w-[45%] space-y-10">
+            {/* LEFT COLUMN: Premium Value Proposition */}
+            <div className="w-full lg:w-[45%] space-y-12">
               <div className="text-left">
-                <h1 className="hero-title text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-gray-900 mb-6 leading-[1.1]" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-title">
-                  Empower Your Creativity,
-                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 mt-2">
-                    Reach Millions, Earn Directly
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 text-orange-600 text-[10px] font-bold uppercase tracking-wider mb-6 border border-orange-100">
+                  <RocketLaunchIcon className="w-3.5 h-3.5" />
+                  Creator Revolution
+                </div>
+                <h1 className="hero-title text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-black text-gray-900 mb-6 leading-[1.05]" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-title">
+                  Build Your Empire.
+                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 mt-1">
+                    Sell Courses & PDFs Directly.
                   </span>
                 </h1>
-                <p className="hero-subtitle text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-subtitle">
-                  The all-in-one platform to share your expertise. Reach a global audience and get paid instantly for your <span className="text-indigo-600 font-semibold">courses</span>, <span className="text-purple-600 font-semibold">videos</span>, and <span className="text-pink-600 font-semibold">PDFs</span>.
+                <p className="hero-subtitle text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed max-w-xl" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-subtitle">
+                  The ultimate platform for experts and creators. Launch your professional brand channel, host premium content, and <span className="text-gray-900 font-bold underline decoration-indigo-500 underline-offset-4">keep 100% of your earnings.</span>
                 </p>
+
+                {/* Selling Highlights */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-2 pb-8 border-y border-gray-100 mb-8">
+                  {[
+                    { label: "Zero Fees", sub: "Keep all profits", icon: CurrencyDollarIcon },
+                    { label: "Instant Setup", sub: "Launch in <5min", icon: BoltIcon },
+                    { label: "Global Payouts", sub: "Direct to Bank", icon: BanknotesIcon }
+                  ].map((item, i) => (
+                    <div key={i} className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2 text-indigo-600">
+                        <item.icon className="w-4 h-4" />
+                        <span className="text-xs font-black uppercase tracking-tight text-gray-900">{item.label}</span>
+                      </div>
+                      <span className="text-[11px] text-gray-500 font-medium">{item.sub}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Process Flowchart - Vertical for Desktop Column */}
-              {/* <div className="relative space-y-6">
-                <p className="text-xs sm:text-sm font-black text-gray-400 mb-6 tracking-widest uppercase">The Path to Success</p>
-                
-                <div className="absolute left-7 top-12 bottom-0 w-0.5 bg-gradient-to-b from-indigo-500/20 via-purple-500/20 to-pink-500/20" style={{ zIndex: 0 }}>
+              <div className="relative space-y-6">
+                <p className="text-[10px] font-black text-gray-400 mb-6 tracking-[0.2em] uppercase">Your Journey to Success</p>
+
+                <div className="absolute left-7 top-10 bottom-4 w-0.5 bg-gray-100" style={{ zIndex: 0 }}>
                   <div className="process-progress-line-mobile absolute top-0 left-0 w-full bg-gradient-to-b from-indigo-500 via-purple-500 to-pink-500 rounded-full" style={{ height: '100%' }}></div>
                 </div>
 
                 <div className="space-y-6 relative" style={{ zIndex: 1 }}>
                   {[
-                    { id: 1, icon: RocketLaunchIcon, title: "Create Channel", desc: "Launch your brand instantly", color: "indigo" },
-                    { id: 2, icon: ShoppingBagIcon, title: "Add Products", desc: "Upload courses, videos or PDFs", color: "blue" },
-                    { id: 3, icon: Cog6ToothIcon, title: "Customize", desc: "Design your perfect storefront", color: "emerald" },
-                    { id: 4, icon: GlobeAltIcon, title: "Go Live", desc: "Reach customers worldwide", color: "orange" },
-                    { id: 5, icon: CurrencyDollarIcon, title: "Earn Directly", desc: "Get paid with 0% platform fees", color: "yellow", success: true }
+                    { id: 1, icon: UserCircleIcon, title: "Create Your Channel", desc: "Launch your brand profile in seconds", color: "indigo" },
+                    { id: 2, icon: ShoppingBagIcon, title: "Host Your Products", desc: "Upload PDFs, Courses or Videos", color: "blue" },
+                    { id: 3, icon: Cog6ToothIcon, title: "Personalize Experience", desc: "Design your perfect storefront", color: "emerald" },
+                    { id: 4, icon: GlobeAltIcon, title: "Go Live & Promote", desc: "Reach eager customers worldwide", color: "orange" },
+                    { id: 5, icon: CurrencyDollarIcon, title: "Direct Revenue", desc: "Get paid instantly with zero platform fees", color: "yellow", success: true }
                   ].map((step, idx) => (
                     <div key={step.id} className={`process-step flex items-center gap-6 group ${step.success ? 'process-step-success' : ''}`}>
                       <div className="relative flex-shrink-0">
-                        <div className={`process-step-icon relative w-14 h-14 rounded-2xl bg-white border-2 border-gray-100 shadow-sm flex items-center justify-center group-hover:scale-110 group-hover:shadow-md transition-all duration-300 group-hover:border-${step.color}-500`}>
-                          <step.icon className={`w-7 h-7 text-gray-700 group-hover:text-${step.color}-600 transition-colors`} />
+                        <div className={`process-step-icon relative w-12 h-12 rounded-xl bg-white border-2 border-gray-50 shadow-sm flex items-center justify-center group-hover:scale-110 group-hover:shadow-md transition-all duration-300 group-hover:border-${step.color}-500 overflow-hidden`}>
+                          <step.icon className={`w-6 h-6 text-gray-700 group-hover:text-${step.color}-600 transition-colors`} />
+                          <div className={`absolute inset-0 bg-${step.color}-500/5 opacity-0 group-hover:opacity-100 transition-opacity`} />
                         </div>
                       </div>
                       <div className="process-step-text">
-                        <div className={`w-5 h-5 rounded-full bg-gradient-to-br from-${step.color}-500 to-${step.color}-600 text-white text-[10px] font-bold flex items-center justify-center shadow-sm mb-1.5`}>
-                          {step.success ? '✓' : step.id}
-                        </div>
-                        <h4 className={`font-bold text-base ${step.success ? 'text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-amber-600' : 'text-gray-900'} mb-1`}>{step.title}</h4>
-                        <p className="text-sm text-gray-500 font-medium">{step.desc}</p>
+                        <h4 className={`font-bold text-[15px] ${step.success ? 'text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-amber-600' : 'text-gray-900'} mb-0.5`}>{step.title}</h4>
+                        <p className="text-xs text-gray-500 font-semibold">{step.desc}</p>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div> */}
+              </div>
 
               <div className="hero-buttons flex flex-col sm:flex-row gap-4 pt-4" style={{ opacity: 1, transform: 'translateY(0)' }}>
                 <CTAButton
                   onClick={() => router.push(session ? "/auth/dashboard/my-channel" : "/auth/signin?callbackUrl=/auth/dashboard/my-channel")}
                   className="group text-base font-bold shadow-xl hover:shadow-2xl px-10 py-5"
                 >
-                  Start Selling Now
-                  <ArrowRightIconSolid className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  Launch Your Channel Now
+                  <RocketLaunchIcon className="ml-2 h-5 w-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                 </CTAButton>
 
                 <div className="hidden sm:flex flex-col justify-center gap-1">
@@ -1289,7 +1308,7 @@ export default function HomePage() {
                     {[1, 2, 3, 4].map(i => (
                       <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center overflow-hidden">
                         <img
-                          src={`https://i.pravatar.cc/150?u=${i}`}
+                          src="/hero/avatar.svg"
                           alt="user"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
@@ -1317,15 +1336,10 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* RIGHT COLUMN: The "Product Reality" (Carousel) */}
-            <div className="w-full lg:w-[55%]">
+            {/* RIGHT COLUMN: Cinematic Creator Workstation */}
+            <div className="w-full lg:w-[55%] relative">
               <div className="hero-visual relative" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-visual">
-                {/* Visual Frame Decorations */}
-                <div className="absolute -inset-4 bg-gradient-to-tr from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-[2.5rem] blur-2xl -z-10"></div>
-                <div className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-400/10 rounded-full blur-[80px] -z-10 animate-pulse"></div>
-                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-pink-400/10 rounded-full blur-[80px] -z-10 animate-pulse"></div>
-
-                <CinematicAd className="w-full min-h-[500px] sm:min-h-[550px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.15)] border border-gray-100" />
+                <CinematicAd className="w-full" />
               </div>
             </div>
           </div>
@@ -2111,6 +2125,10 @@ export default function HomePage() {
       <ScreenshotShowcase
         isOpen={showScreenshotShowcase}
         onClose={() => setShowScreenshotShowcase(false)}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
       />
     </div>
   );
