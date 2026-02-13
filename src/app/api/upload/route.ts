@@ -19,6 +19,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Get the content length to check file size before parsing
+    const contentLength = request.headers.get('content-length');
+    const maxSize = 500 * 1024 * 1024; // 500MB
+
+    if (contentLength && parseInt(contentLength) > maxSize) {
+      return NextResponse.json({
+        error: 'File too large',
+        message: 'Image must be less than 50MB',
+        maxSize: '50MB'
+      }, { status: 413 });
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
@@ -33,12 +45,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file size (50MB max)
-    const maxSize = 50 * 1024 * 1024; // 50MB
     if (file.size > maxSize) {
       return NextResponse.json({
         error: 'File too large',
-        message: 'Image must be less than 50MB'
-      }, { status: 400 });
+        message: 'Image must be less than 50MB',
+        actualSize: `${(file.size / (1024 * 1024)).toFixed(2)}MB`,
+        maxSize: '50MB'
+      }, { status: 413 });
     }
 
     // Prepare file for upload
@@ -93,10 +106,24 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error uploading image:', error);
+
+    // Check if it's a payload too large error
+    if (error instanceof Error && error.message.includes('PayloadTooLargeError')) {
+      return NextResponse.json(
+        {
+          error: 'File too large',
+          message: 'Image must be less than 50MB',
+          details: 'The server rejected the request because the file is too large'
+        },
+        { status: 413 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'Failed to upload image', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
 }
+
 

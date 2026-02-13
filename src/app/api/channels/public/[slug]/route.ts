@@ -49,6 +49,16 @@ export async function GET(
       );
     }
 
+    // Log image URLs for debugging (only in development or when needed)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Channel image URLs:', {
+        slug: channel.slug,
+        profileImage: channel.profileImage,
+        coverImage: channel.coverImage,
+        userImage: channel.user?.image,
+      });
+    }
+
     // Check if channel is published (skip check for preview mode)
     if (!isPreview && !channel.published) {
       return NextResponse.json(
@@ -60,17 +70,17 @@ export async function GET(
     // Serialize Decimal fields properly
     const serializedChannel = {
       ...channel,
-      subscriptionPrice: channel.subscriptionPrice 
+      subscriptionPrice: channel.subscriptionPrice
         ? (typeof channel.subscriptionPrice === 'object' && 'toNumber' in channel.subscriptionPrice
-            ? channel.subscriptionPrice.toNumber()
-            : typeof channel.subscriptionPrice === 'string'
+          ? channel.subscriptionPrice.toNumber()
+          : typeof channel.subscriptionPrice === 'string'
             ? parseFloat(channel.subscriptionPrice)
             : Number(channel.subscriptionPrice))
         : null,
       totalRevenue: channel.totalRevenue
         ? (typeof channel.totalRevenue === 'object' && 'toNumber' in channel.totalRevenue
-            ? channel.totalRevenue.toNumber()
-            : typeof channel.totalRevenue === 'string'
+          ? channel.totalRevenue.toNumber()
+          : typeof channel.totalRevenue === 'string'
             ? parseFloat(channel.totalRevenue)
             : Number(channel.totalRevenue))
         : 0,

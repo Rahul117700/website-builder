@@ -942,13 +942,33 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
               <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
                 {channel.profileImage || channel.user?.image ? (
                   <img
-                    src={channel.profileImage ? `${channel.profileImage}?t=${Date.now()}` : (channel.user?.image || '')}
+                    src={
+                      channel.profileImage
+                        ? (channel.profileImage.startsWith('http')
+                          ? channel.profileImage
+                          : `${channel.profileImage}${channel.profileImage.includes('?') ? '&' : '?'}t=${Date.now()}`)
+                        : (channel.user?.image || '')
+                    }
                     alt={channel.name || 'Channel'}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      // Fallback to placeholder if image fails
-                      e.currentTarget.style.display = 'none';
-                      const parent = e.currentTarget.parentElement;
+                      const img = e.currentTarget;
+                      console.error('Profile image failed to load:', {
+                        profileImage: channel.profileImage,
+                        userImage: channel.user?.image,
+                        attemptedSrc: img.src
+                      });
+
+                      // Try fallback to user image if profile image failed
+                      if (channel.profileImage && channel.user?.image && img.src.includes(channel.profileImage)) {
+                        console.log('Trying fallback to user image:', channel.user.image);
+                        img.src = channel.user.image;
+                        return;
+                      }
+
+                      // Final fallback to placeholder
+                      img.style.display = 'none';
+                      const parent = img.parentElement;
                       if (parent) {
                         parent.innerHTML = `
                           <div class="w-full h-full flex items-center justify-center bg-indigo-100 uppercase text-indigo-600 font-bold text-4xl">
@@ -956,6 +976,9 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                           </div>
                         `;
                       }
+                    }}
+                    onLoad={() => {
+                      console.log('Profile image loaded successfully:', channel.profileImage || channel.user?.image);
                     }}
                   />
                 ) : (
@@ -2721,8 +2744,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                 {/* Refined Meta Badges */}
                                 <div className="hidden sm:flex flex-wrap items-center gap-3 mb-8">
                                   <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border font-bold text-xs sm:text-sm shadow-xl backdrop-blur-md ${featuredProduct.isSubscriberOnly || featuredProduct.price > 0
-                                      ? 'bg-indigo-600/90 border-white/20 text-white'
-                                      : 'bg-white/10 border-white/10 text-gray-200'
+                                    ? 'bg-indigo-600/90 border-white/20 text-white'
+                                    : 'bg-white/10 border-white/10 text-gray-200'
                                     }`}>
                                     {featuredProduct.isSubscriberOnly || featuredProduct.price > 0 ? (
                                       <LockClosedIcon className="w-4 h-4" />
