@@ -26,8 +26,8 @@ export async function POST(request: NextRequest) {
     if (contentLength && parseInt(contentLength) > maxSize) {
       return NextResponse.json({
         error: 'File too large',
-        message: 'Image must be less than 50MB',
-        maxSize: '50MB'
+        message: 'Image must be less than 500MB',
+        maxSize: '500MB'
       }, { status: 413 });
     }
 
@@ -44,13 +44,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Only image files are allowed' }, { status: 400 });
     }
 
-    // Validate file size (50MB max)
+    // Validate file size (500MB max)
     if (file.size > maxSize) {
       return NextResponse.json({
         error: 'File too large',
-        message: 'Image must be less than 50MB',
+        message: 'Image must be less than 500MB',
         actualSize: `${(file.size / (1024 * 1024)).toFixed(2)}MB`,
-        maxSize: '50MB'
+        maxSize: '500MB'
       }, { status: 413 });
     }
 
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'File too large',
-          message: 'Image must be less than 50MB',
+          message: 'Image must be less than 500MB',
           details: 'The server rejected the request because the file is too large'
         },
         { status: 413 }

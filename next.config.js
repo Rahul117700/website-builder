@@ -13,7 +13,7 @@ const nextConfig = {
   experimental: {
     serverActions: {
       allowedOrigins: ['*'],
-      bodySizeLimit: '500mb', // Increase body size limit for file uploads
+      bodySizeLimit: '500mb', // Increase body size limit for file uploads (500MB)
     },
   },
   // Disable Next.js caching completely
