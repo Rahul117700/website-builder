@@ -35,7 +35,18 @@ export default function OptimizedMediaLoader({
         }
 
         return () => observer.disconnect();
+        return () => observer.disconnect();
     }, []);
+
+    // Fallback: If loader hangs for too long (e.g. iframe issues), show content anyway
+    useEffect(() => {
+        if (isVisible && !isLoaded) {
+            const timer = setTimeout(() => {
+                if (!isLoaded) setIsLoaded(true);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [isVisible, isLoaded]);
 
     return (
         <div

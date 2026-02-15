@@ -693,14 +693,26 @@ export default function ProductClient() {
               fileUrl ? (
                 fileUrl.endsWith('.pdf') ? (
                   <div className="relative w-full h-full">
-                    {/* Desktop View: Inline Iframe */}
-                    <iframe
-                      src={fileUrl.startsWith('http') ? `/api/proxy-pdf?url=${encodeURIComponent(fileUrl)}` : `${fileUrl}#toolbar=1`}
-                      className="hidden md:block w-full h-full border-0"
-                      title={product.title}
-                      allow="fullscreen"
-                      loading="lazy"
-                    />
+                    {/* Desktop View: Google Docs Viewer for Reliable Embedding */}
+                    <div className="hidden md:block w-full h-full bg-gray-100">
+                      {fileUrl.startsWith('http') ? (
+                        <iframe
+                          src={`https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=true`}
+                          className="w-full h-full border-0"
+                          title={product.title}
+                          allow="fullscreen"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <iframe
+                          src={`${fileUrl}#toolbar=1`}
+                          className="w-full h-full border-0"
+                          title={product.title}
+                          allow="fullscreen"
+                          loading="lazy"
+                        />
+                      )}
+                    </div>
 
                     {/* Mobile View: Explicit Button */}
                     <div className="md:hidden w-full h-full flex flex-col items-center justify-center bg-gray-50 p-6 text-center border border-gray-100 rounded-lg">
