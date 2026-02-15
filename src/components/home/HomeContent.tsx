@@ -159,6 +159,13 @@ export default function HomeContent({
                                             </div>
                                         )}
 
+                                        {/* Trending Video Carousel - Desktop Only */}
+                                        {others.filter(p => p.type === 'VIDEO' || p.type === 'VIDEOS' || p.type === 'COURSE').length > 0 && (
+                                            <div className="hidden lg:block mb-8">
+                                                <TrendingCarousel items={others.filter(p => p.type === 'VIDEO' || p.type === 'VIDEOS' || p.type === 'COURSE').slice(0, 5)} />
+                                            </div>
+                                        )}
+
                                         <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                                             <FireIcon className="w-6 h-6 text-orange-500" />
                                             Recommended for You
