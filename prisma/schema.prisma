@@ -45,6 +45,11 @@ model User {
   history              UserHistory[]         @relation("UserHistory")
   notifications        UserNotification[]    @relation("UserNotifications")
   subscriptions        UserSubscription[]
+  pageViews            PageView[]
+  interactions         UserInteraction[]
+  analyticsSessions    UserSession[]
+  exitPoints           ExitPoint[]
+  conversionEvents     ConversionEvent[]
 
   @@map("User")
 }
@@ -1109,4 +1114,106 @@ enum ContactFormStatus {
   PENDING
   REVIEWED
   RESOLVED
+}
+
+// User Activity Tracking Models
+model PageView {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sessionId String
+  path      String
+  referrer  String?
+  userAgent String?
+  device    String?
+  browser   String?
+  os        String?
+  country   String?
+  city      String?
+  duration  Int?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([path])
+  @@index([createdAt])
+  @@map("page_views")
+}
+
+model UserInteraction {
+  id           String   @id @default(cuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sessionId    String
+  path         String
+  eventType    String
+  elementId    String?
+  elementClass String?
+  elementText  String?
+  scrollDepth  Int?
+  metadata     Json?
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("user_interactions")
+}
+
+model UserSession {
+  id             String   @id @default(cuid())
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sessionId      String   @unique
+  startTime      DateTime @default(now())
+  endTime        DateTime?
+  duration       Int?
+  pageViews      Int      @default(0)
+  interactions   Int      @default(0)
+  device         String?
+  browser        String?
+  os             String?
+  country        String?
+  exitPage       String?
+  conversionGoal String?
+  createdAt      DateTime @default(now())
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([createdAt])
+  @@map("user_sessions")
+}
+
+model ExitPoint {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sessionId   String
+  path        String
+  scrollDepth Int?
+  timeOnPage  Int?
+  exitType    String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([path])
+  @@index([createdAt])
+  @@map("exit_points")
+}
+
+model ConversionEvent {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sessionId  String
+  eventName  String
+  eventValue Decimal? @db.Decimal(10, 2)
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([eventName])
+  @@index([createdAt])
+  @@map("conversion_events")
 }

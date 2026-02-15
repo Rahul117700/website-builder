@@ -80,7 +80,7 @@
     "react-markdown": "^10.1.0",
     "react-material-ui-carousel": "^3.4.2",
     "react-shepherd": "^6.1.9",
-    "recharts": "^3.2.1",
+    "recharts": "^3.7.0",
     "resend": "^6.4.2",
     "sharp": "^0.34.5",
     "shepherd.js": "^14.5.1",

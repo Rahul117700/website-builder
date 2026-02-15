@@ -21,7 +21,8 @@ import {
     XMarkIcon,
     RocketLaunchIcon,
     ChatBubbleLeftEllipsisIcon,
-    GlobeAltIcon
+    GlobeAltIcon,
+    CursorArrowRaysIcon
 } from '@heroicons/react/24/outline';
 
 
@@ -49,6 +50,7 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
         { name: 'Entity Registry', icon: UsersIcon, href: '/auth/dashboard/super-admin/users' },
         { name: 'Channel Audit', icon: RocketLaunchIcon, href: '/auth/dashboard/super-admin/channels' },
         { name: 'Intelligence', icon: ChartBarIcon, href: '/auth/dashboard/super-admin/analytics' },
+        { name: 'User Activity', icon: CursorArrowRaysIcon, href: '/auth/dashboard/super-admin/user-activity' },
         { name: 'Protocols', icon: CreditCardIcon, href: '/auth/dashboard/super-admin/plans' },
         { name: 'Newsletter', icon: InboxIcon, href: '/auth/dashboard/super-admin/newsletter' },
         { name: 'Incoming', icon: ChatBubbleLeftEllipsisIcon, href: '/auth/dashboard/super-admin/contact' },

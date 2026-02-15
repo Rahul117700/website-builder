@@ -6,6 +6,7 @@ import FacebookPixel from '@/components/analytics/FacebookPixel';
 import RetentionManager from '@/components/retention/RetentionManager';
 import PageViewTracker from '@/components/PageViewTracker';
 import InstallPWA from '@/components/InstallPWA';
+import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider';
 import { generateSEOMetadata, generateWebsiteSchema, generateOrganizationSchema } from '@/utils/seo';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -136,11 +137,13 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} font-sans`}>
         <Providers>
-          <FacebookPixel />
-          <PageViewTracker />
-          <RetentionManager />
-          <InstallPWA />
-          {children}
+          <AnalyticsProvider>
+            <FacebookPixel />
+            <PageViewTracker />
+            <RetentionManager />
+            <InstallPWA />
+            {children}
+          </AnalyticsProvider>
         </Providers>
       </body>
     </html>
