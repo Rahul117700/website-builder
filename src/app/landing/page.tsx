@@ -664,23 +664,23 @@ export default function HomePage() {
   const features: Feature[] = [
     {
       icon: RocketLaunchIcon,
-      title: 'Channel Builder',
-      description: 'Create high-converting channels with our easy-to-use builder. No coding required.'
+      title: 'Easy Store Setup',
+      description: 'Create your online shop in minutes. Very simple - no technical skills needed.'
     },
     {
       icon: ShoppingBagIcon,
-      title: 'Sell Digital Products',
-      description: 'Upload and sell software, courses, videos, ebooks, code, and more with secure delivery.'
+      title: 'Sell Your Products',
+      description: 'Upload courses, PDFs, videos, ebooks and start selling. We handle everything.'
     },
     {
       icon: CurrencyDollarIcon,
-      title: 'Payment Integration',
-      description: 'Accept payments with Razorpay integration. Get paid directly to your account.'
+      title: 'Get Paid Easily',
+      description: 'Accept payments online. Money goes directly to your bank account.'
     },
     {
       icon: ChartBarIcon,
-      title: 'Analytics & Insights',
-      description: 'Track visitor behavior, conversions, revenue, and optimize your channels for better results.'
+      title: 'See Your Sales',
+      description: 'Check how many people visited, bought your products, and how much you earned.'
     }
   ];
 
@@ -1270,24 +1270,24 @@ export default function HomePage() {
               <div className="text-left">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 text-orange-600 text-[10px] font-bold uppercase tracking-wider mb-6 border border-orange-100">
                   <RocketLaunchIcon className="w-3.5 h-3.5" />
-                  Creator Revolution
+                  Start Earning Today
                 </div>
                 <h1 className="hero-title text-4xl sm:text-5xl lg:text-5xl xl:text-6xl font-black text-gray-900 mb-6 leading-[1.05]" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-title">
-                  Build Your Empire.
+                  Start Selling Online.
                   <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 mt-1">
-                    Sell Courses & PDFs Directly.
+                    Earn Money From Your Skills.
                   </span>
                 </h1>
                 <p className="hero-subtitle text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed max-w-xl" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-subtitle">
-                  The ultimate platform for experts and creators. Launch your professional brand channel, host premium content, and <span className="text-gray-900 font-bold underline decoration-indigo-500 underline-offset-4">keep 100% of your earnings.</span>
+                  Sell your courses, PDFs, and videos online. No technical knowledge needed. Setup in 5 minutes and <span className="text-gray-900 font-bold underline decoration-indigo-500 underline-offset-4">keep 100% money - zero fees!</span>
                 </p>
 
                 {/* Selling Highlights */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-2 pb-8 border-y border-gray-100 mb-8">
                   {[
-                    { label: "Zero Fees", sub: "Keep all profits", icon: CurrencyDollarIcon },
-                    { label: "Instant Setup", sub: "Launch in <5min", icon: BoltIcon },
-                    { label: "Global Payouts", sub: "Direct to Bank", icon: BanknotesIcon }
+                    { label: "No Fees", sub: "100% money is yours", icon: CurrencyDollarIcon },
+                    { label: "Very Easy", sub: "Start in 5 minutes", icon: BoltIcon },
+                    { label: "Get Paid", sub: "Money to your bank", icon: BanknotesIcon }
                   ].map((item, i) => (
                     <div key={i} className="flex flex-col gap-1">
                       <div className="flex items-center gap-2 text-indigo-600">
@@ -1302,7 +1302,7 @@ export default function HomePage() {
 
               {/* Process Flowchart - Vertical for Desktop Column */}
               <div className="relative space-y-6">
-                <p className="text-[10px] font-black text-gray-400 mb-6 tracking-[0.2em] uppercase">Your Journey to Success</p>
+                <p className="text-[10px] font-black text-gray-400 mb-6 tracking-[0.2em] uppercase">How It Works</p>
 
                 <div className="absolute left-7 top-10 bottom-4 w-0.5 bg-gray-100" style={{ zIndex: 0 }}>
                   <div className="process-progress-line-mobile absolute top-0 left-0 w-full bg-gradient-to-b from-indigo-500 via-purple-500 to-pink-500 rounded-full" style={{ height: '100%' }}></div>
@@ -1310,11 +1310,11 @@ export default function HomePage() {
 
                 <div className="space-y-6 relative" style={{ zIndex: 1 }}>
                   {[
-                    { id: 1, icon: UserCircleIcon, title: "Create Your Channel", desc: "Launch your brand profile in seconds", color: "indigo" },
-                    { id: 2, icon: ShoppingBagIcon, title: "Host Your Products", desc: "Upload PDFs, Courses or Videos", color: "blue" },
-                    { id: 3, icon: Cog6ToothIcon, title: "Personalize Experience", desc: "Design your perfect storefront", color: "emerald" },
-                    { id: 4, icon: GlobeAltIcon, title: "Go Live & Promote", desc: "Reach eager customers worldwide", color: "orange" },
-                    { id: 5, icon: CurrencyDollarIcon, title: "Direct Revenue", desc: "Get paid instantly with zero platform fees", color: "yellow", success: true }
+                    { id: 1, icon: UserCircleIcon, title: "Create Your Store", desc: "Make your own online shop", color: "indigo" },
+                    { id: 2, icon: ShoppingBagIcon, title: "Upload Products", desc: "Add your courses, PDFs or videos", color: "blue" },
+                    { id: 3, icon: Cog6ToothIcon, title: "Make It Yours", desc: "Choose colors and design", color: "emerald" },
+                    { id: 4, icon: GlobeAltIcon, title: "Share & Sell", desc: "Share link and start selling", color: "orange" },
+                    { id: 5, icon: CurrencyDollarIcon, title: "Get Money", desc: "100% payment directly to your bank", color: "yellow", success: true }
                   ].map((step, idx) => (
                     <div key={step.id} className={`process-step flex items-center gap-6 group ${step.success ? 'process-step-success' : ''}`}>
                       <div className="relative flex-shrink-0">
@@ -1337,7 +1337,7 @@ export default function HomePage() {
                   onClick={() => router.push(session ? "/auth/dashboard/my-channel" : "/auth/signin?callbackUrl=/auth/dashboard/my-channel")}
                   className="group text-base font-bold shadow-xl hover:shadow-2xl px-10 py-5"
                 >
-                  Launch Your Channel Now
+                  Start Selling Now - It's Free!
                   <RocketLaunchIcon className="ml-2 h-5 w-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                 </CTAButton>
 
