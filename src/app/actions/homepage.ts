@@ -484,3 +484,39 @@ function formatDuration(seconds: number): string {
 function pad(n: number) {
     return n < 10 ? '0' + n : n;
 }
+
+export async function getUserChannelInfo(userId: string): Promise<{ hasChannel: boolean; productCount: number } | null> {
+    if (!userId) return null;
+
+    try {
+        const channel = await prisma.channel.findFirst({
+            where: {
+                userId: userId,
+            },
+            include: {
+                _count: {
+                    select: {
+                        products: {
+                            where: {
+                                published: true,
+                                status: 'ACTIVE'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!channel) {
+            return { hasChannel: false, productCount: 0 };
+        }
+
+        return {
+            hasChannel: true,
+            productCount: channel._count.products
+        };
+    } catch (error) {
+        console.error('Error fetching user channel info:', error);
+        return null;
+    }
+}
