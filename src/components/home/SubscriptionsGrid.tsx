@@ -77,17 +77,143 @@ export default function SubscriptionsGrid({ initialSubscriptions }: { initialSub
                     ))}
                 </div>
             ) : (
-                <div className="flex flex-col items-center justify-center py-20 bg-gray-50 rounded-3xl border border-gray-100 text-center">
-                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 text-indigo-500 shadow-sm">
-                        <UserPlusIcon className="w-10 h-10" />
+                <div className="space-y-8">
+                    {/* Hero Banner - Start Selling */}
+                    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-8 sm:p-12 lg:p-16">
+                        {/* Animated Background Pattern */}
+                        <div className="absolute inset-0 opacity-10">
+                            <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse"></div>
+                            <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+                        </div>
+
+                        <div className="relative z-10 max-w-4xl mx-auto text-center">
+                            {/* Badge */}
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-white text-xs sm:text-sm font-bold uppercase tracking-wider mb-6 border border-white/30">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-400"></span>
+                                </span>
+                                Start Earning Today
+                            </div>
+
+                            {/* Headline */}
+                            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white mb-4 sm:mb-6 leading-tight">
+                                Ready to Make Money?
+                                <span className="block mt-2 text-yellow-300">Start Selling Your Skills!</span>
+                            </h1>
+
+                            {/* Description */}
+                            <p className="text-base sm:text-lg lg:text-xl text-white/90 mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed">
+                                Sell courses, PDFs, videos online. Very easy setup. No technical knowledge needed. <span className="font-bold text-yellow-300">Keep 100% money - zero fees!</span>
+                            </p>
+
+                            {/* Benefits Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
+                                {[
+                                    { icon: '💰', title: 'No Fees', desc: '100% money is yours' },
+                                    { icon: '⚡', title: 'Very Easy', desc: 'Start in 5 minutes' },
+                                    { icon: '🏦', title: 'Get Paid', desc: 'Money to your bank' }
+                                ].map((item, i) => (
+                                    <div key={i} className="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-6 border border-white/20 hover:bg-white/20 transition-all">
+                                        <div className="text-3xl sm:text-4xl mb-2 sm:mb-3">{item.icon}</div>
+                                        <h3 className="text-white font-bold text-sm sm:text-base mb-1">{item.title}</h3>
+                                        <p className="text-white/80 text-xs sm:text-sm">{item.desc}</p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* CTA Buttons */}
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                                <Link
+                                    href="/auth/dashboard/my-channel"
+                                    className="group w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-indigo-600 font-bold rounded-full shadow-2xl hover:shadow-white/50 hover:scale-105 transition-all text-base sm:text-lg"
+                                >
+                                    <span>Start Selling Now - Free!</span>
+                                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                    </svg>
+                                </Link>
+
+                                <Link
+                                    href="/"
+                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md text-white font-semibold rounded-full border-2 border-white/30 hover:bg-white/20 transition-all text-base"
+                                >
+                                    Explore Channels
+                                </Link>
+                            </div>
+
+                            {/* Social Proof */}
+                            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 text-white/90 text-sm">
+                                <div className="flex items-center gap-2">
+                                    <div className="flex -space-x-2">
+                                        {[1, 2, 3, 4].map(i => (
+                                            <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-white/20 flex items-center justify-center text-xs">
+                                                👤
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <span className="font-semibold">1000+ sellers earning</span>
+                                </div>
+                                <div className="hidden sm:block w-1 h-1 rounded-full bg-white/50"></div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-2xl">⭐</span>
+                                    <span className="font-semibold">4.8/5 rating</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">No subscriptions found</h2>
-                    <p className="text-gray-500 max-w-md mb-8">
-                        Try adjusting your filters or explore new channels.
-                    </p>
-                    <Link href="/" className="px-8 py-3 bg-indigo-600 text-white font-medium rounded-full shadow-lg hover:bg-indigo-700 transition-all">
-                        Explore Channels
-                    </Link>
+
+                    {/* How It Works Section */}
+                    <div className="bg-white rounded-3xl border border-gray-100 p-6 sm:p-10">
+                        <h2 className="text-2xl sm:text-3xl font-black text-gray-900 text-center mb-8 sm:mb-12">
+                            How It Works - <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Very Simple!</span>
+                        </h2>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                            {[
+                                { step: '1', icon: '🏪', title: 'Create Store', desc: 'Make your online shop in 5 minutes' },
+                                { step: '2', icon: '📦', title: 'Upload Products', desc: 'Add courses, PDFs or videos' },
+                                { step: '3', icon: '🎨', title: 'Make It Yours', desc: 'Choose colors and design' },
+                                { step: '4', icon: '💸', title: 'Get Money', desc: '100% payment to your bank' }
+                            ].map((item, i) => (
+                                <div key={i} className="relative group">
+                                    {/* Connector Line - Hidden on mobile, shown on larger screens */}
+                                    {i < 3 && (
+                                        <div className="hidden lg:block absolute top-12 left-full w-full h-0.5 bg-gradient-to-r from-indigo-200 to-purple-200 -z-10"></div>
+                                    )}
+
+                                    <div className="text-center">
+                                        {/* Step Number */}
+                                        <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 text-white font-black text-lg mb-4 shadow-lg">
+                                            {item.step}
+                                        </div>
+
+                                        {/* Icon */}
+                                        <div className="text-5xl sm:text-6xl mb-4 group-hover:scale-110 transition-transform">
+                                            {item.icon}
+                                        </div>
+
+                                        {/* Title */}
+                                        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
+
+                                        {/* Description */}
+                                        <p className="text-sm sm:text-base text-gray-600">{item.desc}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Bottom CTA */}
+                        <div className="mt-10 sm:mt-12 text-center">
+                            <Link
+                                href="/auth/dashboard/my-channel"
+                                className="inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all text-base sm:text-lg"
+                            >
+                                <span>Start Your Store Now</span>
+                                <span className="text-2xl">🚀</span>
+                            </Link>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

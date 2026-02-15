@@ -30,8 +30,14 @@ export default async function SubscriptionsPage() {
     return (
         <HomeContent userSubscriptions={sidebarSubscriptions}>
             <div className="p-6">
-                <h1 className="text-2xl font-bold mb-6">All Subscriptions</h1>
-                <SubscriptionsGrid initialSubscriptions={subscriptions} />
+                {subscriptions.length > 0 ? (
+                    <>
+                        <h1 className="text-2xl font-bold mb-6">All Subscriptions</h1>
+                        <SubscriptionsGrid initialSubscriptions={subscriptions} />
+                    </>
+                ) : (
+                    <SubscriptionsGrid initialSubscriptions={subscriptions} />
+                )}
             </div>
         </HomeContent>
     );
