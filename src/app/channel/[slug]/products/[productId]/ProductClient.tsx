@@ -692,13 +692,34 @@ export default function ProductClient() {
             {canAccess ? (
               fileUrl ? (
                 fileUrl.endsWith('.pdf') ? (
-                  <iframe
-                    src={fileUrl.startsWith('http') ? `/api/proxy-pdf?url=${encodeURIComponent(fileUrl)}` : `${fileUrl}#toolbar=1`}
-                    className="w-full h-full border-0"
-                    title={product.title}
-                    allow="fullscreen"
-                    loading="lazy"
-                  />
+                  <div className="relative w-full h-full">
+                    {/* Desktop View: Inline Iframe */}
+                    <iframe
+                      src={fileUrl.startsWith('http') ? `/api/proxy-pdf?url=${encodeURIComponent(fileUrl)}` : `${fileUrl}#toolbar=1`}
+                      className="hidden md:block w-full h-full border-0"
+                      title={product.title}
+                      allow="fullscreen"
+                      loading="lazy"
+                    />
+
+                    {/* Mobile View: Explicit Button */}
+                    <div className="md:hidden w-full h-full flex flex-col items-center justify-center bg-gray-50 p-6 text-center border border-gray-100 rounded-lg">
+                      <div className="w-16 h-16 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mb-4">
+                        <DocumentTextIcon className="w-8 h-8" />
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">{product.title}</h3>
+                      <p className="text-sm text-gray-500 mb-6 max-w-xs mx-auto">This document is optimized for mobile viewing.</p>
+                      <a
+                        href={fileUrl.startsWith('http') ? `/api/proxy-pdf?url=${encodeURIComponent(fileUrl)}` : fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white font-bold rounded-xl shadow-lg hover:scale-105 transition-transform"
+                      >
+                        <DocumentTextIcon className="w-5 h-5" />
+                        View PDF
+                      </a>
+                    </div>
+                  </div>
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center p-8">
                     <DocumentTextIcon className="h-16 w-16 text-gray-400 mb-4" />
