@@ -110,9 +110,9 @@ export default function HomeContent({
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-8">
-                            {/* Main Content Column - Full Width */}
-                            <div className="flex-1 min-w-0 space-y-10">
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                            {/* Main Content Column */}
+                            <div className="lg:col-span-8 xl:col-span-9 space-y-10">
 
 
                                 {/* Section: From Your Subscriptions */}
@@ -156,13 +156,6 @@ export default function HomeContent({
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                                     </svg>
                                                 </Link>
-                                            </div>
-                                        )}
-
-                                        {/* Trending Video Carousel - Desktop Only */}
-                                        {others.filter(p => p.type === 'VIDEO' || p.type === 'VIDEOS' || p.type === 'COURSE').length > 0 && (
-                                            <div className="hidden lg:block mb-8">
-                                                <TrendingCarousel items={others.filter(p => p.type === 'VIDEO' || p.type === 'VIDEOS' || p.type === 'COURSE').slice(0, 5)} />
                                             </div>
                                         )}
 
@@ -268,6 +261,37 @@ export default function HomeContent({
                                         </div>
                                     </section>
                                 )}
+                            </div>
+
+                            {/* Right Sidebar - Desktop Only */}
+                            <div className="hidden lg:block lg:col-span-4 xl:col-span-3 space-y-8 sticky top-24 h-fit">
+                                {others.filter(p => p.type === 'VIDEO' || p.type === 'VIDEOS' || p.type === 'COURSE').length > 0 && (
+                                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                                        <div className="p-4 border-b border-gray-50 bg-gray-50/50">
+                                            <h3 className="font-bold flex items-center gap-2 text-gray-900">
+                                                <FireIcon className="w-5 h-5 text-red-500" />
+                                                Trending Videos
+                                            </h3>
+                                        </div>
+                                        <div className="p-4">
+                                            <TrendingCarousel
+                                                items={others.filter(p => p.type === 'VIDEO' || p.type === 'VIDEOS' || p.type === 'COURSE').slice(0, 5)}
+                                                isCompact={true}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="p-5 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-100/50 text-center">
+                                    <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <UserIcon className="w-6 h-6" />
+                                    </div>
+                                    <h4 className="font-bold text-gray-900 mb-2">Sell Your Skills</h4>
+                                    <p className="text-xs text-gray-600 mb-4 leading-relaxed">Create your own store in minutes and start earning 100% of revenue.</p>
+                                    <Link href="/auth/dashboard/my-channel" className="block w-full py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition-all hover:shadow-lg hover:-translate-y-0.5">
+                                        Start Selling Now
+                                    </Link>
+                                </div>
                             </div>
                         </div>
 
