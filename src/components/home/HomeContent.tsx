@@ -136,69 +136,27 @@ export default function HomeContent({
                                 {/* Section: Recommended */}
                                 {others.length > 0 ? (
                                     <section>
-                                        {/* Conditional Banner - Show different content based on user status */}
-                                        {subscribedProducts.length === 0 && (
-                                            <>
-                                                {/* If user has channel with products - Show Success Story */}
-                                                {userChannelInfo?.hasChannel && userChannelInfo?.productCount > 0 ? (
-                                                    <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-4 rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 border border-emerald-100">
-                                                        {/* Left: Icon + Content */}
-                                                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                            {/* Icon */}
-                                                            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-lg shadow-md">
-                                                                💰
-                                                            </div>
-
-                                                            {/* Content */}
-                                                            <div className="flex-1 min-w-0">
-                                                                <div className="flex items-center gap-2 mb-1">
-                                                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">
-                                                                        Success Story
-                                                                    </span>
-                                                                    <span className="hidden sm:inline text-xs text-gray-500">•</span>
-                                                                    <span className="hidden sm:inline text-xs font-semibold text-emerald-600">Priya earned ₹15L in 6 months</span>
-                                                                </div>
-                                                                <p className="text-sm text-gray-600 line-clamp-1">
-                                                                    <span className="sm:hidden font-semibold text-gray-900">Priya earned ₹15L in 6 months. </span>
-                                                                    💡 Share on WhatsApp & Instagram to grow faster
-                                                                </p>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Right: CTA Button */}
-                                                        <Link
-                                                            href="/auth/dashboard/my-channel"
-                                                            className="flex-shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-lg shadow-md hover:shadow-lg hover:scale-105 transition-all text-sm whitespace-nowrap"
-                                                        >
-                                                            <span>Add Products</span>
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                                            </svg>
-                                                        </Link>
-                                                    </div>
-                                                ) : (
-                                                    /* If user doesn't have channel/products - Show Start Selling CTA */
-                                                    <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-5 rounded-xl bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-100">
-                                                        <div className="flex-1">
-                                                            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">
-                                                                Want to earn money? <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Start selling your skills!</span>
-                                                            </h2>
-                                                            <p className="text-sm text-gray-600">
-                                                                Sell courses, PDFs, videos. <span className="font-semibold text-indigo-600">100% money is yours - zero fees!</span>
-                                                            </p>
-                                                        </div>
-                                                        <Link
-                                                            href="/auth/dashboard/my-channel"
-                                                            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all text-sm whitespace-nowrap"
-                                                        >
-                                                            <span>Start Selling - Free!</span>
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                                            </svg>
-                                                        </Link>
-                                                    </div>
-                                                )}
-                                            </>
+                                        {/* Conditional Banner - Only show if user has NO channel/products */}
+                                        {subscribedProducts.length === 0 && (!userChannelInfo?.hasChannel || userChannelInfo?.productCount === 0) && (
+                                            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-5 rounded-xl bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-100">
+                                                <div className="flex-1">
+                                                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">
+                                                        Want to earn money? <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Start selling your skills!</span>
+                                                    </h2>
+                                                    <p className="text-sm text-gray-600">
+                                                        Sell courses, PDFs, videos. <span className="font-semibold text-indigo-600">100% money is yours - zero fees!</span>
+                                                    </p>
+                                                </div>
+                                                <Link
+                                                    href="/auth/dashboard/my-channel"
+                                                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all text-sm whitespace-nowrap"
+                                                >
+                                                    <span>Start Selling - Free!</span>
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                                    </svg>
+                                                </Link>
+                                            </div>
                                         )}
 
                                         <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
