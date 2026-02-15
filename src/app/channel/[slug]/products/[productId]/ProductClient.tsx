@@ -693,7 +693,7 @@ export default function ProductClient() {
               fileUrl ? (
                 fileUrl.endsWith('.pdf') ? (
                   <iframe
-                    src={`${fileUrl}#toolbar=1`}
+                    src={fileUrl.startsWith('http') ? `/api/proxy-pdf?url=${encodeURIComponent(fileUrl)}` : `${fileUrl}#toolbar=1`}
                     className="w-full h-full border-0"
                     title={product.title}
                     allow="fullscreen"
