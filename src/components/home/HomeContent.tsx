@@ -96,6 +96,29 @@ export default function HomeContent({
                                 {/* Section: Recommended */}
                                 {others.length > 0 ? (
                                     <section>
+                                        {/* Sleek Header - Only show if user has no subscriptions */}
+                                        {subscribedProducts.length === 0 && (
+                                            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-5 rounded-xl bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-100">
+                                                <div className="flex-1">
+                                                    <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">
+                                                        Want to earn money? <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Start selling your skills!</span>
+                                                    </h2>
+                                                    <p className="text-sm text-gray-600">
+                                                        Sell courses, PDFs, videos. <span className="font-semibold text-indigo-600">100% money is yours - zero fees!</span>
+                                                    </p>
+                                                </div>
+                                                <Link
+                                                    href="/auth/dashboard/my-channel"
+                                                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all text-sm whitespace-nowrap"
+                                                >
+                                                    <span>Start Selling - Free!</span>
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                                    </svg>
+                                                </Link>
+                                            </div>
+                                        )}
+
                                         <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                                             <FireIcon className="w-6 h-6 text-orange-500" />
                                             Recommended for You
