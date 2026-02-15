@@ -192,80 +192,118 @@ export default function HomePage() {
   }, [totalStorySlides, currentStorySlide]);
 
 
-  // Three.js setup
+  // Three.js setup with error handling
   useEffect(() => {
     if (typeof window === 'undefined' || !threeContainerRef.current) return;
 
-    // Scene setup
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    try {
+      // Test if WebGL is available
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x000000, 0);
-    threeContainerRef.current.appendChild(renderer.domElement);
-
-    // Create floating particles - reduced count and opacity for subtlety
-    const particles = new THREE.Group();
-    const particleCount = 50; // Reduced from 100
-
-    for (let i = 0; i < particleCount; i++) {
-      const geometry = new THREE.SphereGeometry(0.015, 8, 8); // Smaller particles
-      const material = new THREE.MeshBasicMaterial({
-        color: new THREE.Color().setHSL(Math.random() * 0.3 + 0.6, 0.8, 0.6),
-        transparent: true,
-        opacity: 0.3 // Reduced opacity from 0.6
-      });
-      const particle = new THREE.Mesh(geometry, material);
-
-      particle.position.set(
-        (Math.random() - 0.5) * 15, // Reduced spread
-        (Math.random() - 0.5) * 15,
-        (Math.random() - 0.5) * 15
-      );
-
-      particles.add(particle);
-    }
-
-    scene.add(particles);
-    camera.position.z = 5;
-
-    // Animation loop - slower and more subtle
-    const animate = () => {
-      requestAnimationFrame(animate);
-
-      particles.rotation.x += 0.0005; // Slower rotation
-      particles.rotation.y += 0.001;
-
-      particles.children.forEach((particle, i) => {
-        particle.position.y += Math.sin(Date.now() * 0.0005 + i) * 0.0005; // Slower movement
-        particle.position.x += Math.cos(Date.now() * 0.0005 + i) * 0.0005;
-      });
-
-      renderer.render(scene, camera);
-    };
-
-    animate();
-
-    // Handle resize
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    // Store references
-    threeSceneRef.current = { scene, camera, renderer, particles };
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      renderer.dispose();
-      if (threeContainerRef.current) {
-        threeContainerRef.current.removeChild(renderer.domElement);
+      if (!gl) {
+        console.warn('WebGL not available, skipping Three.js initialization');
+        return;
       }
-    };
+
+      // Scene setup
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+      let renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      } catch (rendererError) {
+        console.warn('Failed to create WebGL renderer:', rendererError);
+        return;
+      }
+
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0x000000, 0);
+
+      if (threeContainerRef.current) {
+        threeContainerRef.current.appendChild(renderer.domElement);
+      }
+
+      // Create floating particles - reduced count and opacity for subtlety
+      const particles = new THREE.Group();
+      const particleCount = 50; // Reduced from 100
+
+      for (let i = 0; i < particleCount; i++) {
+        const geometry = new THREE.SphereGeometry(0.015, 8, 8); // Smaller particles
+        const material = new THREE.MeshBasicMaterial({
+          color: new THREE.Color().setHSL(Math.random() * 0.3 + 0.6, 0.8, 0.6),
+          transparent: true,
+          opacity: 0.3 // Reduced opacity from 0.6
+        });
+        const particle = new THREE.Mesh(geometry, material);
+
+        particle.position.set(
+          (Math.random() - 0.5) * 15, // Reduced spread
+          (Math.random() - 0.5) * 15,
+          (Math.random() - 0.5) * 15
+        );
+
+        particles.add(particle);
+      }
+
+      scene.add(particles);
+      camera.position.z = 5;
+
+      // Animation loop - slower and more subtle
+      let animationFrameId: number;
+      const animate = () => {
+        animationFrameId = requestAnimationFrame(animate);
+
+        particles.rotation.x += 0.0005; // Slower rotation
+        particles.rotation.y += 0.001;
+
+        particles.children.forEach((particle, i) => {
+          particle.position.y += Math.sin(Date.now() * 0.0005 + i) * 0.0005; // Slower movement
+          particle.position.x += Math.cos(Date.now() * 0.0005 + i) * 0.0005;
+        });
+
+        renderer.render(scene, camera);
+      };
+
+      animate();
+
+      // Handle resize
+      const handleResize = () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      };
+
+      window.addEventListener('resize', handleResize);
+
+      // Store references
+      threeSceneRef.current = { scene, camera, renderer, particles };
+
+      return () => {
+        window.removeEventListener('resize', handleResize);
+
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+        }
+
+        if (renderer) {
+          renderer.dispose();
+        }
+
+        if (threeContainerRef.current && renderer && renderer.domElement) {
+          try {
+            threeContainerRef.current.removeChild(renderer.domElement);
+          } catch (e) {
+            // Element might already be removed
+          }
+        }
+      };
+    } catch (error) {
+      console.warn('Three.js initialization failed:', error);
+      // Gracefully degrade - the page will still work without 3D effects
+      return;
+    }
   }, []);
 
 
