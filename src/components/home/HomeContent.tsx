@@ -72,8 +72,46 @@ export default function HomeContent({
                 <>
 
                     <div className="max-w-[1800px] mx-auto p-4 md:p-6">
-                        <div className="flex flex-col xl:flex-row gap-8">
-                            {/* Main Content Column */}
+                        {/* Live Activity Feed */}
+                        <div className="mb-8 bg-white border border-gray-100 rounded-xl p-3 shadow-sm flex items-center gap-4 overflow-hidden">
+                            <div className="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-lg text-xs font-bold whitespace-nowrap">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                </span>
+                                LIVE
+                            </div>
+                            <div className="flex-1 overflow-hidden relative h-6">
+                                <div className="animate-marquee whitespace-nowrap flex gap-8 items-center text-sm text-gray-600 absolute top-0">
+                                    {recommendedProducts.slice(0, 5).map((p, i) => (
+                                        <span key={`ticker-${i}`} className="flex items-center gap-2">
+                                            <span className="w-5 h-5 rounded-full bg-gray-100 relative overflow-hidden">
+                                                <Image src={p.channelAvatar} alt="" fill className="object-cover" />
+                                            </span>
+                                            <span className="font-medium text-gray-900">{p.channelName}</span>
+                                            <span>just uploaded</span>
+                                            <span className="font-medium text-indigo-600">{p.title}</span>
+                                            <span className="text-gray-300">•</span>
+                                        </span>
+                                    ))}
+                                    {/* Duplicate for infinite scroll effect */}
+                                    {recommendedProducts.slice(0, 5).map((p, i) => (
+                                        <span key={`ticker-dup-${i}`} className="flex items-center gap-2">
+                                            <span className="w-5 h-5 rounded-full bg-gray-100 relative overflow-hidden">
+                                                <Image src={p.channelAvatar} alt="" fill className="object-cover" />
+                                            </span>
+                                            <span className="font-medium text-gray-900">{p.channelName}</span>
+                                            <span>just uploaded</span>
+                                            <span className="font-medium text-indigo-600">{p.title}</span>
+                                            <span className="text-gray-300">•</span>
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-8">
+                            {/* Main Content Column - Full Width */}
                             <div className="flex-1 min-w-0 space-y-10">
 
 
@@ -265,58 +303,6 @@ export default function HomeContent({
                                         </div>
                                     </section>
                                 )}
-                            </div>
-
-                            {/* Right Sidebar Column */}
-                            <div className="hidden xl:block w-[350px] flex-shrink-0">
-                                <div className="sticky top-24 space-y-6">
-                                    {/* Trending Widget */}
-                                    <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-                                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                            <span className="relative flex h-3 w-3">
-                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                                            </span>
-                                            Trending Now
-                                        </h3>
-
-                                        {(() => {
-                                            // Get top 5 trending products (prefer videos)
-                                            const trendingItems = [...recommendedProducts, ...subscribedProducts]
-                                                .filter((v, i, a) => a.findIndex(t => t.id === v.id) === i) // Unique
-                                                .sort((a, b) => {
-                                                    // Prefer videos, then by views
-                                                    const aVal = (a.type === 'VIDEO' || a.type === 'VIDEOS') ? 10 : 0;
-                                                    const bVal = (b.type === 'VIDEO' || b.type === 'VIDEOS') ? 10 : 0;
-                                                    return bVal - aVal || (parseInt(b.views) || 0) - (parseInt(a.views) || 0);
-                                                })
-                                                .slice(0, 5);
-
-                                            if (trendingItems.length === 0) return (
-                                                <div className="aspect-[4/5] bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
-                                                    No content trending
-                                                </div>
-                                            );
-
-                                            return <TrendingCarousel items={trendingItems} />;
-                                        })()}
-                                    </div>
-
-                                    {/* Mini Suggestions */}
-                                    <div
-                                        className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden group cursor-pointer active:scale-95 transition-transform"
-                                        onClick={() => router.push('/auth/dashboard/my-channel')}
-                                    >
-                                        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-
-                                        <h3 className="font-black text-lg mb-1 relative z-10">Creator Fund</h3>
-                                        <p className="text-indigo-100 text-xs font-medium mb-4 relative z-10 leading-relaxed">Join our creator program, add products, and start earning today.</p>
-                                        <div className="flex items-center gap-2 font-black text-xs uppercase tracking-widest relative z-10">
-                                            <span>Get Started</span>
-                                            <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
