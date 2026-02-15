@@ -43,6 +43,7 @@ import ScreenshotShowcase from '@/components/ScreenshotShowcase';
 import dynamic from 'next/dynamic';
 import { blogPosts } from '@/data/blogs';
 import CinematicAd from '@/components/CinematicAd';
+import ProductCard from '@/components/product/ProductCard';
 
 // SaleNotifications removed - flagged as deceptive content by Google Search Console
 // const SaleNotifications = dynamic(() => import('@/components/SaleNotifications'), { ssr: false });
@@ -1443,6 +1444,41 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Featured Products Section - Display View Cards */}
+      {
+        feedItems.length > 0 && (
+          <section className="py-20 bg-white border-y border-gray-100">
+            <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-bold uppercase tracking-wider mb-4 border border-indigo-100">
+                  <ShoppingBagIcon className="w-3.5 h-3.5" />
+                  Trending Now
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-black text-gray-900 mb-4">Explore Community Creations</h2>
+                <p className="text-lg text-gray-600 max-w-2xl mx-auto">Discover the amazing digital products our creators are selling right now.</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+                {feedItems.slice(0, 8).map((product) => (
+                  <div key={product.id} className="h-full">
+                    <ProductCard {...product} />
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-12 text-center">
+                <CTAButton
+                  onClick={() => router.push(session ? "/auth/dashboard/my-channel" : "/auth/signin")}
+                  className="inline-flex items-center gap-2 px-8 py-3 bg-white text-gray-900 border-2 border-gray-100 rounded-xl font-bold hover:border-gray-900 transition-all hover:-translate-y-1 shadow-sm hover:shadow-lg"
+                >
+                  Start Selling Your Own
+                  <ArrowRightIcon className="w-4 h-4" />
+                </CTAButton>
+              </div>
+            </div>
+          </section>
+        )
+      }
 
 
       {/* Reach Millions Section - Global Impact */}
@@ -2227,6 +2263,6 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
       />
-    </div>
+    </div >
   );
 }
