@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { gsap } from 'gsap';
+import Image from 'next/image';
+import { getRecommendedProducts, ProductCardData } from '@/app/actions/homepage';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { TextPlugin } from 'gsap/TextPlugin';
 import * as THREE from 'three';
@@ -70,6 +72,22 @@ export default function HomePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showScreenshotShowcase, setShowScreenshotShowcase] = useState(false);
+
+  // Live Feed State
+  const [feedItems, setFeedItems] = useState<ProductCardData[]>([]);
+
+  useEffect(() => {
+    async function fetchFeed() {
+      try {
+        // Fetch recommended products for the feed (public or personalized)
+        const products = await getRecommendedProducts(session?.user?.id);
+        setFeedItems(products);
+      } catch (error) {
+        console.error("Failed to fetch activity feed", error);
+      }
+    }
+    fetchFeed();
+  }, [session?.user?.id]);
 
   // Refs for animations
   const heroRef = useRef<HTMLElement>(null);
@@ -1263,6 +1281,47 @@ export default function HomePage() {
       {/* Hero Section - Sleek Premium Split Design */}
       <section ref={heroRef} className="relative pt-12 sm:pt-20 pb-12 px-4 sm:px-6 lg:px-12 bg-white overflow-hidden">
         <div className="max-w-[1500px] mx-auto relative z-10">
+
+          {/* Live Activity Feed */}
+          {feedItems.length > 0 && (
+            <div className="mb-8 md:mb-12 bg-white/80 backdrop-blur-md border border-gray-100 rounded-xl p-3 shadow-sm flex items-center gap-4 overflow-hidden max-w-4xl mx-auto">
+              <div className="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-lg text-xs font-bold whitespace-nowrap">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                LIVE
+              </div>
+              <div className="flex-1 overflow-hidden relative h-6">
+                <div className="animate-marquee whitespace-nowrap flex gap-8 items-center text-sm text-gray-600 absolute top-0">
+                  {feedItems.slice(0, 5).map((p, i) => (
+                    <span key={`ticker-${i}`} className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-gray-100 relative overflow-hidden">
+                        <Image src={p.channelAvatar || '/hero/avatar.svg'} alt="" fill className="object-cover" />
+                      </span>
+                      <span className="font-medium text-gray-900">{p.channelName}</span>
+                      <span>just uploaded</span>
+                      <span className="font-medium text-indigo-600">{p.title}</span>
+                      <span className="text-gray-300">•</span>
+                    </span>
+                  ))}
+                  {/* Duplicate for infinite scroll effect */}
+                  {feedItems.slice(0, 5).map((p, i) => (
+                    <span key={`ticker-dup-${i}`} className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-gray-100 relative overflow-hidden">
+                        <Image src={p.channelAvatar || '/hero/avatar.svg'} alt="" fill className="object-cover" />
+                      </span>
+                      <span className="font-medium text-gray-900">{p.channelName}</span>
+                      <span>just uploaded</span>
+                      <span className="font-medium text-indigo-600">{p.title}</span>
+                      <span className="text-gray-300">•</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
 
             {/* LEFT COLUMN: Premium Value Proposition */}
