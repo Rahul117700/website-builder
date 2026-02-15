@@ -10,18 +10,31 @@ export async function POST(request: NextRequest) {
 
         const { sessionId, path, eventType, elementId, elementClass, elementText, scrollDepth, metadata } = data;
 
+        // Sanitize and validate data
+        const sanitizedElementClass = typeof elementClass === 'string'
+            ? elementClass
+            : (elementClass?.toString ? elementClass.toString() : null);
+
+        const sanitizedElementText = typeof elementText === 'string'
+            ? elementText.substring(0, 500) // Limit text length
+            : null;
+
+        const sanitizedScrollDepth = typeof scrollDepth === 'number'
+            ? Math.min(100, Math.max(0, scrollDepth)) // Clamp between 0-100
+            : null;
+
         // Create interaction record
         await prisma.userInteraction.create({
             data: {
                 id: `int_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 userId: session?.user?.id || null,
-                sessionId,
-                path,
-                eventType,
-                elementId,
-                elementClass,
-                elementText,
-                scrollDepth,
+                sessionId: sessionId || 'unknown',
+                path: path || '/',
+                eventType: eventType || 'click',
+                elementId: elementId || null,
+                elementClass: sanitizedElementClass,
+                elementText: sanitizedElementText,
+                scrollDepth: sanitizedScrollDepth,
                 metadata: metadata || {},
             },
         });
@@ -40,8 +53,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('Error tracking interaction:', error);
+        console.error('Request data:', await request.clone().json().catch(() => 'Unable to parse'));
         return NextResponse.json(
-            { error: 'Failed to track interaction' },
+            { error: 'Failed to track interaction', details: error instanceof Error ? error.message : 'Unknown error' },
             { status: 500 }
         );
     }
