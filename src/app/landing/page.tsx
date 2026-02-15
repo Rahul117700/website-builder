@@ -1437,7 +1437,7 @@ export default function HomePage() {
             {/* RIGHT COLUMN: Cinematic Creator Workstation */}
             <div className="w-full lg:w-[55%] relative">
               <div className="hero-visual relative" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-visual">
-                <CinematicAd className="w-full" />
+                <CinematicAd className="w-full" trendingProducts={feedItems} />
               </div>
             </div>
           </div>
@@ -1458,7 +1458,7 @@ export default function HomePage() {
                 <p className="text-lg text-gray-600 max-w-2xl mx-auto">Discover the amazing digital products our creators are selling right now.</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 lg:gap-8">
                 {feedItems.slice(0, 8).map((product) => (
                   <div key={product.id} className="h-full">
                     <ProductCard {...product} />

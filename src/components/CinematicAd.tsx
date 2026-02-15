@@ -2,6 +2,9 @@
 
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
+import Link from 'next/link';
+import Image from 'next/image';
+import { ProductCardData } from '@/app/actions/homepage';
 import {
     CheckBadgeIcon,
     StarIcon,
@@ -11,7 +14,7 @@ import {
     ShoppingCartIcon
 } from '@heroicons/react/24/solid';
 
-export default function CinematicAd({ className = "" }: { className?: string }) {
+export default function CinematicAd({ className = "", trendingProducts = [] }: { className?: string; trendingProducts?: ProductCardData[] }) {
     const containerRef = useRef<HTMLDivElement>(null);
     const browserRef = useRef<HTMLDivElement>(null);
 
@@ -47,14 +50,15 @@ export default function CinematicAd({ className = "" }: { className?: string }) 
         return () => ctx.revert();
     }, []);
 
-    const products = [
+    const defaultProducts = [
         {
             title: "Mastering Digital Markets",
             type: "Video Course",
             price: "₹4,999",
             icon: PlayIcon,
             color: "indigo",
-            img: "/hero/digital_marketing.svg"
+            img: "/hero/digital_marketing.svg",
+            isDefault: true
         },
         {
             title: "The Creator Playbook",
@@ -62,9 +66,20 @@ export default function CinematicAd({ className = "" }: { className?: string }) 
             price: "₹999",
             icon: DocumentIcon,
             color: "emerald",
-            img: "/hero/creator_playbook.svg"
+            img: "/hero/creator_playbook.svg",
+            isDefault: true
         }
     ];
+
+    const displayProducts = trendingProducts.length > 0 ? trendingProducts.slice(0, 3).map(p => ({
+        title: p.title,
+        type: p.type.replace('_', ' '),
+        price: p.price === 0 || p.isFree ? 'Free' : `₹${p.price}`,
+        icon: (p.type.includes('VIDEO') || p.type === 'COURSE') ? PlayIcon : DocumentIcon,
+        color: (p.type.includes('VIDEO') || p.type === 'COURSE') ? 'indigo' : 'emerald',
+        img: p.thumbnail,
+        isDefault: false
+    })) : defaultProducts;
 
     return (
         <div ref={containerRef} className={`relative flex items-center justify-center h-[500px] sm:h-[600px] w-full perspective-2000 ${className}`}>
@@ -122,13 +137,15 @@ export default function CinematicAd({ className = "" }: { className?: string }) 
 
                         {/* Product List */}
                         <div className="space-y-4">
-                            {products.map((p, i) => (
+                            {displayProducts.map((p, i) => (
                                 <div key={i} className="group relative flex items-center gap-4 p-4 rounded-2xl bg-white border border-gray-50 hover:border-indigo-100 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300">
                                     <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100 flex-shrink-0">
-                                        <img
-                                            src={p.img}
+                                        <Image
+                                            src={p.img || '/placeholder-product.jpg'}
                                             alt={p.title}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                            fill
+                                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                            unoptimized={p.isDefault} // Optimize external images, skip for default SVGs if needed
                                         />
                                         <div className={`absolute top-1 right-1 p-1 bg-white rounded shadow-sm`}>
                                             <p.icon className={`w-3 h-3 text-${p.color}-500`} />
