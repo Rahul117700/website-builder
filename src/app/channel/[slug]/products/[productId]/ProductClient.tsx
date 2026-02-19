@@ -1554,26 +1554,80 @@ export default function ProductClient() {
           </div>
         </div>
 
+        {/* Sticky Mobile CTA for Non-Subscribers */}
+        {!hasActiveSubscription && channel?.subscriptionEnabled && !isOwner && (
+          <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 p-4 pb-safe md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.1)] animation-slide-up">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Unlock Full Access</p>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-lg font-black text-gray-900">
+                    {(() => {
+                      const priceValue = channel.subscriptionPrice;
+                      let price = 0;
+                      if (priceValue !== null && priceValue !== undefined) {
+                        if (typeof priceValue === 'string') {
+                          price = parseFloat(priceValue) || 0;
+                        } else if (typeof priceValue === 'object' && 'toNumber' in priceValue) {
+                          price = priceValue.toNumber();
+                        } else {
+                          price = Number(priceValue) || 0;
+                        }
+                      }
+                      return formatPrice(price, channel.subscriptionCurrency || 'INR');
+                    })()}
+                  </span>
+                  <span className="text-xs font-medium text-gray-500">/month</span>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  if (!session?.user?.id) {
+                    router.push('/auth/signin');
+                    return;
+                  }
+                  setShowSubscriptionModal(true);
+                }}
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-200 active:scale-95 transition-transform"
+              >
+                Subscribe Now
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Subscription Modal */}
         {showSubscriptionModal && channel && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="relative w-full max-w-md rounded-2xl shadow-2xl bg-white">
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Subscribe to {channel.name}</h2>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="relative w-full max-w-md rounded-3xl shadow-2xl bg-white overflow-hidden">
+              {/* Header Pattern */}
+              <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-br from-blue-600 to-indigo-600 opacity-10"></div>
+
+              <div className="relative p-6 sm:p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-black text-gray-900 tracking-tight">Unlock Access</h2>
+                    <p className="text-sm text-gray-500 font-medium">Support {channel.name} & get exclusive content</p>
+                  </div>
                   <button
                     onClick={() => setShowSubscriptionModal(false)}
-                    className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="p-2 rounded-xl hover:bg-gray-100 transition-colors -mr-2 -mt-2"
                   >
-                    <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
+                    <XMarkIcon className="w-6 h-6 text-gray-400 hover:text-gray-900" />
                   </button>
                 </div>
 
-                <div className="mb-6">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <div className="mb-8">
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 mb-4 relative overflow-hidden group hover:border-blue-200 transition-colors">
+                    <div className="absolute top-0 right-0 px-3 py-1 bg-blue-100 text-blue-700 text-[10px] font-black uppercase tracking-widest rounded-bl-xl">
+                      Best Value
+                    </div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-semibold text-sm sm:text-base text-gray-900">Monthly Subscription</span>
-                      <span className="text-xl sm:text-2xl font-bold text-blue-600">
+                      <span className="font-bold text-gray-900 flex items-center gap-2">
+                        <StarIconSolid className="w-5 h-5 text-yellow-400" />
+                        Monthly Access
+                      </span>
+                      <span className="text-3xl font-black text-blue-600 tracking-tight">
                         {(() => {
                           const priceValue = channel.subscriptionPrice;
                           let price = 0;
@@ -1590,27 +1644,49 @@ export default function ProductClient() {
                         })()}
                       </span>
                     </div>
-                    <p className="text-xs sm:text-sm text-gray-600">
-                      Get access to all content in this channel for 30 days
+                    <p className="text-sm text-gray-600 font-medium leading-relaxed">
+                      Get instant access to all premium videos, documents, and resources in this channel for 30 days.
                     </p>
+                  </div>
+
+                  {/* Trust Signals */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                      <CheckCircleIcon className="w-5 h-5 text-green-500 flex-shrink-0" />
+                      <span className="text-xs font-bold text-gray-600">Cancel anytime</span>
+                    </div>
+                    <div className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                      <div className="w-5 h-5 rounded-full bg-slate-900 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">🔒</div>
+                      <span className="text-xs font-bold text-gray-600">Secure payment</span>
+                    </div>
                   </div>
                 </div>
 
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowSubscriptionModal(false)}
-                    className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg text-sm sm:text-base font-semibold hover:bg-gray-50 transition-colors"
+                    className="flex-1 px-4 py-3.5 border-2 border-gray-100 text-gray-700 rounded-xl text-base font-bold hover:bg-gray-50 hover:border-gray-200 transition-all"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSubscribe}
                     disabled={subscribing}
-                    className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-[2] px-4 py-3.5 bg-gray-900 text-white rounded-xl text-base font-bold hover:bg-black transition-all shadow-lg shadow-gray-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    {subscribing ? 'Processing...' : 'Subscribe Now'}
+                    {subscribing ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Processing...</span>
+                      </>
+                    ) : (
+                      <span>Subscribe Now</span>
+                    )}
                   </button>
                 </div>
+                <p className="text-center text-[10px] text-gray-400 mt-4 font-medium">
+                  By subscribing, you agree to our Terms of Service.
+                </p>
               </div>
             </div>
           </div>
@@ -1620,24 +1696,22 @@ export default function ProductClient() {
         {showSubscribersList && channel && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div
-              className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl"
+              className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl"
               style={{ backgroundColor }}
             >
-              <div className="sticky top-0 flex items-center justify-between p-6 border-b" style={{ borderColor: `${textColor}20`, backgroundColor }}>
+              <div className="sticky top-0 flex items-center justify-between p-6 border-b z-10 backdrop-blur-md bg-white/80" style={{ borderColor: `${textColor}10` }}>
                 <div>
-                  <h2 className="text-2xl font-bold mb-1" style={{ color: textColor }}>
+                  <h2 className="text-2xl font-black mb-1" style={{ color: textColor }}>
                     Subscribers
                   </h2>
-                  <p className="text-sm opacity-70" style={{ color: textColor }}>
+                  <p className="text-sm font-medium opacity-70" style={{ color: textColor }}>
                     {subscribers.length} total • {subscribers.filter((sub: any) => sub.status === 'ACTIVE' && new Date(sub.endDate) > new Date()).length} active
                   </p>
                 </div>
                 <button
                   onClick={() => setShowSubscribersList(false)}
-                  className="p-2 rounded-lg transition-colors"
+                  className="p-2 rounded-xl transition-colors hover:bg-gray-100"
                   style={{ color: textColor }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${textColor}10`}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
                   <XMarkIcon className="w-6 h-6" />
                 </button>
@@ -1645,60 +1719,57 @@ export default function ProductClient() {
 
               <div className="p-6">
                 {subscribers.length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="inline-block p-6 rounded-full mb-4" style={{ backgroundColor: `${primaryColor}10` }}>
-                      <svg className="w-12 h-12" style={{ color: primaryColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
+                  <div className="text-center py-16">
+                    <div className="inline-block p-6 rounded-full mb-4 bg-gray-50" style={{ backgroundColor: `${primaryColor}10` }}>
+                      <UserCircleIcon className="w-16 h-16" style={{ color: primaryColor }} />
                     </div>
-                    <p className="text-lg font-medium mb-2" style={{ color: textColor }}>
+                    <p className="text-xl font-bold mb-2" style={{ color: textColor }}>
                       No subscribers yet
                     </p>
-                    <p className="text-sm opacity-70" style={{ color: textColor }}>
-                      Share your channel to get subscribers!
+                    <p className="text-sm opacity-60 max-w-sm mx-auto" style={{ color: textColor }}>
+                      Share your channel on social media to start getting your first subscribers!
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {subscribers.map((subscriber: any) => (
                       <div
                         key={subscriber.id}
-                        className="flex items-center gap-4 p-4 rounded-xl border"
+                        className="flex items-center gap-4 p-4 rounded-2xl border transition-colors hover:bg-gray-50"
                         style={{
                           borderColor: `${textColor}10`,
-                          backgroundColor: `${primaryColor}05`,
                         }}
                       >
                         {subscriber.user?.image ? (
                           <img
                             src={subscriber.user.image}
                             alt={subscriber.user.name || 'Subscriber'}
-                            className="w-12 h-12 rounded-full object-cover"
+                            className="w-12 h-12 rounded-full object-cover ring-2 ring-white shadow-sm"
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}>
-                            <UserCircleIcon className="w-8 h-8" />
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}>
+                            {(subscriber.user?.name || 'U')[0]?.toUpperCase()}
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm truncate" style={{ color: textColor }}>
+                          <p className="font-bold text-sm truncate" style={{ color: textColor }}>
                             {subscriber.user?.name || subscriber.user?.email || 'Anonymous'}
                           </p>
-                          <p className="text-xs opacity-70 truncate" style={{ color: textColor }}>
+                          <p className="text-xs opacity-60 truncate font-medium" style={{ color: textColor }}>
                             {subscriber.user?.email}
                           </p>
                         </div>
                         <div className="text-right">
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-semibold ${subscriber.status === 'ACTIVE' && new Date(subscriber.endDate) > new Date()
-                              ? 'bg-green-100 text-green-700'
+                            className={`inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${subscriber.status === 'ACTIVE' && new Date(subscriber.endDate) > new Date()
+                              ? 'bg-emerald-100 text-emerald-700'
                               : 'bg-gray-100 text-gray-700'
                               }`}
                           >
                             {subscriber.status === 'ACTIVE' && new Date(subscriber.endDate) > new Date() ? 'Active' : 'Expired'}
                           </span>
-                          <p className="text-xs mt-1 opacity-70" style={{ color: textColor }}>
-                            {new Date(subscriber.endDate).toLocaleDateString()}
+                          <p className="text-[10px] mt-1.5 opacity-60 font-medium uppercase tracking-wider" style={{ color: textColor }}>
+                            Ends {new Date(subscriber.endDate).toLocaleDateString()}
                           </p>
                         </div>
                       </div>
@@ -1712,50 +1783,43 @@ export default function ProductClient() {
 
         {/* Success Modal */}
         {showSuccessModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="relative w-full max-w-md rounded-2xl shadow-2xl bg-white animate-fade-in">
-              <div className="p-6">
-                <div className="flex items-center justify-center mb-4">
-                  <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-                    <CheckCircleIcon className="w-10 h-10 text-green-600" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Success!</h3>
-                <p className="text-gray-600 text-center mb-6">{modalMessage}</p>
-                <button
-                  onClick={() => setShowSuccessModal(false)}
-                  className="w-full px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors"
-                >
-                  OK
-                </button>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+            <div className="relative w-full max-w-sm rounded-3xl shadow-2xl bg-white p-8 text-center">
+              <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6">
+                <CheckCircleIcon className="w-12 h-12 text-emerald-500" />
               </div>
+              <h3 className="text-2xl font-black text-gray-900 mb-2">Success!</h3>
+              <p className="text-gray-500 font-medium mb-8 leading-relaxed">{modalMessage}</p>
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="w-full px-6 py-3.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-transform active:scale-95"
+              >
+                Okay, got it
+              </button>
             </div>
           </div>
         )}
 
         {/* Error Modal */}
         {showErrorModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="relative w-full max-w-md rounded-2xl shadow-2xl bg-white animate-fade-in">
-              <div className="p-6">
-                <div className="flex items-center justify-center mb-4">
-                  <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
-                    <XCircleIcon className="w-10 h-10 text-red-600" />
-                  </div>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 text-center mb-2">Error</h3>
-                <p className="text-gray-600 text-center mb-6">{modalMessage}</p>
-                <button
-                  onClick={() => setShowErrorModal(false)}
-                  className="w-full px-4 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors"
-                >
-                  OK
-                </button>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+            <div className="relative w-full max-w-sm rounded-3xl shadow-2xl bg-white p-8 text-center">
+              <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
+                <XCircleIcon className="w-12 h-12 text-red-500" />
               </div>
+              <h3 className="text-2xl font-black text-gray-900 mb-2">Oops!</h3>
+              <p className="text-gray-500 font-medium mb-8 leading-relaxed">{modalMessage}</p>
+              <button
+                onClick={() => setShowErrorModal(false)}
+                className="w-full px-6 py-3.5 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-transform active:scale-95"
+              >
+                Try Again
+              </button>
             </div>
           </div>
         )}
       </div>
+
       {/* Save to Playlist Modal */}
       {channel && product && (
         <SaveToPlaylistModal
@@ -1773,6 +1837,6 @@ export default function ProductClient() {
           description={product.description}
         />
       )}
-    </MainLayout >
+    </MainLayout>
   );
 }

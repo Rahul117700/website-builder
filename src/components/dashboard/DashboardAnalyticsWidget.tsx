@@ -13,7 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
-interface DashboardAnalytics {
+export interface DashboardAnalytics {
   totalViews: number;
   totalConversions: number;
   totalRevenue: number;
@@ -27,15 +27,18 @@ interface DashboardAnalytics {
 
 interface DashboardAnalyticsWidgetProps {
   currentViewers?: number;
+  analyticsData?: DashboardAnalytics;
 }
 
-export default function DashboardAnalyticsWidget({ currentViewers }: DashboardAnalyticsWidgetProps = {}) {
-  const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function DashboardAnalyticsWidget({ currentViewers, analyticsData }: DashboardAnalyticsWidgetProps = {}) {
+  const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(analyticsData || null);
+  const [loading, setLoading] = useState(!analyticsData);
 
   useEffect(() => {
-    loadAnalytics();
-  }, []);
+    if (!analyticsData) {
+      loadAnalytics();
+    }
+  }, [analyticsData]);
 
   // Update live visitors when currentViewers prop changes
   useEffect(() => {
