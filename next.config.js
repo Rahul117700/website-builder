@@ -27,8 +27,10 @@ const nextConfig = {
     pagesBufferLength: 2,
   },
 
-  // Exclude template folders from Next.js compilation
   webpack: (config, { isServer }) => {
+    // Disable filesystem cache to fix EPERM issues
+    config.cache = false;
+
     // Set watch options to ignore template folders
     config.watchOptions = {
       ignored: [

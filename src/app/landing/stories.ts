@@ -8,7 +8,7 @@ interface SuccessStory {
     imageUrl: string;
 }
 
-const storiesWithImages: SuccessStory[] = [
+export const storiesWithImages: SuccessStory[] = [
     {
         name: "Sarah Jenkins",
         business: "Fitness Coach",

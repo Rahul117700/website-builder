@@ -10,12 +10,16 @@ interface TrendingCarouselProps {
     items: ProductCardData[];
     isCompact?: boolean;
     isLoading?: boolean;
+    className?: string;
 }
 
-export default function TrendingCarousel({ items, isCompact = false, isLoading = false }: TrendingCarouselProps) {
+export default function TrendingCarousel({ items, isCompact = false, isLoading = false, className }: TrendingCarouselProps) {
     const router = useRouter();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [direction, setDirection] = useState(0); // -1 for left, 1 for right
+
+    // Determine sizing class: use override if provided, else default to fixed aspect ratios
+    const sizingClass = className || (isCompact ? 'aspect-[3/5]' : 'aspect-[3/4]');
 
     const slideNext = useCallback(() => {
         if (!items.length) return;
@@ -37,7 +41,7 @@ export default function TrendingCarousel({ items, isCompact = false, isLoading =
 
     if (isLoading) {
         return (
-            <div className={`relative ${isCompact ? 'aspect-[3/5]' : 'aspect-[3/4]'} rounded-2xl overflow-hidden bg-gray-100 animate-pulse border border-gray-100`}>
+            <div className={`relative ${sizingClass} rounded-2xl overflow-hidden bg-gray-100 animate-pulse border border-gray-100`}>
                 <div className="absolute inset-0 flex flex-col justify-end p-6 space-y-3">
                     <div className="h-4 w-24 bg-gray-200 rounded"></div>
                     <div className="h-8 w-full bg-gray-200 rounded"></div>
@@ -77,7 +81,7 @@ export default function TrendingCarousel({ items, isCompact = false, isLoading =
     };
 
     return (
-        <div className={`relative ${isCompact ? 'aspect-[3/5]' : 'aspect-[3/4]'} rounded-2xl overflow-hidden bg-gray-900 shadow-2xl group`}>
+        <div className={`relative ${sizingClass} rounded-2xl overflow-hidden bg-gray-900 shadow-2xl group`}>
             <AnimatePresence initial={false} custom={direction} mode="wait">
                 <motion.div
                     key={currentIndex}
@@ -122,44 +126,52 @@ export default function TrendingCarousel({ items, isCompact = false, isLoading =
                     <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent opacity-40" />
 
                     {/* Content */}
-                    <div className={`absolute inset-0 ${isCompact ? 'p-3' : 'p-6'} flex flex-col justify-end`}>
+                    <div className={`absolute inset-0 ${isCompact ? 'p-2 sm:p-3' : 'p-3 sm:p-6'} flex flex-col justify-between`}>
+                        {/* Top Badge */}
+                        <div className="flex justify-start">
+                            <span className={`px-2 py-1 rounded-md bg-black/40 backdrop-blur-md text-white ${isCompact ? 'text-[8px]' : 'text-[10px]'} font-bold uppercase tracking-wider border border-white/10`}>
+                                Trending
+                            </span>
+                        </div>
+
                         <motion.div
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.2 }}
-                            className="space-y-3"
+                            className="space-y-1.5 sm:space-y-3"
                         >
-                            <div className="flex items-center gap-2">
-                                <span className={`px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-xl text-white ${isCompact ? 'text-[8px]' : 'text-[10px]'} font-black uppercase tracking-[0.2em] border border-white/20 shadow-xl`}>
-                                    Top Trending
-                                </span>
-                            </div>
-
-                            <h4 className={`text-white font-black ${isCompact ? 'text-base' : 'text-2xl'} leading-tight line-clamp-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] tracking-tight`}>
+                            <h4 className={`text-white font-black ${isCompact ? 'text-xs leading-snug' : 'text-sm sm:text-2xl'} leading-tight line-clamp-2 drop-shadow-md`}>
                                 {currentItem.title}
                             </h4>
 
                             <div className="flex items-center gap-2">
-                                <div className={`relative ${isCompact ? 'w-6 h-6' : 'w-8 h-8'} rounded-full overflow-hidden border-2 border-white/50 shadow-lg flex-shrink-0`}>
+                                <div className={`relative ${isCompact ? 'w-4 h-4' : 'w-5 h-5 sm:w-8 sm:h-8'} rounded-full overflow-hidden border border-white/50 shadow-sm flex-shrink-0`}>
                                     {currentItem.channelAvatar ? (
                                         <img src={currentItem.channelAvatar} alt={currentItem.channelName} className="w-full h-full object-cover" />
                                     ) : (
-                                        <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-[10px]">
+                                        <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-[8px]">
                                             {currentItem.channelName.charAt(0).toUpperCase()}
                                         </div>
                                     )}
                                 </div>
-                                <span className={`text-gray-100 ${isCompact ? 'text-[10px]' : 'text-sm'} font-bold tracking-tight drop-shadow-md truncate`}>
+                                <span className={`text-gray-200 ${isCompact ? 'text-[9px]' : 'text-[10px] sm:text-sm'} font-medium truncate max-w-[80px] sm:max-w-none`}>
                                     {currentItem.channelName}
                                 </span>
                             </div>
 
                             <button
-                                className={`mt-2 w-full ${isCompact ? 'py-2' : 'py-3.5'} bg-white text-gray-900 rounded-xl font-black ${isCompact ? 'text-[10px]' : 'text-sm'} uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-[0_10px_20px_rgba(0,0,0,0.3)] active:scale-95 flex items-center justify-center gap-2 group/btn`}
-                                onClick={() => router.push(`/channel/${currentItem.channelSlug}/products/${currentItem.id}`)}
+                                className={`mt-1 w-full ${isCompact ? 'py-1.5' : 'py-1.5 sm:py-3.5'} bg-white text-gray-900 rounded-lg sm:rounded-xl font-bold ${isCompact ? 'text-[10px]' : 'text-[10px] sm:text-sm'} uppercase tracking-wide hover:bg-gray-50 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-1.5 group/btn`}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    router.push(`/channel/${currentItem.channelSlug}/products/${currentItem.id}`);
+                                }}
                             >
-                                {isCompact ? 'Watch' : 'Watch Now'}
-                                <RocketLaunchIcon className={`${isCompact ? 'w-3 h-3' : 'w-4 h-4'} group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform`} />
+                                {isCompact ? 'Watch' : (
+                                    <>
+                                        Watch <span className="hidden sm:inline">Now</span>
+                                    </>
+                                )}
+                                <RocketLaunchIcon className={`${isCompact ? 'w-3 h-3' : 'w-3 h-3 sm:w-4 sm:h-4'} group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform`} />
                             </button>
                         </motion.div>
                     </div>

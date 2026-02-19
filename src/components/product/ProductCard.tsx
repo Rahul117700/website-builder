@@ -133,7 +133,7 @@ export default function ProductCard({ id, title, thumbnail, channelName, channel
             </Link>
 
             {/* Thumbnail Container - Cinematic Aspect Ratio */}
-            <div className={`relative w-full aspect-video bg-gray-100 rounded-2xl overflow-hidden mb-3 isolate`}>
+            <div className={`relative w-full aspect-video bg-gray-100 rounded-xl overflow-hidden mb-4 isolate shadow-sm transition-all duration-500 ring-1 ring-black/5 group-hover:shadow-2xl group-hover:ring-black/10 group-hover:-translate-y-1`}>
 
                 {/* Image / Video Layer */}
                 <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
@@ -157,12 +157,12 @@ export default function ProductCard({ id, title, thumbnail, channelName, channel
                 </div>
 
                 {/* Overlay Gradient - Subtle cinematic fade */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
 
                 {/* Top Badges */}
                 <div className="absolute top-3 left-3 flex gap-2 z-10">
                     {/* Media Type Icon */}
-                    <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-sm">
+                    <div className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-white shadow-sm">
                         {type === 'VIDEO' || type === 'VIDEOS' || type === 'COURSE' ? (
                             <VideoCameraIcon className="w-4 h-4" />
                         ) : type === 'EBOOK' ? (
@@ -184,23 +184,23 @@ export default function ProductCard({ id, title, thumbnail, channelName, channel
                             Free
                         </div>
                     ) : (
-                        <div className="px-2.5 py-1 bg-white text-gray-900 text-[10px] font-bold rounded-lg shadow-lg border border-gray-100">
+                        <div className="px-2.5 py-1 bg-white/95 backdrop-blur text-gray-900 text-[10px] font-bold rounded-lg shadow-lg border border-gray-100 uppercase tracking-wider">
                             ₹{price}
                         </div>
                     )}
                 </div>
 
                 {/* Bottom Actions - Appear on Hover */}
-                <div className="absolute bottom-3 right-3 flex gap-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-20">
+                <div className="absolute bottom-3 right-3 flex gap-2 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-20">
                     <button
                         onClick={handleLike}
-                        className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 ${isLiked ? 'bg-red-500 text-white' : 'bg-white text-gray-900 hover:bg-gray-50'}`}
+                        className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 border border-white/10 backdrop-blur-sm ${isLiked ? 'bg-red-500 text-white' : 'bg-white/90 text-gray-900 hover:bg-white'}`}
                     >
                         {isLiked ? <HeartIconSolid className="w-5 h-5" /> : <HeartIcon className="w-5 h-5" />}
                     </button>
                     <button
                         onClick={handleSave}
-                        className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 ${isSaved ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 hover:bg-gray-50'}`}
+                        className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 border border-white/10 backdrop-blur-sm ${isSaved ? 'bg-indigo-600 text-white' : 'bg-white/90 text-gray-900 hover:bg-white'}`}
                     >
                         {isSaved ? <BookmarkIconSolid className="w-5 h-5" /> : <BookmarkIcon className="w-5 h-5" />}
                     </button>
@@ -208,22 +208,22 @@ export default function ProductCard({ id, title, thumbnail, channelName, channel
 
                 {/* Duration Badge */}
                 {duration && (
-                    <div className="absolute bottom-3 left-3 px-2 py-0.5 bg-black/60 backdrop-blur text-white text-[10px] font-bold rounded overflow-hidden">
+                    <div className="absolute bottom-3 left-3 px-2 py-0.5 bg-black/60 backdrop-blur text-white text-[10px] font-bold rounded-md overflow-hidden border border-white/10">
                         {duration}
                     </div>
                 )}
             </div>
 
             {/* Info Section - Clean & Minimal */}
-            <div className="flex gap-3 px-1">
+            <div className="flex gap-3.5 px-1">
                 {/* Avatar */}
-                <div className="flex-shrink-0 relative z-10">
+                <div className="flex-shrink-0 relative z-10 pt-0.5">
                     <Link href={`/channel/${channelSlug}`} onClick={(e) => e.stopPropagation()}>
-                        <div className="w-9 h-9 rounded-full bg-gray-100 border border-gray-100 overflow-hidden relative shadow-sm hover:ring-2 hover:ring-indigo-500 hover:ring-offset-2 transition-all">
+                        <div className="w-9 h-9 rounded-full bg-gray-100 ring-2 ring-transparent group-hover:ring-indigo-500/20 overflow-hidden relative shadow-sm transition-all">
                             {channelAvatar ? (
                                 <Image src={channelAvatar} alt={channelName} fill className="object-cover" />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-600 text-xs font-bold">
+                                <div className="w-full h-full flex items-center justify-center bg-indigo-50 text-indigo-600 text-xs font-bold">
                                     {channelName.charAt(0)}
                                 </div>
                             )}
@@ -232,17 +232,17 @@ export default function ProductCard({ id, title, thumbnail, channelName, channel
                 </div>
 
                 {/* Text Content */}
-                <div className="flex-1 min-w-0 pt-0.5">
-                    <h3 className="text-gray-900 font-bold text-[15px] leading-snug line-clamp-2 mb-1 group-hover:text-indigo-600 transition-colors">
+                <div className="flex-1 min-w-0">
+                    <h3 className="text-gray-900 font-bold text-base leading-tight line-clamp-2 mb-1.5 group-hover:text-indigo-600 transition-colors">
                         {title}
                     </h3>
-                    <div className="flex flex-col">
-                        <Link href={`/channel/${channelSlug}`} className="text-[12px] text-gray-500 font-medium hover:text-gray-900 transition-colors truncate w-full mb-0.5" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex flex-col gap-0.5">
+                        <Link href={`/channel/${channelSlug}`} className="text-sm text-gray-500 font-medium hover:text-gray-900 transition-colors truncate w-full" onClick={(e) => e.stopPropagation()}>
                             {channelName}
                         </Link>
-                        <div className="flex items-center text-[11px] text-gray-400 font-medium whitespace-nowrap overflow-hidden">
-                            <span>{views}</span>
-                            <span className="mx-1 opacity-50">•</span>
+                        <div className="flex items-center text-xs text-gray-400 font-medium whitespace-nowrap overflow-hidden gap-2">
+                            <span>{views} views</span>
+                            <span className="w-0.5 h-0.5 rounded-full bg-gray-300"></span>
                             <span>{postedAt}</span>
                         </div>
                     </div>
