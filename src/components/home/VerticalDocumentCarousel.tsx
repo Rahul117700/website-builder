@@ -12,8 +12,8 @@ interface VerticalDocumentCarouselProps {
 
 export default function VerticalDocumentCarousel({ items }: VerticalDocumentCarouselProps) {
     const router = useRouter();
-    // Use a window of 4 items for the carousel
-    const WINDOW_SIZE = 4;
+    // Use a window of 6 items for the carousel
+    const WINDOW_SIZE = 6;
     const [currentIndex, setCurrentIndex] = useState(0);
 
     // Auto-scroll logic
@@ -21,7 +21,7 @@ export default function VerticalDocumentCarousel({ items }: VerticalDocumentCaro
         if (items.length <= WINDOW_SIZE) return;
 
         const timer = setInterval(() => {
-            setCurrentIndex((prev) => (prev + 1) % items.length);
+            setCurrentIndex((prev) => (prev + 2) % items.length);
         }, 3000); // Change every 3 seconds
 
         return () => clearInterval(timer);
@@ -56,7 +56,7 @@ export default function VerticalDocumentCarousel({ items }: VerticalDocumentCaro
     const displayItems = items.length <= WINDOW_SIZE ? items : getOrderedItems();
 
     return (
-        <div className="flex flex-col gap-3 overflow-hidden h-full relative" style={{ minHeight: '400px' }}>
+        <div className="grid grid-cols-2 gap-3 overflow-hidden h-full relative content-start" style={{ minHeight: '400px' }}>
             {/* Gradient Overlay for "fading out" effect at top/bottom if desired */}
             {/* <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none"></div> */}
             {/* <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none"></div> */}
@@ -70,11 +70,11 @@ export default function VerticalDocumentCarousel({ items }: VerticalDocumentCaro
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
                         transition={{ duration: 0.5, type: "spring", stiffness: 100, damping: 15 }}
-                        className="group flex gap-3 p-2.5 rounded-xl bg-white border border-gray-100 hover:shadow-md hover:border-indigo-100 transition-all cursor-pointer relative flex-shrink-0"
+                        className="group flex gap-3 p-2.5 rounded-none bg-transparent hover:bg-gray-50 transition-all cursor-pointer relative flex-shrink-0"
                         onClick={() => router.push(`/channel/${product.channelSlug}/products/${product.id}`)}
                     >
                         {/* Thumbnail */}
-                        <div className="relative w-16 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100 shadow-sm group-hover:shadow transition-all">
+                        <div className="relative w-16 h-20 flex-shrink-0 rounded-none overflow-hidden bg-gray-100 shadow-sm group-hover:shadow transition-all">
                             <Image
                                 src={product.thumbnail}
                                 alt={product.title}

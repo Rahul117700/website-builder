@@ -6,7 +6,7 @@ export default function ProductCardSkeleton({ isVideo = true }: { isVideo?: bool
     return (
         <div className="flex flex-col h-full animate-pulse">
             {/* Thumbnail Skeleton */}
-            <div className={`relative ${isVideo ? 'aspect-video' : 'aspect-[4/3]'} rounded-xl bg-gray-200 mb-3 shadow-sm border border-gray-100`}>
+            <div className={`relative ${isVideo ? 'aspect-video' : 'aspect-[4/3]'} rounded-none bg-gray-200 mb-3 shadow-sm border border-gray-100`}>
                 {/* Badges/Icons placeholders if needed */}
                 <div className="absolute top-2 right-2 w-10 h-4 bg-gray-300 rounded"></div>
                 <div className="absolute top-2 left-2 w-6 h-6 bg-gray-300 rounded-lg"></div>

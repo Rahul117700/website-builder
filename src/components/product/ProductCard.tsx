@@ -133,7 +133,7 @@ export default function ProductCard({ id, title, thumbnail, channelName, channel
             </Link>
 
             {/* Thumbnail Container - Cinematic Aspect Ratio */}
-            <div className={`relative w-full aspect-video bg-gray-100 rounded-xl overflow-hidden mb-4 isolate shadow-sm transition-all duration-500 ring-1 ring-black/5 group-hover:shadow-2xl group-hover:ring-black/10 group-hover:-translate-y-1`}>
+            <div className={`relative w-full aspect-video bg-gray-100 rounded-none overflow-hidden mb-4 isolate shadow-sm transition-all duration-500 ring-1 ring-black/5 group-hover:shadow-2xl group-hover:ring-black/10 group-hover:-translate-y-1`}>
 
                 {/* Image / Video Layer */}
                 <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">

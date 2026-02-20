@@ -10,6 +10,7 @@ import { getRecommendedProducts, ProductCardData } from '@/app/actions/homepage'
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { TextPlugin } from 'gsap/TextPlugin';
 import * as THREE from 'three';
+import { motion } from 'framer-motion';
 import {
   ComputerDesktopIcon,
   DevicePhoneMobileIcon,
@@ -1387,14 +1388,28 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="hero-buttons flex flex-col sm:flex-row gap-3 pt-1" style={{ opacity: 1, transform: 'translateY(0)' }}>
-                <CTAButton
-                  onClick={() => router.push(session ? "/auth/dashboard/my-channel" : "/auth/signin?callbackUrl=/auth/dashboard/my-channel")}
-                  className="group text-sm font-bold shadow-lg hover:shadow-xl px-6 py-3 bg-white text-black hover:bg-gray-100"
+              <div className="hero-buttons flex flex-row gap-2 sm:gap-3 pt-1 w-full" style={{ opacity: 1, transform: 'translateY(0)' }}>
+                <button
+                  onClick={() => {
+                    import('../../components/analytics/analytics').then(m => m.default.track('cta_click'));
+                    router.push(session ? "/auth/dashboard/my-channel" : "/auth/signin?callbackUrl=/auth/dashboard/my-channel");
+                  }}
+                  className="group flex-1 flex text-xs sm:text-sm items-center justify-center font-bold shadow-lg hover:shadow-xl px-2 sm:px-6 py-3 bg-white text-black hover:bg-gray-100 rounded-lg transition-all"
                 >
-                  Start Selling - Free!
-                  <RocketLaunchIcon className="ml-2 h-4 w-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                </CTAButton>
+                  <span className="truncate">Start Selling - Free!</span>
+                  <RocketLaunchIcon className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                </button>
+
+                <button
+                  onClick={() => {
+                    import('../../components/analytics/analytics').then(m => m.default.track('cta_click'));
+                    router.push('/');
+                  }}
+                  className="group flex-1 flex text-xs sm:text-sm items-center justify-center font-bold shadow-lg hover:shadow-xl px-2 sm:px-6 py-3 bg-black/40 text-white backdrop-blur-md border border-white/20 hover:bg-white/10 rounded-lg transition-all"
+                >
+                  <span className="truncate">Explore Products</span>
+                  <ArrowRightIcon className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
+                </button>
 
                 <div className="hidden sm:flex flex-col justify-center gap-0.5">
                   <div className="flex -space-x-2">
@@ -1434,7 +1449,7 @@ export default function HomePage() {
       {/* Featured Products Section - Display View Cards */}
       {
         feedItems.length > 0 && (
-          <section className="py-20 bg-white border-y border-gray-100">
+          <section id="explore-products" className="py-20 bg-white border-y border-gray-100">
             <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-12">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-bold uppercase tracking-wider mb-4 border border-indigo-100">
@@ -1491,7 +1506,7 @@ export default function HomePage() {
           {/* Bento Grid Features */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {/* Card 1: Global CDN (Large) */}
-            <div className="md:col-span-2 bg-white/5 border border-white/10 rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-10 relative overflow-hidden group hover:border-white/20 transition-colors">
+            <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.5, delay: 0.1 }} className="md:col-span-2 bg-white/5 border border-white/10 rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-10 relative overflow-hidden group hover:border-white/20 transition-colors">
               <div className="relative z-10">
                 <div className="w-10 h-10 sm:w-14 sm:h-14 bg-indigo-500/20 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-6 border border-indigo-500/30 text-indigo-400">
                   <GlobeAltIcon className="w-5 h-5 sm:w-7 sm:h-7" />
@@ -1501,10 +1516,10 @@ export default function HomePage() {
               </div>
               {/* Decorative Map/Globe Effect */}
               <div className="absolute -right-8 -top-8 sm:-right-16 sm:-top-16 w-48 h-48 sm:w-80 sm:h-80 bg-indigo-600/20 rounded-full blur-[40px] sm:blur-[80px] group-hover:bg-indigo-600/30 transition-all"></div>
-            </div>
+            </motion.div>
 
             {/* Card 2: Community (Tall) */}
-            <div className="md:row-span-2 bg-white/5 border border-white/10 rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-10 relative overflow-hidden group hover:border-white/20 transition-colors flex flex-col">
+            <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.5, delay: 0.2 }} className="md:row-span-2 bg-white/5 border border-white/10 rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-10 relative overflow-hidden group hover:border-white/20 transition-colors flex flex-col">
               <div className="w-10 h-10 sm:w-14 sm:h-14 bg-pink-500/20 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-6 border border-pink-500/30 text-pink-400">
                 <UserGroupIcon className="w-5 h-5 sm:w-7 sm:h-7" />
               </div>
@@ -1521,19 +1536,19 @@ export default function HomePage() {
                   +1M
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Card 3: Viral Tools */}
-            <div className="bg-white/5 border border-white/10 rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-10 relative overflow-hidden group hover:border-white/20 transition-colors">
+            <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.5, delay: 0.3 }} className="bg-white/5 border border-white/10 rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-10 relative overflow-hidden group hover:border-white/20 transition-colors">
               <div className="w-10 h-10 sm:w-14 sm:h-14 bg-emerald-500/20 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-6 border border-emerald-500/30 text-emerald-400">
                 <ChartBarIcon className="w-5 h-5 sm:w-7 sm:h-7" />
               </div>
               <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Viral Engines</h3>
               <p className="text-gray-400 text-sm sm:text-base leading-relaxed">Built-in SEO & social sharing tools.</p>
-            </div>
+            </motion.div>
 
             {/* Card 4: Uptime */}
-            <div className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-10 relative overflow-hidden flex items-center justify-between group">
+            <motion.div initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.5, delay: 0.4 }} className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-10 relative overflow-hidden flex items-center justify-between group">
               <div>
                 <p className="text-white/80 font-medium mb-1 text-sm sm:text-base">Uptime Guarantee</p>
                 <h3 className="text-2xl sm:text-4xl font-black text-white">99.99%</h3>
@@ -1541,7 +1556,7 @@ export default function HomePage() {
               <div className="h-10 w-10 sm:h-12 sm:w-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center">
                 <CheckBadgeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -1560,7 +1575,7 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Card 1: Courses */}
-            <div className="group rounded-[2.5rem] bg-gray-50 p-8 hover:bg-white border border-gray-100 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 30 }} whileInView={{ opacity: 1, scale: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.5, delay: 0.1 }} className="group rounded-[2.5rem] bg-gray-50 p-8 hover:bg-white border border-gray-100 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500">
               <div className="h-48 sm:h-64 bg-indigo-100 rounded-[2rem] mb-6 sm:mb-8 relative overflow-hidden group-hover:scale-[1.02] transition-transform duration-500 isolate">
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-100 to-white flex items-center justify-center">
                   <BookOpenIcon className="w-20 h-20 sm:w-24 sm:h-24 text-indigo-300/50" />
@@ -1577,10 +1592,10 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Video Courses</h3>
               <p className="text-gray-500 font-medium leading-relaxed">Create structured curriculums, drip content, and track student completion rates.</p>
-            </div>
+            </motion.div>
 
             {/* Card 2: Videos (Featured) */}
-            <div className="group rounded-[2.5rem] bg-gray-900 p-8 text-white shadow-2xl shadow-gray-900/20 transform md:-translate-y-8 border border-gray-800">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 30 }} whileInView={{ opacity: 1, scale: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.5, delay: 0.2 }} className="group rounded-[2.5rem] bg-gray-900 p-8 text-white shadow-2xl shadow-gray-900/20 transform md:-translate-y-8 border border-gray-800">
               <div className="h-48 sm:h-64 bg-gray-800 rounded-[2rem] mb-6 sm:mb-8 relative overflow-hidden group-hover:scale-[1.02] transition-transform duration-500 border border-gray-700 isolate">
                 <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black flex items-center justify-center">
                   <PlayIcon className="w-20 h-20 sm:w-24 sm:h-24 text-white/10" />
@@ -1593,10 +1608,10 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">Exclusive Content</h3>
               <p className="text-gray-400 font-medium leading-relaxed">Member-only videos, behind-the-scenes, and premium streaming with 4K support.</p>
-            </div>
+            </motion.div>
 
             {/* Card 3: Files */}
-            <div className="group rounded-[2.5rem] bg-gray-50 p-8 hover:bg-white border border-gray-100 hover:shadow-2xl hover:shadow-pink-500/10 transition-all duration-500">
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 30 }} whileInView={{ opacity: 1, scale: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.5, delay: 0.3 }} className="group rounded-[2.5rem] bg-gray-50 p-8 hover:bg-white border border-gray-100 hover:shadow-2xl hover:shadow-pink-500/10 transition-all duration-500">
               <div className="h-48 sm:h-64 bg-pink-100 rounded-[2rem] mb-6 sm:mb-8 relative overflow-hidden group-hover:scale-[1.02] transition-transform duration-500 isolate">
                 <div className="absolute inset-0 bg-gradient-to-br from-pink-100 to-white flex items-center justify-center">
                   <DocumentTextIcon className="w-20 h-20 sm:w-24 sm:h-24 text-pink-300/50" />
@@ -1609,7 +1624,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Digital Downloads</h3>
               <p className="text-gray-500 font-medium leading-relaxed">Secure delivery for PDFs, software, presets, and templates.</p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -1691,13 +1706,13 @@ export default function HomePage() {
                 color: "amber"
               }
             ].map((item, i) => (
-              <div key={i} className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-xl hover:border-gray-200 transition-all duration-300 group">
+              <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.5, delay: i * 0.1 }} key={i} className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-xl hover:border-gray-200 transition-all duration-300 group">
                 <div className={`w-16 h-16 rounded-2xl bg-${item.color}-50 flex items-center justify-center text-${item.color}-600 mb-6 group-hover:scale-110 transition-transform`}>
                   {item.icon}
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">{item.title}</h3>
                 <p className="text-gray-500 font-medium leading-relaxed">{item.desc}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
 
@@ -1729,7 +1744,7 @@ export default function HomePage() {
                   { num: "02", title: "Add Products", desc: "Upload videos, courses, or files." },
                   { num: "03", title: "Get Paid", desc: "Share your link and watch the sales roll in." }
                 ].map((step, i) => (
-                  <div key={i} className="flex items-start gap-6 group">
+                  <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.5, delay: i * 0.15 }} key={i} className="flex items-start gap-6 group">
                     <div className="w-16 h-16 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-white/20 transition-colors">
                       <span className="text-2xl font-black text-white/50 group-hover:text-white transition-colors">{step.num}</span>
                     </div>
@@ -1737,7 +1752,7 @@ export default function HomePage() {
                       <h3 className="text-2xl font-bold text-white mb-1 group-hover:text-indigo-400 transition-colors">{step.title}</h3>
                       <p className="text-gray-400 font-medium">{step.desc}</p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
@@ -1799,7 +1814,7 @@ export default function HomePage() {
                 quote: "The funnel templates saved me months of dev time. My conversion rate doubled overnight."
               }
             ].map((story, i) => (
-              <div key={i} className="bg-white/5 border border-white/10 rounded-[2rem] p-8 hover:bg-white/10 transition-colors duration-300">
+              <motion.div initial={{ opacity: 0, scale: 0.95, y: 30 }} whileInView={{ opacity: 1, scale: 1, y: 0 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 0.5, delay: i * 0.15 }} key={i} className="bg-white/5 border border-white/10 rounded-[2rem] p-8 hover:bg-white/10 transition-colors duration-300">
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-12 h-12 rounded-full bg-gray-800 overflow-hidden relative border border-white/10 flex items-center justify-center">
                     <span className="text-xl font-bold text-gray-400">{story.name.charAt(0)}</span>
@@ -1820,7 +1835,7 @@ export default function HomePage() {
                     <p className="text-green-400 font-bold">{story.after}</p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

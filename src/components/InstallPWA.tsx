@@ -94,10 +94,10 @@ export default function InstallPWA() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowModal(true)}
-                className="fixed bottom-6 right-6 z-[60] flex items-center gap-2 px-5 py-3 bg-white text-indigo-600 rounded-full shadow-[0_10px_30px_-5px_rgba(0,0,0,0.15)] border border-gray-100 group transition-all"
+                className="fixed bottom-24 md:bottom-6 right-4 md:right-6 z-[60] flex items-center justify-center p-3 md:px-5 md:py-3 md:gap-2 bg-white text-indigo-600 rounded-full shadow-[0_10px_30px_-5px_rgba(0,0,0,0.15)] border border-gray-100 group transition-all"
             >
-                <ArrowDownTrayIcon className="w-5 h-5 text-indigo-500" />
-                <span className="text-sm font-bold tracking-tight text-gray-800">Install App</span>
+                <ArrowDownTrayIcon className="w-6 h-6 md:w-5 md:h-5 text-indigo-500" />
+                <span className="hidden md:block text-sm font-bold tracking-tight text-gray-800">Install App</span>
                 <div className="absolute inset-0 rounded-full bg-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity -z-10"></div>
             </motion.button>
 

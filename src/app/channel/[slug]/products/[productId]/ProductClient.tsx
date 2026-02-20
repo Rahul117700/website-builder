@@ -1469,13 +1469,13 @@ export default function ProductClient() {
                       <div
                         key={relatedProduct.id}
                         onClick={handleRelatedProductClick}
-                        className={`group flex flex-col lg:flex-row gap-3 rounded-2xl p-2.5 transition-all duration-500 bg-white border border-gray-100 shadow-sm ${canAccessRelated
-                          ? 'cursor-pointer hover:border-indigo-100/50 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-1 active:scale-95'
+                        className={`group flex flex-col lg:flex-row gap-2 rounded-none transition-all duration-500 bg-transparent border-none ${canAccessRelated
+                          ? 'cursor-pointer hover:bg-gray-50/50 hover:-translate-y-1 active:scale-95'
                           : 'cursor-not-allowed opacity-75'
                           }`}
                       >
                         {/* Thumbnail Container */}
-                        <div className="relative w-full lg:w-32 h-28 lg:h-20 flex-shrink-0 rounded-xl overflow-hidden bg-gray-50 shadow-inner">
+                        <div className="relative w-full lg:w-32 h-28 lg:h-20 flex-shrink-0 rounded-none overflow-hidden bg-gray-50 shadow-inner">
                           {relatedProduct.previewImage ? (
                             <img
                               src={relatedProduct.previewImage}

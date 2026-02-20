@@ -94,7 +94,7 @@ export default function RetentionManager() {
       {showExitIntent && <ExitIntentPopup onClose={() => setShowExitIntent(false)} />}
 
       {/* Engagement Notifications - Only on public pages */}
-      {!isDashboard && <EngagementNotifier userStatus={userStatus} />}
+      {/* Notifications removed as per user request */}
 
       {/* Social Proof removed - flagged as deceptive content by Google */}
       {/* {!isDashboard && <SocialProof />} */}
