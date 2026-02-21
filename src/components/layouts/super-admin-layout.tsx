@@ -22,7 +22,9 @@ import {
     RocketLaunchIcon,
     ChatBubbleLeftEllipsisIcon,
     GlobeAltIcon,
-    CursorArrowRaysIcon
+    CursorArrowRaysIcon,
+    ShoppingBagIcon,
+    PlusCircleIcon
 } from '@heroicons/react/24/outline';
 
 
@@ -49,11 +51,13 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
         { name: 'Dashboard', icon: HomeIcon, href: '/auth/dashboard/super-admin' },
         { name: 'Entity Registry', icon: UsersIcon, href: '/auth/dashboard/super-admin/users' },
         { name: 'Channel Audit', icon: RocketLaunchIcon, href: '/auth/dashboard/super-admin/channels' },
+        { name: 'Product Index', icon: ShoppingBagIcon, href: '/auth/dashboard/super-admin/products' },
         { name: 'Intelligence', icon: ChartBarIcon, href: '/auth/dashboard/super-admin/analytics' },
         { name: 'User Activity', icon: CursorArrowRaysIcon, href: '/auth/dashboard/super-admin/user-activity' },
         { name: 'Protocols', icon: CreditCardIcon, href: '/auth/dashboard/super-admin/plans' },
         { name: 'Newsletter', icon: InboxIcon, href: '/auth/dashboard/super-admin/newsletter' },
         { name: 'Incoming', icon: ChatBubbleLeftEllipsisIcon, href: '/auth/dashboard/super-admin/contact' },
+        { name: 'Metric Injector', icon: PlusCircleIcon, href: '/auth/dashboard/super-admin/metrics' },
         { name: 'Settings', icon: Cog6ToothIcon, href: '/auth/dashboard/super-admin/settings' },
     ];
 
@@ -102,9 +106,9 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
                     {/* Sidebar Decor */}
                     <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent"></div>
 
-                    {/* Logo Section */}
-                    <div className="p-8">
-                        <div className="flex items-center gap-4 mb-8">
+                    {/* Logo Section & Navigation Area */}
+                    <div className="p-8 flex flex-col flex-1 min-h-0">
+                        <div className="flex items-center gap-4 mb-8 shrink-0">
                             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center shadow-lg shadow-indigo-500/20 ring-1 ring-white/20 group-hover:scale-110 transition-transform duration-300">
                                 <ShieldCheckIcon className="w-7 h-7 text-white" />
                             </div>
@@ -115,7 +119,7 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
                         </div>
 
                         {/* Back to Home & User Dashboard */}
-                        <div className="space-y-2 mb-8">
+                        <div className="space-y-2 mb-8 shrink-0">
                             <Link
                                 href="/"
                                 className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-slate-900/50 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800/50 hover:border-slate-700 transition-all duration-300 text-sm group/home"
@@ -134,32 +138,34 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
                         </div>
 
                         {/* Nav Links */}
-                        <nav className="space-y-2">
-                            {navigation.map((item) => {
-                                const isActive = pathname === item.href;
-                                return (
-                                    <Link
-                                        key={item.name}
-                                        href={item.href}
-                                        onClick={() => setIsSidebarOpen(false)}
-                                        className={`flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 group/nav ${isActive
-                                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
-                                            : 'text-slate-400 hover:bg-slate-900/50 hover:text-white'
-                                            }`}
-                                    >
-                                        <item.icon className={`w-5 h-5 transition-colors ${isActive ? 'text-white' : 'text-slate-500 group-hover/nav:text-indigo-400'}`} />
-                                        <span className="font-semibold tracking-wide">{item.name}</span>
-                                        {isActive && (
-                                            <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
-                                        )}
-                                    </Link>
-                                );
-                            })}
-                        </nav>
+                        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 mt-4 space-y-2 pb-6">
+                            <nav className="space-y-2">
+                                {navigation.map((item) => {
+                                    const isActive = pathname === item.href;
+                                    return (
+                                        <Link
+                                            key={item.name}
+                                            href={item.href}
+                                            onClick={() => setIsSidebarOpen(false)}
+                                            className={`flex items-center gap-4 px-5 py-3.5 rounded-2xl transition-all duration-300 group/nav ${isActive
+                                                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20'
+                                                : 'text-slate-400 hover:bg-slate-900/50 hover:text-white'
+                                                }`}
+                                        >
+                                            <item.icon className={`w-5 h-5 transition-colors ${isActive ? 'text-white' : 'text-slate-500 group-hover/nav:text-indigo-400'}`} />
+                                            <span className="font-semibold tracking-wide">{item.name}</span>
+                                            {isActive && (
+                                                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white]"></div>
+                                            )}
+                                        </Link>
+                                    );
+                                })}
+                            </nav>
+                        </div>
                     </div>
 
                     {/* User Profile Section */}
-                    <div className="mt-auto p-6 border-t border-slate-800/50 bg-slate-950/20">
+                    <div className="mt-auto p-6 border-t border-slate-800/50 bg-slate-950/20 shrink-0">
                         <div className="flex items-center gap-4 mb-6">
                             <div className="relative">
                                 <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-slate-800 to-slate-700 ring-1 ring-slate-700 overflow-hidden">

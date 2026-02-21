@@ -18,7 +18,7 @@ import {
 import { HeartIcon as HeartIconSolid, BookmarkIcon as BookmarkIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { ProductCardData } from '@/app/actions/homepage';
 
-export default function ProductCard({ id, title, thumbnail, channelName, channelAvatar, views, postedAt, duration, price, type, videoUrl, slug, channelSlug, hasAccess, isSubscriberOnly, isFree, isPromoted, averageRating, reviewCount }: ProductCardData & { isPromoted?: boolean }) {
+export default React.memo(function ProductCard({ id, title, thumbnail, channelName, channelAvatar, views, postedAt, duration, price, type, videoUrl, slug, channelSlug, hasAccess, isSubscriberOnly, isFree, isPromoted, averageRating, reviewCount }: ProductCardData & { isPromoted?: boolean }) {
     const { data: session } = useSession();
     const router = useRouter();
     const isVideo = type === 'VIDEO' || type === 'VIDEOS' || type === 'COURSE';
@@ -215,49 +215,46 @@ export default function ProductCard({ id, title, thumbnail, channelName, channel
             </div>
 
             {/* Info Section - Clean & Minimal */}
-            <div className="flex gap-3.5 px-1">
-                {/* Avatar */}
-                <div className="flex-shrink-0 relative z-10 pt-0.5">
-                    <Link href={`/channel/${channelSlug}`} onClick={(e) => e.stopPropagation()}>
-                        <div className="w-9 h-9 rounded-full bg-gray-100 ring-2 ring-transparent group-hover:ring-indigo-500/20 overflow-hidden relative shadow-sm transition-all">
-                            {channelAvatar ? (
-                                <Image src={channelAvatar} alt={channelName} fill className="object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-indigo-50 text-indigo-600 text-xs font-bold">
-                                    {channelName.charAt(0)}
-                                </div>
-                            )}
-                        </div>
+            <div className="px-1 block">
+                {/* Avatar (Floated) */}
+                <div className="float-left mr-3 mb-1.5 mt-0.5 relative z-10 w-9 h-9 rounded-full bg-gray-100 ring-2 ring-transparent group-hover:ring-indigo-500/20 overflow-hidden shadow-sm transition-all flex-shrink-0">
+                    <Link href={`/channel/${channelSlug}`} onClick={(e) => e.stopPropagation()} className="block w-full h-full relative">
+                        {channelAvatar ? (
+                            <Image src={channelAvatar} alt={channelName} fill className="object-cover" />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-indigo-50 text-indigo-600 text-xs font-bold">
+                                {channelName.charAt(0)}
+                            </div>
+                        )}
                     </Link>
                 </div>
 
                 {/* Text Content */}
-                <div className="flex-1 min-w-0">
-                    <h3 className="text-gray-900 font-bold text-base leading-tight line-clamp-2 mb-1.5 group-hover:text-indigo-600 transition-colors">
-                        {title}
-                    </h3>
-                    <div className="flex flex-col gap-0.5">
-                        <Link href={`/channel/${channelSlug}`} className="text-sm text-gray-500 font-medium hover:text-gray-900 transition-colors truncate w-full" onClick={(e) => e.stopPropagation()}>
-                            {channelName}
-                        </Link>
-                        <div className="flex items-center text-xs text-gray-400 font-medium whitespace-nowrap overflow-hidden gap-2">
-                            {averageRating ? (
-                                <>
-                                    <span className="flex items-center gap-0.5 text-amber-500 font-bold">
-                                        <StarIconSolid className="w-3.5 h-3.5" />
-                                        {averageRating.toFixed(1)}
-                                        {reviewCount ? <span className="text-gray-400 font-medium ml-0.5">({reviewCount})</span> : null}
-                                    </span>
-                                    <span className="w-0.5 h-0.5 rounded-full bg-gray-300"></span>
-                                </>
-                            ) : null}
-                            <span>{views}</span>
-                            <span className="w-0.5 h-0.5 rounded-full bg-gray-300"></span>
-                            <span>{postedAt}</span>
-                        </div>
-                    </div>
+                <h3 className="text-gray-900 font-bold text-base leading-tight line-clamp-2 mb-1 group-hover:text-indigo-600 transition-colors">
+                    {title}
+                </h3>
+
+                <Link href={`/channel/${channelSlug}`} className="text-sm text-gray-500 font-medium hover:text-gray-900 transition-colors line-clamp-1 mb-0.5 block" onClick={(e) => e.stopPropagation()}>
+                    {channelName}
+                </Link>
+
+                <div className="text-xs text-gray-400 font-medium leading-relaxed block">
+                    {averageRating ? (
+                        <span className="inline-flex items-center gap-0.5 text-amber-500 font-bold whitespace-nowrap mr-1.5 align-middle">
+                            <StarIconSolid className="w-3.5 h-3.5" />
+                            <span className="leading-none mt-0.5">{averageRating.toFixed(1)}</span>
+                            {reviewCount ? <span className="text-gray-400 font-medium ml-0.5 mt-0.5">({reviewCount})</span> : null}
+                            <span className="w-[3px] h-[3px] rounded-full bg-gray-300 ml-1.5 inline-block align-middle"></span>
+                        </span>
+                    ) : null}
+                    <span className="whitespace-nowrap mr-1.5 inline-block align-middle">{views}</span>
+                    <span className="w-[3px] h-[3px] rounded-full bg-gray-300 mr-1.5 inline-block align-middle"></span>
+                    <span className="whitespace-nowrap inline-block align-middle">{postedAt}</span>
                 </div>
+
+                {/* Clear float to preserve full container height */}
+                <div className="clear-both"></div>
             </div>
         </div>
     );
-}
+});

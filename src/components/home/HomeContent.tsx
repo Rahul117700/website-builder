@@ -51,20 +51,24 @@ export default function HomeContent({
     const router = useRouter();
     const [activeCategory, setActiveCategory] = useState('All');
 
-    // Filter Logic
-    const others = recommendedProducts.filter(p => p.type !== 'EBOOK' && p.type !== 'DOCUMENT');
-    const documents = recommendedProducts.filter(p => p.type === 'DOCUMENT');
-    const videos = others.filter(p => p.type === 'VIDEO' || p.type === 'VIDEOS' || p.type === 'COURSE');
+    // Filter Logic - Memoized for performance
+    const { others, documents, videos, trendingItems } = React.useMemo(() => {
+        const others = recommendedProducts.filter(p => p.type !== 'EBOOK' && p.type !== 'DOCUMENT');
+        const documents = recommendedProducts.filter(p => p.type === 'DOCUMENT');
+        const videos = others.filter(p => p.type === 'VIDEO' || p.type === 'VIDEOS' || p.type === 'COURSE');
 
-    // Trending Logic
-    const trendingItems = [...recommendedProducts, ...subscribedProducts]
-        .filter((v, i, a) => a.findIndex(t => t.id === v.id) === i) // Unique
-        .sort((a, b) => {
-            const aVal = (a.type === 'VIDEO' || a.type === 'VIDEOS') ? 10 : 0;
-            const bVal = (b.type === 'VIDEO' || b.type === 'VIDEOS') ? 10 : 0;
-            return bVal - aVal || (parseInt(b.views) || 0) - (parseInt(a.views) || 0);
-        })
-        .slice(0, 5);
+        const trendingItems = [...recommendedProducts, ...subscribedProducts]
+            .filter((v, i, a) => a.findIndex(t => t.id === v.id) === i) // Unique
+            .sort((a, b) => {
+                if (a.isFeatured !== b.isFeatured) return a.isFeatured ? -1 : 1;
+                const aVal = (a.type === 'VIDEO' || a.type === 'VIDEOS') ? 10 : 0;
+                const bVal = (b.type === 'VIDEO' || b.type === 'VIDEOS') ? 10 : 0;
+                return bVal - aVal || (parseInt(b.views) || 0) - (parseInt(a.views) || 0);
+            })
+            .slice(0, 5);
+
+        return { others, documents, videos, trendingItems };
+    }, [recommendedProducts, subscribedProducts]);
 
     const spotlightItem = trendingItems[0];
     const upNextItems = trendingItems.slice(1, 4);
@@ -154,7 +158,7 @@ export default function HomeContent({
                                                 </div>
                                                 <span className="text-white font-bold">{spotlightItem.channelName}</span>
                                                 <span className="opacity-50">•</span>
-                                                <span>{spotlightItem.views} views</span>
+                                                <span>{spotlightItem.views}</span>
                                             </div>
                                         </div>
                                         {/* Play Button Overlay */}

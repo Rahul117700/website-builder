@@ -51,12 +51,7 @@ const DocumentCarouselItem = ({ product }: { product: ProductCardData }) => {
     };
 
     return (
-        <motion.div
-            layout
-            initial={{ opacity: 0, y: 50, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-            transition={{ duration: 0.5, type: "spring", stiffness: 100, damping: 15 }}
+        <div
             className="group flex gap-3 p-2.5 rounded-none bg-transparent hover:bg-gray-50 transition-all cursor-pointer relative flex-shrink-0"
             onClick={() => router.push(`/channel/${product.channelSlug}/products/${product.id}`)}
         >
@@ -115,7 +110,7 @@ const DocumentCarouselItem = ({ product }: { product: ProductCardData }) => {
                     </button>
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
 };
 
@@ -130,7 +125,7 @@ export default function VerticalDocumentCarousel({ items }: VerticalDocumentCaro
 
         const timer = setInterval(() => {
             setCurrentIndex((prev) => (prev + 2) % items.length);
-        }, 3000); // Change every 3 seconds
+        }, 5000); // Change every 5 seconds instead of 3 to reduce calculation latency
 
         return () => clearInterval(timer);
     }, [items.length]);
@@ -164,15 +159,20 @@ export default function VerticalDocumentCarousel({ items }: VerticalDocumentCaro
     const displayItems = items.length <= WINDOW_SIZE ? items : getOrderedItems();
 
     return (
-        <div className="grid grid-cols-2 gap-3 overflow-hidden h-full relative content-start" style={{ minHeight: '400px' }}>
-            {/* Gradient Overlay for "fading out" effect at top/bottom if desired */}
-            {/* <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none"></div> */}
-            {/* <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent z-10 pointer-events-none"></div> */}
-
-            <AnimatePresence initial={false} mode="popLayout">
-                {displayItems.map((product) => (
-                    <DocumentCarouselItem key={product.id} product={product} />
-                ))}
+        <div className="overflow-hidden h-full relative" style={{ minHeight: '400px' }}>
+            <AnimatePresence initial={false} mode="wait">
+                <motion.div
+                    key={currentIndex}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-3 content-start"
+                >
+                    {displayItems.map((product) => (
+                        <DocumentCarouselItem key={product.id} product={product} />
+                    ))}
+                </motion.div>
             </AnimatePresence>
         </div>
     );

@@ -27,6 +27,7 @@ export type ProductCardData = {
     isSaved?: boolean;
     averageRating?: number; // [NEW] Added for real reviews
     reviewCount?: number;   // [NEW] Added for real reviews
+    isFeatured?: boolean;   // [NEW] Added for featured admin dashboard
 };
 
 export type SubscriptionData = {
@@ -103,8 +104,8 @@ export async function getRecommendedProducts(userId?: string): Promise<ProductCa
                 },
                 reviews: { select: { rating: true } },
             },
-            orderBy: { viewCount: 'desc' }, // Simple recommendation: popularity
-            take: 20,
+            orderBy: { createdAt: 'desc' },
+            take: 50,
         });
 
         return products.map(p => ({
@@ -470,6 +471,7 @@ function mapToCardData(product: any): ProductCardData {
         isSaved: product.saves && product.saves.length > 0,
         averageRating: avgRating,
         reviewCount: revCount,
+        isFeatured: product.isFeatured || false,
     };
 }
 
