@@ -25,6 +25,8 @@ export type ProductCardData = {
     isPromoted?: boolean;
     isLiked?: boolean;
     isSaved?: boolean;
+    averageRating?: number; // [NEW] Added for real reviews
+    reviewCount?: number;   // [NEW] Added for real reviews
 };
 
 export type SubscriptionData = {
@@ -66,6 +68,7 @@ export async function getSubscribedProducts(userId: string): Promise<ProductCard
                         user: { select: { image: true, name: true } }, // Fallback for avatar
                     },
                 },
+                reviews: { select: { rating: true } },
             },
             orderBy: { createdAt: 'desc' },
             take: 10,
@@ -98,6 +101,7 @@ export async function getRecommendedProducts(userId?: string): Promise<ProductCa
                         } : false
                     },
                 },
+                reviews: { select: { rating: true } },
             },
             orderBy: { viewCount: 'desc' }, // Simple recommendation: popularity
             take: 20,
@@ -127,6 +131,7 @@ export async function getTrendingEbooks(): Promise<ProductCardData[]> {
                         user: { select: { image: true, name: true } },
                     },
                 },
+                reviews: { select: { rating: true } },
             },
             orderBy: { purchaseCount: 'desc' },
             take: 10,
@@ -223,6 +228,7 @@ export async function searchProducts(query: string, userId?: string): Promise<Pr
                 },
                 likes: userId ? { where: { userId: userId } } : false,
                 saves: userId ? { where: { userId: userId } } : false,
+                reviews: { select: { rating: true } },
             },
             orderBy: { viewCount: 'desc' },
             take: 40
@@ -308,6 +314,7 @@ export async function getProductsByTag(tag: string, userId?: string): Promise<Pr
                 },
                 likes: userId ? { where: { userId: userId } } : false,
                 saves: userId ? { where: { userId: userId } } : false,
+                reviews: { select: { rating: true } },
             },
             orderBy: { createdAt: 'desc' },
             take: 40,
@@ -353,6 +360,7 @@ export async function getTrendingProducts(tag?: string, userId?: string): Promis
                 },
                 likes: userId ? { where: { userId: userId } } : false,
                 saves: userId ? { where: { userId: userId } } : false,
+                reviews: { select: { rating: true } },
             },
             orderBy: [
                 { viewCount: 'desc' }
@@ -431,6 +439,17 @@ export async function getMarketplaceChannels(): Promise<any[]> {
 }
 
 function mapToCardData(product: any): ProductCardData {
+    // Calculate average rating if reviews are available
+    let avgRating: number | undefined = undefined;
+    let revCount: number = 0;
+    if (product.reviews && Array.isArray(product.reviews)) {
+        revCount = product.reviews.length;
+        if (revCount > 0) {
+            const sum = product.reviews.reduce((acc: number, r: any) => acc + (r.rating || 0), 0);
+            avgRating = Number((sum / revCount).toFixed(1));
+        }
+    }
+
     return {
         id: product.id,
         title: product.title,
@@ -449,6 +468,8 @@ function mapToCardData(product: any): ProductCardData {
         isFree: product.isFree,
         isLiked: product.likes && product.likes.length > 0,
         isSaved: product.saves && product.saves.length > 0,
+        averageRating: avgRating,
+        reviewCount: revCount,
     };
 }
 

@@ -15,10 +15,10 @@ import {
     BookmarkIcon,
     FireIcon,
 } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartIconSolid, BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid';
+import { HeartIcon as HeartIconSolid, BookmarkIcon as BookmarkIconSolid, StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { ProductCardData } from '@/app/actions/homepage';
 
-export default function ProductCard({ id, title, thumbnail, channelName, channelAvatar, views, postedAt, duration, price, type, videoUrl, slug, channelSlug, hasAccess, isSubscriberOnly, isFree, isPromoted }: ProductCardData & { isPromoted?: boolean }) {
+export default function ProductCard({ id, title, thumbnail, channelName, channelAvatar, views, postedAt, duration, price, type, videoUrl, slug, channelSlug, hasAccess, isSubscriberOnly, isFree, isPromoted, averageRating, reviewCount }: ProductCardData & { isPromoted?: boolean }) {
     const { data: session } = useSession();
     const router = useRouter();
     const isVideo = type === 'VIDEO' || type === 'VIDEOS' || type === 'COURSE';
@@ -241,7 +241,17 @@ export default function ProductCard({ id, title, thumbnail, channelName, channel
                             {channelName}
                         </Link>
                         <div className="flex items-center text-xs text-gray-400 font-medium whitespace-nowrap overflow-hidden gap-2">
-                            <span>{views} views</span>
+                            {averageRating ? (
+                                <>
+                                    <span className="flex items-center gap-0.5 text-amber-500 font-bold">
+                                        <StarIconSolid className="w-3.5 h-3.5" />
+                                        {averageRating.toFixed(1)}
+                                        {reviewCount ? <span className="text-gray-400 font-medium ml-0.5">({reviewCount})</span> : null}
+                                    </span>
+                                    <span className="w-0.5 h-0.5 rounded-full bg-gray-300"></span>
+                                </>
+                            ) : null}
+                            <span>{views}</span>
                             <span className="w-0.5 h-0.5 rounded-full bg-gray-300"></span>
                             <span>{postedAt}</span>
                         </div>
