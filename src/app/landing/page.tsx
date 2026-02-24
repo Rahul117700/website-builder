@@ -36,7 +36,8 @@ import {
   StarIcon,
   CalendarIcon,
   ClockIcon,
-  CheckBadgeIcon
+  CheckBadgeIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 import { LineChart, Line, BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } from 'recharts';
 import Header from '@/components/Header';
@@ -46,6 +47,7 @@ import dynamic from 'next/dynamic';
 import { blogPosts } from '@/data/blogs';
 import CinematicAd from '@/components/CinematicAd';
 import ProductCard from '@/components/product/ProductCard';
+import TrendingCarousel from '@/components/home/TrendingCarousel';
 
 // SaleNotifications removed - flagged as deceptive content by Google Search Console
 // const SaleNotifications = dynamic(() => import('@/components/SaleNotifications'), { ssr: false });
@@ -92,6 +94,19 @@ export default function HomePage() {
     }
     fetchFeed();
   }, [session?.user?.id]);
+
+  // Derived trending and spotlight items from feedItems
+  const trendingItems = [...feedItems]
+    .sort((a, b) => {
+      if (a.isFeatured !== b.isFeatured) return a.isFeatured ? -1 : 1;
+      const aVal = (a.type === 'VIDEO' || a.type === 'VIDEOS') ? 10 : 0;
+      const bVal = (b.type === 'VIDEO' || b.type === 'VIDEOS') ? 10 : 0;
+      return bVal - aVal || (parseInt(b.views) || 0) - (parseInt(a.views) || 0);
+    })
+    .slice(0, 5);
+
+  const spotlightItem = trendingItems[0];
+  const upNextItems = trendingItems.slice(1, 4);
 
   // Refs for animations
   const heroRef = useRef<HTMLElement>(null);
@@ -1445,6 +1460,73 @@ export default function HomePage() {
           </div>
         </div>
       </section >
+
+      {/* 1. Hero Spotlight Section - Dark Theme Row (Trending) */}
+      {spotlightItem && (
+        <section className="w-full bg-[#050505] py-16 sm:py-20 mb-2 border-y border-gray-900 shadow-2xl relative z-10">
+          <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center sm:text-left flex flex-col sm:flex-row items-center justify-between mb-10 gap-4">
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:block w-1.5 h-10 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+                  Featured <span className="text-gray-600 font-normal">&</span> Trending
+                </h2>
+              </div>
+              <div className="flex items-center gap-2 text-sm font-medium text-gray-500 bg-white/5 px-4 py-2 rounded-full border border-white/5 shadow-inner">
+                <SparklesIcon className="w-4 h-4 text-yellow-500" />
+                <span>Curated for you</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-5 lg:grid-cols-12 gap-3 sm:gap-6 lg:gap-8 items-stretch">
+              {/* Main Hero Card - 60% width on mobile, 70% width on large screens */}
+              <div className="col-span-3 lg:col-span-8 group cursor-pointer relative rounded-2xl overflow-hidden aspect-[4/5] sm:aspect-video lg:aspect-[21/9] shadow-2xl ring-1 ring-white/10" onClick={() => router.push(spotlightItem.price === 0 || spotlightItem.hasAccess ? `/channel/${spotlightItem.channelSlug}/products/${spotlightItem.id}` : `/channel/${spotlightItem.channelSlug}`)}>
+                {(spotlightItem.type === 'VIDEO' || spotlightItem.type === 'VIDEOS') && spotlightItem.videoUrl ? (
+                  <video
+                    src={spotlightItem.videoUrl}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                  />
+                ) : (
+                  <Image src={spotlightItem.thumbnail} alt={spotlightItem.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" unoptimized />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 flex flex-col items-start gap-2 sm:gap-4 pointer-events-none z-10">
+                  <span className="px-3 py-1 bg-white/10 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-full border border-white/10 flex items-center gap-2">
+                    <SparklesIcon className="w-3 h-3 text-yellow-300" />
+                    Featured
+                  </span>
+                  <h1 className="text-xl sm:text-3xl lg:text-4xl font-black text-white leading-tight drop-shadow-md max-w-3xl text-balance line-clamp-2 md:line-clamp-none">
+                    {spotlightItem.title}
+                  </h1>
+                  <div className="hidden sm:flex items-center gap-3 text-white/90 text-sm font-medium mt-2">
+                    <div className="w-8 h-8 rounded-full bg-gray-800 overflow-hidden relative ring-2 ring-white/20">
+                      <Image src={spotlightItem.channelAvatar || '/hero/avatar.svg'} alt="" fill className="object-cover" unoptimized />
+                    </div>
+                    <span className="text-white font-bold">{spotlightItem.channelName}</span>
+                    <span className="opacity-50">•</span>
+                    <span>{spotlightItem.views} views</span>
+                  </div>
+                </div>
+                {/* Play Button Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                  <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border-2 border-white shadow-[0_0_30px_rgba(255,255,255,0.3)] transform scale-75 group-hover:scale-100 transition-all">
+                    <VideoCameraIcon className="w-6 h-6 sm:w-10 sm:h-10 text-white" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Up Next List / Trending Carousel - 40% width on mobile, 30% width on large screens */}
+              <div className="col-span-2 lg:col-span-4 h-full min-h-[300px]">
+                <TrendingCarousel items={upNextItems} isCompact={true} className="h-full w-full shadow-none ring-1 ring-white/10" />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Featured Products Section - Display View Cards */}
       {
