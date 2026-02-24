@@ -16,7 +16,7 @@ export const COUNTRY_TO_CURRENCY: { [key: string]: { currency: string; symbol: s
   'US': { currency: 'USD', symbol: '$' },
   'CA': { currency: 'CAD', symbol: 'C$' },
   'MX': { currency: 'MXN', symbol: '$' },
-  
+
   // Europe
   'GB': { currency: 'GBP', symbol: '£' },
   'DE': { currency: 'EUR', symbol: '€' },
@@ -38,7 +38,7 @@ export const COUNTRY_TO_CURRENCY: { [key: string]: { currency: string; symbol: s
   'RO': { currency: 'RON', symbol: 'lei' },
   'TR': { currency: 'TRY', symbol: '₺' },
   'RU': { currency: 'RUB', symbol: '₽' },
-  
+
   // Asia Pacific
   'IN': { currency: 'INR', symbol: '₹' },
   'AU': { currency: 'AUD', symbol: 'A$' },
@@ -56,14 +56,14 @@ export const COUNTRY_TO_CURRENCY: { [key: string]: { currency: string; symbol: s
   'PK': { currency: 'PKR', symbol: '₨' },
   'BD': { currency: 'BDT', symbol: '৳' },
   'LK': { currency: 'LKR', symbol: 'Rs' },
-  
+
   // South America
   'BR': { currency: 'BRL', symbol: 'R$' },
   'AR': { currency: 'ARS', symbol: '$' },
   'CL': { currency: 'CLP', symbol: '$' },
   'CO': { currency: 'COP', symbol: '$' },
   'PE': { currency: 'PEN', symbol: 'S/' },
-  
+
   // Middle East & Africa
   'AE': { currency: 'AED', symbol: 'د.إ' },
   'SA': { currency: 'SAR', symbol: '﷼' },
@@ -72,6 +72,54 @@ export const COUNTRY_TO_CURRENCY: { [key: string]: { currency: string; symbol: s
   'EG': { currency: 'EGP', symbol: 'E£' },
   'NG': { currency: 'NGN', symbol: '₦' },
   'KE': { currency: 'KES', symbol: 'KSh' },
+};
+
+// Approximate Purchasing Power Parity (PPP) conversion rates relative to USD
+// This defines how much of the local currency represents the same purchasing power as 1 USD.
+export const PPP_CONVERSION_RATES: { [currency: string]: number } = {
+  USD: 1.0,
+  EUR: 0.85,
+  GBP: 0.75,
+  INR: 30.0, // e.g., 30 INR has ~same local purchasing power as $1 USD
+  AUD: 1.4,
+  CAD: 1.3,
+  SGD: 1.3,
+  AED: 3.67,
+  BRL: 3.0,
+  MXN: 10.0,
+  JPY: 110.0,
+  CNY: 4.0,
+  PHP: 25.0,
+  THB: 15.0,
+  VND: 8000.0,
+  IDR: 6000.0,
+  MYR: 2.5,
+  CHF: 1.0,
+  SEK: 9.0,
+  NOK: 10.0,
+  DKK: 6.5,
+  PLN: 2.5,
+  CZK: 15.0,
+  HUF: 150.0,
+  RON: 2.5,
+  TRY: 10.0,
+  RUB: 30.0,
+  KRW: 800.0,
+  NZD: 1.5,
+  HKD: 6.0,
+  PKR: 80.0,
+  BDT: 40.0,
+  LKR: 100.0,
+  ARS: 500.0,
+  CLP: 400.0,
+  COP: 1500.0,
+  PEN: 2.0,
+  SAR: 3.0,
+  ZAR: 7.0,
+  ILS: 4.0,
+  EGP: 10.0,
+  NGN: 200.0,
+  KES: 50.0,
 };
 
 // Get currency info for a country code
@@ -128,13 +176,13 @@ export function formatPrice(price: number, currency: string): string {
   };
 
   const symbol = currencySymbols[currency] || currency + ' ';
-  
+
   // Format number based on currency
   if (['JPY', 'KRW', 'VND', 'IDR'].includes(currency)) {
     // No decimals for these currencies
     return `${symbol}${Math.round(price)}`;
   }
-  
+
   // Two decimals for most currencies
   return `${symbol}${price.toFixed(2)}`;
 }
@@ -161,7 +209,48 @@ export function getPriceForCurrency(
     }
   }
 
-  // Fallback to base price
+  // Fallback to automatic PPP-adjusted pricing
+  const baseCurrency = plan.currency.toUpperCase();
+  const target = targetCurrency.toUpperCase();
+
+  if (PPP_CONVERSION_RATES[baseCurrency] && PPP_CONVERSION_RATES[target]) {
+    const basePpp = PPP_CONVERSION_RATES[baseCurrency];
+    const targetPpp = PPP_CONVERSION_RATES[target];
+
+    // Convert base price to equivalent purchasing power in target currency
+    let rawConvertedPrice = (plan.price / basePpp) * targetPpp;
+
+    // Psychological pricing rounding rules to make prices look nice in that currency
+    if (rawConvertedPrice > 1000) {
+      // e.g. 1530 -> 1499 or 1599
+      rawConvertedPrice = Math.ceil(rawConvertedPrice / 100) * 100 - 1;
+    } else if (rawConvertedPrice > 100) {
+      // e.g. 152 -> 149 or 159
+      rawConvertedPrice = Math.ceil(rawConvertedPrice / 10) * 10 - 1;
+    } else if (rawConvertedPrice > 10) {
+      // e.g. 12.3 -> 12.99
+      rawConvertedPrice = Math.floor(rawConvertedPrice) + 0.99;
+    } else if (rawConvertedPrice > 1) {
+      // e.g. 2.5 -> 2.99
+      rawConvertedPrice = Math.floor(rawConvertedPrice) + 0.99;
+    } else {
+      rawConvertedPrice = Number(rawConvertedPrice.toFixed(2));
+    }
+
+    // Extra guard for 0 price (free plans)
+    if (plan.price === 0) {
+      return 0;
+    }
+
+    // For specific currencies that do not use decimals at all
+    if (['JPY', 'KRW', 'VND', 'IDR'].includes(target)) {
+      rawConvertedPrice = Math.round(rawConvertedPrice);
+    }
+
+    return Number(rawConvertedPrice.toFixed(2));
+  }
+
+  // Final fallback to raw number if currencies aren't in PPP table
   return plan.price;
 }
 
@@ -180,10 +269,10 @@ export async function detectCountryFromBrowser(): Promise<string> {
         const response = await fetch(apiUrl);
         if (response.ok) {
           const data = await response.json();
-          
+
           // Different APIs return country code in different fields
           const countryCode = data.country_code || data.country || data.countryCode;
-          
+
           if (countryCode && typeof countryCode === 'string') {
             return countryCode.toUpperCase();
           }
@@ -216,7 +305,7 @@ export function getSupportedCurrencies(plan: {
   regionalPricing?: any;
 }): string[] {
   const currencies = [plan.currency]; // Always include base currency
-  
+
   if (plan.regionalPricing && typeof plan.regionalPricing === 'object') {
     Object.keys(plan.regionalPricing).forEach(curr => {
       if (!currencies.includes(curr)) {
@@ -224,7 +313,7 @@ export function getSupportedCurrencies(plan: {
       }
     });
   }
-  
+
   return currencies;
 }
 
@@ -235,7 +324,7 @@ export function convertPlanForDisplay(
 ): any {
   const targetCurrency = detectedCurrency || plan.currency;
   const price = getPriceForCurrency(plan, targetCurrency);
-  
+
   return {
     ...plan,
     displayPrice: price,
