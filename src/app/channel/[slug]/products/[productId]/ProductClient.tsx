@@ -22,11 +22,13 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   FolderIcon,
+  FlagIcon
 } from '@heroicons/react/24/outline';
 import {
   HeartIcon as HeartIconSolid,
   BookmarkIcon as BookmarkIconSolid,
   StarIcon as StarIconSolid,
+  FlagIcon as FlagIconSolid
 } from '@heroicons/react/24/solid';
 import { PlusCircleIcon } from '@heroicons/react/24/outline';
 import MainLayout from '@/components/layout/MainLayout';
@@ -82,6 +84,11 @@ export default function ProductClient() {
   const [modalMessage, setModalMessage] = useState('');
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
+  // Reporting
+  const [isReporting, setIsReporting] = useState(false);
+  const [reportReason, setReportReason] = useState('Inappropriate content');
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
 
   // Check if user is owner
   const isOwner = session?.user?.id === channel?.userId;
@@ -516,6 +523,41 @@ export default function ProductClient() {
   const handleShare = async () => {
     if (!product || !channel) return;
     setIsShareModalOpen(true);
+  };
+
+  const submitReport = async () => {
+    if (!session?.user?.id) {
+      router.push('/auth/signin');
+      return;
+    }
+
+    if (!channel?.id || !product?.id) {
+      setModalMessage('Product or channel information is missing');
+      setShowErrorModal(true);
+      return;
+    }
+
+    setIsSubmittingReport(true);
+    try {
+      const res = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: product.id, reason: reportReason })
+      });
+      if (res.ok) {
+        setIsReporting(false);
+        setModalMessage('Report submitted. Administrators will review it.');
+        setShowSuccessModal(true);
+      } else {
+        setModalMessage('Failed to submit report');
+        setShowErrorModal(true);
+      }
+    } catch {
+      setModalMessage('Error submitting report');
+      setShowErrorModal(true);
+    } finally {
+      setIsSubmittingReport(false);
+    }
   };
 
   const getContentIcon = (type: string) => {
@@ -1033,6 +1075,49 @@ export default function ProductClient() {
                         <span className="hidden sm:inline text-sm font-medium text-gray-700">Download</span>
                       </button>
                     )}
+                    <div className="relative">
+                      <button
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsReporting(!isReporting); }}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 transition-all hover:shadow-md ${isReporting ? 'bg-amber-50 text-amber-600 border-amber-300' : 'bg-white border-gray-200 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-600 text-gray-700'}`}
+                      >
+                        {isReporting ? <FlagIconSolid className="h-5 w-5 text-amber-500" /> : <FlagIcon className="h-5 w-5" />}
+                        <span className="hidden sm:inline text-sm font-medium">Report</span>
+                      </button>
+
+                      {isReporting && (
+                        <div className="absolute right-0 top-14 w-60 bg-white shadow-[0_10px_40px_-5px_rgba(0,0,0,0.2)] rounded-2xl border border-gray-100 p-4 z-50 animate-in fade-in slide-in-from-top-2">
+                          <p className="text-xs font-bold text-gray-900 mb-3 uppercase tracking-wider flex items-center gap-2">
+                            <FlagIcon className="w-4 h-4 text-amber-500" /> Report Content
+                          </p>
+                          <select
+                            value={reportReason}
+                            onChange={(e) => setReportReason(e.target.value)}
+                            className="w-full text-sm p-2.5 rounded-xl border border-gray-200 mb-4 outline-none bg-gray-50 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+                          >
+                            <option>Inappropriate content</option>
+                            <option>Pornography or Nudity</option>
+                            <option>Copyright violation</option>
+                            <option>Spam or misleading</option>
+                            <option>Other</option>
+                          </select>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setIsReporting(false)}
+                              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold py-2.5 rounded-xl transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={submitReport}
+                              disabled={isSubmittingReport}
+                              className="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold py-2.5 rounded-xl disabled:opacity-50 transition-colors shadow-md shadow-amber-500/20"
+                            >
+                              {isSubmittingReport ? '...' : 'Submit'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 

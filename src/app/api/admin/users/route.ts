@@ -36,7 +36,9 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build where clause
-    const where: any = {};
+    const where: any = {
+      NOT: { email: { startsWith: 'fake_' } }
+    };
 
     if (search) {
       where.OR = [
@@ -114,7 +116,9 @@ export async function GET(request: NextRequest) {
     });
 
     // Calculate additional stats
-    const totalUsers = await prisma.user.count();
+    const totalUsers = await prisma.user.count({
+      where: { NOT: { email: { startsWith: 'fake_' } } }
+    });
     const activeUsers = totalUsers; // For now, treat all users as active
     const disabledUsers = 0; // No disabled users yet
     const superAdmins = await prisma.user.count({ where: { role: 'SUPER_ADMIN' } });

@@ -23,6 +23,7 @@ export async function GET() {
     // Get users who have been active in the last 6 hours (created funnels, made transactions)
     const recentUsers = await prisma.user.findMany({
       where: {
+        NOT: { email: { startsWith: 'fake_' } },
         OR: [
           { createdAt: { gte: sixHoursAgo } },
           { funnels: { some: { createdAt: { gte: sixHoursAgo } } } },
@@ -64,10 +65,10 @@ export async function GET() {
       // Count users active in this time slot
       const activeUsers = recentUsers.filter(user => {
         const userCreated = user.createdAt >= slot.time && user.createdAt < slotEnd;
-        const hasRecentFunnels = user.funnels.some(funnel => 
+        const hasRecentFunnels = user.funnels.some(funnel =>
           funnel.createdAt >= slot.time && funnel.createdAt < slotEnd
         );
-        const hasRecentTransactions = user.transactions.some(transaction => 
+        const hasRecentTransactions = user.transactions.some(transaction =>
           transaction.createdAt >= slot.time && transaction.createdAt < slotEnd
         );
 
@@ -79,10 +80,10 @@ export async function GET() {
       // Count activities in this time slot
       let activityCount = 0;
       recentUsers.forEach(user => {
-        activityCount += user.funnels.filter(funnel => 
+        activityCount += user.funnels.filter(funnel =>
           funnel.createdAt >= slot.time && funnel.createdAt < slotEnd
         ).length;
-        activityCount += user.transactions.filter(transaction => 
+        activityCount += user.transactions.filter(transaction =>
           transaction.createdAt >= slot.time && transaction.createdAt < slotEnd
         ).length;
       });
@@ -94,8 +95,8 @@ export async function GET() {
     const totalActiveUsers = recentUsers.length;
     const currentHourActivities = timeSlots[timeSlots.length - 1].activities;
     const previousHourActivities = timeSlots[timeSlots.length - 2].activities;
-    const activityGrowth = previousHourActivities > 0 
-      ? ((currentHourActivities - previousHourActivities) / previousHourActivities) * 100 
+    const activityGrowth = previousHourActivities > 0
+      ? ((currentHourActivities - previousHourActivities) / previousHourActivities) * 100
       : 0;
 
     // Get top active users

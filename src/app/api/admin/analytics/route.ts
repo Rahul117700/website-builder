@@ -18,27 +18,42 @@ export async function GET(request: Request) {
     console.log('Analytics API: Fetching data for super admin');
 
     // Get counts
-    const totalUsers = await prisma.user.count();
+    const totalUsers = await prisma.user.count({
+      where: { NOT: { email: { startsWith: 'fake_' } } }
+    });
     console.log('Total users:', totalUsers);
 
-    const totalChannels = await prisma.channel.count();
+    const totalChannels = await prisma.channel.count({
+      where: { NOT: { user: { email: { startsWith: 'fake_' } } } }
+    });
     console.log('Total channels:', totalChannels);
 
-    const totalProducts = await prisma.digitalProduct.count();
+    const totalProducts = await prisma.digitalProduct.count({
+      where: { NOT: { user: { email: { startsWith: 'fake_' } } } }
+    });
     console.log('Total products:', totalProducts);
 
     const activeChannels = await prisma.channel.count({
-      where: { status: 'ACTIVE' }
+      where: {
+        status: 'ACTIVE',
+        NOT: { user: { email: { startsWith: 'fake_' } } }
+      }
     });
     console.log('Active channels:', activeChannels);
 
     const publishedChannels = await prisma.channel.count({
-      where: { published: true }
+      where: {
+        published: true,
+        NOT: { user: { email: { startsWith: 'fake_' } } }
+      }
     });
     console.log('Published channels:', publishedChannels);
 
     const activeUsers = await prisma.user.count({
-      where: { status: 'ACTIVE' }
+      where: {
+        status: 'ACTIVE',
+        NOT: { email: { startsWith: 'fake_' } }
+      }
     });
     console.log('Active users:', activeUsers);
 
@@ -54,6 +69,9 @@ export async function GET(request: Request) {
 
     // Calculate total revenue from completed orders (case-insensitive check)
     const allOrders = await prisma.funnelOrder.findMany({
+      where: {
+        NOT: { customerEmail: { startsWith: 'fake_' } }
+      },
       select: {
         amount: true,
         status: true,
@@ -67,6 +85,9 @@ export async function GET(request: Request) {
 
     // Calculate subscription revenue
     const subscriptionPayments = await prisma.userSubscription.findMany({
+      where: {
+        NOT: { user: { email: { startsWith: 'fake_' } } }
+      },
       select: {
         amount: true,
         status: true,
@@ -88,7 +109,8 @@ export async function GET(request: Request) {
     const monthlyOrders = await prisma.funnelOrder.findMany({
       where: {
         status: 'COMPLETED',
-        createdAt: { gte: sixMonthsAgo }
+        createdAt: { gte: sixMonthsAgo },
+        NOT: { customerEmail: { startsWith: 'fake_' } }
       },
       select: {
         amount: true,
@@ -99,7 +121,8 @@ export async function GET(request: Request) {
     const monthlySubscriptions = await prisma.userSubscription.findMany({
       where: {
         status: 'ACTIVE',
-        createdAt: { gte: sixMonthsAgo }
+        createdAt: { gte: sixMonthsAgo },
+        NOT: { user: { email: { startsWith: 'fake_' } } }
       },
       select: {
         amount: true,
@@ -145,7 +168,10 @@ export async function GET(request: Request) {
     // Calculate plan distribution
     const planCounts = await prisma.userSubscription.groupBy({
       by: ['planId'],
-      where: { status: 'ACTIVE' },
+      where: {
+        status: 'ACTIVE',
+        NOT: { user: { email: { startsWith: 'fake_' } } }
+      },
       _count: true
     });
 
@@ -182,6 +208,7 @@ export async function GET(request: Request) {
     const recentChannels = await prisma.channel.findMany({
       take: 10,
       orderBy: { createdAt: 'desc' },
+      where: { NOT: { user: { email: { startsWith: 'fake_' } } } },
       include: {
         user: {
           select: {
@@ -200,6 +227,7 @@ export async function GET(request: Request) {
 
     // Get all users with their basic counts and channels
     const allUsers = await prisma.user.findMany({
+      where: { NOT: { email: { startsWith: 'fake_' } } },
       include: {
         _count: {
           select: {

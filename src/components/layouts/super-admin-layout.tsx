@@ -21,10 +21,11 @@ import {
     XMarkIcon,
     RocketLaunchIcon,
     ChatBubbleLeftEllipsisIcon,
-    GlobeAltIcon,
     CursorArrowRaysIcon,
+    GlobeAltIcon,
     ShoppingBagIcon,
-    PlusCircleIcon
+    PlusCircleIcon,
+    ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 
 
@@ -57,6 +58,7 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
         { name: 'Protocols', icon: CreditCardIcon, href: '/auth/dashboard/super-admin/plans' },
         { name: 'Newsletter', icon: InboxIcon, href: '/auth/dashboard/super-admin/newsletter' },
         { name: 'Incoming', icon: ChatBubbleLeftEllipsisIcon, href: '/auth/dashboard/super-admin/contact' },
+        { name: 'Moderation', icon: ExclamationTriangleIcon, href: '/auth/dashboard/super-admin/reports' },
         { name: 'Metric Injector', icon: PlusCircleIcon, href: '/auth/dashboard/super-admin/metrics' },
         { name: 'Settings', icon: Cog6ToothIcon, href: '/auth/dashboard/super-admin/settings' },
     ];

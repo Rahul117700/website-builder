@@ -50,6 +50,7 @@ model User {
   analyticsSessions    UserSession[]
   exitPoints           ExitPoint[]
   conversionEvents     ConversionEvent[]
+  reports              Report[]
 
   @@map("User")
 }
@@ -632,6 +633,7 @@ model Channel {
   subscribers          ChannelSubscription[]
   template             ChannelTemplate       @relation(fields: [templateId], references: [id])
   user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reports              Report[]
 
   @@index([userId])
   @@index([slug])
@@ -742,6 +744,7 @@ model ChannelProduct {
   reviews          ProductReview[]
   saves            ProductSave[]
   history          UserHistory[]        @relation("ProductHistory")
+  reports          Report[]
 
   @@index([channelId])
   @@index([status])
@@ -1064,6 +1067,7 @@ enum ChannelStatus {
   ACTIVE
   PAUSED
   ARCHIVED
+  BLOCKED
 }
 
 enum ChannelProductType {
@@ -1083,6 +1087,7 @@ enum ChannelProductStatus {
   DRAFT
   ACTIVE
   ARCHIVED
+  BLOCKED
 }
 
 enum ChannelSubscriptionStatus {
@@ -1217,4 +1222,30 @@ model ConversionEvent {
   @@index([eventName])
   @@index([createdAt])
   @@map("conversion_events")
+}
+
+model Report {
+  id        String       @id @default(cuid())
+  userId    String?
+  channelId String?
+  productId String?
+  reason    String
+  details   String?
+  status    ReportStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  user      User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  channel   Channel?        @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  product   ChannelProduct? @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("reports")
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
 }
