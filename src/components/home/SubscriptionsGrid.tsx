@@ -36,7 +36,7 @@ export default function SubscriptionsGrid({ initialSubscriptions }: { initialSub
             </div>
 
             {filteredSubs.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
                     {filteredSubs.map((sub) => (
                         <Link key={sub.channelId} href={`/channel/${sub.slug}`} className="group relative block">
                             <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-indigo-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center h-full relative overflow-hidden">

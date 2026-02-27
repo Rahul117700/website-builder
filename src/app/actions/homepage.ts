@@ -508,7 +508,7 @@ function pad(n: number) {
     return n < 10 ? '0' + n : n;
 }
 
-export async function getUserChannelInfo(userId: string): Promise<{ hasChannel: boolean; productCount: number } | null> {
+export async function getUserChannelInfo(userId: string): Promise<{ hasChannel: boolean; productCount: number; totalEarnings: number } | null> {
     if (!userId) return null;
 
     try {
@@ -531,12 +531,13 @@ export async function getUserChannelInfo(userId: string): Promise<{ hasChannel: 
         });
 
         if (!channel) {
-            return { hasChannel: false, productCount: 0 };
+            return { hasChannel: false, productCount: 0, totalEarnings: 0 };
         }
 
         return {
             hasChannel: true,
-            productCount: channel._count.products
+            productCount: channel._count.products,
+            totalEarnings: Number(channel.totalRevenue || 0)
         };
     } catch (error) {
         console.error('Error fetching user channel info:', error);

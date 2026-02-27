@@ -41,7 +41,7 @@ export default function MainLayout({
 }: MainLayoutProps) {
     const { data: session } = useSession();
     const router = useRouter();
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
     const [notiMenuOpen, setNotiMenuOpen] = useState(false);
@@ -55,7 +55,7 @@ export default function MainLayout({
         const handleResize = () => {
             if (window.innerWidth >= 1024) {
                 setMobileMenuOpen(false);
-                setSidebarOpen(true);
+                // Do not force sidebar open on desktop by default
             } else {
                 setSidebarOpen(false);
             }

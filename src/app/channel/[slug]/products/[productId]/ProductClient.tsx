@@ -1612,7 +1612,7 @@ export default function ProductClient() {
                   <p className="text-sm font-bold text-gray-400">No other products available</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-5">
+                <div className="grid grid-cols-2 lg:grid-cols-1 gap-1 lg:gap-2">
                   {relatedProducts.map((relatedProduct: any) => {
                     // Check if user can access this related product
                     const canAccessRelated = isOwner || !relatedProduct.isSubscriberOnly || !channel?.subscriptionEnabled || hasActiveSubscription;

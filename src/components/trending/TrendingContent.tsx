@@ -79,7 +79,7 @@ export default function TrendingContent({
                 </div>
 
                 {activeTabData.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-4 gap-y-8">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 sm:gap-2">
                         {activeTabData.map((product, index) => (
                             <React.Fragment key={product.id}>
                                 <ProductCard {...product} />

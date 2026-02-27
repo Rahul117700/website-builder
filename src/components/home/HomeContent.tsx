@@ -34,7 +34,7 @@ interface HomeContentProps {
     trendingEbooks?: ProductCardData[];
     userSubscriptions?: SubscriptionData[];
     notifications?: NotificationData[];
-    userChannelInfo?: { hasChannel: boolean; productCount: number } | null;
+    userChannelInfo?: { hasChannel: boolean; productCount: number; totalEarnings?: number } | null;
     children?: React.ReactNode;
 }
 
@@ -49,7 +49,7 @@ export default function HomeContent({
 }: HomeContentProps) {
     const { data: session } = useSession();
     const router = useRouter();
-    const [activeCategory, setActiveCategory] = useState('All');
+    const [activeCategory, setActiveCategory] = useState('Videos');
 
     // Filter Logic - Memoized for performance
     const { others, documents, videos, trendingItems } = React.useMemo(() => {
@@ -111,26 +111,26 @@ export default function HomeContent({
                         </div>
                     </div>
 
-                    {/* 1. Hero Spotlight Section - Dark Theme Row */}
+                    {/* 1. Hero Spotlight Section */}
                     {spotlightItem && (
-                        <div className="w-full bg-[#050505] py-6 sm:py-10 mb-2 border-b border-gray-900 shadow-2xl relative z-10">
+                        <div className="w-full py-6 sm:py-8 relative z-10">
                             <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
                                 <div className="flex items-center justify-between mb-6">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-1.5 h-8 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
-                                        <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                                            Featured <span className="text-gray-600 font-normal">&</span> Trending
+                                        <div className="w-1.5 h-8 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full shadow-sm"></div>
+                                        <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
+                                            Featured <span className="text-gray-400 font-normal">&</span> Trending
                                         </h2>
                                     </div>
-                                    <div className="hidden sm:flex items-center gap-2 text-sm font-medium text-gray-500 bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                                        <SparklesIcon className="w-4 h-4 text-yellow-500" />
+                                    <div className="hidden sm:flex items-center gap-2 text-sm font-medium text-gray-600 bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm">
+                                        <SparklesIcon className="w-4 h-4 text-amber-500" />
                                         <span>Curated for you</span>
                                     </div>
                                 </div>
 
-                                <section className="grid grid-cols-12 gap-3 sm:gap-6 lg:gap-8 items-stretch">
+                                <section className="grid grid-cols-12 gap-1 items-stretch">
                                     {/* Main Hero Card - 70% width on all screens */}
-                                    <div className="col-span-8 group cursor-pointer relative rounded-2xl overflow-hidden aspect-square lg:aspect-[4/1] shadow-2xl ring-1 ring-white/10" onClick={() => router.push(spotlightItem.price === 0 || spotlightItem.hasAccess ? `/channel/${spotlightItem.channelSlug}/products/${spotlightItem.id}` : `/channel/${spotlightItem.channelSlug}`)}>
+                                    <div className="col-span-8 group cursor-pointer relative rounded-2xl overflow-hidden aspect-square lg:aspect-[4/1] shadow-lg ring-1 ring-gray-900/5" onClick={() => router.push(spotlightItem.price === 0 || spotlightItem.hasAccess ? `/channel/${spotlightItem.channelSlug}/products/${spotlightItem.id}` : `/channel/${spotlightItem.channelSlug}`)}>
                                         {(spotlightItem.type === 'VIDEO' || spotlightItem.type === 'VIDEOS') && spotlightItem.videoUrl ? (
                                             <video
                                                 src={spotlightItem.videoUrl}
@@ -171,14 +171,14 @@ export default function HomeContent({
 
                                     {/* Up Next List / Trending Carousel - 30% width on all screens */}
                                     <div className="col-span-4 h-full">
-                                        <TrendingCarousel items={upNextItems} isCompact={false} className="h-full w-full shadow-none ring-1 ring-white/10" />
+                                        <TrendingCarousel items={upNextItems} isCompact={false} className="h-full w-full shadow-lg ring-1 ring-gray-900/5" />
                                     </div>
                                 </section>
                             </div>
                         </div>
                     )}
 
-                    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+                    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-8 space-y-12">
 
                         {/* 2. From Subscriptions (if any) */}
                         {session && subscribedProducts.length > 0 && (
@@ -189,7 +189,7 @@ export default function HomeContent({
                                         From Your Subscriptions
                                     </h2>
                                 </div>
-                                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-6">
+                                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 sm:gap-2">
                                     {subscribedProducts.map((product) => (
                                         <ProductCard key={product.id} {...product} />
                                     ))}
@@ -225,16 +225,37 @@ export default function HomeContent({
                                     <LightBulbIcon className="w-6 h-6 text-amber-500" />
                                     Recommended for You
                                 </h2>
-                                <div className="flex gap-2 bg-white rounded-full p-1 border border-gray-200 shadow-sm self-start sm:self-auto">
-                                    {['All', 'Videos', 'Docs'].map(cat => (
-                                        <button
-                                            key={cat}
-                                            onClick={() => setActiveCategory(cat)}
-                                            className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${activeCategory === cat ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-100'}`}
-                                        >
-                                            {cat}
-                                        </button>
-                                    ))}
+                                <div className="flex flex-wrap items-center gap-2 sm:gap-3 self-start sm:self-auto w-full sm:w-auto">
+                                    {/* Earnings Badge */}
+                                    <Link
+                                        href="/auth/dashboard/my-channel"
+                                        className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-full hover:bg-emerald-100 hover:border-emerald-200 transition-all shadow-sm group whitespace-nowrap"
+                                    >
+                                        <span className="text-emerald-600 font-bold text-[11px] sm:text-xs">
+                                            Earnings: <span className={userChannelInfo?.hasChannel ? "text-emerald-700" : "text-emerald-500"}>₹{userChannelInfo?.totalEarnings || 0}</span>
+                                        </span>
+
+                                        {!userChannelInfo?.hasChannel && (
+                                            <span className="bg-emerald-600 text-white px-2 py-0.5 rounded-full text-[10px] font-bold group-hover:bg-emerald-700 animate-pulse">
+                                                Start earning now?
+                                            </span>
+                                        )}
+
+                                        <ArrowRightIcon className="w-3 h-3 text-emerald-600 group-hover:translate-x-0.5 transition-transform" />
+                                    </Link>
+
+                                    {/* Category Filter */}
+                                    <div className="flex gap-2 bg-white rounded-full p-1 border border-gray-200 shadow-sm">
+                                        {['All', 'Videos', 'Docs'].map(cat => (
+                                            <button
+                                                key={cat}
+                                                onClick={() => setActiveCategory(cat)}
+                                                className={`px-4 py-1.5 text-xs font-bold rounded-full transition-all ${activeCategory === cat ? 'bg-gray-900 text-white shadow-md' : 'text-gray-500 hover:bg-gray-100'}`}
+                                            >
+                                                {cat}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 
@@ -256,7 +277,7 @@ export default function HomeContent({
                                         </div>
                                         {videos.length > 0 ? (
                                             <>
-                                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+                                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-2">
                                                     {videos.slice(0, 50).map((product) => (
                                                         <ProductCard key={product.id} {...product} />
                                                     ))}
@@ -305,7 +326,7 @@ export default function HomeContent({
                                 </div>
                             ) : (
                                 /* Filtered View */
-                                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-6">
+                                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 sm:gap-2">
                                     {(activeCategory === 'Videos' ? videos : documents).length > 0 ? (
                                         (activeCategory === 'Videos' ? videos : documents).map((product) => (
                                             <ProductCard key={product.id} {...product} />

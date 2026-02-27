@@ -117,7 +117,7 @@ export default function SignUpPage() {
           </div>
 
           {/* Sign Up Form */}
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit} method="POST">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                 Full name
@@ -193,8 +193,8 @@ export default function SignUpPage() {
                         <div
                           key={level}
                           className={`h-1 w-8 rounded-full ${level <= strength.score
-                              ? strength.color.replace('text-', 'bg-')
-                              : 'bg-gray-200'
+                            ? strength.color.replace('text-', 'bg-')
+                            : 'bg-gray-200'
                             }`}
                         />
                       ))}
