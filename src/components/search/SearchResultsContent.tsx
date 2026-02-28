@@ -82,20 +82,21 @@ export default function SearchResultsContent({
         <MainLayout
             userSubscriptions={userSubscriptions}
             notifications={notifications}
+            isDarkTheme={true}
         >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-[#141414] min-h-screen text-white">
                 {/* Search Header */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 border-b border-gray-100 pb-8">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 border-b border-[#333] pb-8">
                     <div>
-                        <div className="flex items-center gap-2 text-indigo-600 font-bold text-sm uppercase tracking-widest mb-2">
+                        <div className="flex items-center gap-2 text-indigo-500 font-bold text-sm uppercase tracking-widest mb-2">
                             <MagnifyingGlassIcon className="w-4 h-4" />
                             <span>Search Results</span>
                         </div>
-                        <h1 className="text-4xl font-black text-gray-900 tracking-tight">
-                            Results for &quot;<span className="text-indigo-600">{query || 'Everything'}</span>&quot;
+                        <h1 className="text-4xl font-black text-white tracking-tight">
+                            Results for &quot;<span className="text-indigo-400">{query || 'Everything'}</span>&quot;
                         </h1>
-                        <p className="mt-2 text-gray-500 font-medium">
-                            Found {channels.length} channels and {products.length} products
+                        <p className="mt-2 text-gray-400 font-medium">
+                            Found {displayChannels.length} channels and {displayProducts.length} products
                         </p>
                     </div>
 
@@ -103,7 +104,7 @@ export default function SearchResultsContent({
                         <select
                             value={priceFilter}
                             onChange={(e) => setPriceFilter(e.target.value)}
-                            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                            className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-xl text-sm font-bold text-gray-200 hover:bg-[#2a2a2a] transition-colors shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                         >
                             <option value="all">All Items</option>
                             <option value="free">Free Only</option>
@@ -112,7 +113,7 @@ export default function SearchResultsContent({
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
-                            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                            className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border border-[#333] rounded-xl text-sm font-bold text-gray-200 hover:bg-[#2a2a2a] transition-colors shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                         >
                             <option value="relevance">Sort by: Relevance</option>
                             <option value="subs">Sort by: Subscribers</option>
@@ -129,8 +130,8 @@ export default function SearchResultsContent({
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-black transition-all whitespace-nowrap ${activeTab === tab.id
-                                ? 'bg-gray-900 text-white shadow-xl scale-105'
-                                : 'bg-white text-gray-500 hover:bg-gray-50 border border-gray-100'
+                                ? 'bg-white text-black shadow-xl scale-105'
+                                : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#2a2a2a] border border-[#333]'
                                 }`}
                         >
                             <tab.icon className="w-4 h-4" />
@@ -149,11 +150,11 @@ export default function SearchResultsContent({
                             className="space-y-16"
                         >
                             <div className="flex flex-col items-center justify-center py-10 text-center">
-                                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-                                    <MagnifyingGlassIcon className="w-12 h-12 text-gray-300" />
+                                <div className="w-24 h-24 bg-[#1a1a1a] rounded-full flex items-center justify-center mb-6">
+                                    <MagnifyingGlassIcon className="w-12 h-12 text-[#444]" />
                                 </div>
-                                <h2 className="text-2xl font-black text-gray-900 mb-2">No matching results for &quot;{query}&quot;</h2>
-                                <p className="text-gray-500 max-w-md mx-auto">
+                                <h2 className="text-2xl font-black text-white mb-2">No matching results for &quot;{query}&quot;</h2>
+                                <p className="text-gray-400 max-w-md mx-auto">
                                     We couldn&apos;t find anything matching your search. Try checking for typos or using broader keywords.
                                 </p>
                             </div>
@@ -161,11 +162,11 @@ export default function SearchResultsContent({
                             {recommendedProducts.length > 0 && (
                                 <section>
                                     <div className="flex items-center gap-3 mb-8">
-                                        <div className="h-px flex-1 bg-gray-100" />
-                                        <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest">
+                                        <div className="h-px flex-1 bg-[#333]" />
+                                        <h3 className="text-sm font-black text-gray-500 uppercase tracking-widest">
                                             Trending Content You Might Like
                                         </h3>
-                                        <div className="h-px flex-1 bg-gray-100" />
+                                        <div className="h-px flex-1 bg-[#333]" />
                                     </div>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 sm:gap-2">
                                         {recommendedProducts.slice(0, 8).map((product, idx) => (
@@ -175,7 +176,7 @@ export default function SearchResultsContent({
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 transition={{ delay: idx * 0.05 }}
                                             >
-                                                <ProductCard {...product} />
+                                                <ProductCard {...product} isDarkTheme={true} />
                                             </motion.div>
                                         ))}
                                     </div>
@@ -194,8 +195,8 @@ export default function SearchResultsContent({
                             {/* Channels Section */}
                             {displayChannels.length > 0 && (
                                 <section>
-                                    <h3 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-2">
-                                        <UsersIcon className="w-5 h-5 text-indigo-600" />
+                                    <h3 className="text-xl font-black text-white mb-6 flex items-center gap-2">
+                                        <UsersIcon className="w-5 h-5 text-indigo-500" />
                                         Channels
                                     </h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-2">
@@ -208,7 +209,7 @@ export default function SearchResultsContent({
                                             >
                                                 <Link
                                                     href={`/channel/${channel.slug}`}
-                                                    className="group bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-indigo-100 transition-all flex items-center gap-5"
+                                                    className="group bg-[#1a1a1a] p-5 rounded-2xl border border-[#333] shadow-sm hover:shadow-xl hover:border-[#444] transition-all flex items-center gap-5"
                                                 >
                                                     <div className="relative w-16 h-16 flex-shrink-0">
                                                         {channel.avatar ? (
@@ -216,29 +217,29 @@ export default function SearchResultsContent({
                                                                 src={channel.avatar}
                                                                 alt={channel.name}
                                                                 fill
-                                                                className="rounded-2xl object-cover ring-2 ring-gray-50 group-hover:ring-indigo-100 transition-all"
+                                                                className="rounded-2xl object-cover ring-2 ring-[#333] group-hover:ring-[#555] transition-all"
                                                             />
                                                         ) : (
                                                             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-xl shadow-inner">
                                                                 {channel.name.charAt(0).toUpperCase()}
                                                             </div>
                                                         )}
-                                                        <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-white rounded-full flex items-center justify-center">
+                                                        <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-[#1a1a1a] rounded-full flex items-center justify-center">
                                                             <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
                                                         </div>
                                                     </div>
                                                     <div className="min-w-0 flex-1">
-                                                        <h4 className="font-black text-gray-900 group-hover:text-indigo-600 transition-colors truncate">
+                                                        <h4 className="font-black text-white group-hover:text-indigo-400 transition-colors truncate">
                                                             {channel.name}
                                                         </h4>
-                                                        <p className="text-xs font-bold text-gray-500 mt-0.5">
+                                                        <p className="text-xs font-bold text-gray-400 mt-0.5">
                                                             @{channel.slug}
                                                         </p>
                                                         <div className="flex items-center gap-3 mt-2">
-                                                            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-1 bg-indigo-50 text-indigo-600 rounded-lg">
+                                                            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-1 bg-indigo-900/30 text-indigo-400 rounded-lg">
                                                                 {channel.subscribers} Subs
                                                             </span>
-                                                            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-1 bg-gray-50 text-gray-500 rounded-lg">
+                                                            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-1 bg-[#2a2a2a] text-gray-400 rounded-lg">
                                                                 {channel.productsCount} items
                                                             </span>
                                                         </div>
@@ -254,8 +255,8 @@ export default function SearchResultsContent({
                             {displayProducts.length > 0 && (
                                 <section>
                                     <div className="flex items-center justify-between mb-6">
-                                        <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
-                                            <InboxIcon className="w-5 h-5 text-indigo-600" />
+                                        <h3 className="text-xl font-black text-white flex items-center gap-2">
+                                            <InboxIcon className="w-5 h-5 text-indigo-500" />
                                             {activeTab === 'all' ? 'Marketplace Items' : tabs.find(t => t.id === activeTab)?.label}
                                         </h3>
                                         <span className="text-xs font-bold text-gray-400">
@@ -270,9 +271,11 @@ export default function SearchResultsContent({
                                                     animate={{ opacity: 1, scale: 1 }}
                                                     transition={{ delay: idx * 0.03 }}
                                                 >
-                                                    <ProductCard {...product} />
+                                                    <div className="w-full">
+                                                        <ProductCard {...product} isDarkTheme={true} />
+                                                    </div>
                                                 </motion.div>
-                                                {idx === 0 && <MobileTrendingWidget items={recommendedProducts} />}
+                                                {idx === 1 && <MobileTrendingWidget items={recommendedProducts} />}
                                             </React.Fragment>
                                         ))}
                                     </div>

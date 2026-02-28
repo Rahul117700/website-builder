@@ -102,23 +102,11 @@ export default function TrendingCarousel({ items, isCompact = false, isLoading =
                         className="absolute inset-0 cursor-pointer"
                         onClick={() => router.push(`/channel/${currentItem.channelSlug}/products/${currentItem.id}`)}
                     >
-                        {(currentItem.type === 'VIDEO' || currentItem.type === 'VIDEOS') && currentItem.videoUrl ? (
-                            <video
-                                src={currentItem.videoUrl}
-                                className="absolute inset-0 w-full h-full object-cover opacity-90"
-                                autoPlay
-                                muted
-                                loop
-                                playsInline
-                                preload="metadata"
-                            />
-                        ) : (
-                            <img
-                                src={currentItem.thumbnail}
-                                alt={currentItem.title}
-                                className="absolute inset-0 w-full h-full object-cover"
-                            />
-                        )}
+                        <img
+                            src={currentItem.thumbnail}
+                            alt={currentItem.title}
+                            className="absolute inset-0 w-full h-full object-cover"
+                        />
                     </div>
 
                     {/* Premium Gradient Overlays */}

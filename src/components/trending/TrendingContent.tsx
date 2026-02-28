@@ -45,20 +45,21 @@ export default function TrendingContent({
         <MainLayout
             userSubscriptions={userSubscriptions}
             notifications={notifications}
+            isDarkTheme={true}
         >
-            <div className="max-w-[1800px] mx-auto p-4 md:p-6">
+            <div className="max-w-[1800px] mx-auto p-4 md:p-6 bg-[#141414] min-h-screen text-white">
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                    <h1 className="text-3xl font-bold text-white flex items-center gap-3">
                         <FireIcon className="w-8 h-8 text-orange-500" />
                         Trending
                     </h1>
-                    <p className="text-gray-500 mt-2">
+                    <p className="text-gray-400 mt-2">
                         The most popular products and videos across SellEarnDirect right now.
                     </p>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-2 overflow-x-auto pb-4 mb-8 no-scrollbar border-b border-gray-100">
+                <div className="flex gap-2 overflow-x-auto pb-4 mb-8 no-scrollbar border-b border-[#333]">
                     {tabs.map((tab) => {
                         const Icon = tab.icon;
                         const isActive = activeTab === tab.id;
@@ -67,11 +68,11 @@ export default function TrendingContent({
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-all whitespace-nowrap ${isActive
-                                    ? 'bg-gray-900 text-white shadow-lg scale-105'
-                                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                    ? 'bg-white text-black shadow-lg scale-105'
+                                    : 'bg-[#1a1a1a] text-gray-400 border border-[#333] hover:bg-[#2a2a2a]'
                                     }`}
                             >
-                                <Icon className={`w-5 h-5 ${isActive ? 'text-white' : tab.color}`} />
+                                <Icon className={`w-5 h-5 ${isActive ? 'text-black' : tab.color}`} />
                                 {tab.label}
                             </button>
                         );
@@ -79,18 +80,20 @@ export default function TrendingContent({
                 </div>
 
                 {activeTabData.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 sm:gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4">
                         {activeTabData.map((product, index) => (
                             <React.Fragment key={product.id}>
-                                <ProductCard {...product} />
-                                {index === 0 && <MobileTrendingWidget items={activeTabData.slice(0, 5)} />}
+                                <div className="w-full">
+                                    <ProductCard {...product} isDarkTheme={true} />
+                                </div>
+                                {index === 1 && <MobileTrendingWidget items={activeTabData.slice(0, 5)} />}
                             </React.Fragment>
                         ))}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                        <FireIcon className="w-16 h-16 text-gray-200 mb-4" />
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">No trending {activeTab} yet</h3>
+                    <div className="flex flex-col items-center justify-center py-20 bg-[#1a1a1a] rounded-2xl border-2 border-dashed border-[#333]">
+                        <FireIcon className="w-16 h-16 text-[#444] mb-4" />
+                        <h3 className="text-xl font-bold text-gray-200 mb-2">No trending {activeTab} yet</h3>
                         <p className="text-gray-500 text-center max-w-md">
                             We're still gathering data for this category. Check back soon for the most popular content!
                         </p>

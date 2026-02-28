@@ -30,7 +30,7 @@ export default function SubscriptionsGrid({ initialSubscriptions }: { initialSub
                         placeholder="Filter"
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
-                        className="pl-10 pr-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-full bg-white shadow-sm transition-all"
+                        className="pl-10 pr-4 py-2 border border-[#333] rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent w-full bg-[#1a1a1a] text-white placeholder-gray-500 shadow-sm transition-all"
                     />
                 </div>
             </div>
@@ -39,14 +39,14 @@ export default function SubscriptionsGrid({ initialSubscriptions }: { initialSub
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
                     {filteredSubs.map((sub) => (
                         <Link key={sub.channelId} href={`/channel/${sub.slug}`} className="group relative block">
-                            <div className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-indigo-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center h-full relative overflow-hidden">
+                            <div className="bg-[#1a1a1a] rounded-2xl p-6 border border-[#333] hover:border-[#555] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center h-full relative overflow-hidden">
 
                                 {/* Decorative Background Blur */}
-                                <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-indigo-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-indigo-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                                 {/* Avatar */}
                                 <div className="relative mb-4 z-10">
-                                    <div className="p-1 rounded-full border-2 border-indigo-100 group-hover:border-indigo-300 transition-colors bg-white">
+                                    <div className="p-1 rounded-full border-2 border-[#333] group-hover:border-indigo-500/50 transition-colors bg-[#1a1a1a]">
                                         <div className="relative w-24 h-24 rounded-full overflow-hidden">
                                             <Image
                                                 src={sub.channelAvatar || '/placeholder-avatar.jpg'}
@@ -57,17 +57,17 @@ export default function SubscriptionsGrid({ initialSubscriptions }: { initialSub
                                             />
                                         </div>
                                     </div>
-                                    <div className="absolute bottom-1 right-1 bg-white rounded-full p-1 shadow-md border border-gray-100" title="Notifications on">
-                                        <BellIcon className="w-4 h-4 text-gray-900" />
+                                    <div className="absolute bottom-1 right-1 bg-[#2a2a2a] rounded-full p-1 shadow-md border border-[#444]" title="Notifications on">
+                                        <BellIcon className="w-4 h-4 text-white" />
                                     </div>
                                 </div>
 
                                 {/* Info */}
-                                <h3 className="font-bold text-lg text-gray-900 mb-1 group-hover:text-indigo-600 transition-colors z-10 line-clamp-1">{sub.channelName}</h3>
+                                <h3 className="font-bold text-lg text-white mb-1 group-hover:text-indigo-400 transition-colors z-10 line-clamp-1">{sub.channelName}</h3>
 
                                 {/* Action Button */}
                                 <div className="mt-auto pt-6 w-full z-10">
-                                    <div className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-gray-100 group-hover:bg-indigo-50 text-gray-700 group-hover:text-indigo-700 font-medium rounded-full text-sm transition-colors">
+                                    <div className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-[#2a2a2a] group-hover:bg-indigo-900/30 text-gray-300 group-hover:text-indigo-400 font-medium rounded-full text-sm transition-colors border border-transparent group-hover:border-indigo-500/30">
                                         <CheckCircleIcon className="w-5 h-5" />
                                         <span>Subscribed</span>
                                     </div>
@@ -164,9 +164,9 @@ export default function SubscriptionsGrid({ initialSubscriptions }: { initialSub
                     </div>
 
                     {/* How It Works Section */}
-                    <div className="bg-white rounded-3xl border border-gray-100 p-6 sm:p-10">
-                        <h2 className="text-2xl sm:text-3xl font-black text-gray-900 text-center mb-8 sm:mb-12">
-                            How It Works - <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Very Simple!</span>
+                    <div className="bg-[#1a1a1a] rounded-3xl border border-[#333] p-6 sm:p-10">
+                        <h2 className="text-2xl sm:text-3xl font-black text-white text-center mb-8 sm:mb-12">
+                            How It Works - <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Very Simple!</span>
                         </h2>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
@@ -194,10 +194,10 @@ export default function SubscriptionsGrid({ initialSubscriptions }: { initialSub
                                         </div>
 
                                         {/* Title */}
-                                        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
+                                        <h3 className="text-lg sm:text-xl font-bold text-white mb-2">{item.title}</h3>
 
                                         {/* Description */}
-                                        <p className="text-sm sm:text-base text-gray-600">{item.desc}</p>
+                                        <p className="text-sm sm:text-base text-gray-400">{item.desc}</p>
                                     </div>
                                 </div>
                             ))}

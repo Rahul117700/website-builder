@@ -8,9 +8,9 @@
     "theme_color": "#6366f1",
     "icons": [
         {
-            "src": "/logo/app_logo.gif",
+            "src": "/logo/sed_premium_icon.svg",
             "sizes": "512x512",
-            "type": "image/gif",
+            "type": "image/svg+xml",
             "purpose": "any"
         }
     ],

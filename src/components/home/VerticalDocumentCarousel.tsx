@@ -11,9 +11,10 @@ import { HeartIcon } from '@heroicons/react/24/outline';
 
 interface VerticalDocumentCarouselProps {
     items: ProductCardData[];
+    isDarkTheme?: boolean;
 }
 
-const DocumentCarouselItem = ({ product }: { product: ProductCardData }) => {
+const DocumentCarouselItem = ({ product, isDarkTheme }: { product: ProductCardData, isDarkTheme?: boolean }) => {
     const router = useRouter();
     const { data: session } = useSession();
     const [isLiked, setIsLiked] = useState(product.isLiked || false);
@@ -52,11 +53,11 @@ const DocumentCarouselItem = ({ product }: { product: ProductCardData }) => {
 
     return (
         <div
-            className="group flex gap-3 p-2.5 rounded-none bg-transparent hover:bg-gray-50 transition-all cursor-pointer relative flex-shrink-0"
+            className={`group flex gap-3 p-2.5 rounded-none ${isDarkTheme ? 'bg-transparent hover:bg-[#2a2a2a]' : 'bg-transparent hover:bg-gray-50'} transition-all cursor-pointer relative flex-shrink-0`}
             onClick={() => router.push(`/channel/${product.channelSlug}/products/${product.id}`)}
         >
             {/* Thumbnail */}
-            <div className="relative w-16 h-20 flex-shrink-0 rounded-none overflow-hidden bg-gray-100 shadow-sm group-hover:shadow transition-all">
+            <div className={`relative w-16 h-20 flex-shrink-0 rounded-none overflow-hidden ${isDarkTheme ? 'bg-[#1a1a1a]' : 'bg-gray-100'} shadow-sm group-hover:shadow transition-all`}>
                 <Image
                     src={product.thumbnail}
                     alt={product.title}
@@ -69,12 +70,12 @@ const DocumentCarouselItem = ({ product }: { product: ProductCardData }) => {
             {/* Info */}
             <div className="flex-1 min-w-0 py-0.5 flex flex-col justify-between">
                 <div>
-                    <h4 className="font-bold text-gray-900 text-[13px] leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors mb-1">
+                    <h4 className={`font-bold ${isDarkTheme ? 'text-gray-200' : 'text-gray-900'} text-[13px] leading-snug line-clamp-2 group-hover:text-indigo-500 transition-colors mb-1`}>
                         {product.title}
                     </h4>
-                    <p className="text-[11px] text-gray-500 truncate mb-1.5">{product.channelName}</p>
+                    <p className={`text-[11px] ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'} truncate mb-1.5`}>{product.channelName}</p>
 
-                    <div className="flex items-center text-[10px] text-gray-400 font-medium whitespace-nowrap overflow-hidden gap-1.5 mb-1.5">
+                    <div className={`flex items-center text-[10px] ${isDarkTheme ? 'text-gray-500' : 'text-gray-400'} font-medium whitespace-nowrap overflow-hidden gap-1.5 mb-1.5`}>
                         {product.averageRating ? (
                             <>
                                 <span className="flex items-center gap-0.5 text-amber-500 font-bold">
@@ -93,11 +94,11 @@ const DocumentCarouselItem = ({ product }: { product: ProductCardData }) => {
 
                 <div className="flex items-center justify-between">
                     {product.isSubscriberOnly ? (
-                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
+                        <span className={`text-[10px] font-bold ${isDarkTheme ? 'text-indigo-400 bg-indigo-900/30 border-indigo-800' : 'text-indigo-600 bg-indigo-50 border-indigo-100'} px-1.5 py-0.5 rounded border`}>
                             Subscriber Only
                         </span>
                     ) : (
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${product.price === 0 ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : 'text-gray-700 bg-gray-50 border-gray-100'}`}>
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${product.price === 0 ? (isDarkTheme ? 'text-emerald-400 bg-emerald-900/30 border-emerald-800/50' : 'text-emerald-600 bg-emerald-50 border-emerald-100') : (isDarkTheme ? 'text-gray-300 bg-[#333] border-[#444]' : 'text-gray-700 bg-gray-50 border-gray-100')}`}>
                             {product.price === 0 ? 'Free' : `₹${product.price}`}
                         </span>
                     )}
@@ -114,7 +115,7 @@ const DocumentCarouselItem = ({ product }: { product: ProductCardData }) => {
     );
 };
 
-export default function VerticalDocumentCarousel({ items }: VerticalDocumentCarouselProps) {
+export default function VerticalDocumentCarousel({ items, isDarkTheme }: VerticalDocumentCarouselProps) {
     // Use a window of 6 items for the carousel
     const WINDOW_SIZE = 6;
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -170,7 +171,7 @@ export default function VerticalDocumentCarousel({ items }: VerticalDocumentCaro
                     className="grid grid-cols-1 md:grid-cols-2 gap-3 content-start"
                 >
                     {displayItems.map((product) => (
-                        <DocumentCarouselItem key={product.id} product={product} />
+                        <DocumentCarouselItem key={product.id} product={product} isDarkTheme={isDarkTheme} />
                     ))}
                 </motion.div>
             </AnimatePresence>

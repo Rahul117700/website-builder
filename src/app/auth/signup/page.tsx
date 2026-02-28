@@ -64,32 +64,26 @@ export default function SignUpPage() {
   const strength = passwordStrength();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-indigo-50 flex items-center justify-center p-4" style={{ backgroundColor: '#f8fafc' }}>
+    <div className="min-h-screen bg-[#141414] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-6">
             <Link href="/">
-              <img
-                src="/logo/logo.gif"
-                alt="sedStudios - Turn Traffic Into Revenue"
-                className="h-20 w-auto object-contain hover:scale-105 transition-transform no-blur"
-                style={{ maxWidth: '250px' }}
-              />
+              <Logo variant="white" size="lg" showText={true} />
             </Link>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create your account</h1>
-          <p className="text-gray-600">Start selling digital products today</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Create your account</h1>
+          <p className="text-gray-400">Start selling digital products today</p>
         </div>
 
         {/* Main Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8" style={{ backgroundColor: '#ffffff' }}>
+        <div className="bg-[#1a1a1a] rounded-2xl shadow-xl border border-[#333] p-8">
           {/* Social Signup Buttons */}
           <div className="space-y-3 mb-8">
             <button
               type="button"
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-              style={{ backgroundColor: '#ffffff' }}
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium text-white bg-[#222] border border-[#333] hover:bg-[#333] transition-all duration-200 focus:outline-none"
               onClick={() => window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(callbackUrl)}`}
             >
               <FaGoogle className="w-5 h-5 text-red-500" />
@@ -97,8 +91,7 @@ export default function SignUpPage() {
             </button>
             <button
               type="button"
-              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-              style={{ backgroundColor: '#ffffff' }}
+              className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium text-white bg-[#222] border border-[#333] hover:bg-[#333] transition-all duration-200 focus:outline-none"
               onClick={() => window.location.href = `/api/auth/signin/github?callbackUrl=${encodeURIComponent(callbackUrl)}`}
             >
               <FaGithub className="w-5 h-5" />
@@ -109,17 +102,17 @@ export default function SignUpPage() {
           {/* Divider */}
           <div className="relative mb-8">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
+              <div className="w-full border-t border-[#333]" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500" style={{ backgroundColor: '#ffffff' }}>Or sign up with email</span>
+              <span className="px-4 bg-[#1a1a1a] text-gray-400">Or sign up with email</span>
             </div>
           </div>
 
           {/* Sign Up Form */}
           <form className="space-y-6" onSubmit={handleSubmit} method="POST">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
                 Full name
               </label>
               <input
@@ -128,8 +121,7 @@ export default function SignUpPage() {
                 type="text"
                 autoComplete="name"
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
-                style={{ backgroundColor: '#ffffff', color: '#111827' }}
+                className="w-full px-4 py-3 border border-[#333] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-[#222] transition-all duration-200"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Enter your full name"
@@ -137,7 +129,7 @@ export default function SignUpPage() {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
                 Email address
               </label>
               <input
@@ -146,8 +138,7 @@ export default function SignUpPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
-                style={{ backgroundColor: '#ffffff', color: '#111827' }}
+                className="w-full px-4 py-3 border border-[#333] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-[#222] transition-all duration-200"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="Enter your email"
@@ -155,7 +146,7 @@ export default function SignUpPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
                 Password
               </label>
               <div className="relative">
@@ -165,8 +156,7 @@ export default function SignUpPage() {
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   required
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
-                  style={{ backgroundColor: '#ffffff', color: '#111827' }}
+                  className="w-full px-4 py-3 pr-12 border border-[#333] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 bg-[#222]"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="Create a strong password"
@@ -177,9 +167,9 @@ export default function SignUpPage() {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-white" />
                   ) : (
-                    <EyeIcon className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <EyeIcon className="h-5 w-5 text-gray-400 hover:text-white" />
                   )}
                 </button>
               </div>
@@ -219,17 +209,17 @@ export default function SignUpPage() {
                   type="checkbox"
                   checked={agreedToTerms}
                   onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-indigo-500 focus:ring-indigo-500 border-[#333] rounded bg-[#222]"
                 />
               </div>
               <div className="ml-3 text-sm">
-                <label htmlFor="terms" className="text-gray-700">
+                <label htmlFor="terms" className="text-gray-400">
                   I agree to the{' '}
-                  <Link href="/terms" className="text-indigo-600 hover:text-indigo-500 hover:underline">
+                  <Link href="/terms" className="text-indigo-400 hover:text-indigo-300 hover:underline">
                     Terms of Service
                   </Link>
                   {' '}and{' '}
-                  <Link href="/privacy" className="text-indigo-600 hover:text-indigo-500 hover:underline">
+                  <Link href="/privacy" className="text-indigo-400 hover:text-indigo-300 hover:underline">
                     Privacy Policy
                   </Link>
                 </label>
@@ -237,16 +227,15 @@ export default function SignUpPage() {
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
-                <p className="text-sm text-red-600">{error}</p>
+              <div className="p-3 bg-red-900/30 border border-red-500/50 rounded-xl">
+                <p className="text-sm text-red-500">{error}</p>
               </div>
             )}
 
             <button
               type="submit"
               disabled={loading || !agreedToTerms}
-              className="w-full py-3 px-4 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
-              style={{ backgroundColor: '#4f46e5' }}
+              className="w-full py-3 px-4 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 focus:outline-none shadow-lg shadow-indigo-600/20 border border-indigo-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -261,11 +250,11 @@ export default function SignUpPage() {
 
           {/* Sign In Link */}
           <div className="mt-8 text-center">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-400">
               Already have an account?{' '}
               <Link
                 href={`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`}
-                className="font-medium text-indigo-600 hover:text-indigo-500 hover:underline"
+                className="font-medium text-indigo-500 hover:text-indigo-400 hover:underline"
               >
                 Sign in
               </Link>
@@ -275,23 +264,23 @@ export default function SignUpPage() {
 
         {/* Features */}
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-          <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-200" style={{ backgroundColor: '#ffffff' }}>
-            <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <CheckIcon className="w-5 h-5 text-indigo-600" />
+          <div className="p-4 bg-[#1a1a1a] rounded-xl shadow-sm border border-[#333]">
+            <div className="w-8 h-8 bg-indigo-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <CheckIcon className="w-5 h-5 text-indigo-400" />
             </div>
-            <p className="text-xs text-gray-600">Free to start</p>
+            <p className="text-xs text-gray-400">Free to start</p>
           </div>
-          <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-200" style={{ backgroundColor: '#ffffff' }}>
-            <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <CheckIcon className="w-5 h-5 text-indigo-600" />
+          <div className="p-4 bg-[#1a1a1a] rounded-xl shadow-sm border border-[#333]">
+            <div className="w-8 h-8 bg-indigo-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <CheckIcon className="w-5 h-5 text-indigo-400" />
             </div>
-            <p className="text-xs text-gray-600">No credit card</p>
+            <p className="text-xs text-gray-400">No credit card</p>
           </div>
-          <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-200" style={{ backgroundColor: '#ffffff' }}>
-            <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <CheckIcon className="w-5 h-5 text-indigo-600" />
+          <div className="p-4 bg-[#1a1a1a] rounded-xl shadow-sm border border-[#333]">
+            <div className="w-8 h-8 bg-indigo-900/30 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <CheckIcon className="w-5 h-5 text-indigo-400" />
             </div>
-            <p className="text-xs text-gray-600">Cancel anytime</p>
+            <p className="text-xs text-gray-400">Cancel anytime</p>
           </div>
         </div>
       </div>

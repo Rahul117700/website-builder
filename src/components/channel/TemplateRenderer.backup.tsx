@@ -149,7 +149,7 @@ const VideoHoverPreview = ({ product, primaryColor, getContentIcon }: { product:
           className={`w-full h-full object-cover transition-opacity duration-300 ${isHovered && isVideo && hasVideoSource ? 'opacity-0' : 'opacity-100'}`}
         />
       ) : (
-        <div className={`w-full h-full flex items-center justify-center bg-[#1a1a1a] transition-opacity duration-300 ${isHovered && isVideo && hasVideoSource ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`w-full h-full flex items-center justify-center bg-gray-50 transition-opacity duration-300 ${isHovered && isVideo && hasVideoSource ? 'opacity-0' : 'opacity-100'}`}>
           <div style={{ color: `${primaryColor}40` }}>{getContentIcon(product.type)}</div>
         </div>
       )}
@@ -722,9 +722,10 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
   const primaryColor = customTheme.primary || theme?.colors?.primary || '#6366f1';
   const secondaryColor = customTheme.secondary || theme?.colors?.secondary || '#8b5cf6';
   // For Minimal template, default to white background if not set
-  const backgroundColor = '#141414'; // Forced dark theme
-  const defaultTextColor = '#ffffff'; // Simple constant since background is hardcoded to dark
-  const textColor = '#ffffff'; // Forced dark theme text
+  const backgroundColor = customTheme.background || theme?.colors?.background || '#ffffff';
+  // For Minimal template, default to dark text if background is light
+  const defaultTextColor = backgroundColor === '#ffffff' || backgroundColor === '#fff' || !backgroundColor || backgroundColor.includes('white') ? '#0f172a' : '#ffffff';
+  const textColor = customTheme.text || theme?.colors?.text || defaultTextColor;
   // Professional font stack - Inter, Roboto, system fonts
   const headingFont = customTheme.headingFont || theme?.fonts?.heading || '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
   const bodyFont = customTheme.bodyFont || theme?.fonts?.body || '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
@@ -830,27 +831,27 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
     }, [totalReach]);
 
     return (
-      <div className="bg-[#141414] rounded-[2.5rem] p-8 border border-[#333] shadow-[0_20px_50px_rgba(0,0,0,0.05)] overflow-hidden relative">
+      <div className="bg-white rounded-[2.5rem] p-8 border border-gray-100 shadow-[0_20px_50px_rgba(0,0,0,0.05)] overflow-hidden relative">
         <div className="absolute top-0 right-0 p-8 opacity-5">
-          <FireIcon className="w-48 h-48 text-white" />
+          <FireIcon className="w-48 h-48 text-indigo-600" />
         </div>
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 relative z-10">
           <div>
-            <div className="flex items-center gap-2 text-white font-black text-[10px] uppercase tracking-[0.2em] mb-2">
-              <span className="w-2 h-2 rounded-full bg-[#e50914] animate-pulse" />
+            <div className="flex items-center gap-2 text-indigo-600 font-black text-[10px] uppercase tracking-[0.2em] mb-2">
+              <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
               Real-time Momentum
             </div>
-            <h3 className="text-3xl font-black text-white tracking-tight">Channel Vitality</h3>
-            <p className="text-gray-400 font-medium">Tracking engagement and reach across your ecosystem</p>
+            <h3 className="text-3xl font-black text-gray-900 tracking-tight">Channel Vitality</h3>
+            <p className="text-gray-500 font-medium">Tracking engagement and reach across your ecosystem</p>
           </div>
 
           <div className="flex gap-4">
-            <div className="bg-[#222] border border-indigo-100 rounded-2xl px-6 py-4">
-              <div className="text-[10px] font-black text-white uppercase tracking-widest mb-1">Total Reach</div>
+            <div className="bg-indigo-50 border border-indigo-100 rounded-2xl px-6 py-4">
+              <div className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Total Reach</div>
               <div className="text-2xl font-black text-indigo-900">{formatViewCount(totalReach)}+</div>
             </div>
-            <div className="bg-[#222] border border-emerald-100 rounded-2xl px-6 py-4">
+            <div className="bg-emerald-50 border border-emerald-100 rounded-2xl px-6 py-4">
               <div className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Growth rate</div>
               <div className="text-2xl font-black text-emerald-900">+24%</div>
             </div>
@@ -902,9 +903,9 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
           </ResponsiveContainer>
         </div>
 
-        <div className="mt-8 flex items-center justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest border-t border-[#222] pt-6">
+        <div className="mt-8 flex items-center justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest border-t border-gray-50 pt-6">
           <div className="flex items-center gap-4">
-            <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-[#222]0" /> Channel Reach Momentum</span>
+            <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Channel Reach Momentum</span>
           </div>
           <span>Updated Live</span>
         </div>
@@ -914,9 +915,9 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
   const renderChannelHeader = () => {
     return (
-      <div className="bg-[#141414]">
+      <div className="bg-white">
         {/* Banner Image */}
-        <div className="relative w-full h-48 sm:h-56 md:h-72 lg:h-80 bg-[#222] group overflow-hidden">
+        <div className="relative w-full h-48 sm:h-56 md:h-72 lg:h-80 bg-gray-100 group overflow-hidden">
           <img
             src={activeCoverImage}
             alt=""
@@ -938,7 +939,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
           <div className="flex flex-col md:flex-row items-center md:items-end relative z-10 pb-6 mb-2">
             {/* Avatar */}
             <div className="relative mb-4 md:mb-0 -mt-16 md:-mt-20">
-              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-lg overflow-hidden bg-[#141414]">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
                 {channel.profileImage || channel.user?.image ? (
                   <img
                     src={
@@ -970,7 +971,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       const parent = img.parentElement;
                       if (parent) {
                         parent.innerHTML = `
-                          <div class="w-full h-full flex items-center justify-center bg-[#333] uppercase text-white font-bold text-4xl">
+                          <div class="w-full h-full flex items-center justify-center bg-indigo-100 uppercase text-indigo-600 font-bold text-4xl">
                             ${(channel.name || 'C').charAt(0)}
                           </div>
                         `;
@@ -981,7 +982,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                     }}
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-[#222] text-gray-400">
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
                     <UserCircleIcon className="w-20 h-20" />
                   </div>
                 )}
@@ -990,16 +991,16 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
             {/* Channel Info */}
             <div className="flex-1 text-center md:text-left md:ml-6 mb-4 md:mb-2 relative z-10">
-              <h1 className="text-2xl md:text-4xl font-bold text-white mb-1" style={{ fontFamily: headingFont }}>
+              <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-1" style={{ fontFamily: headingFont }}>
                 {channel.name}
               </h1>
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 text-sm text-gray-400 mb-3">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-4 text-sm text-gray-600 mb-3">
                 <span className="font-medium">@{channel.slug}</span>
                 <span>•</span>
                 {isOwner ? (
                   <button
                     onClick={() => setShowSubscribersList(true)}
-                    className="hover:text-white hover:underline transition-colors focus:outline-none"
+                    className="hover:text-gray-900 hover:underline transition-colors focus:outline-none"
                     title="View subscriber list"
                   >
                     {formatViewCount(channel._count?.subscribers || 0)} subscribers
@@ -1010,7 +1011,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                 <span>•</span>
                 <span>{channel._count?.products || 0} products</span>
               </div>
-              <p className="text-sm text-gray-400 line-clamp-1 max-w-2xl mx-auto md:mx-0">
+              <p className="text-sm text-gray-600 line-clamp-1 max-w-2xl mx-auto md:mx-0">
                 {channel.description || 'Welcome to my channel!'}
               </p>
             </div>
@@ -1022,8 +1023,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                   onClick={() => !hasActiveSubscription && setShowSubscriptionModal(true)}
                   disabled={hasActiveSubscription}
                   className={`px-6 py-2.5 rounded-full font-semibold text-sm transition-all shadow-sm ${hasActiveSubscription
-                    ? 'bg-[#222] text-gray-400 cursor-default'
-                    : 'bg-white text-black hover:bg-[#333] hover:shadow-md active:scale-95'
+                    ? 'bg-gray-100 text-gray-600 cursor-default'
+                    : 'bg-gray-900 text-white hover:bg-black hover:shadow-md active:scale-95'
                     }`}
                 >
                   {hasActiveSubscription ? 'Subscribed' : 'Subscribe'}
@@ -1033,7 +1034,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center gap-6 sm:gap-8 overflow-x-auto scrollbar-hide border-b border-[#333]">
+          <div className="flex items-center gap-6 sm:gap-8 overflow-x-auto scrollbar-hide border-b border-gray-200">
             {[
               { id: 'home', label: 'Home' },
               { id: 'videos', label: 'Explore Store' },
@@ -1043,15 +1044,15 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`py-4 text-sm sm:text-[15px] font-black whitespace-nowrap border-b-[3px] transition-all relative ${activeTab === tab.id
-                  ? 'border-[#e50914] text-white'
-                  : 'border-transparent text-gray-400 hover:text-white hover:border-[#333]'
+                  ? 'border-indigo-600 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-200'
                   }`}
               >
                 {tab.label}
                 {activeTab === tab.id && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute bottom-[-3px] left-0 right-0 h-[3px] bg-[#e50914]"
+                    className="absolute bottom-[-3px] left-0 right-0 h-[3px] bg-indigo-600"
                   />
                 )}
               </button>
@@ -1099,9 +1100,9 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
   // Creative Template - Uses white background with black text for visibility
   const renderCreativeTemplate = () => {
     return (
-      <div className="min-h-screen bg-[#141414]">
+      <div className="min-h-screen bg-white">
         {/* Hero Section */}
-        <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#141414] via-[#1a1a1a] to-[#141414]">
+        <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50">
           {/* Background */}
           <div
             className="absolute inset-0 bg-cover bg-center"
@@ -1119,10 +1120,10 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                 className="w-32 h-32 rounded-full mx-auto mb-6 border-4 border-white/20 shadow-2xl"
               />
             )}
-            <h1 className="text-6xl md:text-7xl font-bold mb-6 text-white">
+            <h1 className="text-6xl md:text-7xl font-bold mb-6 text-gray-900">
               {channel.name}
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-gray-200">
+            <p className="text-xl md:text-2xl mb-8 text-gray-700">
               {channel.description}
             </p>
             {channel.subscriptionEnabled && (
@@ -1130,13 +1131,13 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => router.push(`/auth/signin?callbackUrl=${encodeURIComponent(channelUrl)}`)}
-                    className="px-6 py-3 rounded-full font-semibold text-base transition-all duration-300 transform hover:scale-105 shadow-lg border-2 border-gray-900 bg-transparent text-white hover:bg-[#e50914] hover:text-white"
+                    className="px-6 py-3 rounded-full font-semibold text-base transition-all duration-300 transform hover:scale-105 shadow-lg border-2 border-gray-900 bg-transparent text-gray-900 hover:bg-gray-900 hover:text-white"
                   >
                     Sign In
                   </button>
                   <button
                     onClick={() => router.push(`/auth/signup?callbackUrl=${encodeURIComponent(channelUrl)}`)}
-                    className="px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl bg-white text-black hover:bg-[#333] hover:shadow-2xl"
+                    className="px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl bg-gray-900 text-white hover:bg-black hover:shadow-2xl"
                   >
                     Subscribe Now
                   </button>
@@ -1145,7 +1146,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                 <button
                   onClick={() => setShowSubscriptionModal(true)}
                   disabled={hasActiveSubscription}
-                  className="px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl bg-white text-black hover:bg-[#333] hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl bg-gray-900 text-white hover:bg-black hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {hasActiveSubscription ? 'Subscribed' : 'Subscribe Now'}
                 </button>
@@ -1155,7 +1156,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
           {/* Scroll Indicator */}
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
             </svg>
           </div>
@@ -1163,12 +1164,12 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
         {/* Welcome Section */}
         {channel.welcomeMessage && (
-          <section className="py-20 px-4 bg-[#1a1a1a]">
+          <section className="py-20 px-4 bg-gray-50">
             <div className="w-full px-4 sm:px-6 md:px-8">
-              <h2 className="text-4xl font-bold mb-6 text-center text-white">
+              <h2 className="text-4xl font-bold mb-6 text-center text-gray-900">
                 Welcome
               </h2>
-              <p className="text-lg leading-relaxed text-center text-gray-200">
+              <p className="text-lg leading-relaxed text-center text-gray-700">
                 {channel.welcomeMessage}
               </p>
             </div>
@@ -1177,16 +1178,16 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
         {/* Products Grid */}
         {products && products.length > 0 && (
-          <section className="py-20 px-4 bg-[#141414]">
+          <section className="py-20 px-4 bg-white">
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-4xl font-bold mb-12 text-center text-white">
+              <h2 className="text-4xl font-bold mb-12 text-center text-gray-900">
                 Products & Content
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.map((product: any, index: number) => (
                   <div
                     key={index}
-                    className="rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 bg-[#141414] border border-[#333]"
+                    className="rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 bg-white border border-gray-200"
                   >
                     {product.previewImage && (
                       <img
@@ -1196,11 +1197,11 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       />
                     )}
                     <div className="p-6">
-                      <h3 className="text-xl font-bold mb-2 text-white">
+                      <h3 className="text-xl font-bold mb-2 text-gray-900">
                         {product.title}
                       </h3>
                       {product.description && (
-                        <p className="text-sm mb-4 text-gray-400">
+                        <p className="text-sm mb-4 text-gray-600">
                           {product.description}
                         </p>
                       )}
@@ -1223,9 +1224,9 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
         )}
 
         {/* Footer */}
-        <footer className="py-12 px-4 border-t bg-[#1a1a1a] border-[#333]">
+        <footer className="py-12 px-4 border-t bg-gray-50 border-gray-200">
           <div className="max-w-7xl mx-auto text-center">
-            <p className="text-gray-400">
+            <p className="text-gray-600">
               © {new Date().getFullYear()} {channel.name}. All rights reserved.
             </p>
           </div>
@@ -1527,7 +1528,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                   }}
                                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'home'
                                     ? 'shadow-inner'
-                                    : 'hover:bg-[#1a1a1a]/50'
+                                    : 'hover:bg-gray-50/50'
                                     }`}
                                   style={{
                                     color: activeSidebarItem === 'home' ? textColor : `${textColor}CC`,
@@ -1545,7 +1546,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                   }}
                                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'explore'
                                     ? 'shadow-inner'
-                                    : 'hover:bg-[#1a1a1a]/50'
+                                    : 'hover:bg-gray-50/50'
                                     }`}
                                   style={{
                                     color: activeSidebarItem === 'explore' ? textColor : `${textColor}CC`,
@@ -1563,8 +1564,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                       setShowNavDropdown(false);
                                     }}
                                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'subscriptions'
-                                      ? 'bg-[#222] font-semibold'
-                                      : 'hover:bg-[#1a1a1a]'
+                                      ? 'bg-gray-100 font-semibold'
+                                      : 'hover:bg-gray-50'
                                       }`}
                                     style={{
                                       color: activeSidebarItem === 'subscriptions' ? textColor : `${textColor}CC`,
@@ -1604,8 +1605,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                         setShowNavDropdown(false);
                                       }}
                                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'history'
-                                        ? 'bg-[#222] font-semibold'
-                                        : 'hover:bg-[#1a1a1a]'
+                                        ? 'bg-gray-100 font-semibold'
+                                        : 'hover:bg-gray-50'
                                         }`}
                                       style={{
                                         color: activeSidebarItem === 'history' ? textColor : `${textColor}CC`,
@@ -1621,8 +1622,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                         setShowNavDropdown(false);
                                       }}
                                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'liked'
-                                        ? 'bg-[#222] font-semibold'
-                                        : 'hover:bg-[#1a1a1a]'
+                                        ? 'bg-gray-100 font-semibold'
+                                        : 'hover:bg-gray-50'
                                         }`}
                                       style={{
                                         color: activeSidebarItem === 'liked' ? textColor : `${textColor}CC`,
@@ -1638,8 +1639,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                         setShowNavDropdown(false);
                                       }}
                                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'saved'
-                                        ? 'bg-[#222] font-semibold'
-                                        : 'hover:bg-[#1a1a1a]'
+                                        ? 'bg-gray-100 font-semibold'
+                                        : 'hover:bg-gray-50'
                                         }`}
                                       style={{
                                         color: activeSidebarItem === 'saved' ? textColor : `${textColor}CC`,
@@ -1654,7 +1655,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                         setShowCreatePlaylistModal(true);
                                         setShowNavDropdown(false);
                                       }}
-                                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-[#1a1a1a] border border-dashed border-[#555]"
+                                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-gray-50 border border-dashed border-gray-300"
                                       style={{
                                         color: `${textColor}CC`,
                                       }}
@@ -1675,8 +1676,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                               setShowNavDropdown(false);
                                             }}
                                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === `playlist-${playlist.id}`
-                                              ? 'bg-[#222] font-semibold'
-                                              : 'hover:bg-[#1a1a1a]'
+                                              ? 'bg-gray-100 font-semibold'
+                                              : 'hover:bg-gray-50'
                                               }`}
                                             style={{
                                               color: activeSidebarItem === `playlist-${playlist.id}` ? textColor : `${textColor}CC`,
@@ -1716,8 +1717,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                     setShowNavDropdown(false);
                                   }}
                                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'music'
-                                    ? 'bg-[#222] font-semibold'
-                                    : 'hover:bg-[#1a1a1a]'
+                                    ? 'bg-gray-100 font-semibold'
+                                    : 'hover:bg-gray-50'
                                     }`}
                                   style={{
                                     color: activeSidebarItem === 'music' ? textColor : `${textColor}CC`,
@@ -1733,8 +1734,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                     setShowNavDropdown(false);
                                   }}
                                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'gaming'
-                                    ? 'bg-[#222] font-semibold'
-                                    : 'hover:bg-[#1a1a1a]'
+                                    ? 'bg-gray-100 font-semibold'
+                                    : 'hover:bg-gray-50'
                                     }`}
                                   style={{
                                     color: activeSidebarItem === 'gaming' ? textColor : `${textColor}CC`,
@@ -1753,8 +1754,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                     setShowNavDropdown(false);
                                   }}
                                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'news'
-                                    ? 'bg-[#222] font-semibold'
-                                    : 'hover:bg-[#1a1a1a]'
+                                    ? 'bg-gray-100 font-semibold'
+                                    : 'hover:bg-gray-50'
                                     }`}
                                   style={{
                                     color: activeSidebarItem === 'news' ? textColor : `${textColor}CC`,
@@ -1770,8 +1771,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                     setShowNavDropdown(false);
                                   }}
                                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'sports'
-                                    ? 'bg-[#222] font-semibold'
-                                    : 'hover:bg-[#1a1a1a]'
+                                    ? 'bg-gray-100 font-semibold'
+                                    : 'hover:bg-gray-50'
                                     }`}
                                   style={{
                                     color: activeSidebarItem === 'sports' ? textColor : `${textColor}CC`,
@@ -1787,8 +1788,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                     setShowNavDropdown(false);
                                   }}
                                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'learning'
-                                    ? 'bg-[#222] font-semibold'
-                                    : 'hover:bg-[#1a1a1a]'
+                                    ? 'bg-gray-100 font-semibold'
+                                    : 'hover:bg-gray-50'
                                     }`}
                                   style={{
                                     color: activeSidebarItem === 'learning' ? textColor : `${textColor}CC`,
@@ -1812,7 +1813,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                       }
                                       setShowNavDropdown(false);
                                     }}
-                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-[#1a1a1a]"
+                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-gray-50"
                                     style={{ color: `${textColor}CC` }}
                                   >
                                     <Cog6ToothIcon className="w-5 h-5 flex-shrink-0" />
@@ -2369,7 +2370,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                     }}
                     className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'home'
                       ? 'shadow-inner'
-                      : 'hover:bg-[#1a1a1a]/50'
+                      : 'hover:bg-gray-50/50'
                       }`}
                     style={{
                       color: activeSidebarItem === 'home' ? textColor : `${textColor}CC`,
@@ -2395,7 +2396,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                     }}
                     className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'explore'
                       ? 'shadow-inner'
-                      : 'hover:bg-[#1a1a1a]/50'
+                      : 'hover:bg-gray-50/50'
                       }`}
                     style={{
                       color: activeSidebarItem === 'explore' ? textColor : `${textColor}CC`,
@@ -2415,7 +2416,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                         }}
                         className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'subscriptions'
                           ? 'shadow-inner'
-                          : 'hover:bg-[#1a1a1a]/50'
+                          : 'hover:bg-gray-50/50'
                           }`}
                         style={{
                           color: activeSidebarItem === 'subscriptions' ? textColor : `${textColor}CC`,
@@ -2456,7 +2457,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                         }}
                         className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'history'
                           ? 'shadow-inner'
-                          : 'hover:bg-[#1a1a1a]/50'
+                          : 'hover:bg-gray-50/50'
                           }`}
                         style={{
                           color: activeSidebarItem === 'history' ? textColor : `${textColor}CC`,
@@ -2474,7 +2475,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                         }}
                         className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'liked'
                           ? 'shadow-inner'
-                          : 'hover:bg-[#1a1a1a]/50'
+                          : 'hover:bg-gray-50/50'
                           }`}
                         style={{
                           color: activeSidebarItem === 'liked' ? textColor : `${textColor}CC`,
@@ -2492,7 +2493,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                         }}
                         className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === 'saved'
                           ? 'shadow-inner'
-                          : 'hover:bg-[#1a1a1a]/50'
+                          : 'hover:bg-gray-50/50'
                           }`}
                         style={{
                           color: activeSidebarItem === 'saved' ? textColor : `${textColor}CC`,
@@ -2509,7 +2510,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                           setShowCreatePlaylistModal(true);
                           setSidebarOpen(false);
                         }}
-                        className="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-[#1a1a1a]/50 border border-dashed border-[#555]/50"
+                        className="w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 hover:bg-gray-50/50 border border-dashed border-gray-300/50"
                         style={{
                           color: `${textColor}CC`,
                         }}
@@ -2531,7 +2532,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                               }}
                               className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 ${activeSidebarItem === `playlist-${playlist.id}`
                                 ? 'shadow-inner'
-                                : 'hover:bg-[#1a1a1a]/50'
+                                : 'hover:bg-gray-50/50'
                                 }`}
                               style={{
                                 color: activeSidebarItem === `playlist-${playlist.id}` ? textColor : `${textColor}CC`,
@@ -2573,8 +2574,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       setSidebarOpen(false);
                     }}
                     className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'music'
-                      ? 'bg-[#222] font-semibold'
-                      : 'hover:bg-[#1a1a1a]'
+                      ? 'bg-gray-100 font-semibold'
+                      : 'hover:bg-gray-50'
                       }`}
                     style={{
                       color: activeSidebarItem === 'music' ? textColor : `${textColor}CC`,
@@ -2590,8 +2591,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       setSidebarOpen(false);
                     }}
                     className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'gaming'
-                      ? 'bg-[#222] font-semibold'
-                      : 'hover:bg-[#1a1a1a]'
+                      ? 'bg-gray-100 font-semibold'
+                      : 'hover:bg-gray-50'
                       }`}
                     style={{
                       color: activeSidebarItem === 'gaming' ? textColor : `${textColor}CC`,
@@ -2610,8 +2611,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       setSidebarOpen(false);
                     }}
                     className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'news'
-                      ? 'bg-[#222] font-semibold'
-                      : 'hover:bg-[#1a1a1a]'
+                      ? 'bg-gray-100 font-semibold'
+                      : 'hover:bg-gray-50'
                       }`}
                     style={{
                       color: activeSidebarItem === 'news' ? textColor : `${textColor}CC`,
@@ -2627,8 +2628,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       setSidebarOpen(false);
                     }}
                     className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'sports'
-                      ? 'bg-[#222] font-semibold'
-                      : 'hover:bg-[#1a1a1a]'
+                      ? 'bg-gray-100 font-semibold'
+                      : 'hover:bg-gray-50'
                       }`}
                     style={{
                       color: activeSidebarItem === 'sports' ? textColor : `${textColor}CC`,
@@ -2644,8 +2645,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       setSidebarOpen(false);
                     }}
                     className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${activeSidebarItem === 'learning'
-                      ? 'bg-[#222] font-semibold'
-                      : 'hover:bg-[#1a1a1a]'
+                      ? 'bg-gray-100 font-semibold'
+                      : 'hover:bg-gray-50'
                       }`}
                     style={{
                       color: activeSidebarItem === 'learning' ? textColor : `${textColor}CC`,
@@ -2671,7 +2672,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                         }
                         setSidebarOpen(false);
                       }}
-                      className="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-[#1a1a1a]"
+                      className="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-gray-50"
                       style={{ color: `${textColor}CC` }}
                     >
                       <Cog6ToothIcon className="w-6 h-6 flex-shrink-0" />
@@ -2726,10 +2727,10 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                             <div className="absolute inset-0 p-6 sm:p-8 lg:p-10 z-20 flex flex-col justify-between">
                               {/* Top Section - Badge */}
                               <div className="flex items-start justify-between">
-                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#141414]/10 backdrop-blur-xl text-white text-xs font-bold uppercase tracking-wider border border-white/20 shadow-lg">
+                                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-xl text-white text-xs font-bold uppercase tracking-wider border border-white/20 shadow-lg">
                                   <span className="relative flex h-2 w-2">
                                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#222]0" />
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500" />
                                   </span>
                                   {getTimeAgo(new Date(featuredProduct.createdAt))}
                                 </div>
@@ -2745,8 +2746,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                 {/* Meta Info */}
                                 <div className="flex flex-wrap items-center gap-3">
                                   <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border font-semibold text-xs backdrop-blur-md ${featuredProduct.isSubscriberOnly || featuredProduct.price > 0
-                                    ? 'bg-[#e50914]/90 border-indigo-400/30 text-white'
-                                    : 'bg-[#141414]/10 border-white/20 text-gray-200'
+                                    ? 'bg-indigo-600/90 border-indigo-400/30 text-white'
+                                    : 'bg-white/10 border-white/20 text-gray-200'
                                     }`}>
                                     {featuredProduct.isSubscriberOnly || featuredProduct.price > 0 ? (
                                       <>
@@ -2760,7 +2761,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                       </>
                                     )}
                                   </div>
-                                  <div className="flex items-center gap-1.5 bg-[#141414]/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/20 text-xs font-semibold text-gray-200">
+                                  <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/20 text-xs font-semibold text-gray-200">
                                     <EyeIcon className="w-3.5 h-3.5" />
                                     {formatViewCount(featuredProduct.viewCount || 0)}
                                   </div>
@@ -2772,7 +2773,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                     e.stopPropagation();
                                     router.push(`/channel/${channel.slug}/products/${featuredProduct.id}`);
                                   }}
-                                  className="group/btn inline-flex items-center gap-3 px-6 py-3 sm:px-8 sm:py-4 bg-[#141414] text-white font-bold rounded-xl hover:bg-[#e50914] hover:text-white transition-all duration-300 shadow-xl hover:shadow-indigo-500/50 hover:-translate-y-0.5 active:scale-95 text-sm"
+                                  className="group/btn inline-flex items-center gap-3 px-6 py-3 sm:px-8 sm:py-4 bg-white text-gray-900 font-bold rounded-xl hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow-xl hover:shadow-indigo-500/50 hover:-translate-y-0.5 active:scale-95 text-sm"
                                 >
                                   <PlayIcon className="w-5 h-5 fill-current" />
                                   <span className="uppercase tracking-wider">Start Watching</span>
@@ -2783,7 +2784,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
                             {/* Hover Play Icon */}
                             <div className="absolute inset-0 flex items-center justify-center z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-                              <div className="w-20 h-20 rounded-full bg-[#141414]/10 backdrop-blur-xl flex items-center justify-center border border-white/20 shadow-2xl group-hover:scale-110 transition-transform duration-500">
+                              <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-xl flex items-center justify-center border border-white/20 shadow-2xl group-hover:scale-110 transition-transform duration-500">
                                 <PlayIcon className="w-10 h-10 text-white fill-white ml-1" />
                               </div>
                             </div>
@@ -2808,9 +2809,9 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
                                 <PlayIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white fill-white" />
                               </div>
-                              <h3 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">Premium Spotlight</h3>
+                              <h3 className="text-2xl sm:text-4xl lg:text-5xl font-black text-gray-900 tracking-tight">Premium Spotlight</h3>
                             </div>
-                            <p className="text-gray-400 font-semibold text-sm sm:text-lg max-w-2xl leading-relaxed">
+                            <p className="text-gray-500 font-semibold text-sm sm:text-lg max-w-2xl leading-relaxed">
                               Experience our most impactful and highly-curated digital content.
                             </p>
                           </div>
@@ -2819,7 +2820,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                               setActiveTab('videos');
                               setSelectedType('all');
                             }}
-                            className="w-full sm:w-fit group flex items-center justify-center gap-3 text-xs sm:text-sm font-black text-white hover:text-white transition-all px-6 py-3.5 sm:px-8 sm:py-4 bg-[#222] hover:bg-[#e50914] rounded-2xl"
+                            className="w-full sm:w-fit group flex items-center justify-center gap-3 text-xs sm:text-sm font-black text-indigo-600 hover:text-white transition-all px-6 py-3.5 sm:px-8 sm:py-4 bg-indigo-50 hover:bg-indigo-600 rounded-2xl"
                           >
                             <span>Explore All Content</span>
                             <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -2834,7 +2835,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                               onClick={() => router.push(`/channel/${channel.slug}/products/${product.id}`)}
                             >
                               {/* Thumbnail Container */}
-                              <div className="aspect-video bg-[#222] rounded-xl overflow-hidden relative mb-3 shadow-sm group-hover:shadow-md transition-all duration-300">
+                              <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3 shadow-sm group-hover:shadow-md transition-all duration-300">
                                 <img
                                   src={product.previewImage || product.thumbnail || '/placeholder-video.jpg'}
                                   alt={product.title}
@@ -2850,7 +2851,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
                                 {/* Access Badge (Top Right) */}
                                 <div className="absolute top-2 right-2">
-                                  <div className={`px-2 py-0.5 rounded-md text-white text-[10px] font-black shadow-sm backdrop-blur-sm ${product.isSubscriberOnly || product.price > 0 ? 'bg-[#e50914]/90' : 'bg-[#222]0/90'
+                                  <div className={`px-2 py-0.5 rounded-md text-white text-[10px] font-black shadow-sm backdrop-blur-sm ${product.isSubscriberOnly || product.price > 0 ? 'bg-indigo-600/90' : 'bg-emerald-500/90'
                                     }`}>
                                     {product.isSubscriberOnly || product.price > 0 ? 'Premium' : 'Free'}
                                   </div>
@@ -2861,11 +2862,11 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                               <div className="flex gap-3">
                                 {/* Channel Avatar */}
                                 <div className="flex-shrink-0 mt-1">
-                                  <div className="w-9 h-9 rounded-full bg-[#333] overflow-hidden border border-[#333]">
+                                  <div className="w-9 h-9 rounded-full bg-gray-200 overflow-hidden border border-gray-100">
                                     {channel.user?.image ? (
                                       <img src={channel.user.image} className="w-full h-full object-cover" alt="" />
                                     ) : (
-                                      <div className="w-full h-full flex items-center justify-center bg-[#333] text-white font-bold text-xs uppercase">
+                                      <div className="w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-600 font-bold text-xs uppercase">
                                         {channel.name?.[0] || 'C'}
                                       </div>
                                     )}
@@ -2873,12 +2874,12 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                 </div>
 
                                 <div className="flex-1 min-w-0">
-                                  <h4 className="font-bold text-white group-hover:text-white transition-colors text-sm lg:text-base line-clamp-2 leading-snug mb-1">
+                                  <h4 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors text-sm lg:text-base line-clamp-2 leading-snug mb-1">
                                     {product.title}
                                   </h4>
 
-                                  <div className="flex flex-col text-[12px] text-gray-400 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
-                                    <span className="hover:text-white transition-colors hidden sm:block">
+                                  <div className="flex flex-col text-[12px] text-gray-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+                                    <span className="hover:text-gray-900 transition-colors hidden sm:block">
                                       {channel.name}
                                     </span>
                                     <div className="flex items-center gap-1">
@@ -2909,9 +2910,9 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
                           <RocketLaunchIcon className="w-5 h-5 text-white" />
                         </div>
-                        <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">The Vault</h2>
+                        <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-gray-900 tracking-tight">The Vault</h2>
                       </div>
-                      <p className="text-gray-400 font-semibold text-sm sm:text-lg max-w-xl">
+                      <p className="text-gray-500 font-semibold text-sm sm:text-lg max-w-xl">
                         Unlock the full potential of your crafts with our curated professional resources.
                       </p>
                     </div>
@@ -2925,14 +2926,14 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                           placeholder="Search the vault..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full pl-12 pr-6 py-4 bg-[#1a1a1a] border border-[#333] rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-[#141414] focus:border-indigo-500 outline-none transition-all shadow-sm"
+                          className="w-full pl-12 pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/10 focus:bg-white focus:border-indigo-500 outline-none transition-all shadow-sm"
                         />
                       </div>
                     </div>
                   </div>
 
                   {/* Filter System */}
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-8 border-b border-[#333]">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-8 border-b border-gray-100">
                     <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-2 w-full sm:w-auto">
                       {[
                         { id: 'all', label: 'All Content' },
@@ -2943,8 +2944,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                           key={cat.id}
                           onClick={() => setSelectedType(cat.id)}
                           className={`px-8 py-3.5 rounded-2xl text-[13px] font-black transition-all whitespace-nowrap border-2 ${selectedType === cat.id
-                            ? 'bg-[#e50914] text-white border-[#e50914] scale-105'
-                            : 'bg-[#141414] text-gray-400 hover:border-[#333] border-[#222]'
+                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-xl shadow-indigo-200 scale-105'
+                            : 'bg-white text-gray-500 hover:border-gray-200 border-gray-50 shadow-sm'
                             }`}
                         >
                           {cat.label}
@@ -2952,7 +2953,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       ))}
                     </div>
 
-                    <div className="text-sm font-bold text-gray-400 uppercase tracking-widest bg-[#1a1a1a] px-4 py-2 rounded-xl">
+                    <div className="text-sm font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-4 py-2 rounded-xl">
                       {filteredProducts.length} Results
                     </div>
                   </div>
@@ -2966,7 +2967,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                           onClick={() => router.push(`/channel/${channel.slug}/products/${product.id}`)}
                         >
                           {/* YouTube Style Media Container */}
-                          <div className="aspect-video bg-[#222] rounded-xl overflow-hidden relative mb-3 shadow-sm group-hover:shadow-md transition-all duration-300">
+                          <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3 shadow-sm group-hover:shadow-md transition-all duration-300">
                             <img
                               src={product.previewImage || product.thumbnail || '/placeholder-video.jpg'}
                               alt={product.title}
@@ -2982,7 +2983,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
                             {/* Document Type Indicator */}
                             {product.type === 'DOCUMENT' && (
-                              <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-[#141414]/90 text-white text-[10px] font-black shadow-sm backdrop-blur-sm uppercase">
+                              <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-white/90 text-gray-900 text-[10px] font-black shadow-sm backdrop-blur-sm uppercase">
                                 PDF
                               </div>
                             )}
@@ -2990,8 +2991,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                             {/* Price/Access Badge */}
                             <div className="absolute top-2 right-2 focus:ring-0">
                               <div className={`px-2 py-0.5 rounded-md text-[10px] font-black shadow-sm backdrop-blur-sm transition-all ${product.isSubscriberOnly || product.price > 0
-                                ? 'bg-[#e50914]/90 text-white'
-                                : 'bg-[#222]0/90 text-white'
+                                ? 'bg-indigo-600/90 text-white'
+                                : 'bg-emerald-500/90 text-white'
                                 }`}>
                                 {product.isSubscriberOnly || product.price > 0 ? 'Premium' : 'Free'}
                               </div>
@@ -3002,11 +3003,11 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                           <div className="flex gap-3">
                             {/* Channel Avatar */}
                             <div className="flex-shrink-0 mt-1">
-                              <div className="w-9 h-9 rounded-full bg-[#333] overflow-hidden border border-[#333]">
+                              <div className="w-9 h-9 rounded-full bg-gray-200 overflow-hidden border border-gray-100">
                                 {channel.user?.image ? (
                                   <img src={channel.user.image} className="w-full h-full object-cover" alt="" />
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center bg-[#333] text-white font-bold text-xs uppercase">
+                                  <div className="w-full h-full flex items-center justify-center bg-indigo-100 text-indigo-600 font-bold text-xs uppercase">
                                     {channel.name?.[0] || 'C'}
                                   </div>
                                 )}
@@ -3014,12 +3015,12 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                             </div>
 
                             <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-white group-hover:text-white transition-colors text-sm lg:text-base line-clamp-2 leading-snug mb-1">
+                              <h3 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors text-sm lg:text-base line-clamp-2 leading-snug mb-1">
                                 {product.title}
                               </h3>
 
-                              <div className="flex flex-col text-[12px] text-gray-400 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
-                                <span className="hover:text-white transition-colors hidden sm:block">
+                              <div className="flex flex-col text-[12px] text-gray-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
+                                <span className="hover:text-gray-900 transition-colors hidden sm:block">
                                   {channel.name}
                                 </span>
                                 <div className="flex items-center gap-1">
@@ -3034,17 +3035,17 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       ))}
                     </div>
                   ) : (
-                    <div className="py-32 flex flex-col items-center justify-center text-center space-y-6 bg-[#1a1a1a] rounded-[3rem] border-2 border-dashed border-[#333]">
-                      <div className="w-24 h-24 bg-[#222] rounded-3xl flex items-center justify-center">
+                    <div className="py-32 flex flex-col items-center justify-center text-center space-y-6 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
+                      <div className="w-24 h-24 bg-gray-100 rounded-3xl flex items-center justify-center">
                         <MagnifyingGlassIcon className="w-12 h-12 text-gray-300" />
                       </div>
                       <div className="space-y-2">
-                        <h3 className="text-2xl font-black text-white">No results found</h3>
-                        <p className="text-gray-400 font-medium">Try matching your search with different keywords.</p>
+                        <h3 className="text-2xl font-black text-gray-900">No results found</h3>
+                        <p className="text-gray-500 font-medium">Try matching your search with different keywords.</p>
                       </div>
                       <button
                         onClick={() => { setSearchQuery(''); setSelectedType('all'); }}
-                        className="px-8 py-3 bg-[#141414] border border-[#333] rounded-2xl font-black text-sm uppercase tracking-widest hover:border-[#e50914] hover:text-white transition-all shadow-sm"
+                        className="px-8 py-3 bg-white border border-gray-200 rounded-2xl font-black text-sm uppercase tracking-widest hover:border-indigo-600 hover:text-indigo-600 transition-all shadow-sm"
                       >
                         Clear All Filters
                       </button>
@@ -3058,8 +3059,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                 <div className="space-y-10 sm:space-y-12">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 sm:mb-12">
                     <div className="space-y-2">
-                      <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">Collections</h2>
-                      <p className="text-gray-400 font-semibold text-sm sm:text-lg">Thematic journeys curated for deep learning.</p>
+                      <h2 className="text-2xl sm:text-4xl lg:text-5xl font-black text-gray-900 tracking-tight">Collections</h2>
+                      <p className="text-gray-500 font-semibold text-sm sm:text-lg">Thematic journeys curated for deep learning.</p>
                     </div>
                   </div>
 
@@ -3067,7 +3068,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                     <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-10 sm:gap-x-8 sm:gap-y-12 lg:gap-x-10">
                       {playlists.map((playlist) => (
                         <div key={playlist.id} className="group cursor-pointer flex flex-col" onClick={() => router.push(`/channel/${channel.slug}/playlists/${playlist.id}`)}>
-                          <div className="aspect-video bg-[#222] rounded-xl overflow-hidden relative mb-3 shadow-sm group-hover:shadow-md transition-all duration-300">
+                          <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-3 shadow-sm group-hover:shadow-md transition-all duration-300">
                             {/* Playlist Stack Visual Overlay */}
                             <div className="absolute inset-0 bg-black/5 flex items-center justify-center">
                               {playlist.items?.[0]?.product?.previewImage ? (
@@ -3091,7 +3092,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                           </div>
 
                           <div className="flex flex-col">
-                            <h3 className="font-bold text-white group-hover:text-white transition-colors text-sm lg:text-base line-clamp-2 leading-snug mb-1">
+                            <h3 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors text-sm lg:text-base line-clamp-2 leading-snug mb-1">
                               {playlist.name}
                             </h3>
                             <div className="flex items-center gap-1.5 text-[12px] text-gray-400 font-bold uppercase tracking-wider">
@@ -3104,13 +3105,13 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       ))}
                     </div>
                   ) : (
-                    <div className="py-32 flex flex-col items-center justify-center text-center space-y-6 bg-[#1a1a1a] rounded-[3rem] border-2 border-dashed border-[#333]">
-                      <div className="w-20 h-20 bg-[#141414] rounded-2xl flex items-center justify-center shadow-sm">
+                    <div className="py-32 flex flex-col items-center justify-center text-center space-y-6 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
+                      <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-sm">
                         <ListBulletIcon className="w-10 h-10 text-gray-300" />
                       </div>
                       <div className="space-y-1">
-                        <h3 className="text-xl font-bold text-white">No playlists found</h3>
-                        <p className="text-gray-400 font-medium">This channel hasn't organized any collections yet.</p>
+                        <h3 className="text-xl font-bold text-gray-900">No playlists found</h3>
+                        <p className="text-gray-500 font-medium">This channel hasn't organized any collections yet.</p>
                       </div>
                     </div>
                   )}
@@ -3121,18 +3122,18 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
               {activeTab === 'community' && (
                 <div className="max-w-4xl mx-auto py-20 text-center space-y-8">
                   <div className="relative inline-block">
-                    <div className="absolute inset-0 bg-[#222]0 blur-3xl opacity-20 animate-pulse" />
-                    <div className="relative w-24 h-24 bg-[#141414] rounded-[2rem] flex items-center justify-center shadow-xl border border-[#333] mx-auto">
+                    <div className="absolute inset-0 bg-indigo-500 blur-3xl opacity-20 animate-pulse" />
+                    <div className="relative w-24 h-24 bg-white rounded-[2rem] flex items-center justify-center shadow-xl border border-gray-100 mx-auto">
                       <UserGroupIcon className="w-12 h-12 text-indigo-500" />
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <h3 className="text-3xl lg:text-4xl font-black text-white tracking-tight">The Hub is coming soon</h3>
-                    <p className="text-gray-400 font-medium text-lg max-w-md mx-auto leading-relaxed">
+                    <h3 className="text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">The Hub is coming soon</h3>
+                    <p className="text-gray-500 font-medium text-lg max-w-md mx-auto leading-relaxed">
                       Soon you'll be able to interact directly with {channel.name} and the community right here.
                     </p>
                   </div>
-                  <button className="px-10 py-5 bg-[#e50914] text-white font-black rounded-2xl  hover:scale-105 active:scale-95 transition-all text-sm uppercase tracking-widest">
+                  <button className="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-200 hover:scale-105 active:scale-95 transition-all text-sm uppercase tracking-widest">
                     Notify me on launch
                   </button>
                 </div>
@@ -3143,12 +3144,12 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                 <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12">
                   <div className="lg:col-span-2 space-y-8 sm:space-y-10">
                     <section>
-                      <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight mb-6 sm:mb-8 uppercase flex items-center gap-3">
-                        <div className="w-1.5 h-6 sm:w-2 sm:h-8 bg-[#e50914] rounded-full" />
+                      <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight mb-6 sm:mb-8 uppercase flex items-center gap-3">
+                        <div className="w-1.5 h-6 sm:w-2 sm:h-8 bg-indigo-600 rounded-full" />
                         Channel Bio
                       </h2>
-                      <div className="bg-[#141414] rounded-3xl p-6 sm:p-10 border border-[#333] shadow-md">
-                        <p className="whitespace-pre-wrap text-gray-200 leading-relaxed text-sm sm:text-lg font-medium opacity-90 first-letter:text-4xl sm:first-letter:text-5xl first-letter:font-black first-letter:mr-2 sm:first-letter:mr-3 first-letter:float-left first-letter:text-white">
+                      <div className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-md">
+                        <p className="whitespace-pre-wrap text-gray-700 leading-relaxed text-sm sm:text-lg font-medium opacity-90 first-letter:text-4xl sm:first-letter:text-5xl first-letter:font-black first-letter:mr-2 sm:first-letter:mr-3 first-letter:float-left first-letter:text-indigo-600">
                           {channel.description || `${channel.name} hasn't provided a description yet.`}
                         </p>
                       </div>
@@ -3156,7 +3157,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                   </div>
 
                   <aside className="space-y-6 sm:space-y-8 pt-6 sm:pt-10">
-                    <div className="bg-[#e50914] rounded-3xl p-8 sm:p-10 text-white shadow-xl relative overflow-hidden">
+                    <div className="bg-gray-900 rounded-3xl p-8 sm:p-10 text-white shadow-xl relative overflow-hidden">
                       <div className="absolute top-0 right-0 p-4 opacity-5">
                         <ChartBarIcon className="w-24 h-24 sm:w-32 sm:h-32" />
                       </div>
@@ -3165,7 +3166,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
                       <div className="space-y-6 sm:space-y-8 relative z-10">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#141414]/10 rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/10 backdrop-blur-md">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/10 backdrop-blur-md">
                             <CalendarIcon className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-400" />
                           </div>
                           <div>
@@ -3175,7 +3176,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                         </div>
 
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#141414]/10 rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/10 backdrop-blur-md">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/10 backdrop-blur-md">
                             <EyeIcon className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
                           </div>
                           <div>
@@ -3185,7 +3186,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                         </div>
 
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#141414]/10 rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/10 backdrop-blur-md">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-xl sm:rounded-2xl flex items-center justify-center border border-white/10 backdrop-blur-md">
                             <ShoppingBagIcon className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" />
                           </div>
                           <div>
@@ -3196,17 +3197,17 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       </div>
                     </div>
 
-                    <div className="bg-[#141414] rounded-3xl p-6 sm:p-8 border border-[#333] shadow-md">
-                      <h4 className="text-xs font-black text-white uppercase tracking-widest mb-6">Channel Details</h4>
+                    <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-md">
+                      <h4 className="text-xs font-black text-gray-900 uppercase tracking-widest mb-6">Channel Details</h4>
                       <div className="space-y-3 sm:space-y-4">
-                        <div className="bg-[#1a1a1a] rounded-xl sm:rounded-2xl p-4 flex items-center justify-between border border-[#333]">
-                          <span className="font-bold text-gray-400 text-sm sm:text-base">@{channel.slug}</span>
-                          <UserCircleIcon className="w-5 h-5 text-white" />
+                        <div className="bg-gray-50 rounded-xl sm:rounded-2xl p-4 flex items-center justify-between border border-gray-100">
+                          <span className="font-bold text-gray-500 text-sm sm:text-base">@{channel.slug}</span>
+                          <UserCircleIcon className="w-5 h-5 text-indigo-600" />
                         </div>
-                        <div className="bg-[#1a1a1a] rounded-xl sm:rounded-2xl p-4 flex items-center justify-between border border-[#333]">
+                        <div className="bg-gray-50 rounded-xl sm:rounded-2xl p-4 flex items-center justify-between border border-gray-100">
                           <div className="flex flex-col">
                             <span className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest">Contact</span>
-                            <span className="font-bold text-gray-400 text-xs sm:text-sm truncate max-w-[150px]">{channel.user?.email || 'Global'}</span>
+                            <span className="font-bold text-gray-600 text-xs sm:text-sm truncate max-w-[150px]">{channel.user?.email || 'Global'}</span>
                           </div>
                           <EnvelopeIcon className="w-5 h-5 text-gray-300" />
                         </div>
@@ -3278,18 +3279,18 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                               />
                               <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-green-500 rounded-full border-3 border-white shadow-lg"></div>
                             </div>
-                            <div className="bg-[#141414]/95 backdrop-blur-lg rounded-2xl px-4 sm:px-5 py-3 sm:py-4 shadow-2xl border border-white/60">
-                              <div className="text-base sm:text-lg font-bold text-white">{sellerName}</div>
-                              <div className="text-xs sm:text-sm text-gray-400 font-medium">Creator</div>
+                            <div className="bg-white/95 backdrop-blur-lg rounded-2xl px-4 sm:px-5 py-3 sm:py-4 shadow-2xl border border-white/60">
+                              <div className="text-base sm:text-lg font-bold text-gray-900">{sellerName}</div>
+                              <div className="text-xs sm:text-sm text-gray-600 font-medium">Creator</div>
                             </div>
                           </div>
                         </div>
                       )}
 
                       {/* Top Right Card - Stats & Actions */}
-                      <div className="absolute top-4 sm:top-6 md:top-8 lg:top-10 right-4 sm:right-6 md:right-8 lg:right-10 backdrop-blur-xl bg-[#141414]/90 border border-white/60 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 shadow-2xl w-[calc(100%-2rem)] sm:w-auto sm:max-w-xs md:max-w-sm z-20">
+                      <div className="absolute top-4 sm:top-6 md:top-8 lg:top-10 right-4 sm:right-6 md:right-8 lg:right-10 backdrop-blur-xl bg-white/90 border border-white/60 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 shadow-2xl w-[calc(100%-2rem)] sm:w-auto sm:max-w-xs md:max-w-sm z-20">
                         {/* Rating */}
-                        <div className="flex items-center gap-2 mb-4 pb-4 border-b border-[#333]/50">
+                        <div className="flex items-center gap-2 mb-4 pb-4 border-b border-gray-200/50">
                           <div className="flex items-center gap-0.5">
                             {[1, 2, 3, 4, 5].map((star) => (
                               <svg
@@ -3302,22 +3303,22 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                               </svg>
                             ))}
                           </div>
-                          <span className="text-base sm:text-lg font-bold text-white">{averageRating.toFixed(1)}</span>
+                          <span className="text-base sm:text-lg font-bold text-gray-900">{averageRating.toFixed(1)}</span>
                           {ratingCount > 0 && (
-                            <span className="text-xs sm:text-sm text-gray-400">({ratingCount} reviews)</span>
+                            <span className="text-xs sm:text-sm text-gray-500">({ratingCount} reviews)</span>
                           )}
                         </div>
 
                         {/* Stats Grid */}
-                        <div className="grid grid-cols-2 gap-3 mb-4 pb-4 border-b border-[#333]/50">
+                        <div className="grid grid-cols-2 gap-3 mb-4 pb-4 border-b border-gray-200/50">
                           {/* Views */}
                           <div className="flex items-center gap-2">
-                            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
                             <div className="flex flex-col">
-                              <span className="text-sm sm:text-base font-bold text-white">
+                              <span className="text-sm sm:text-base font-bold text-gray-900">
                                 {(() => {
                                   // Calculate total views from all products' viewCount for accuracy
                                   const totalViews = allProducts?.reduce((sum: number, p: any) => {
@@ -3326,30 +3327,30 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                   return totalViews;
                                 })()}
                               </span>
-                              <span className="text-xs text-gray-400">views</span>
+                              <span className="text-xs text-gray-600">views</span>
                             </div>
                           </div>
 
                           {/* Products */}
                           <div className="flex items-center gap-2">
-                            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                             </svg>
                             <div className="flex flex-col">
-                              <span className="text-sm sm:text-base font-bold text-white">{channel._count?.products || allProducts.length || 0}</span>
-                              <span className="text-xs text-gray-400">products</span>
+                              <span className="text-sm sm:text-base font-bold text-gray-900">{channel._count?.products || allProducts.length || 0}</span>
+                              <span className="text-xs text-gray-600">products</span>
                             </div>
                           </div>
 
                           {/* Purchases */}
                           {totalPurchases > 0 && (
                             <div className="flex items-center gap-2">
-                              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                               </svg>
                               <div className="flex flex-col">
-                                <span className="text-sm sm:text-base font-bold text-white">{totalPurchases}</span>
-                                <span className="text-xs text-gray-400">sold</span>
+                                <span className="text-sm sm:text-base font-bold text-gray-900">{totalPurchases}</span>
+                                <span className="text-xs text-gray-600">sold</span>
                               </div>
                             </div>
                           )}
@@ -3357,7 +3358,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
                         {/* People Who Bought */}
                         {recentBuyers.length > 0 && (
-                          <div className="flex items-center gap-3 mb-4 pb-4 border-b border-[#333]/50">
+                          <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-200/50">
                             <div className="flex -space-x-2">
                               {recentBuyers.map((buyer, idx) => (
                                 <div
@@ -3372,20 +3373,20 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                 </div>
                               ))}
                             </div>
-                            <span className="text-sm sm:text-base text-gray-200">
-                              <span className="font-bold text-white">{totalPurchases}+</span> bought
+                            <span className="text-sm sm:text-base text-gray-700">
+                              <span className="font-bold text-gray-900">{totalPurchases}+</span> bought
                             </span>
                           </div>
                         )}
 
                         {/* Category/Tags */}
                         {channel.category && (
-                          <div className="mb-4 pb-4 border-b border-[#333]/50">
+                          <div className="mb-4 pb-4 border-b border-gray-200/50">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                               </svg>
-                              <span className="text-xs sm:text-sm font-medium text-gray-200 bg-[#222] px-2 py-1 rounded-md">
+                              <span className="text-xs sm:text-sm font-medium text-gray-700 bg-gray-100 px-2 py-1 rounded-md">
                                 {channel.category}
                               </span>
                             </div>
@@ -3399,7 +3400,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                               <>
                                 <button
                                   onClick={() => router.push(`/auth/signin?callbackUrl=${encodeURIComponent(channelUrl)}`)}
-                                  className="w-full px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] border-2 border-gray-900 bg-transparent text-white hover:bg-[#e50914] hover:text-white"
+                                  className="w-full px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] border-2 border-gray-900 bg-transparent text-gray-900 hover:bg-gray-900 hover:text-white"
                                 >
                                   Sign In
                                 </button>
@@ -3415,7 +3416,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                 onClick={() => setShowSubscriptionModal(true)}
                                 disabled={hasActiveSubscription}
                                 className={`w-full px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl font-bold text-base sm:text-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${hasActiveSubscription
-                                  ? 'bg-[#333] text-gray-400 cursor-not-allowed'
+                                  ? 'bg-gray-200 text-gray-600 cursor-not-allowed'
                                   : 'bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white shadow-lg hover:shadow-xl'
                                   }`}
                               >
@@ -3453,21 +3454,21 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                         .map((subscription: any) => (
                           <div
                             key={subscription.id}
-                            className="bg-[#141414] rounded-xl border border-[#333] p-4 sm:p-6 hover:shadow-lg transition-all duration-200"
+                            className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6 hover:shadow-lg transition-all duration-200"
                           >
                             <div className="flex items-start justify-between mb-4">
                               <div className="flex-1">
-                                <h3 className="text-lg font-semibold text-white mb-1">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-1">
                                   {subscription.channel?.name || 'Channel'}
                                 </h3>
-                                <p className="text-sm text-gray-400">
+                                <p className="text-sm text-gray-600">
                                   Active until {new Date(subscription.endDate).toLocaleDateString()}
                                 </p>
                               </div>
                             </div>
                             <button
                               onClick={() => router.push(`/channel/${subscription.channel?.slug}`)}
-                              className="w-full px-4 py-2 bg-[#e50914] text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
+                              className="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
                             >
                               Visit Channel
                             </button>
@@ -3476,10 +3477,10 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <p className="text-gray-400 mb-4">You haven't subscribed to any channels yet.</p>
+                      <p className="text-gray-600 mb-4">You haven't subscribed to any channels yet.</p>
                       <button
                         onClick={() => setActiveSidebarItem('explore')}
-                        className="px-6 py-2 bg-[#e50914] text-white rounded-lg hover:bg-gray-800 transition-colors"
+                        className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
                       >
                         Explore Channels
                       </button>
@@ -3491,11 +3492,11 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
             {/* All Products Section */}
             {false && isSectionVisible('products') && (
-              <section id="products" className="py-8 sm:py-12 bg-[#141414] scroll-mt-20">
+              <section id="products" className="py-8 sm:py-12 bg-white scroll-mt-20">
                 <div className="w-full px-4 sm:px-6 md:px-8 lg:px-12 max-w-7xl mx-auto">
 
                   {/* Mobile-Optimized Search & Controls Bar */}
-                  <div className="relative bg-[#141414] border-b border-[#333] shadow-sm py-3 sm:py-4 px-3 sm:px-4 md:px-6 lg:px-12">
+                  <div className="relative bg-white border-b border-gray-200 shadow-sm py-3 sm:py-4 px-3 sm:px-4 md:px-6 lg:px-12">
                     <div className="max-w-7xl mx-auto space-y-3 sm:space-y-4">
                       {/* Search Bar - Premium Soft-UI */}
                       <div className="relative w-full group">
@@ -3507,7 +3508,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                           placeholder="Search for premium products..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full pl-12 sm:pl-14 pr-12 sm:pr-14 py-4 sm:py-5 bg-[#141414]/50 backdrop-blur-xl border rounded-2xl text-sm sm:text-base text-white placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/20 transition-all duration-500 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)]"
+                          className="w-full pl-12 sm:pl-14 pr-12 sm:pr-14 py-4 sm:py-5 bg-white/50 backdrop-blur-xl border rounded-2xl text-sm sm:text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/20 transition-all duration-500 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)]"
                           style={{
                             fontFamily: bodyFont,
                             letterSpacing: '-0.01em',
@@ -3516,10 +3517,10 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                         {searchQuery && (
                           <button
                             onClick={() => setSearchQuery('')}
-                            className="absolute inset-y-0 right-0 pr-3 sm:pr-4 flex items-center active:bg-[#222] rounded-r-full transition-colors touch-manipulation"
+                            className="absolute inset-y-0 right-0 pr-3 sm:pr-4 flex items-center active:bg-gray-100 rounded-r-full transition-colors touch-manipulation"
                             aria-label="Clear search"
                           >
-                            <XMarkIcon className="h-5 w-5 text-gray-400 active:text-gray-200 transition-colors" />
+                            <XMarkIcon className="h-5 w-5 text-gray-500 active:text-gray-700 transition-colors" />
                           </button>
                         )}
                       </div>
@@ -3536,9 +3537,9 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                             <button
                               key={category}
                               onClick={() => setSelectedCategory(category)}
-                              className={`px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-500 flex-shrink-0 active:scale-95 border ${isActive
-                                ? 'bg-[#e50914] text-white border-transparent'
-                                : 'bg-[#141414] text-gray-200 border-[#333] hover:border-[#444]'
+                              className={`px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-500 flex-shrink-0 active:scale-95 shadow-sm border ${isActive
+                                ? 'bg-gray-900 text-white border-transparent shadow-[0_10px_20px_-5px_rgba(0,0,0,0.3)]'
+                                : 'bg-white text-gray-700 border-gray-100 hover:border-gray-200 hover:shadow-md'
                                 }`}
                               style={{
                                 fontFamily: bodyFont,
@@ -3548,7 +3549,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                             >
                               <span className="flex items-center gap-2">
                                 {category}
-                                <span className={`text-[10px] sm:text-xs px-1.5 py-0.5 rounded-md font-bold ${isActive ? 'bg-[#141414]/20 text-white' : 'bg-[#222] text-gray-400'}`}>
+                                <span className={`text-[10px] sm:text-xs px-1.5 py-0.5 rounded-md font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'}`}>
                                   {count}
                                 </span>
                               </span>
@@ -3558,39 +3559,39 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       </div>
 
                       {/* Controls Row - Mobile Optimized */}
-                      <div className="flex flex-col gap-2 sm:gap-3 pt-2 sm:pt-3 border-t border-[#333]">
+                      <div className="flex flex-col gap-2 sm:gap-3 pt-2 sm:pt-3 border-t border-gray-200">
                         {/* Results Count - Hidden on very small screens */}
                         <div
-                          className="text-xs sm:text-sm text-gray-400 hidden sm:block"
+                          className="text-xs sm:text-sm text-gray-600 hidden sm:block"
                           style={{
                             fontFamily: bodyFont,
                             letterSpacing: '-0.01em',
                           }}
                         >
                           {activeSidebarItem === 'history' && (
-                            <span>Showing <span className="font-semibold text-white">{filteredProducts.length}</span> viewed products</span>
+                            <span>Showing <span className="font-semibold text-gray-900">{filteredProducts.length}</span> viewed products</span>
                           )}
                           {activeSidebarItem === 'liked' && (
-                            <span>Showing <span className="font-semibold text-white">{filteredProducts.length}</span> liked products</span>
+                            <span>Showing <span className="font-semibold text-gray-900">{filteredProducts.length}</span> liked products</span>
                           )}
                           {activeSidebarItem === 'saved' && (
-                            <span>Showing <span className="font-semibold text-white">{filteredProducts.length}</span> saved products</span>
+                            <span>Showing <span className="font-semibold text-gray-900">{filteredProducts.length}</span> saved products</span>
                           )}
                           {!['history', 'liked', 'saved', 'subscriptions'].includes(activeSidebarItem) && (
-                            <span>Showing <span className="font-semibold text-white">{filteredProducts.length}</span> of{' '}
-                              <span className="font-semibold text-white">{baseProducts.length}</span> products</span>
+                            <span>Showing <span className="font-semibold text-gray-900">{filteredProducts.length}</span> of{' '}
+                              <span className="font-semibold text-gray-900">{baseProducts.length}</span> products</span>
                           )}
                         </div>
 
                         {/* Premium Filter & View Controls */}
-                        <div className="flex items-center justify-between gap-4 flex-wrap pt-4 border-t border-[#333]">
+                        <div className="flex items-center justify-between gap-4 flex-wrap pt-4 border-t border-gray-100">
                           {/* Left: Filter Toggle & Sort */}
                           <div className="flex items-center gap-3 flex-1 flex-wrap">
                             <button
                               onClick={() => setShowFilters(!showFilters)}
                               className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-500 flex items-center gap-2 active:scale-95 shadow-sm border ${showFilters || selectedType !== 'all'
-                                ? 'bg-[#e50914] text-white border-transparent '
-                                : 'bg-[#141414] text-gray-200 border-[#333] hover:border-[#333] hover:shadow-md'
+                                ? 'bg-gray-900 text-white border-transparent shadow-[0_10px_20px_-5px_rgba(0,0,0,0.3)]'
+                                : 'bg-white text-gray-700 border-gray-100 hover:border-gray-200 hover:shadow-md'
                                 }`}
                               style={{ minHeight: '48px' }}
                             >
@@ -3606,7 +3607,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                               <select
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
-                                className="appearance-none w-full pl-4 pr-10 py-2.5 bg-[#141414] border border-[#333] rounded-xl text-sm font-bold text-gray-200 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/20 transition-all duration-500 shadow-sm hover:shadow-md cursor-pointer"
+                                className="appearance-none w-full pl-4 pr-10 py-2.5 bg-white border border-gray-100 rounded-xl text-sm font-bold text-gray-700 focus:outline-none focus:ring-4 focus:ring-primary/5 focus:border-primary/20 transition-all duration-500 shadow-sm hover:shadow-md cursor-pointer"
                                 style={{ minHeight: '48px' }}
                               >
                                 <option value="newest">Newest First</option>
@@ -3624,12 +3625,12 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                           </div>
 
                           {/* Right: View Toggle */}
-                          <div className="flex items-center bg-[#1a1a1a]/50 p-1 rounded-xl border border-[#333]/50 shadow-inner">
+                          <div className="flex items-center bg-gray-50/50 p-1 rounded-xl border border-gray-100/50 shadow-inner">
                             <button
                               onClick={() => setViewMode('grid')}
                               className={`p-2.5 rounded-lg transition-all duration-500 ${viewMode === 'grid'
-                                ? 'bg-[#141414] text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)]'
-                                : 'text-gray-400 hover:text-gray-400'
+                                ? 'bg-white text-gray-900 shadow-[0_4px_12px_rgba(0,0,0,0.08)]'
+                                : 'text-gray-400 hover:text-gray-600'
                                 }`}
                               title="Grid view"
                               aria-label="Grid view"
@@ -3639,8 +3640,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                             <button
                               onClick={() => setViewMode('list')}
                               className={`p-2.5 rounded-lg transition-all duration-500 ${viewMode === 'list'
-                                ? 'bg-[#141414] text-white shadow-[0_4px_12px_rgba(0,0,0,0.08)]'
-                                : 'text-gray-400 hover:text-gray-400'
+                                ? 'bg-white text-gray-900 shadow-[0_4px_12px_rgba(0,0,0,0.08)]'
+                                : 'text-gray-400 hover:text-gray-600'
                                 }`}
                               title="List view"
                               aria-label="List view"
@@ -3660,7 +3661,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                             exit={{ height: 0, opacity: 0 }}
                             className="overflow-hidden"
                           >
-                            <div className="mt-4 bg-[#141414]/80 backdrop-blur-xl border border-[#333] rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
+                            <div className="mt-4 bg-white/80 backdrop-blur-xl border border-gray-100 rounded-2xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
                               <div className="flex items-center justify-between mb-6">
                                 <h3
                                   className="text-xs font-bold text-gray-400 uppercase tracking-widest"
@@ -3687,7 +3688,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                     onClick={() => setSelectedType(type)}
                                     className={`px-5 py-2.5 rounded-xl font-bold text-xs transition-all duration-500 ${selectedType === type
                                       ? 'bg-primary text-white shadow-[0_10px_20px_-5px_rgba(0,0,0,0.2)]'
-                                      : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#222]'
+                                      : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                                       }`}
                                     style={{
                                       minHeight: '44px',
@@ -3713,7 +3714,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                               setSelectedCategory('All');
                               setShowFilters(false);
                             }}
-                            className="text-sm text-gray-400 hover:text-white font-medium transition-colors flex items-center gap-1"
+                            className="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors flex items-center gap-1"
                           >
                             <XMarkIcon className="h-4 w-4" />
                             Clear filters
@@ -3748,10 +3749,10 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                               }}
                               className="group relative cursor-pointer"
                             >
-                              <div className="relative bg-[#141414]/70 backdrop-blur-sm border border-[#333] rounded-[2rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.08)] transition-all duration-500">
+                              <div className="relative bg-white/70 backdrop-blur-sm border border-gray-100 rounded-[2rem] overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.08)] transition-all duration-500">
                                 <div className="flex flex-col md:flex-row">
                                   {/* Thumbnail */}
-                                  <div className="relative w-full md:w-80 lg:w-96 aspect-video md:aspect-auto bg-[#1a1a1a] overflow-hidden">
+                                  <div className="relative w-full md:w-80 lg:w-96 aspect-video md:aspect-auto bg-gray-50 overflow-hidden">
                                     <VideoHoverPreview
                                       product={product}
                                       primaryColor={primaryColor}
@@ -3760,8 +3761,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
                                     {/* Badges */}
                                     <div className="absolute top-4 left-4 flex gap-2">
-                                      <div className="px-3 py-1.5 rounded-xl bg-[#141414]/80 backdrop-blur-md shadow-lg border border-white/40">
-                                        <span className="text-[10px] font-bold text-white uppercase tracking-widest">
+                                      <div className="px-3 py-1.5 rounded-xl bg-white/80 backdrop-blur-md shadow-lg border border-white/40">
+                                        <span className="text-[10px] font-bold text-gray-900 uppercase tracking-widest">
                                           {product.type}
                                         </span>
                                       </div>
@@ -3786,7 +3787,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                           </span>
                                         ))}
                                         {!canAccess && (
-                                          <span className="flex items-center gap-1.5 text-[10px] font-bold px-2 py-1 rounded-lg bg-[#e50914] text-white uppercase tracking-wider">
+                                          <span className="flex items-center gap-1.5 text-[10px] font-bold px-2 py-1 rounded-lg bg-gray-900 text-white uppercase tracking-wider">
                                             <LockClosedIcon className="w-3 h-3" />
                                             Locked
                                           </span>
@@ -3794,14 +3795,14 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                       </div>
 
                                       <h3
-                                        className="text-2xl md:text-3xl font-black mb-3 text-white line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-300"
+                                        className="text-2xl md:text-3xl font-black mb-3 text-gray-900 line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-300"
                                         style={{ fontFamily: headingFont }}
                                       >
                                         {product.title}
                                       </h3>
 
                                       {product.description && (
-                                        <p className="text-gray-400 line-clamp-2 md:line-clamp-3 mb-6 text-sm md:text-base leading-relaxed" style={{ fontFamily: bodyFont }}>
+                                        <p className="text-gray-500 line-clamp-2 md:line-clamp-3 mb-6 text-sm md:text-base leading-relaxed" style={{ fontFamily: bodyFont }}>
                                           {product.description}
                                         </p>
                                       )}
@@ -3826,10 +3827,10 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                       </div>
                                     </div>
 
-                                    <div className="mt-auto pt-6 border-t border-[#333] flex flex-wrap items-center justify-between gap-4">
+                                    <div className="mt-auto pt-6 border-t border-gray-100 flex flex-wrap items-center justify-between gap-4">
                                       <div className="flex flex-col">
                                         <span className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Premium Access</span>
-                                        <span className="text-2xl font-black text-white" style={{ fontFamily: headingFont }}>
+                                        <span className="text-2xl font-black text-gray-900" style={{ fontFamily: headingFont }}>
                                           {product.price > 0 ? `$${product.price}` : 'Free'}
                                         </span>
                                       </div>
@@ -3843,7 +3844,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                                 setProductToAdd(product);
                                                 setShowAddToPlaylistModal(true);
                                               }}
-                                              className="p-3.5 rounded-2xl bg-[#1a1a1a] text-gray-400 border border-[#333] hover:bg-[#222] hover:text-gray-400 transition-all duration-300"
+                                              className="p-3.5 rounded-2xl bg-gray-50 text-gray-400 border border-gray-100 hover:bg-gray-100 hover:text-gray-600 transition-all duration-300"
                                             >
                                               <PlusIcon className="w-6 h-6" />
                                             </button>
@@ -3854,7 +3855,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                               }}
                                               className={`p-3.5 rounded-2xl transition-all duration-300 ${isProductSaved(product.id)
                                                 ? 'bg-primary/10 text-primary border-primary/20 shadow-inner'
-                                                : 'bg-[#1a1a1a] text-gray-400 border-[#333] hover:bg-[#222] hover:text-gray-400'
+                                                : 'bg-gray-50 text-gray-400 border-gray-100 hover:bg-gray-100 hover:text-gray-600'
                                                 } border`}
                                             >
                                               <BookmarkIcon className={`w-6 h-6 ${isProductSaved(product.id) ? 'fill-current' : ''}`} />
@@ -3870,7 +3871,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                               setShowSubscriptionModal(true);
                                             }
                                           }}
-                                          className="px-8 py-3.5 rounded-2xl bg-[#e50914] text-white font-bold text-sm shadow-xl hover:shadow-primary/20 hover:bg-primary transition-all duration-300 active:scale-95 flex items-center gap-2"
+                                          className="px-8 py-3.5 rounded-2xl bg-gray-900 text-white font-bold text-sm shadow-xl hover:shadow-primary/20 hover:bg-primary transition-all duration-300 active:scale-95 flex items-center gap-2"
                                         >
                                           {canAccess ? 'View Product' : 'Subscribe to Unlock'}
                                           <ArrowRightIcon className="w-5 h-5" />
@@ -3899,7 +3900,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                             }}
                             className="group relative cursor-pointer h-full"
                           >
-                            <div className="relative bg-[#141414]/70 backdrop-blur-sm border border-[#333] rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.1)] transition-all duration-500 h-full flex flex-col">
+                            <div className="relative bg-white/70 backdrop-blur-sm border border-gray-100 rounded-3xl overflow-hidden shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.1)] transition-all duration-500 h-full flex flex-col">
                               {(() => {
                                 const isVideo = product.type === 'VIDEO' || product.type === 'VIDEOS';
                                 const hasVideoSource = product.videoUrl || product.fileUrl;
@@ -3914,7 +3915,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
                                       {isVideo && hasVideoSource && (
                                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                          <div className="w-12 h-12 rounded-full bg-[#141414]/20 backdrop-blur-sm flex items-center justify-center">
+                                          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
                                             <PlayIcon className="w-6 h-6 text-white opacity-80" />
                                           </div>
                                         </div>
@@ -3929,8 +3930,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                       {/* Premium Badges */}
                                       <div className="absolute top-4 left-4 right-4 flex justify-between items-start pointer-events-none">
                                         <div className="flex gap-2">
-                                          <div className="px-3 py-1.5 rounded-xl bg-[#141414]/80 backdrop-blur-md shadow-lg border border-white/40">
-                                            <span className="text-[10px] font-bold text-white uppercase tracking-widest">
+                                          <div className="px-3 py-1.5 rounded-xl bg-white/80 backdrop-blur-md shadow-lg border border-white/40">
+                                            <span className="text-[10px] font-bold text-gray-900 uppercase tracking-widest">
                                               {product.type}
                                             </span>
                                           </div>
@@ -3945,7 +3946,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                         </div>
 
                                         {!canAccess && (
-                                          <div className="p-2 rounded-xl bg-[#e50914]/80 backdrop-blur-md shadow-lg text-white">
+                                          <div className="p-2 rounded-xl bg-gray-900/80 backdrop-blur-md shadow-lg text-white">
                                             <LockClosedIcon className="w-4 h-4" />
                                           </div>
                                         )}
@@ -3963,7 +3964,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                       </div>
 
                                       <h3
-                                        className="text-lg font-bold mb-2 text-white line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-300"
+                                        className="text-lg font-bold mb-2 text-gray-900 line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-300"
                                         style={{ fontFamily: headingFont }}
                                       >
                                         {product.title}
@@ -3972,7 +3973,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                       <div className="mt-auto pt-4 flex items-center justify-between">
                                         <div>
                                           <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Premium Access</p>
-                                          <p className="text-xl font-black text-white" style={{ fontFamily: headingFont }}>
+                                          <p className="text-xl font-black text-gray-900" style={{ fontFamily: headingFont }}>
                                             {product.price > 0 ? `$${product.price}` : 'Free'}
                                           </p>
                                         </div>
@@ -3986,7 +3987,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                               }}
                                               className={`p-2.5 rounded-xl transition-all duration-300 ${isProductSaved(product.id)
                                                 ? 'bg-primary/10 text-primary border-primary/20'
-                                                : 'bg-[#1a1a1a] text-gray-400 border-[#333] hover:bg-[#222]'
+                                                : 'bg-gray-50 text-gray-400 border-gray-100 hover:bg-gray-100'
                                                 } border`}
                                             >
                                               <BookmarkIcon className={`w-5 h-5 ${isProductSaved(product.id) ? 'fill-current' : ''}`} />
@@ -3997,7 +3998,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                               e.stopPropagation();
                                               window.location.href = `/channel/${channel.slug}/products/${product.id}`;
                                             }}
-                                            className="p-2.5 rounded-xl bg-[#e50914] text-white shadow-lg hover:shadow-primary/20 hover:bg-primary transition-all duration-300 active:scale-95"
+                                            className="p-2.5 rounded-xl bg-gray-900 text-white shadow-lg hover:shadow-primary/20 hover:bg-primary transition-all duration-300 active:scale-95"
                                           >
                                             <ArrowRightIcon className="w-5 h-5" />
                                           </button>
@@ -4014,13 +4015,13 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                     </div>
                   ) : (
                     <div className="text-center py-20">
-                      <div className="inline-block p-6 rounded-full bg-gradient-to-br from-[#222] to-[#333] mb-4">
+                      <div className="inline-block p-6 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 mb-4">
                         <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                         </svg>
                       </div>
-                      <p className="text-lg font-semibold text-gray-200 mb-2">No products found</p>
-                      <p className="text-gray-400">Try selecting a different category</p>
+                      <p className="text-lg font-semibold text-gray-700 mb-2">No products found</p>
+                      <p className="text-gray-500">Try selecting a different category</p>
                     </div>
                   )}
                 </div>
@@ -4028,7 +4029,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
             )}
 
             {/* Newsletter / Lead Capture Section */}
-            <section className="py-24 relative overflow-hidden bg-[#e50914]">
+            <section className="py-24 relative overflow-hidden bg-gray-900">
               <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black opacity-50" />
               <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
                 <h2 className="text-3xl md:text-4xl font-black text-white mb-4" style={{ fontFamily: headingFont }}>
@@ -4042,7 +4043,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                   <input
                     type="email"
                     placeholder="Enter your email address"
-                    className="flex-1 px-6 py-4 rounded-xl bg-[#141414]/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-[#141414]/20 transition-all"
+                    className="flex-1 px-6 py-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/20 transition-all"
                   />
                   <button
                     type="submit"
@@ -4052,14 +4053,14 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                     Subscribe
                   </button>
                 </form>
-                <p className="text-xs text-gray-400 mt-4">
+                <p className="text-xs text-gray-500 mt-4">
                   We respect your privacy. Unsubscribe at any time.
                 </p>
               </div>
             </section>
 
             {/* Premium Footer */}
-            <footer className="relative pt-24 pb-12 bg-[#141414] overflow-hidden">
+            <footer className="relative pt-24 pb-12 bg-white overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
 
               <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
@@ -4068,7 +4069,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                   <div className="space-y-6">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-secondary p-0.5 shadow-lg shadow-primary/20">
-                        <div className="w-full h-full rounded-[14px] bg-[#141414] flex items-center justify-center overflow-hidden">
+                        <div className="w-full h-full rounded-[14px] bg-white flex items-center justify-center overflow-hidden">
                           {channel.profileImage ? (
                             <img src={channel.profileImage} alt={channel.name} className="w-full h-full object-cover" />
                           ) : (
@@ -4076,16 +4077,16 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                           )}
                         </div>
                       </div>
-                      <span className="text-2xl font-black tracking-tighter text-white">
+                      <span className="text-2xl font-black tracking-tighter text-gray-900">
                         {channel.name}
                       </span>
                     </div>
-                    <p className="text-gray-400 leading-relaxed max-w-xs">
+                    <p className="text-gray-500 leading-relaxed max-w-xs">
                       Elevating the digital commerce experience with premium products and curated content from top creators.
                     </p>
                     <div className="flex gap-4">
                       {['twitter', 'instagram', 'youtube'].map((platform) => (
-                        <button key={platform} className="w-10 h-10 rounded-xl bg-[#1a1a1a] border border-[#333] flex items-center justify-center text-gray-400 hover:text-primary hover:bg-[#141414] hover:shadow-xl transition-all active:scale-95">
+                        <button key={platform} className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 hover:text-primary hover:bg-white hover:shadow-xl transition-all active:scale-95">
                           <GlobeAltIcon className="w-5 h-5" />
                         </button>
                       ))}
@@ -4098,7 +4099,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                     <ul className="space-y-4">
                       {['Home', 'Products', 'Subscriptions', 'Library'].map((link) => (
                         <li key={link}>
-                          <a href="#" className="text-gray-400 hover:text-primary font-medium transition-colors flex items-center group">
+                          <a href="#" className="text-gray-600 hover:text-primary font-medium transition-colors flex items-center group">
                             <span className="w-0 group-hover:w-4 h-0.5 bg-primary mr-0 group-hover:mr-2 transition-all" />
                             {link}
                           </a>
@@ -4115,7 +4116,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                         <li key={cat}>
                           <button
                             onClick={() => setSelectedCategory(cat)}
-                            className="text-gray-400 hover:text-primary font-medium transition-colors text-left text-sm"
+                            className="text-gray-600 hover:text-primary font-medium transition-colors text-left text-sm"
                           >
                             {cat}
                           </button>
@@ -4127,27 +4128,27 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                   {/* Newsletter/Support Column */}
                   <div>
                     <h4 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-8">Subscribe</h4>
-                    <p className="text-sm text-gray-400 mb-6">Stay updated with the latest releases and collector items.</p>
+                    <p className="text-sm text-gray-500 mb-6">Stay updated with the latest releases and collector items.</p>
                     <div className="relative">
                       <input
                         type="email"
                         placeholder="your@email.com"
-                        className="w-full h-14 bg-[#1a1a1a] border border-[#333] rounded-2xl px-6 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-[#141414] transition-all shadow-inner"
+                        className="w-full h-14 bg-gray-50 border border-gray-100 rounded-2xl px-6 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all shadow-inner"
                       />
-                      <button className="absolute right-2 top-2 w-10 h-10 rounded-xl bg-[#e50914] text-white flex items-center justify-center hover:bg-primary transition-all">
+                      <button className="absolute right-2 top-2 w-10 h-10 rounded-xl bg-gray-900 text-white flex items-center justify-center hover:bg-primary transition-all">
                         <ArrowRightIcon className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-12 border-t border-[#333] flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="pt-12 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
                   <div className="text-sm text-gray-400 font-medium">
-                    © {new Date().getFullYear()} <span className="text-white font-bold">{channel.name}</span>. All rights reserved.
+                    © {new Date().getFullYear()} <span className="text-gray-900 font-bold">{channel.name}</span>. All rights reserved.
                   </div>
                   <div className="flex gap-8">
                     {['Privacy', 'Terms', 'Security', 'Sitemap'].map((item) => (
-                      <a key={item} href="#" className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-colors">
+                      <a key={item} href="#" className="text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-gray-900 transition-colors">
                         {item}
                       </a>
                     ))}
@@ -4184,21 +4185,21 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
   // Minimalist Shop - E-commerce focused with product grid
   const renderMinimalShopLayout = () => {
     return (
-      <div className="min-h-screen bg-[#1a1a1a]">
+      <div className="min-h-screen bg-gray-50">
         {/* Shop Header */}
-        <header className="sticky top-0 z-50 bg-[#141414] shadow-sm">
+        <header className="sticky top-0 z-50 bg-white shadow-sm">
           <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
             <div className="flex items-center justify-between h-14 sm:h-16">
               <div className="flex items-center gap-2">
                 {channel.profileImage && (
                   <img src={channel.profileImage} alt={channel.name} className="w-8 h-8 rounded" />
                 )}
-                <span className="font-bold text-lg text-white">{channel.name}</span>
+                <span className="font-bold text-lg text-gray-900">{channel.name}</span>
               </div>
               <nav className="hidden md:flex items-center gap-6">
-                <a href="#shop" className="text-sm text-gray-400 hover:text-white">Shop</a>
-                <a href="#about" className="text-sm text-gray-400 hover:text-white">About</a>
-                <button className="p-2 text-gray-400 hover:text-white">
+                <a href="#shop" className="text-sm text-gray-600 hover:text-gray-900">Shop</a>
+                <a href="#about" className="text-sm text-gray-600 hover:text-gray-900">About</a>
+                <button className="p-2 text-gray-600 hover:text-gray-900">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
@@ -4215,7 +4216,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
             {channel.description && (
               <p className="text-lg sm:text-xl mb-6 opacity-90">{channel.description}</p>
             )}
-            <button className="px-6 py-3 bg-[#141414] text-white font-semibold rounded hover:bg-[#222]">
+            <button className="px-6 py-3 bg-white text-gray-900 font-semibold rounded hover:bg-gray-100">
               Shop Now
             </button>
           </div>
@@ -4226,8 +4227,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
           <section id="shop" className="py-12 sm:py-16 px-4">
             <div className="max-w-7xl mx-auto">
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold text-white">All Products</h2>
-                <select className="px-4 py-2 border border-[#555] rounded text-sm">
+                <h2 className="text-2xl font-bold text-gray-900">All Products</h2>
+                <select className="px-4 py-2 border border-gray-300 rounded text-sm">
                   <option>Sort by</option>
                   <option>Price: Low to High</option>
                   <option>Price: High to Low</option>
@@ -4236,9 +4237,9 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                 {channel.products.map((product: any, index: number) => (
-                  <div key={index} className="group bg-[#141414] rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                  <div key={index} className="group bg-white rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                     {product.previewImage && (
-                      <div className="aspect-square overflow-hidden bg-[#222]">
+                      <div className="aspect-square overflow-hidden bg-gray-100">
                         <img
                           src={product.previewImage}
                           alt={product.title}
@@ -4247,7 +4248,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       </div>
                     )}
                     <div className="p-3 sm:p-4">
-                      <h3 className="text-sm font-medium text-white mb-1 line-clamp-2">{product.title}</h3>
+                      <h3 className="text-sm font-medium text-gray-900 mb-1 line-clamp-2">{product.title}</h3>
                     </div>
                   </div>
                 ))}
@@ -4258,10 +4259,10 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
         {/* About Section */}
         {channel.welcomeMessage && (
-          <section id="about" className="py-16 px-4 bg-[#141414]">
+          <section id="about" className="py-16 px-4 bg-white">
             <div className="w-full px-4 sm:px-6 md:px-8 text-center">
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6">About Us</h2>
-              <p className="text-base sm:text-lg text-gray-400 leading-relaxed">{channel.welcomeMessage}</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">About Us</h2>
+              <p className="text-base sm:text-lg text-gray-600 leading-relaxed">{channel.welcomeMessage}</p>
             </div>
           </section>
         )}
@@ -4272,7 +4273,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
   // Minimalist Hero - Large image hero with overlays
   const renderMinimalHeroLayout = () => {
     return (
-      <div className="min-h-screen bg-[#141414]">
+      <div className="min-h-screen bg-white">
         {/* Transparent Header */}
         <header className="absolute top-0 left-0 right-0 z-50">
           <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 flex items-center justify-between">
@@ -4305,7 +4306,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
             {channel.description && (
               <p className="text-xl sm:text-2xl mb-8 opacity-90">{channel.description}</p>
             )}
-            <button className="px-8 py-4 bg-[#141414] text-white font-semibold rounded-full hover:bg-[#222] transition-colors">
+            <button className="px-8 py-4 bg-white text-gray-900 font-semibold rounded-full hover:bg-gray-100 transition-colors">
               Explore
             </button>
           </div>
@@ -4320,7 +4321,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
         {channel.products && channel.products.length > 0 && (
           <section id="products" className="py-20 px-4">
             <div className="max-w-7xl mx-auto">
-              <h3 className="text-3xl sm:text-4xl font-bold text-white mb-12 text-center">Our Collection</h3>
+              <h3 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-12 text-center">Our Collection</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {channel.products.map((product: any, index: number) => (
                   <div key={index} className="group">
@@ -4332,13 +4333,13 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                          <button className="w-full py-3 bg-[#141414] text-white font-semibold rounded-lg">
+                          <button className="w-full py-3 bg-white text-gray-900 font-semibold rounded-lg">
                             Quick View
                           </button>
                         </div>
                       </div>
                     )}
-                    <h4 className="text-lg font-semibold text-white mb-2">{product.title}</h4>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">{product.title}</h4>
                   </div>
                 ))}
               </div>
@@ -4348,10 +4349,10 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
         {/* About */}
         {channel.welcomeMessage && (
-          <section id="about" className="py-20 px-4 bg-[#1a1a1a]">
+          <section id="about" className="py-20 px-4 bg-gray-50">
             <div className="w-full px-4 sm:px-6 md:px-8 text-center">
-              <h3 className="text-3xl font-bold text-white mb-6">Our Story</h3>
-              <p className="text-lg text-gray-400 leading-relaxed">{channel.welcomeMessage}</p>
+              <h3 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h3>
+              <p className="text-lg text-gray-600 leading-relaxed">{channel.welcomeMessage}</p>
             </div>
           </section>
         )}
@@ -4362,12 +4363,12 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
   // Minimalist Grid - Clean grid layout
   const renderMinimalGridLayout = () => {
     return (
-      <div className="min-h-screen bg-[#141414]">
+      <div className="min-h-screen bg-white">
         {/* Minimal Header */}
-        <header className="sticky top-0 z-50 bg-[#141414] border-b border-[#333]">
+        <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
           <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-3 sm:py-4">
             <div className="flex items-center justify-between">
-              <h1 className="text-xl sm:text-2xl font-bold text-white truncate">{channel.name}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{channel.name}</h1>
               <button className="md:hidden p-2">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -4381,14 +4382,14 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
         <section className="py-12 sm:py-20 px-4">
           <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8 items-center">
             <div>
-              <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">{channel.name}</h2>
+              <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">{channel.name}</h2>
               {channel.description && (
-                <p className="text-lg text-gray-400 mb-8">{channel.description}</p>
+                <p className="text-lg text-gray-600 mb-8">{channel.description}</p>
               )}
               {channel.welcomeMessage && (
-                <p className="text-base text-gray-400 mb-8">{channel.welcomeMessage}</p>
+                <p className="text-base text-gray-500 mb-8">{channel.welcomeMessage}</p>
               )}
-              <button className="px-6 py-3 bg-[#e50914] text-white font-semibold rounded hover:bg-gray-800">
+              <button className="px-6 py-3 bg-gray-900 text-white font-semibold rounded hover:bg-gray-800">
                 Explore More
               </button>
             </div>
@@ -4412,11 +4413,11 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
         {/* Products Grid */}
         {channel.products && channel.products.length > 0 && (
-          <section className="py-12 sm:py-20 px-4 bg-[#1a1a1a]">
+          <section className="py-12 sm:py-20 px-4 bg-gray-50">
             <div className="max-w-7xl mx-auto">
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {channel.products.map((product: any, index: number) => (
-                  <div key={index} className="group bg-[#141414] rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
+                  <div key={index} className="group bg-white rounded-2xl overflow-hidden hover:shadow-xl transition-shadow">
                     {product.previewImage && (
                       <div className="aspect-[4/3] overflow-hidden">
                         <img
@@ -4427,9 +4428,9 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       </div>
                     )}
                     <div className="p-6">
-                      <h3 className="text-lg font-bold text-white mb-2">{product.title}</h3>
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">{product.title}</h3>
                       {product.description && (
-                        <p className="text-sm text-gray-400 mb-4">{product.description}</p>
+                        <p className="text-sm text-gray-600 mb-4">{product.description}</p>
                       )}
                       <div className="flex items-center justify-between">
                         {!isOwner && channel.subscriptionEnabled && getSubscribeButtonText() && (
@@ -4456,18 +4457,18 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
   // Minimalist Magazine - Editorial style
   const renderMinimalMagazineLayout = () => {
     return (
-      <div className="min-h-screen bg-[#141414]">
+      <div className="min-h-screen bg-white">
         {/* Magazine Header */}
-        <header className="border-b border-[#333]">
+        <header className="border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <h1 className="text-3xl sm:text-4xl font-serif font-bold text-white text-center mb-4">{channel.name}</h1>
+            <h1 className="text-3xl sm:text-4xl font-serif font-bold text-gray-900 text-center mb-4">{channel.name}</h1>
             {channel.description && (
-              <p className="text-center text-sm sm:text-base text-gray-400 w-full px-4 mx-auto">{channel.description}</p>
+              <p className="text-center text-sm sm:text-base text-gray-600 w-full px-4 mx-auto">{channel.description}</p>
             )}
             <nav className="flex items-center justify-center gap-8 mt-6 text-sm">
-              <a href="#" className="text-white font-medium">Home</a>
-              <a href="#" className="text-gray-400 hover:text-white">Products</a>
-              <a href="#" className="text-gray-400 hover:text-white">About</a>
+              <a href="#" className="text-gray-900 font-medium">Home</a>
+              <a href="#" className="text-gray-600 hover:text-gray-900">Products</a>
+              <a href="#" className="text-gray-600 hover:text-gray-900">About</a>
             </nav>
           </div>
         </header>
@@ -4477,7 +4478,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
           <div className="max-w-7xl mx-auto">
             {channel.welcomeMessage && (
               <div className="w-full px-4 sm:px-6 md:px-8 text-center mb-12 sm:mb-16">
-                <p className="text-xl text-gray-200 leading-relaxed italic">{channel.welcomeMessage}</p>
+                <p className="text-xl text-gray-700 leading-relaxed italic">{channel.welcomeMessage}</p>
               </div>
             )}
 
@@ -4494,12 +4495,12 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                         className="w-full aspect-[16/10] object-cover rounded-lg mb-6"
                       />
                     )}
-                    <h2 className="text-3xl font-bold text-white mb-4">{channel.products[0].title}</h2>
+                    <h2 className="text-3xl font-bold text-gray-900 mb-4">{channel.products[0].title}</h2>
                     {channel.products[0].description && (
-                      <p className="text-gray-400 mb-4">{channel.products[0].description}</p>
+                      <p className="text-gray-600 mb-4">{channel.products[0].description}</p>
                     )}
                     <div className="flex items-center justify-between">
-                      <button className="px-6 py-3 bg-[#e50914] text-white font-semibold rounded hover:bg-gray-800">
+                      <button className="px-6 py-3 bg-gray-900 text-white font-semibold rounded hover:bg-gray-800">
                         View Details
                       </button>
                     </div>
@@ -4509,7 +4510,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                 {/* Sidebar Products */}
                 <div className="md:col-span-5 space-y-8">
                   {channel.products.slice(1, 4).map((product: any, index: number) => (
-                    <div key={index} className="border-b border-[#333] pb-6 last:border-0">
+                    <div key={index} className="border-b border-gray-200 pb-6 last:border-0">
                       {product.previewImage && (
                         <img
                           src={product.previewImage}
@@ -4517,7 +4518,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                           className="w-full aspect-[16/9] object-cover rounded-lg mb-4"
                         />
                       )}
-                      <h3 className="text-xl font-bold text-white mb-2">{product.title}</h3>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">{product.title}</h3>
                     </div>
                   ))}
                 </div>
@@ -4533,7 +4534,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
   const Stat = ({ label, value, color }: { label: string; value: number; color: string }) => (
     <div className="text-center">
       <div className={`text-4xl font-bold ${color}`}>{value}</div>
-      <div className="text-sm text-gray-400 mt-1">{label}</div>
+      <div className="text-sm text-gray-600 mt-1">{label}</div>
     </div>
   );
 
@@ -4543,19 +4544,19 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
 
         {/* Header */}
-        <header className="sticky top-0 z-50 backdrop-blur-lg bg-[#141414]/70 border-b border-[#333]">
+        <header className="sticky top-0 z-50 backdrop-blur-lg bg-white/70 border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               {channel.profileImage && (
                 <img
                   src={channel.profileImage}
                   alt={channel.name}
-                  className="w-12 h-12 rounded-xl border-2 border-[#e50914] shadow-lg"
+                  className="w-12 h-12 rounded-xl border-2 border-indigo-600 shadow-lg"
                 />
               )}
               <div>
-                <h1 className="font-bold text-lg text-white">{channel.name}</h1>
-                <p className="text-xs text-gray-400">Tech & SaaS</p>
+                <h1 className="font-bold text-lg text-gray-900">{channel.name}</h1>
+                <p className="text-xs text-gray-600">Tech & SaaS</p>
               </div>
             </div>
 
@@ -4574,10 +4575,10 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
         {/* Hero */}
         <section className="py-20 px-4 text-center">
           <div className="max-w-6xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#333] text-indigo-700 rounded-full text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium mb-6">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#e50914]" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600" />
               </span>
               Now Available
             </div>
@@ -4586,13 +4587,13 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
               {channel.name}
             </h1>
 
-            <p className="text-2xl text-gray-200 mb-12 max-w-3xl mx-auto">
+            <p className="text-2xl text-gray-700 mb-12 max-w-3xl mx-auto">
               {channel.description}
             </p>
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
-              <Stat label="Products" value={channel._count?.products || 0} color="text-white" />
+              <Stat label="Products" value={channel._count?.products || 0} color="text-indigo-600" />
               {isOwner && (
                 <Stat label="Subscribers" value={channel._count?.subscribers || 0} color="text-purple-600" />
               )}
@@ -4603,10 +4604,10 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
         {/* Welcome */}
         {channel.welcomeMessage && (
-          <section className="py-16 px-4 bg-[#141414]/50 backdrop-blur">
-            <div className="max-w-4xl mx-auto bg-[#141414] rounded-2xl p-8 shadow-xl border">
+          <section className="py-16 px-4 bg-white/50 backdrop-blur">
+            <div className="max-w-4xl mx-auto bg-white rounded-2xl p-8 shadow-xl border">
               <h2 className="text-3xl font-bold mb-4">Welcome</h2>
-              <p className="text-lg text-gray-200 leading-relaxed">
+              <p className="text-lg text-gray-700 leading-relaxed">
                 {channel.welcomeMessage}
               </p>
             </div>
@@ -4631,7 +4632,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                           window.location.href = `/channel/${channel.slug}/products/${product.id}`;
                         }
                       }}
-                      className="group bg-[#141414] rounded-2xl overflow-hidden border hover:shadow-2xl transition cursor-pointer"
+                      className="group bg-white rounded-2xl overflow-hidden border hover:shadow-2xl transition cursor-pointer"
                     >
 
                       {/* Preview */}
@@ -4656,7 +4657,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                           />
                         </div>
                       ) : (
-                        <div className="h-64 flex items-center justify-center bg-[#222] text-gray-400">
+                        <div className="h-64 flex items-center justify-center bg-gray-100 text-gray-400">
                           No Preview
                         </div>
                       )}
@@ -4666,7 +4667,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                         <h3 className="text-2xl font-bold mb-3">{product.title}</h3>
 
                         {product.description && (
-                          <p className="text-gray-400 mb-6 line-clamp-2">
+                          <p className="text-gray-600 mb-6 line-clamp-2">
                             {product.description}
                           </p>
                         )}
@@ -4678,7 +4679,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                 e.stopPropagation()
                                 setSelectedContent(product)
                               }}
-                              className="px-6 py-3 bg-[#e50914] text-white rounded-lg font-semibold hover:bg-gray-800 hover:shadow-xl transition-all duration-200"
+                              className="px-6 py-3 bg-gray-900 text-white rounded-lg font-semibold hover:bg-gray-800 hover:shadow-xl transition-all duration-200"
                             >
                               View
                             </button>
@@ -4688,7 +4689,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                                 e.stopPropagation();
                                 setShowSubscriptionModal(true);
                               }}
-                              className="px-6 py-3 bg-[#e50914] text-white rounded-lg font-semibold hover:bg-gray-800 hover:shadow-xl transition-all duration-200"
+                              className="px-6 py-3 bg-gray-900 text-white rounded-lg font-semibold hover:bg-gray-800 hover:shadow-xl transition-all duration-200"
                             >
                               Subscribe to View
                             </button>
@@ -4704,7 +4705,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
         )}
 
         {/* Footer */}
-        <footer className="py-12 px-4 bg-[#e50914] text-white text-center">
+        <footer className="py-12 px-4 bg-gray-900 text-white text-center">
           © {new Date().getFullYear()} {channel.name}. All rights reserved.
         </footer>
       </div>
@@ -4716,7 +4717,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
         {/* Header */}
-        <header className="bg-[#141414] border-b border-[#333]">
+        <header className="bg-white border-b border-gray-200">
           <div className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
               {channel.profileImage && (
@@ -4727,8 +4728,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                 />
               )}
               <div>
-                <h1 className="text-2xl font-bold text-white">{channel.name}</h1>
-                <p className="text-gray-400">Educational Content</p>
+                <h1 className="text-2xl font-bold text-gray-900">{channel.name}</h1>
+                <p className="text-gray-600">Educational Content</p>
               </div>
             </div>
             {channel.subscriptionEnabled && (
@@ -4742,12 +4743,12 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
         {/* Hero */}
         <section className="py-16 px-4">
           <div className="max-w-5xl mx-auto text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">{channel.name}</h1>
-            <p className="text-xl text-gray-200 mb-8 max-w-3xl mx-auto">{channel.description}</p>
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 text-gray-900">{channel.name}</h1>
+            <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto">{channel.description}</p>
 
             {channel.welcomeMessage && (
-              <div className="bg-[#141414] rounded-xl p-8 shadow-lg border border-[#333]">
-                <p className="text-lg text-gray-200 leading-relaxed">{channel.welcomeMessage}</p>
+              <div className="bg-white rounded-xl p-8 shadow-lg border border-gray-200">
+                <p className="text-lg text-gray-700 leading-relaxed">{channel.welcomeMessage}</p>
               </div>
             )}
           </div>
@@ -4755,14 +4756,14 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
         {/* Courses/Products */}
         {channel.products && channel.products.length > 0 && (
-          <section className="py-16 px-4 bg-[#141414]/50">
+          <section className="py-16 px-4 bg-white/50">
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-4xl font-bold mb-12 text-center text-white">Available Courses</h2>
+              <h2 className="text-4xl font-bold mb-12 text-center text-gray-900">Available Courses</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {channel.products.map((product: any, index: number) => (
                   <div
                     key={index}
-                    className="bg-[#141414] rounded-xl overflow-hidden border border-[#333] hover:shadow-xl transition-all duration-300"
+                    className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300"
                   >
                     {product.previewImage && (
                       <img
@@ -4772,9 +4773,9 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       />
                     )}
                     <div className="p-6">
-                      <h3 className="text-xl font-bold mb-2 text-white">{product.title}</h3>
+                      <h3 className="text-xl font-bold mb-2 text-gray-900">{product.title}</h3>
                       {product.description && (
-                        <p className="text-gray-400 mb-4 text-sm">{product.description}</p>
+                        <p className="text-gray-600 mb-4 text-sm">{product.description}</p>
                       )}
                       <div className="flex items-center justify-between">
                         <button className="px-4 py-2 bg-orange-600 text-white rounded-lg font-semibold text-sm hover:bg-orange-700 transition-colors">
@@ -4790,9 +4791,9 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
         )}
 
         {/* Footer */}
-        <footer className="py-8 px-4 bg-[#141414] border-t border-[#333]">
+        <footer className="py-8 px-4 bg-white border-t border-gray-200">
           <div className="max-w-7xl mx-auto text-center">
-            <p className="text-gray-400">
+            <p className="text-gray-600">
               © {new Date().getFullYear()} {channel.name}. Empowering learners worldwide.
             </p>
           </div>
@@ -4848,7 +4849,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                     />
                   </div>
                 ) : (
-                  <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-2xl bg-gradient-to-br from-[#222] to-[#333] flex items-center justify-center">
+                  <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
                     <svg className="w-16 h-16 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                     </svg>
@@ -4859,15 +4860,15 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
               {/* Channel Info */}
               <div className="flex-1 text-center md:text-left">
-                <h1 className="text-4xl md:text-5xl font-black text-white mb-3 tracking-tight">
+                <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-3 tracking-tight">
                   {channel.name}
                 </h1>
                 {channel.description && (
-                  <p className="text-lg text-gray-400 mb-4 max-w-2xl">
+                  <p className="text-lg text-gray-600 mb-4 max-w-2xl">
                     {channel.description}
                   </p>
                 )}
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 text-sm text-gray-400 mb-6">
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 text-sm text-gray-600 mb-6">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                     <span className="font-semibold">{channel._count?.products || 0}</span>
@@ -4910,12 +4911,12 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
           {/* Welcome Message */}
           {channel.welcomeMessage && (
             <div className="mb-16">
-              <div className="bg-[#141414] rounded-2xl shadow-xl p-8 md:p-12 border border-[#333]">
+              <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-gray-100">
                 <div className="flex items-start gap-4 mb-4">
                   <div className="w-1 h-16 bg-gradient-to-b from-purple-600 to-pink-600 rounded-full"></div>
                   <div>
-                    <h2 className="text-2xl font-bold text-white mb-2">Welcome</h2>
-                    <p className="text-gray-400 leading-relaxed">{channel.welcomeMessage}</p>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome</h2>
+                    <p className="text-gray-600 leading-relaxed">{channel.welcomeMessage}</p>
                   </div>
                 </div>
               </div>
@@ -4926,7 +4927,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
           {channel.products && channel.products.length > 0 ? (
             <div>
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-3xl font-bold text-white">Featured Products</h2>
+                <h2 className="text-3xl font-bold text-gray-900">Featured Products</h2>
                 <button className="text-purple-600 font-semibold hover:text-purple-700 transition-colors">
                   View All →
                 </button>
@@ -4935,14 +4936,14 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                 {isEditing && (
                   <div
                     onClick={onAddProduct}
-                    className="group bg-[#141414] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-dashed border-[#555] hover:border-purple-500 cursor-pointer min-h-[300px] flex flex-col items-center justify-center gap-4 hover:bg-[#1a1a1a]"
+                    className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-dashed border-gray-300 hover:border-purple-500 cursor-pointer min-h-[300px] flex flex-col items-center justify-center gap-4 hover:bg-gray-50"
                   >
-                    <div className="w-16 h-16 rounded-full bg-[#333] flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                    <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                       <PlusIcon className="w-8 h-8 text-purple-600" />
                     </div>
                     <div className="text-center">
-                      <h3 className="text-lg font-bold text-white">Add New Product</h3>
-                      <p className="text-sm text-gray-400 mt-1">Create a new product for your channel</p>
+                      <h3 className="text-lg font-bold text-gray-900">Add New Product</h3>
+                      <p className="text-sm text-gray-500 mt-1">Create a new product for your channel</p>
                     </div>
                   </div>
                 )}
@@ -4950,9 +4951,9 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                   <div
                     key={product.id || index}
                     onClick={() => window.location.href = `/channel/${channel.slug}/products/${product.id}`}
-                    className="group bg-[#141414] rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-[#333] hover:border-purple-200 cursor-pointer"
+                    className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-purple-200 cursor-pointer"
                   >
-                    <div className="relative aspect-video bg-gradient-to-br from-[#222] to-[#333] overflow-hidden">
+                    <div className="relative aspect-video bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                       {(product.type === 'VIDEO' || product.type === 'VIDEOS') && (product.videoUrl || product.fileUrl) ? (
                         <video
                           src={product.videoUrl || product.fileUrl}
@@ -4996,11 +4997,11 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                       </div>
                     </div>
                     <div className="p-6">
-                      <h3 className="text-xl font-bold text-white mb-2 group-hover:text-purple-600 transition-colors line-clamp-2">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors line-clamp-2">
                         {product.title}
                       </h3>
                       {product.description && (
-                        <p className="text-gray-400 text-sm mb-4 line-clamp-2">
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                           {product.description}
                         </p>
                       )}
@@ -5027,16 +5028,16 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">No Products Yet</h3>
-              <p className="text-gray-400">Start adding products to showcase your amazing content!</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">No Products Yet</h3>
+              <p className="text-gray-600">Start adding products to showcase your amazing content!</p>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="border-t border-[#333] bg-[#141414]">
+        <div className="border-t border-gray-200 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="text-center text-gray-400 text-sm">
+            <div className="text-center text-gray-600 text-sm">
               <p>© {new Date().getFullYear()} {channel.name}. All rights reserved.</p>
             </div>
           </div>
@@ -5264,11 +5265,11 @@ function SuccessModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="relative w-full max-w-md bg-[#141414] rounded-2xl shadow-2xl transform transition-all animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl transform transition-all animate-in zoom-in-95 duration-300">
         {/* Success Icon */}
         <div className="flex flex-col items-center px-6 sm:px-8 py-8 sm:py-10">
           <div className="relative mb-6">
-            <div className="absolute inset-0 bg-[#222] rounded-full animate-ping opacity-75"></div>
+            <div className="absolute inset-0 bg-green-100 rounded-full animate-ping opacity-75"></div>
             <div
               className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center"
               style={{ backgroundColor: `${primaryColor}15` }}
@@ -5291,10 +5292,10 @@ function SuccessModal({
           </div>
 
           {/* Message */}
-          <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 text-center">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 text-center">
             Success!
           </h3>
-          <p className="text-sm sm:text-base text-gray-400 text-center mb-6 px-4">
+          <p className="text-sm sm:text-base text-gray-600 text-center mb-6 px-4">
             {message}
           </p>
 
@@ -5330,7 +5331,7 @@ function ErrorModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
-      <div className="relative w-full max-w-md bg-[#141414] rounded-2xl shadow-2xl transform transition-all animate-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl transform transition-all animate-in zoom-in-95 duration-300">
         {/* Error Icon */}
         <div className="flex flex-col items-center px-6 sm:px-8 py-8 sm:py-10">
           <div className="relative mb-6">
@@ -5353,10 +5354,10 @@ function ErrorModal({
           </div>
 
           {/* Message */}
-          <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 text-center">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 text-center">
             Error
           </h3>
-          <p className="text-sm sm:text-base text-gray-400 text-center mb-6 px-4">
+          <p className="text-sm sm:text-base text-gray-600 text-center mb-6 px-4">
             {message}
           </p>
 
@@ -5436,7 +5437,7 @@ function ContentViewerModal({
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
-                  <VideoCameraIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <VideoCameraIcon className="h-16 w-16 text-gray-600 mx-auto mb-4" />
                   <p className="text-gray-400">Video not available</p>
                 </div>
               </div>
@@ -5449,7 +5450,7 @@ function ContentViewerModal({
     // Handle DOCUMENT type - PDF viewer
     if (productType === 'DOCUMENT' || productType === 'DOCUMENTS') {
       return (
-        <div className="w-full h-[600px] sm:h-[700px] bg-[#222] rounded-lg overflow-hidden">
+        <div className="w-full h-[600px] sm:h-[700px] bg-gray-100 rounded-lg overflow-hidden">
           {fileUrl ? (
             fileUrl.endsWith('.pdf') ? (
               <iframe
@@ -5461,7 +5462,7 @@ function ContentViewerModal({
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center p-8">
                 <DocumentTextIcon className="h-16 w-16 text-gray-400 mb-4" />
-                <p className="text-gray-400 mb-4">Document Preview</p>
+                <p className="text-gray-600 mb-4">Document Preview</p>
                 <a
                   href={fileUrl}
                   target="_blank"
@@ -5487,7 +5488,7 @@ function ContentViewerModal({
     // Handle CODE type - Code viewer
     if (productType === 'CODE') {
       return (
-        <div className="w-full h-[600px] sm:h-[700px] bg-[#e50914] rounded-lg overflow-hidden">
+        <div className="w-full h-[600px] sm:h-[700px] bg-gray-900 rounded-lg overflow-hidden">
           {fileUrl ? (
             <iframe
               src={fileUrl}
@@ -5510,7 +5511,7 @@ function ContentViewerModal({
     // Handle IMAGES type
     if (productType === 'IMAGE' || productType === 'IMAGES') {
       return (
-        <div className="w-full bg-[#e50914] rounded-lg overflow-hidden">
+        <div className="w-full bg-gray-900 rounded-lg overflow-hidden">
           {fileUrl || content.previewImage ? (
             <img
               src={fileUrl || content.previewImage}
@@ -5529,7 +5530,7 @@ function ContentViewerModal({
     // Handle SOFTWARE type - Download button
     if (productType === 'SOFTWARE') {
       return (
-        <div className="w-full h-[400px] bg-[#e50914] rounded-lg flex items-center justify-center">
+        <div className="w-full h-[400px] bg-gray-900 rounded-lg flex items-center justify-center">
           <div className="text-center p-8">
             <CodeBracketIcon className="h-20 w-20 text-gray-400 mx-auto mb-6" />
             <h3 className="text-xl font-bold text-white mb-2">{content.title}</h3>
@@ -5551,7 +5552,7 @@ function ContentViewerModal({
     // Handle COURSE type
     if (productType === 'COURSE') {
       return (
-        <div className="w-full h-[600px] bg-[#e50914] rounded-lg overflow-hidden">
+        <div className="w-full h-[600px] bg-gray-900 rounded-lg overflow-hidden">
           {fileUrl ? (
             <iframe
               src={fileUrl}
@@ -5573,7 +5574,7 @@ function ContentViewerModal({
 
     // Default - Generic file viewer
     return (
-      <div className="w-full h-[500px] bg-[#e50914] rounded-lg flex items-center justify-center">
+      <div className="w-full h-[500px] bg-gray-900 rounded-lg flex items-center justify-center">
         <div className="text-center p-8">
           <DocumentTextIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-white mb-2">{content.title}</h3>
@@ -5795,7 +5796,7 @@ function SubscriptionModal({
             </button>
             <button
               onClick={() => onSubscribe(duration)}
-              className="flex-1 px-6 py-3 rounded-lg font-semibold text-white transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed bg-[#e50914] hover:bg-gray-800"
+              className="flex-1 px-6 py-3 rounded-lg font-semibold text-white transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed bg-gray-900 hover:bg-gray-800"
               disabled={subscribing}
             >
               {subscribing ? 'Processing...' : 'Subscribe Now'}

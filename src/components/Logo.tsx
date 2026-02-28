@@ -13,73 +13,88 @@ interface LogoProps {
 }
 
 export default function Logo({
-  className,
+  className = '',
   showText = true,
-  textClassName,
   href = "/",
   variant = 'default',
   size = 'md',
-  showSubtitle = false
 }: LogoProps) {
-  // Size mappings - Pixel values for high-quality rendering
-  const sizeMap = {
-    sm: { height: 40, width: 150 },
-    md: { height: 50, width: 180 },
-    lg: { height: 60, width: 200 },
-    xl: { height: 70, width: 220 }
+  const isDark = variant === 'white';
+
+  // Adjusted sizes for perfect rendering
+  const widthMap = {
+    sm: 130,
+    md: 160,
+    lg: 190,
+    xl: 220
   };
 
-  const textSizeMap = {
-    sm: 'text-sm',
-    md: 'text-base sm:text-lg',
-    lg: 'text-lg sm:text-xl',
-    xl: 'text-xl sm:text-2xl'
+  const heightMap = {
+    sm: 28,
+    md: 34,
+    lg: 40,
+    xl: 46
   };
 
-  const dimensions = sizeMap[size];
-  // Use custom logo from public/logo/logo.gif
-  const logoSrc = '/logo/logo.gif';
+  // If icon-only, use height for both so it's a square
+  const w = variant === 'icon-only' ? heightMap[size] : widthMap[size];
+  const h = heightMap[size];
 
-  const textStyles = textClassName || (
-    variant === 'gradient'
-      ? `${textSizeMap[size]} font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent`
-      : variant === 'white'
-        ? `${textSizeMap[size]} font-bold text-white`
-        : `${textSizeMap[size]} font-bold text-gray-900`
-  );
+  // Theming colors
+  const textColor = isDark ? '#FFFFFF' : '#111827';
+  const pillBg = isDark ? '#FFFFFF' : '#111827';
+  const pillText = isDark ? '#000000' : '#FFFFFF';
 
   const content = (
-    <>
-      <div className={className || ''} style={{ position: 'relative', height: `${dimensions.height}px`, width: `${dimensions.width}px` }}>
-        {/* Use regular img tag for better server compatibility */}
-        <img
-          src={logoSrc}
-          alt="sedStudios - Professional Digital Studio"
-          width={dimensions.width}
-          height={dimensions.height}
-          className="object-contain transition-transform hover:scale-105"
-          style={{
-            imageRendering: 'crisp-edges',
-            width: '100%',
-            height: '100%',
-            maxWidth: '100%',
-            maxHeight: '100%'
-          }}
-          loading="eager"
-        />
-      </div>
-      {/* Logo already contains the brand name, so we hide the text by default */}
-      {showText && variant !== 'icon-only' && (
-        <div className="ml-2 sm:ml-3">
-          <span className={textStyles}>
-            sedStudios
-          </span>
-          {showSubtitle && (
-            <p className="text-xs text-gray-500 mt-0.5">Professional Digital Studio</p>
-          )}
-        </div>
+    <svg
+      width={w}
+      height={h}
+      viewBox={variant === 'icon-only' ? "0 0 100 100" : "0 0 380 100"}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={`${className} transition-transform hover:scale-105 origin-left`}
+    >
+      {variant === 'icon-only' ? (
+        // Render just the 3x3 grid for icon only
+        <g transform="translate(14, 14) scale(1.6)">
+          <circle cx="0" cy="0" r="6" fill="#ef4444" />
+          <circle cx="18" cy="0" r="6" fill="#f97316" />
+          <circle cx="36" cy="0" r="6" fill="#eab308" />
+
+          <circle cx="0" cy="18" r="6" fill="#22c55e" />
+          <circle cx="18" cy="18" r="6" fill="#10b981" />
+          <circle cx="36" cy="18" r="6" fill="#14b8a6" />
+
+          <circle cx="0" cy="36" r="6" fill="#fbbf24" />
+          <circle cx="18" cy="36" r="6" fill="#059669" />
+          <circle cx="36" cy="36" r="6" fill="#3b82f6" />
+        </g>
+      ) : (
+        <>
+          {/* Pill */}
+          <rect x="0" y="15" width="112" height="70" rx="35" fill={pillBg} />
+          <text x="56" y="63" fontFamily="Inter, system-ui, sans-serif" fontSize="48" fontWeight="800" fill={pillText} textAnchor="middle" letterSpacing="-1.5">SED</text>
+
+          {/* STUDIOS Text */}
+          <text x="125" y="63" fontFamily="Inter, system-ui, sans-serif" fontSize="48" fontWeight="400" fill={textColor} letterSpacing="-1">STUDIOS</text>
+
+          {/* 3x3 Dots Grid */}
+          <g transform="translate(325, 30)">
+            <circle cx="0" cy="0" r="6" fill="#ef4444" />
+            <circle cx="18" cy="0" r="6" fill="#f97316" />
+            <circle cx="36" cy="0" r="6" fill="#eab308" />
+
+            <circle cx="0" cy="18" r="6" fill="#22c55e" />
+            <circle cx="18" cy="18" r="6" fill="#10b981" />
+            <circle cx="36" cy="18" r="6" fill="#14b8a6" />
+
+            <circle cx="0" cy="36" r="6" fill="#fbbf24" />
+            <circle cx="18" cy="36" r="6" fill="#059669" />
+            <circle cx="36" cy="36" r="6" fill="#3b82f6" />
+          </g>
+        </>
       )}
-    </>
+    </svg>
   );
 
   if (href) {

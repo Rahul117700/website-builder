@@ -65,7 +65,7 @@ export default function ChannelClient({ initialChannel, slug }: { initialChannel
     }
 
     return (
-        <MainLayout>
+        <MainLayout isDarkTheme={true}>
             <TemplateRenderer channel={channel} />
         </MainLayout>
     );

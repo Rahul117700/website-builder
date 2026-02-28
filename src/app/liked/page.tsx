@@ -64,11 +64,11 @@ export default function LikedProductsPage() {
 
     if (loading || status === 'loading') {
         return (
-            <MainLayout>
-                <div className="flex items-center justify-center min-h-screen">
+            <MainLayout isDarkTheme={true}>
+                <div className="flex items-center justify-center min-h-screen bg-[#141414]">
                     <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Loading liked products...</p>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+                        <p className="text-gray-400">Loading liked products...</p>
                     </div>
                 </div>
             </MainLayout>
@@ -76,79 +76,81 @@ export default function LikedProductsPage() {
     }
 
     return (
-        <MainLayout>
-            <div className="max-w-7xl mx-auto px-6 py-8">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Liked Products</h1>
-                    <p className="text-gray-600">Products you've liked from across all channels</p>
-                </div>
-
-                {likedProducts.length === 0 ? (
-                    <div className="text-center py-16">
-                        <div className="inline-block p-6 bg-gray-100 rounded-full mb-4">
-                            <HeartIcon className="w-16 h-16 text-gray-400" />
-                        </div>
-                        <h2 className="text-2xl font-semibold text-gray-900 mb-2">No liked products yet</h2>
-                        <p className="text-gray-600 mb-6">Start exploring and like products you're interested in!</p>
-                        <Link
-                            href="/"
-                            className="inline-block px-6 py-3 bg-gray-900 text-white rounded-lg font-semibold hover:bg-black transition-colors"
-                        >
-                            Explore Products
-                        </Link>
+        <MainLayout isDarkTheme={true}>
+            <div className="min-h-screen bg-[#141414]">
+                <div className="max-w-7xl mx-auto px-6 py-8">
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-white mb-2">Liked Products</h1>
+                        <p className="text-gray-400">Products you've liked from across all channels</p>
                     </div>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 sm:gap-2">
-                        {likedProducts.map((item) => (
+
+                    {likedProducts.length === 0 ? (
+                        <div className="text-center py-16">
+                            <div className="inline-block p-6 bg-[#1a1a1a] rounded-full mb-4">
+                                <HeartIcon className="w-16 h-16 text-[#444]" />
+                            </div>
+                            <h2 className="text-2xl font-semibold text-white mb-2">No liked products yet</h2>
+                            <p className="text-gray-400 mb-6">Start exploring and like products you're interested in!</p>
                             <Link
-                                key={item.id}
-                                href={`/channel/${item.product.channel.slug}/products/${item.product.id}`}
-                                className="group"
+                                href="/"
+                                className="inline-block px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
                             >
-                                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all">
-                                    {/* Product Image */}
-                                    <div className="relative aspect-video bg-gray-100">
-                                        <Image
-                                            src={item.product.previewImage || '/placeholder-product.jpg'}
-                                            alt={item.product.title}
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform"
-                                            unoptimized
-                                        />
-                                        {item.product.price === 0 && (
-                                            <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
-                                                Free
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Product Info */}
-                                    <div className="p-4">
-                                        <h3 className="font-semibold text-gray-900 line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
-                                            {item.product.title}
-                                        </h3>
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <div className="relative w-6 h-6 flex-shrink-0">
-                                                <Image
-                                                    src={item.product.channel.profileImage || item.product.channel.user.image || '/default-avatar.png'}
-                                                    alt={item.product.channel.name}
-                                                    fill
-                                                    className="rounded-full object-cover"
-                                                    unoptimized
-                                                />
-                                            </div>
-                                            <p className="text-sm text-gray-600 truncate">{item.product.channel.name}</p>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs text-gray-500">{item.product.type}</span>
-                                            <HeartIcon className="w-5 h-5 text-red-500 fill-current" />
-                                        </div>
-                                    </div>
-                                </div>
+                                Explore Products
                             </Link>
-                        ))}
-                    </div>
-                )}
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1 sm:gap-2">
+                            {likedProducts.map((item) => (
+                                <Link
+                                    key={item.id}
+                                    href={`/channel/${item.product.channel.slug}/products/${item.product.id}`}
+                                    className="group"
+                                >
+                                    <div className="bg-[#1a1a1a] rounded-xl shadow-sm border border-[#333] overflow-hidden hover:border-[#444] hover:shadow-xl hover:-translate-y-1 transition-all">
+                                        {/* Product Image */}
+                                        <div className="relative aspect-video bg-[#2a2a2a]">
+                                            <Image
+                                                src={item.product.previewImage || '/placeholder-product.jpg'}
+                                                alt={item.product.title}
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform"
+                                                unoptimized
+                                            />
+                                            {item.product.price === 0 && (
+                                                <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
+                                                    Free
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Product Info */}
+                                        <div className="p-4">
+                                            <h3 className="font-semibold text-white line-clamp-2 mb-2 group-hover:text-indigo-400 transition-colors">
+                                                {item.product.title}
+                                            </h3>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="relative w-6 h-6 flex-shrink-0">
+                                                    <Image
+                                                        src={item.product.channel.profileImage || item.product.channel.user.image || '/default-avatar.png'}
+                                                        alt={item.product.channel.name}
+                                                        fill
+                                                        className="rounded-full object-cover ring-2 ring-[#333]"
+                                                        unoptimized
+                                                    />
+                                                </div>
+                                                <p className="text-sm text-gray-400 truncate">{item.product.channel.name}</p>
+                                            </div>
+                                            <div className="flex items-center justify-between mt-auto pt-2 border-t border-[#333]">
+                                                <span className="text-xs text-gray-500 font-medium tracking-wider uppercase">{item.product.type}</span>
+                                                <HeartIcon className="w-5 h-5 text-red-500 fill-current" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </MainLayout>
     );

@@ -18,6 +18,16 @@ const nextConfig = {
   poweredByHeader: false,
   compress: false,
 
+  async redirects() {
+    return [
+      {
+        source: '/landing',
+        destination: '/',
+        permanent: true,
+      },
+    ];
+  },
+
   // Exclude template folders from compilation
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
   onDemandEntries: {

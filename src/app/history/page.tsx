@@ -150,7 +150,7 @@ export default function HistoryPage() {
 
         return (
             <div className="mb-8">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">{title}</h2>
+                <h2 className="text-lg font-bold text-white mb-4">{title}</h2>
                 <div className="space-y-3">
                     {items.map((item) => (
                         <Link
@@ -158,9 +158,9 @@ export default function HistoryPage() {
                             href={`/channel/${item.product.channel.slug}/products/${item.product.id}`}
                             className="group block"
                         >
-                            <div className="flex gap-4 bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md hover:border-gray-300 transition-all">
+                            <div className="flex gap-4 bg-[#1a1a1a] rounded-lg border border-[#333] p-3 hover:border-[#444] hover:-translate-y-0.5 hover:shadow-xl transition-all">
                                 {/* Thumbnail */}
-                                <div className="relative w-40 h-24 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
+                                <div className="relative w-40 h-24 flex-shrink-0 bg-[#333] rounded overflow-hidden">
                                     {item.product.previewImage ? (
                                         <Image
                                             src={item.product.previewImage}
@@ -178,10 +178,10 @@ export default function HistoryPage() {
 
                                 {/* Info */}
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold text-gray-900 line-clamp-2 mb-1 group-hover:text-blue-600 transition-colors">
+                                    <h3 className="font-semibold text-white line-clamp-2 mb-1 group-hover:text-indigo-400 transition-colors">
                                         {item.product.title}
                                     </h3>
-                                    <p className="text-sm text-gray-600 mb-1">
+                                    <p className="text-sm text-gray-400 mb-1">
                                         {item.product.channel.name}
                                     </p>
                                     <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -193,11 +193,11 @@ export default function HistoryPage() {
                                 {/* Price */}
                                 <div className="flex-shrink-0 text-right">
                                     {item.product.price > 0 ? (
-                                        <p className="text-sm font-semibold text-gray-900">
+                                        <p className="text-sm font-semibold text-white">
                                             ₹{item.product.price.toLocaleString()}
                                         </p>
                                     ) : (
-                                        <p className="text-sm font-semibold text-green-600">
+                                        <p className="text-sm font-semibold text-emerald-500">
                                             Free
                                         </p>
                                     )}
@@ -212,95 +212,97 @@ export default function HistoryPage() {
 
     if (loading || status === 'loading') {
         return (
-            <MainLayout>
-                <div className="flex items-center justify-center min-h-screen">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <MainLayout isDarkTheme={true}>
+                <div className="flex items-center justify-center min-h-screen bg-[#141414]">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
                 </div>
             </MainLayout>
         );
     }
 
     return (
-        <MainLayout>
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-8">
-                    <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <ClockIcon className="w-8 h-8 text-gray-700" />
-                            <h1 className="text-3xl font-bold text-gray-900">Watch History</h1>
-                        </div>
-                        <p className="text-gray-600">
-                            Products you've viewed recently
-                        </p>
-                    </div>
-                    {history.length > 0 && (
-                        <button
-                            onClick={() => setShowClearConfirm(true)}
-                            className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                            <TrashIcon className="w-5 h-5" />
-                            <span className="font-medium">Clear History</span>
-                        </button>
-                    )}
-                </div>
-
-                {/* Content */}
-                {history.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 px-4">
-                        <div className="bg-gray-100 rounded-full p-6 mb-6">
-                            <ClockIcon className="w-16 h-16 text-gray-400" />
-                        </div>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                            No viewing history yet
-                        </h2>
-                        <p className="text-gray-600 text-center mb-8 max-w-md">
-                            Your viewing history will appear here as you explore products across different channels.
-                        </p>
-                        <Link
-                            href="/"
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                            <SparklesIcon className="w-5 h-5" />
-                            Explore Products
-                        </Link>
-                    </div>
-                ) : (
-                    <div>
-                        {renderHistoryGroup('Today', groupedHistory.today)}
-                        {renderHistoryGroup('Yesterday', groupedHistory.yesterday)}
-                        {renderHistoryGroup('This Week', groupedHistory.thisWeek)}
-                        {renderHistoryGroup('Earlier', groupedHistory.earlier)}
-                    </div>
-                )}
-
-                {/* Clear Confirmation Modal */}
-                {showClearConfirm && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-lg max-w-md w-full p-6">
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">
-                                Clear watch history?
-                            </h3>
-                            <p className="text-gray-600 mb-6">
-                                This will remove all products from your viewing history. This action cannot be undone.
+        <MainLayout isDarkTheme={true}>
+            <div className="min-h-screen bg-[#141414]">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-white">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <div className="flex items-center gap-3 mb-2">
+                                <ClockIcon className="w-8 h-8 text-white" />
+                                <h1 className="text-3xl font-bold text-white">Watch History</h1>
+                            </div>
+                            <p className="text-gray-400">
+                                Products you've viewed recently
                             </p>
-                            <div className="flex gap-3 justify-end">
-                                <button
-                                    onClick={() => setShowClearConfirm(false)}
-                                    className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors font-medium"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleClearHistory}
-                                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
-                                >
-                                    Clear History
-                                </button>
+                        </div>
+                        {history.length > 0 && (
+                            <button
+                                onClick={() => setShowClearConfirm(true)}
+                                className="flex items-center gap-2 px-4 py-2 text-red-500 hover:bg-red-900/30 rounded-lg transition-colors border border-transparent hover:border-red-500/30"
+                            >
+                                <TrashIcon className="w-5 h-5" />
+                                <span className="font-bold">Clear History</span>
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Content */}
+                    {history.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-16 px-4">
+                            <div className="bg-[#1a1a1a] rounded-full p-6 mb-6">
+                                <ClockIcon className="w-16 h-16 text-[#444]" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-white mb-2">
+                                No viewing history yet
+                            </h2>
+                            <p className="text-gray-400 text-center mb-8 max-w-md">
+                                Your viewing history will appear here as you explore products across different channels.
+                            </p>
+                            <Link
+                                href="/"
+                                className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+                            >
+                                <SparklesIcon className="w-5 h-5" />
+                                Explore Products
+                            </Link>
+                        </div>
+                    ) : (
+                        <div>
+                            {renderHistoryGroup('Today', groupedHistory.today)}
+                            {renderHistoryGroup('Yesterday', groupedHistory.yesterday)}
+                            {renderHistoryGroup('This Week', groupedHistory.thisWeek)}
+                            {renderHistoryGroup('Earlier', groupedHistory.earlier)}
+                        </div>
+                    )}
+
+                    {/* Clear Confirmation Modal */}
+                    {showClearConfirm && (
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                            <div className="bg-[#1a1a1a] rounded-2xl max-w-md w-full p-6 border border-[#333]">
+                                <h3 className="text-xl font-bold text-white mb-2">
+                                    Clear watch history?
+                                </h3>
+                                <p className="text-gray-400 mb-6">
+                                    This will remove all products from your viewing history. This action cannot be undone.
+                                </p>
+                                <div className="flex gap-3 justify-end">
+                                    <button
+                                        onClick={() => setShowClearConfirm(false)}
+                                        className="px-4 py-2 text-gray-300 hover:bg-[#333] hover:text-white rounded-lg transition-colors font-medium border border-[#333]"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleClearHistory}
+                                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                                    >
+                                        Clear History
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         </MainLayout>
     );

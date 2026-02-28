@@ -63,102 +63,112 @@ export default function SavedProductsPage() {
 
     if (loading || status === 'loading') {
         return (
-            <MainLayout>
-                <div className="flex items-center justify-center min-h-screen">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <MainLayout isDarkTheme={true}>
+                <div className="flex items-center justify-center min-h-screen bg-[#141414]">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
                 </div>
             </MainLayout>
         );
     }
 
     return (
-        <MainLayout>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header */}
-                <div className="mb-8">
-                    <div className="flex items-center gap-3 mb-2">
-                        <BookmarkIcon className="w-8 h-8 text-blue-600" />
-                        <h1 className="text-3xl font-bold text-gray-900">Saved Products</h1>
-                    </div>
-                    <p className="text-gray-600">
-                        Products you've bookmarked from across all channels
-                    </p>
-                </div>
-
-                {/* Content */}
-                {savedProducts.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 px-4">
-                        <div className="bg-gray-100 rounded-full p-6 mb-6">
-                            <BookmarkIcon className="w-16 h-16 text-gray-400" />
+        <MainLayout isDarkTheme={true}>
+            <div className="min-h-screen bg-[#141414] text-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    {/* Header */}
+                    <div className="mb-8 border-b border-[#333] pb-6">
+                        <div className="flex items-center gap-3 mb-2">
+                            <BookmarkIcon className="w-8 h-8 text-indigo-500" />
+                            <h1 className="text-3xl font-bold text-white">Saved Products</h1>
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                            No saved products yet
-                        </h2>
-                        <p className="text-gray-600 text-center mb-8 max-w-md">
-                            Start bookmarking products you want to check out later. Click the bookmark icon on any product card.
+                        <p className="text-gray-400 font-medium">
+                            Products you've bookmarked from across all channels
                         </p>
-                        <Link
-                            href="/"
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                            <SparklesIcon className="w-5 h-5" />
-                            Explore Products
-                        </Link>
                     </div>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                        {savedProducts.map((saved) => (
+
+                    {/* Content */}
+                    {savedProducts.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-16 px-4">
+                            <div className="bg-[#1a1a1a] rounded-full p-6 mb-6 inline-flex shadow-sm">
+                                <BookmarkIcon className="w-16 h-16 text-[#444]" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-white mb-2">
+                                No saved products yet
+                            </h2>
+                            <p className="text-gray-400 text-center mb-8 max-w-md">
+                                Start bookmarking products you want to check out later. Click the bookmark icon on any product card.
+                            </p>
                             <Link
-                                key={saved.id}
-                                href={`/channel/${saved.product.channel.slug}/products/${saved.product.id}`}
-                                className="group block"
+                                href="/"
+                                className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors shadow-lg hover:shadow-indigo-500/20"
                             >
-                                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all">
-                                    {/* Product Image */}
-                                    <div className="relative aspect-video bg-gray-100">
-                                        {saved.product.previewImage ? (
-                                            <Image
-                                                src={saved.product.previewImage}
-                                                alt={saved.product.title}
-                                                fill
-                                                className="object-cover group-hover:scale-105 transition-transform"
-                                                unoptimized
-                                            />
-                                        ) : (
-                                            <div className="flex items-center justify-center h-full">
-                                                <BookmarkIcon className="w-12 h-12 text-gray-300" />
+                                <SparklesIcon className="w-5 h-5" />
+                                Explore Products
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            {savedProducts.map((saved) => (
+                                <Link
+                                    key={saved.id}
+                                    href={`/channel/${saved.product.channel.slug}/products/${saved.product.id}`}
+                                    className="group block"
+                                >
+                                    <div className="bg-[#1a1a1a] rounded-2xl shadow-sm border border-[#333] hover:border-[#444] overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all">
+                                        {/* Product Image */}
+                                        <div className="relative aspect-video bg-[#2a2a2a]">
+                                            {saved.product.previewImage ? (
+                                                <Image
+                                                    src={saved.product.previewImage}
+                                                    alt={saved.product.title}
+                                                    fill
+                                                    className="object-cover group-hover:scale-105 transition-transform"
+                                                    unoptimized
+                                                />
+                                            ) : (
+                                                <div className="flex items-center justify-center h-full">
+                                                    <BookmarkIcon className="w-12 h-12 text-[#444]" />
+                                                </div>
+                                            )}
+                                            {/* Saved Badge */}
+                                            <div className="absolute top-2 right-2 bg-indigo-600 text-white p-1.5 rounded-full shadow-lg border border-indigo-500">
+                                                <BookmarkIcon className="w-4 h-4" />
                                             </div>
-                                        )}
-                                        {/* Saved Badge */}
-                                        <div className="absolute top-2 right-2 bg-blue-600 text-white p-1.5 rounded-full shadow-lg">
-                                            <BookmarkIcon className="w-4 h-4" />
+                                        </div>
+
+                                        {/* Product Info */}
+                                        <div className="p-5">
+                                            <h3 className="font-bold text-lg text-white line-clamp-2 mb-2 group-hover:text-indigo-400 transition-colors">
+                                                {saved.product.title}
+                                            </h3>
+                                            <p className="text-sm font-medium text-gray-400 mb-4 tracking-wide">
+                                                {saved.product.channel.name}
+                                            </p>
+
+                                            <div className="pt-4 border-t border-[#333] flex justify-between items-center">
+                                                {saved.product.price > 0 ? (
+                                                    <p className="text-lg font-black text-white">
+                                                        ₹{saved.product.price.toLocaleString()}
+                                                    </p>
+                                                ) : (
+                                                    <p className="text-sm font-black text-emerald-400 px-3 py-1 bg-emerald-900/20 rounded-lg inline-block uppercase tracking-wider">
+                                                        Free
+                                                    </p>
+                                                )}
+
+                                                <div className="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center group-hover:bg-indigo-900/30 group-hover:text-indigo-400 transition-colors">
+                                                    <svg className="w-4 h-4 text-gray-400 group-hover:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-
-                                    {/* Product Info */}
-                                    <div className="p-4">
-                                        <h3 className="font-semibold text-gray-900 line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
-                                            {saved.product.title}
-                                        </h3>
-                                        <p className="text-sm text-gray-600 mb-2">
-                                            {saved.product.channel.name}
-                                        </p>
-                                        {saved.product.price > 0 && (
-                                            <p className="text-sm font-semibold text-gray-900">
-                                                ₹{saved.product.price.toLocaleString()}
-                                            </p>
-                                        )}
-                                        {saved.product.price === 0 && (
-                                            <p className="text-sm font-semibold text-green-600">
-                                                Free
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                )}
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </MainLayout>
     );

@@ -127,11 +127,11 @@ export default function PlaylistPage() {
 
     if (loading || status === 'loading') {
         return (
-            <MainLayout>
-                <div className="min-h-screen flex items-center justify-center bg-gray-50/50">
+            <MainLayout isDarkTheme={true}>
+                <div className="min-h-screen flex items-center justify-center bg-[#141414]">
                     <div className="flex flex-col items-center">
-                        <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                        <p className="mt-4 text-gray-500 font-medium">Loading your playlist...</p>
+                        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                        <p className="mt-4 text-gray-400 font-medium">Loading your playlist...</p>
                     </div>
                 </div>
             </MainLayout>
@@ -141,13 +141,13 @@ export default function PlaylistPage() {
     if (!playlist) return null;
 
     return (
-        <MainLayout>
-            <div className="min-h-screen bg-gray-50/50">
+        <MainLayout isDarkTheme={true}>
+            <div className="min-h-screen bg-[#141414]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
                     <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
                         {/* Sidebar / Header */}
                         <div className="lg:w-80 shrink-0">
-                            <div className="relative aspect-video lg:aspect-square rounded-3xl overflow-hidden shadow-2xl shadow-indigo-100 group">
+                            <div className="relative aspect-video lg:aspect-square rounded-3xl overflow-hidden shadow-2xl border border-[#333] group">
                                 {playlist.items[0]?.product.previewImage ? (
                                     <Image
                                         src={playlist.items[0].product.previewImage}
@@ -157,46 +157,46 @@ export default function PlaylistPage() {
                                         unoptimized
                                     />
                                 ) : (
-                                    <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                                        <FolderIcon className="w-20 h-20 text-white/50" />
+                                    <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center">
+                                        <FolderIcon className="w-20 h-20 text-[#444]" />
                                     </div>
                                 )}
-                                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors" />
+                                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors" />
                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button
                                         onClick={handlePlayAll}
                                         className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-all duration-300"
                                     >
-                                        <PlayIcon className="w-8 h-8 text-indigo-600 ml-1" />
+                                        <PlayIcon className="w-8 h-8 text-black ml-1" />
                                     </button>
                                 </div>
                             </div>
 
                             <div className="mt-6 lg:mt-8 space-y-4">
-                                <h1 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">
+                                <h1 className="text-3xl font-black text-white tracking-tight leading-tight">
                                     {playlist.name}
                                 </h1>
 
                                 {playlist.description && (
-                                    <p className="text-gray-600 text-sm leading-relaxed">
+                                    <p className="text-gray-400 text-sm leading-relaxed">
                                         {playlist.description}
                                     </p>
                                 )}
 
-                                <div className="flex items-center flex-wrap gap-4 py-4 border-y border-gray-100">
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-white rounded-full shadow-sm border border-gray-100">
+                                <div className="flex items-center flex-wrap gap-4 py-4 border-y border-[#333]">
+                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-[#1a1a1a] rounded-full shadow-sm border border-[#333]">
                                         {playlist.isPublic ? (
                                             <GlobeAltIcon className="w-4 h-4 text-emerald-500" />
                                         ) : (
                                             <LockClosedIcon className="w-4 h-4 text-amber-500" />
                                         )}
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                                             {playlist.isPublic ? 'Public' : 'Private'}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-white rounded-full shadow-sm border border-gray-100">
+                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-[#1a1a1a] rounded-full shadow-sm border border-[#333]">
                                         <ClockIcon className="w-4 h-4 text-indigo-500" />
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">
                                             {playlist.items.length} Items
                                         </span>
                                     </div>
@@ -205,7 +205,7 @@ export default function PlaylistPage() {
                                 <button
                                     onClick={handlePlayAll}
                                     disabled={playlist.items.length === 0}
-                                    className="w-full h-12 flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-lg shadow-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full h-12 flex items-center justify-center gap-2 bg-white text-black font-bold rounded-xl hover:bg-gray-200 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <PlayIcon className="w-5 h-5 fill-current" />
                                     Play All
@@ -216,17 +216,17 @@ export default function PlaylistPage() {
                         {/* Items List */}
                         <div className="flex-1 min-w-0">
                             {playlist.items.length === 0 ? (
-                                <div className="bg-white rounded-3xl p-12 text-center border-2 border-dashed border-gray-200">
-                                    <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <FolderIcon className="w-10 h-10 text-gray-300" />
+                                <div className="bg-[#1a1a1a] rounded-3xl p-12 text-center border-2 border-dashed border-[#333]">
+                                    <div className="w-20 h-20 bg-[#2a2a2a] rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <FolderIcon className="w-10 h-10 text-[#555]" />
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-2">Your playlist is empty</h3>
-                                    <p className="text-gray-500 mb-8 max-w-sm mx-auto">
+                                    <h3 className="text-xl font-bold text-white mb-2">Your playlist is empty</h3>
+                                    <p className="text-gray-400 mb-8 max-w-sm mx-auto">
                                         Explore and add products you love to this playlist to keep them organized.
                                     </p>
                                     <Link
                                         href="/"
-                                        className="inline-flex items-center gap-2 px-8 py-3 bg-gray-900 text-white font-bold rounded-2xl hover:bg-black transition-all shadow-xl"
+                                        className="inline-flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition-all shadow-xl"
                                     >
                                         <SparklesIcon className="w-5 h-5" />
                                         Browse Products
@@ -237,15 +237,15 @@ export default function PlaylistPage() {
                                     {playlist.items.map((item, index) => (
                                         <div
                                             key={item.id}
-                                            className="group relative bg-white rounded-3xl p-4 flex gap-4 sm:gap-6 hover:bg-white hover:shadow-xl hover:shadow-indigo-50/50 transition-all border border-transparent hover:border-indigo-100/50"
+                                            className="group relative bg-[#1a1a1a] rounded-3xl p-4 flex gap-4 sm:gap-6 hover:bg-[#222] hover:-translate-y-1 transition-all border border-[#333] hover:border-[#444]"
                                         >
-                                            <div className="hidden sm:flex items-center justify-center w-6 text-sm font-bold text-gray-300 group-hover:text-indigo-400 transition-colors">
+                                            <div className="hidden sm:flex items-center justify-center w-6 text-sm font-bold text-gray-500 group-hover:text-indigo-400 transition-colors">
                                                 {index + 1}
                                             </div>
 
                                             <Link
                                                 href={`/channel/${item.product.channel.slug}/products/${item.product.id}`}
-                                                className="relative w-32 sm:w-48 aspect-video rounded-2xl overflow-hidden shrink-0 shadow-sm"
+                                                className="relative w-32 sm:w-48 aspect-video rounded-2xl overflow-hidden shrink-0 shadow-sm border border-[#333]"
                                             >
                                                 {item.product.previewImage ? (
                                                     <Image
@@ -256,11 +256,11 @@ export default function PlaylistPage() {
                                                         unoptimized
                                                     />
                                                 ) : (
-                                                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                                        <PlayIcon className="w-8 h-8 text-gray-300" />
+                                                    <div className="w-full h-full bg-[#2a2a2a] flex items-center justify-center">
+                                                        <PlayIcon className="w-8 h-8 text-[#555]" />
                                                     </div>
                                                 )}
-                                                <div className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-black/60 backdrop-blur-md rounded text-[10px] font-bold text-white uppercase tracking-widest">
+                                                <div className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-black/80 backdrop-blur-md rounded text-[10px] font-bold text-white uppercase tracking-widest">
                                                     {item.product.type}
                                                 </div>
                                             </Link>
@@ -270,7 +270,7 @@ export default function PlaylistPage() {
                                                     href={`/channel/${item.product.channel.slug}/products/${item.product.id}`}
                                                     className="inline-block"
                                                 >
-                                                    <h3 className="text-base sm:text-lg font-bold text-gray-900 line-clamp-2 hover:text-indigo-600 transition-colors">
+                                                    <h3 className="text-base sm:text-lg font-bold text-white line-clamp-2 hover:text-indigo-400 transition-colors">
                                                         {item.product.title}
                                                     </h3>
                                                 </Link>
@@ -278,7 +278,7 @@ export default function PlaylistPage() {
                                                 <div className="mt-2 flex items-center gap-2">
                                                     <Link
                                                         href={`/channel/${item.product.channel.slug}`}
-                                                        className="relative w-5 h-5 rounded-full overflow-hidden shrink-0"
+                                                        className="relative w-5 h-5 rounded-full overflow-hidden shrink-0 ring-1 ring-[#444]"
                                                     >
                                                         {item.product.channel.user.image ? (
                                                             <Image
@@ -289,25 +289,25 @@ export default function PlaylistPage() {
                                                                 unoptimized
                                                             />
                                                         ) : (
-                                                            <div className="w-full h-full bg-indigo-100 flex items-center justify-center text-[10px] font-bold text-indigo-600">
+                                                            <div className="w-full h-full bg-[#333] flex items-center justify-center text-[10px] font-bold text-gray-300">
                                                                 {item.product.channel.name[0]}
                                                             </div>
                                                         )}
                                                     </Link>
                                                     <Link
                                                         href={`/channel/${item.product.channel.slug}`}
-                                                        className="text-xs font-bold text-gray-500 hover:text-indigo-600 transition-colors"
+                                                        className="text-xs font-bold text-gray-400 hover:text-indigo-400 transition-colors"
                                                     >
                                                         {item.product.channel.name}
                                                     </Link>
                                                 </div>
 
                                                 <div className="mt-4 flex items-center justify-between">
-                                                    <div className="text-sm font-black text-gray-900">
+                                                    <div className="text-sm font-black text-white">
                                                         {item.product.price > 0 ? (
                                                             `₹${item.product.price.toLocaleString()}`
                                                         ) : (
-                                                            <span className="text-emerald-600 uppercase tracking-widest text-[10px]">Free</span>
+                                                            <span className="text-emerald-400 uppercase tracking-widest text-[10px] px-2 py-1 bg-emerald-900/30 rounded inline-block">Free</span>
                                                         )}
                                                     </div>
                                                 </div>
@@ -317,7 +317,7 @@ export default function PlaylistPage() {
                                                 <button
                                                     onClick={() => handleRemoveItem(item.product.id)}
                                                     disabled={removingId === item.product.id}
-                                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                                    className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-900/20 rounded-xl transition-all"
                                                     title="Remove from playlist"
                                                 >
                                                     {removingId === item.product.id ? (

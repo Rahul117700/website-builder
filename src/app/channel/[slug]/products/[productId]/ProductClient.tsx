@@ -707,7 +707,7 @@ export default function ProductClient() {
                           e.stopPropagation();
                           setShowQualityMenu(!showQualityMenu);
                         }}
-                        className="px-3 py-1.5 bg-black/70 hover:bg-black/90 text-white text-sm font-medium rounded flex items-center gap-2 transition-colors backdrop-blur-sm"
+                        className="px-3 py-1.5 bg-[#e50914]/70 hover:bg-[#e50914]/90 text-white text-sm font-medium rounded flex items-center gap-2 transition-colors backdrop-blur-sm"
                       >
                         <span>{selectedQuality === 'auto' ? 'Auto' : selectedQuality}</span>
                       </button>
@@ -717,7 +717,7 @@ export default function ProductClient() {
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
                   <div className="text-center">
-                    <VideoCameraIcon className="h-16 w-16 text-gray-600 mx-auto mb-4" />
+                    <VideoCameraIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-400">Video not available</p>
                   </div>
                 </div>
@@ -729,7 +729,7 @@ export default function ProductClient() {
                   <p className="text-white/70 text-lg font-medium mb-4">Subscribe to watch</p>
                   <button
                     onClick={() => setShowSubscriptionModal(true)}
-                    className="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition"
+                    className="px-6 py-3 bg-[#1a1a1a] text-white rounded-lg font-semibold hover:bg-[#333] transition"
                   >
                     Subscribe Now
                   </button>
@@ -771,17 +771,17 @@ export default function ProductClient() {
                     </div>
 
                     {/* Mobile View: Explicit Button */}
-                    <div className="md:hidden w-full h-full flex flex-col items-center justify-center bg-gray-50 p-6 text-center border border-gray-100 rounded-lg">
+                    <div className="md:hidden w-full h-full flex flex-col items-center justify-center bg-[#141414] p-6 text-center border border-[#333] rounded-lg">
                       <div className="w-16 h-16 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mb-4">
                         <DocumentTextIcon className="w-8 h-8" />
                       </div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">{product.title}</h3>
-                      <p className="text-sm text-gray-500 mb-6 max-w-xs mx-auto">This document is optimized for mobile viewing.</p>
+                      <h3 className="text-lg font-bold text-white mb-2 line-clamp-1">{product.title}</h3>
+                      <p className="text-sm text-gray-400 mb-6 max-w-xs mx-auto">This document is optimized for mobile viewing.</p>
                       <a
                         href={fileUrl.startsWith('http') ? `/api/proxy-pdf?url=${encodeURIComponent(fileUrl)}` : fileUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white font-bold rounded-xl shadow-lg hover:scale-105 transition-transform"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black font-bold font-bold rounded-xl shadow-lg hover:scale-105 transition-transform"
                       >
                         <DocumentTextIcon className="w-5 h-5" />
                         View PDF
@@ -791,7 +791,7 @@ export default function ProductClient() {
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center p-8">
                     <DocumentTextIcon className="h-16 w-16 text-gray-400 mb-4" />
-                    <p className="text-gray-600 mb-4">Document Preview</p>
+                    <p className="text-gray-400 mb-4">Document Preview</p>
                     <a
                       href={fileUrl}
                       target="_blank"
@@ -814,7 +814,7 @@ export default function ProductClient() {
                   <p className="text-white/70 text-lg font-medium mb-4">Subscribe to view</p>
                   <button
                     onClick={() => setShowSubscriptionModal(true)}
-                    className="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition"
+                    className="px-6 py-3 bg-[#1a1a1a] text-white rounded-lg font-semibold hover:bg-[#333] transition"
                   >
                     Subscribe Now
                   </button>
@@ -851,7 +851,7 @@ export default function ProductClient() {
                   <p className="text-white/70 text-lg font-medium mb-4">Subscribe to view</p>
                   <button
                     onClick={() => setShowSubscriptionModal(true)}
-                    className="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition"
+                    className="px-6 py-3 bg-[#1a1a1a] text-white rounded-lg font-semibold hover:bg-[#333] transition"
                   >
                     Subscribe Now
                   </button>
@@ -888,7 +888,7 @@ export default function ProductClient() {
                 <p className="text-white/70 text-lg font-medium mb-4">Subscribe to view</p>
                 <button
                   onClick={() => setShowSubscriptionModal(true)}
-                  className="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition"
+                  className="px-6 py-3 bg-[#1a1a1a] text-white rounded-lg font-semibold hover:bg-[#333] transition"
                 >
                   Subscribe Now
                 </button>
@@ -923,7 +923,7 @@ export default function ProductClient() {
             <p className="text-white/70 text-lg font-medium mb-4">Subscribe to view</p>
             <button
               onClick={() => setShowSubscriptionModal(true)}
-              className="px-6 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition"
+              className="px-6 py-3 bg-[#1a1a1a] text-white rounded-lg font-semibold hover:bg-[#333] transition"
             >
               Subscribe Now
             </button>
@@ -935,10 +935,10 @@ export default function ProductClient() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#141414] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading product...</p>
+          <p className="text-gray-400">Loading product...</p>
         </div>
       </div>
     );
@@ -946,9 +946,9 @@ export default function ProductClient() {
 
   if (!product || !channel) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#141414] flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Product not found</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">Product not found</h1>
           <button
             onClick={() => router.push(`/channel/${params?.slug}`)}
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -967,8 +967,8 @@ export default function ProductClient() {
   const sellerName = channel.user?.name || channel.name || 'Creator';
 
   return (
-    <MainLayout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-purple-50/20 w-full relative overflow-hidden">
+    <MainLayout isDarkTheme={true}>
+      <div className="min-h-screen bg-gradient-to-br bg-[#141414] w-full relative overflow-hidden">
         {/* Decorative Background Elements */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-200/10 to-purple-200/10 rounded-full blur-3xl"></div>
@@ -987,10 +987,10 @@ export default function ProductClient() {
 
               {/* Content Details - Full Width with Padding */}
               <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-6 leading-tight">{product.title}</h1>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-6 leading-tight">{product.title}</h1>
 
                 {/* Channel Info & Actions */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-6 border-b border-gray-200">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-6 border-b border-[#333]">
                   <div className="flex items-center gap-3 sm:gap-4">
                     {channel.user?.image ? (
                       <div
@@ -1009,19 +1009,19 @@ export default function ProductClient() {
                         className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center ring-2 ring-white shadow-lg cursor-pointer"
                         onClick={() => router.push(`/channel/${params?.slug}`)}
                       >
-                        <span className="text-indigo-600 font-bold text-lg">
+                        <span className="text-red-500 font-bold text-lg">
                           {(channel.user?.name || channel.name || 'C')[0].toUpperCase()}
                         </span>
                       </div>
                     )}
                     <div>
                       <h3
-                        className="font-bold text-gray-900 text-base sm:text-lg cursor-pointer hover:text-indigo-600 transition-colors"
+                        className="font-bold text-white text-base sm:text-lg cursor-pointer hover:text-red-500 transition-colors"
                         onClick={() => router.push(`/channel/${params?.slug}`)}
                       >
                         {channel.name}
                       </h3>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-400">
                         {channel._count?.subscribers || channel.subscribers?.length || 0} subscribers
                       </p>
                     </div>
@@ -1048,65 +1048,65 @@ export default function ProductClient() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <button
                       onClick={handleLikeToggle}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-gray-200 hover:border-red-300 hover:bg-red-50 transition-all hover:shadow-md"
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1a1a1a] border-2 border-[#333] hover:border-red-500 hover:bg-red-900/30 transition-all hover:shadow-md"
                     >
                       {isLiked ? (
                         <HeartIconSolid className="h-5 w-5 text-red-600" />
                       ) : (
-                        <HeartIcon className="h-5 w-5 text-gray-600" />
+                        <HeartIcon className="h-5 w-5 text-gray-400" />
                       )}
-                      <span className="text-xs sm:text-sm font-medium text-gray-700">
+                      <span className="text-xs sm:text-sm font-medium text-gray-300">
                         {product.likeCount || 0}
                       </span>
                     </button>
                     <button
                       onClick={() => setIsBookmarked(!isBookmarked)}
-                      className="p-2.5 rounded-xl bg-white border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all hover:shadow-md"
+                      className="p-2.5 rounded-xl bg-[#1a1a1a] border-2 border-[#333] hover:border-blue-500 hover:bg-blue-900/30 transition-all hover:shadow-md"
                     >
                       {isBookmarked ? (
                         <BookmarkIconSolid className="h-5 w-5 text-blue-600" />
                       ) : (
-                        <BookmarkIcon className="h-5 w-5 text-gray-600" />
+                        <BookmarkIcon className="h-5 w-5 text-gray-400" />
                       )}
                     </button>
                     <button
                       onClick={() => setIsSaveModalOpen(true)}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all hover:shadow-md"
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1a1a1a] border-2 border-[#333] hover:border-indigo-500 hover:bg-indigo-900/30 transition-all hover:shadow-md"
                     >
-                      <PlusCircleIcon className="h-5 w-5 text-gray-600" />
-                      <span className="hidden sm:inline text-sm font-medium text-gray-700">Save</span>
+                      <PlusCircleIcon className="h-5 w-5 text-gray-400" />
+                      <span className="hidden sm:inline text-sm font-medium text-gray-300">Save</span>
                     </button>
                     <button
                       onClick={handleShare}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all hover:shadow-md"
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1a1a1a] border-2 border-[#333] hover:border-indigo-500 hover:bg-indigo-900/30 transition-all hover:shadow-md"
                     >
-                      <ShareIcon className="h-5 w-5 text-gray-600" />
-                      <span className="hidden sm:inline text-sm font-medium text-gray-700">Share</span>
+                      <ShareIcon className="h-5 w-5 text-gray-400" />
+                      <span className="hidden sm:inline text-sm font-medium text-gray-300">Share</span>
                     </button>
                     {product.fileUrl && (product.type?.toUpperCase() !== 'VIDEO' && product.type?.toUpperCase() !== 'VIDEOS') && (
-                      <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border-2 border-gray-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all hover:shadow-md">
-                        <ArrowDownTrayIcon className="h-5 w-5 text-gray-600" />
-                        <span className="hidden sm:inline text-sm font-medium text-gray-700">Download</span>
+                      <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1a1a1a] border-2 border-[#333] hover:border-emerald-500 hover:bg-emerald-900/30 transition-all hover:shadow-md">
+                        <ArrowDownTrayIcon className="h-5 w-5 text-gray-400" />
+                        <span className="hidden sm:inline text-sm font-medium text-gray-300">Download</span>
                       </button>
                     )}
                     <div className="relative">
                       <button
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsReporting(!isReporting); }}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 transition-all hover:shadow-md ${isReporting ? 'bg-amber-50 text-amber-600 border-amber-300' : 'bg-white border-gray-200 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-600 text-gray-700'}`}
+                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 transition-all hover:shadow-md ${isReporting ? 'bg-amber-50 text-amber-600 border-amber-300' : 'bg-[#1a1a1a] border-[#333] hover:border-amber-300 hover:bg-amber-50 hover:text-amber-600 text-gray-300'}`}
                       >
                         {isReporting ? <FlagIconSolid className="h-5 w-5 text-amber-500" /> : <FlagIcon className="h-5 w-5" />}
                         <span className="hidden sm:inline text-sm font-medium">Report</span>
                       </button>
 
                       {isReporting && (
-                        <div className="absolute right-0 top-14 w-60 bg-white shadow-[0_10px_40px_-5px_rgba(0,0,0,0.2)] rounded-2xl border border-gray-100 p-4 z-50 animate-in fade-in slide-in-from-top-2">
-                          <p className="text-xs font-bold text-gray-900 mb-3 uppercase tracking-wider flex items-center gap-2">
+                        <div className="absolute right-0 top-14 w-60 bg-[#1a1a1a] shadow-[0_10px_40px_-5px_rgba(0,0,0,0.2)] rounded-2xl border border-[#333] p-4 z-50 animate-in fade-in slide-in-from-top-2">
+                          <p className="text-xs font-bold text-white mb-3 uppercase tracking-wider flex items-center gap-2">
                             <FlagIcon className="w-4 h-4 text-amber-500" /> Report Content
                           </p>
                           <select
                             value={reportReason}
                             onChange={(e) => setReportReason(e.target.value)}
-                            className="w-full text-sm p-2.5 rounded-xl border border-gray-200 mb-4 outline-none bg-gray-50 focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+                            className="w-full text-sm p-2.5 rounded-xl border border-[#333] mb-4 outline-none bg-[#141414] focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
                           >
                             <option>Inappropriate content</option>
                             <option>Pornography or Nudity</option>
@@ -1117,7 +1117,7 @@ export default function ProductClient() {
                           <div className="flex gap-2">
                             <button
                               onClick={() => setIsReporting(false)}
-                              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold py-2.5 rounded-xl transition-colors"
+                              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-300 text-sm font-bold py-2.5 rounded-xl transition-colors"
                             >
                               Cancel
                             </button>
@@ -1136,7 +1136,7 @@ export default function ProductClient() {
                 </div>
 
                 {/* Product Info */}
-                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                <div className="bg-[#141414] rounded-lg p-4 mb-4">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
                     <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                       {product.tags && product.tags.length > 0 && (
@@ -1169,12 +1169,12 @@ export default function ProductClient() {
                     )}
                   </div>
                   {product.description && (
-                    <p className="text-sm sm:text-base text-gray-700 whitespace-pre-wrap">{product.description}</p>
+                    <p className="text-sm sm:text-base text-gray-300 whitespace-pre-wrap">{product.description}</p>
                   )}
                 </div>
 
                 {/* Stats */}
-                <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-600 mb-6">
+                <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-400 mb-6">
                   <span>{product.viewCount || 0} views</span>
                   <span>{new Date(product.createdAt).toLocaleDateString()}</span>
                   <span>{product.type}</span>
@@ -1184,25 +1184,25 @@ export default function ProductClient() {
                 <div className="mb-12">
                   <button
                     onClick={() => setReviewsExpanded(!reviewsExpanded)}
-                    className="w-full flex md:hidden items-center justify-between p-4 bg-white rounded-2xl border border-gray-100 shadow-sm mb-4"
+                    className="w-full flex md:hidden items-center justify-between p-4 bg-[#1a1a1a] rounded-2xl border border-[#333] shadow-sm mb-4"
                   >
                     <div className="flex items-center gap-3">
                       <StarIconSolid className="w-5 h-5 text-yellow-400" />
-                      <span className="font-bold text-gray-900">Ratings & Reviews ({totalReviews})</span>
+                      <span className="font-bold text-white">Ratings & Reviews ({totalReviews})</span>
                     </div>
                     {reviewsExpanded ? (
-                      <ChevronUpIcon className="w-5 h-5 text-gray-500" />
+                      <ChevronUpIcon className="w-5 h-5 text-gray-400" />
                     ) : (
-                      <ChevronDownIcon className="w-5 h-5 text-gray-500" />
+                      <ChevronDownIcon className="w-5 h-5 text-gray-400" />
                     )}
                   </button>
 
                   <div className={`${reviewsExpanded ? 'block' : 'hidden'} md:block`}>
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 bg-gradient-to-br from-white to-gray-50 p-8 rounded-[2rem] border border-gray-100/80 shadow-sm">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 bg-[#1a1a1a] p-8 rounded-[2rem] border border-[#333]/80 shadow-sm">
                       <div className="flex flex-col md:flex-row items-center gap-8">
                         <div className="text-center md:text-left flex flex-col items-center md:items-start">
                           <div className="flex items-baseline gap-2 mb-2">
-                            <span className="text-5xl sm:text-7xl font-black text-gray-900 tracking-tighter">
+                            <span className="text-5xl sm:text-7xl font-black text-white tracking-tighter">
                               {averageRating > 0 ? averageRating.toFixed(1) : '0.0'}
                             </span>
                             <span className="text-xl text-gray-400 font-bold">/ 5</span>
@@ -1218,12 +1218,12 @@ export default function ProductClient() {
                               />
                             ))}
                           </div>
-                          <div className="text-sm text-gray-500 font-medium bg-gray-100/80 px-3 py-1 rounded-full">{totalReviews} verified ratings</div>
+                          <div className="text-sm text-gray-400 font-medium bg-gray-100/80 px-3 py-1 rounded-full">{totalReviews} verified ratings</div>
                         </div>
                         <div className="h-px w-full md:w-px md:h-24 bg-gradient-to-b from-transparent via-gray-200 to-transparent" />
                         <div className="text-center md:text-left">
                           <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                            <h2 className="text-2xl font-black text-gray-900 tracking-tight">Ratings & Reviews</h2>
+                            <h2 className="text-2xl font-black text-white tracking-tight">Ratings & Reviews</h2>
                             <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm text-[10px] font-extrabold uppercase tracking-widest shrink-0">
                               <span className="relative flex h-2 w-2">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -1232,25 +1232,25 @@ export default function ProductClient() {
                               LIVE
                             </span>
                           </div>
-                          <p className="text-base text-gray-500 max-w-sm">Authentic feedback from real users to help you make the best decision.</p>
+                          <p className="text-base text-gray-400 max-w-sm">Authentic feedback from real users to help you make the best decision.</p>
                         </div>
                       </div>
                     </div>
 
                     {/* User Rating Form */}
                     {session?.user?.id && (
-                      <div className="bg-white rounded-[2rem] p-8 mb-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+                      <div className="bg-[#1a1a1a] rounded-[2rem] p-8 mb-8 border border-[#333] shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
                         <div className="flex items-center gap-3 mb-6">
-                          <div className="p-2.5 bg-indigo-50 rounded-xl text-indigo-600">
+                          <div className="p-2.5 bg-indigo-900/30 rounded-xl text-red-500">
                             <StarIcon className="w-6 h-6" />
                           </div>
                           <div>
-                            <h3 className="text-lg font-extrabold text-gray-900">Rate this product</h3>
-                            <p className="text-sm text-gray-500 font-medium">Share your experience with the community</p>
+                            <h3 className="text-lg font-extrabold text-white">Rate this product</h3>
+                            <p className="text-sm text-gray-400 font-medium">Share your experience with the community</p>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-4 mb-6 p-4 bg-gray-50/50 rounded-2xl border border-gray-100 inline-block w-fit">
+                        <div className="flex items-center gap-4 mb-6 p-4 bg-[#1a1a1a] shadow-none rounded-2xl border border-[#333] inline-block w-fit">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <button
                               key={star}
@@ -1272,13 +1272,13 @@ export default function ProductClient() {
                             value={reviewComment}
                             onChange={(e) => setReviewComment(e.target.value)}
                             placeholder="Tell us what you think about this content..."
-                            className="w-full px-5 py-4 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 text-sm sm:text-base text-gray-900 transition-all resize-none min-h-[120px]"
+                            className="w-full px-5 py-4 bg-[#1a1a1a] shadow-none border border-[#333] rounded-2xl focus:ring-4 focus:ring-red-500/10 focus:border-red-500 text-sm sm:text-base text-white transition-all resize-none min-h-[120px]"
                           />
                         </div>
                         <button
                           onClick={handleRatingSubmit}
                           disabled={userRating === 0}
-                          className="px-8 py-3.5 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-black transition-all shadow-md hover:shadow-xl disabled:opacity-40 disabled:shadow-none translate-y-0 active:scale-95 flex items-center gap-2"
+                          className="px-8 py-3.5 bg-white text-black font-bold rounded-xl text-sm font-bold hover:bg-[#e50914] transition-all shadow-md hover:shadow-xl disabled:opacity-40 disabled:shadow-none translate-y-0 active:scale-95 flex items-center gap-2"
                         >
                           Submit Review
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1291,16 +1291,16 @@ export default function ProductClient() {
                     {/* Reviews List */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {reviews.length === 0 ? (
-                        <div className="col-span-full py-16 text-center bg-gray-50/50 rounded-[2rem] border-2 border-dashed border-gray-100">
-                          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-gray-100">
+                        <div className="col-span-full py-16 text-center bg-[#1a1a1a] shadow-none rounded-[2rem] border-2 border-dashed border-[#333]">
+                          <div className="w-16 h-16 bg-[#1a1a1a] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-[#333]">
                             <StarIcon className="w-8 h-8 text-gray-300" />
                           </div>
-                          <p className="text-base text-gray-500 font-bold mb-1">No reviews yet</p>
+                          <p className="text-base text-gray-400 font-bold mb-1">No reviews yet</p>
                           <p className="text-sm text-gray-400">Be the first to share your thoughts!</p>
                         </div>
                       ) : (
                         reviews.slice(0, visibleReviewsCount).map((review: any) => (
-                          <div key={review.id} className="bg-white border border-gray-100 rounded-[2rem] p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 group">
+                          <div key={review.id} className="bg-[#1a1a1a] border border-[#333] rounded-[2rem] p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 group">
                             <div className="flex items-start justify-between mb-4">
                               <div className="flex items-center gap-4">
                                 {review.user?.image ? (
@@ -1311,13 +1311,13 @@ export default function ProductClient() {
                                   />
                                 ) : (
                                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center border-2 border-white shadow-sm ring-4 ring-gray-50">
-                                    <span className="text-indigo-600 font-black text-sm">
+                                    <span className="text-red-500 font-black text-sm">
                                       {(review.user?.name || 'U')[0].toUpperCase()}
                                     </span>
                                   </div>
                                 )}
                                 <div>
-                                  <h4 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                                  <h4 className="font-bold text-white group-hover:text-red-500 transition-colors">
                                     {review.user?.name || 'Anonymous'}
                                   </h4>
                                   <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">
@@ -1331,7 +1331,7 @@ export default function ProductClient() {
                               </div>
                             </div>
                             {review.comment && (
-                              <p className="text-sm text-gray-600 leading-relaxed bg-gray-50/50 p-4 rounded-2xl border border-gray-100/50 line-clamp-4">"{review.comment}"</p>
+                              <p className="text-sm text-gray-400 leading-relaxed bg-[#1a1a1a] shadow-none p-4 rounded-2xl border border-[#333]/50 line-clamp-4">"{review.comment}"</p>
                             )}
                           </div>
                         ))
@@ -1341,7 +1341,7 @@ export default function ProductClient() {
                       <div className="mt-8 text-center">
                         <button
                           onClick={() => setVisibleReviewsCount(prev => prev + 4)}
-                          className="inline-flex items-center justify-center px-6 py-2.5 border border-gray-200 shadow-sm text-sm font-bold rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all active:scale-95"
+                          className="inline-flex items-center justify-center px-6 py-2.5 border border-[#333] shadow-sm text-sm font-bold rounded-xl text-gray-300 bg-[#1a1a1a] hover:bg-[#141414] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all active:scale-95"
                         >
                           Show more reviews
                         </button>
@@ -1354,29 +1354,29 @@ export default function ProductClient() {
                 <div className="mb-6">
                   <button
                     onClick={() => setCommentsExpanded(!commentsExpanded)}
-                    className="w-full flex md:hidden items-center justify-between p-4 bg-white rounded-2xl border border-gray-100 shadow-sm mb-4"
+                    className="w-full flex md:hidden items-center justify-between p-4 bg-[#1a1a1a] rounded-2xl border border-[#333] shadow-sm mb-4"
                   >
                     <div className="flex items-center gap-3">
-                      <ChatBubbleLeftRightIcon className="h-5 w-5 text-gray-700" />
-                      <span className="font-bold text-gray-900">Comments ({comments.length})</span>
+                      <ChatBubbleLeftRightIcon className="h-5 w-5 text-gray-300" />
+                      <span className="font-bold text-white">Comments ({comments.length})</span>
                     </div>
                     {commentsExpanded ? (
-                      <ChevronUpIcon className="w-5 h-5 text-gray-500" />
+                      <ChevronUpIcon className="w-5 h-5 text-gray-400" />
                     ) : (
-                      <ChevronDownIcon className="w-5 h-5 text-gray-500" />
+                      <ChevronDownIcon className="w-5 h-5 text-gray-400" />
                     )}
                   </button>
 
                   <div className={`${commentsExpanded ? 'block' : 'hidden'} md:block`}>
                     {/* Comments Header */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 bg-gradient-to-br from-white to-gray-50 p-8 rounded-[2rem] border border-gray-100/80 shadow-sm">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 bg-[#1a1a1a] p-8 rounded-[2rem] border border-[#333]/80 shadow-sm">
                       <div className="flex items-center gap-6">
-                        <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100/50 text-indigo-600 shadow-sm">
+                        <div className="p-4 bg-indigo-900/30 rounded-2xl border border-indigo-100/50 text-red-500 shadow-sm">
                           <ChatBubbleLeftRightIcon className="h-8 w-8" />
                         </div>
                         <div>
                           <div className="flex items-center gap-3 mb-2">
-                            <h2 className="text-2xl font-black text-gray-900 tracking-tight">
+                            <h2 className="text-2xl font-black text-white tracking-tight">
                               Comments
                             </h2>
                             <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm text-[10px] font-extrabold uppercase tracking-widest shrink-0">
@@ -1387,7 +1387,7 @@ export default function ProductClient() {
                               LIVE
                             </span>
                           </div>
-                          <p className="text-base text-gray-500 font-medium">{comments.length} discussions happening live right now</p>
+                          <p className="text-base text-gray-400 font-medium">{comments.length} discussions happening live right now</p>
                         </div>
                       </div>
                     </div>
@@ -1395,7 +1395,7 @@ export default function ProductClient() {
                     {/* Comment Form */}
                     <div className="mb-10">
                       {session?.user?.id ? (
-                        <div className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
+                        <div className="bg-[#1a1a1a] rounded-[2rem] p-8 border border-[#333] shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
                           <div className="flex gap-4 mb-6">
                             {session.user.image ? (
                               <img
@@ -1405,7 +1405,7 @@ export default function ProductClient() {
                               />
                             ) : (
                               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center ring-4 ring-gray-50 shadow-sm shrink-0">
-                                <span className="text-gray-600 font-black text-sm">
+                                <span className="text-gray-400 font-black text-sm">
                                   {(session.user.name || 'Y')[0].toUpperCase()}
                                 </span>
                               </div>
@@ -1415,7 +1415,7 @@ export default function ProductClient() {
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
                                 placeholder="Join the conversation..."
-                                className="w-full px-5 py-4 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 text-sm sm:text-base text-gray-900 transition-all resize-none min-h-[120px]"
+                                className="w-full px-5 py-4 bg-[#1a1a1a] shadow-none border border-[#333] rounded-2xl focus:ring-4 focus:ring-red-500/10 focus:border-red-500 text-sm sm:text-base text-white transition-all resize-none min-h-[120px]"
                               />
                             </div>
                           </div>
@@ -1423,7 +1423,7 @@ export default function ProductClient() {
                             <button
                               onClick={() => handleCommentSubmit()}
                               disabled={!newComment.trim()}
-                              className="px-8 py-3.5 bg-gray-900 text-white rounded-xl text-sm font-bold hover:bg-black transition-all shadow-md hover:shadow-xl disabled:opacity-40 disabled:shadow-none translate-y-0 active:scale-95 flex items-center gap-2"
+                              className="px-8 py-3.5 bg-white text-black font-bold rounded-xl text-sm font-bold hover:bg-[#e50914] transition-all shadow-md hover:shadow-xl disabled:opacity-40 disabled:shadow-none translate-y-0 active:scale-95 flex items-center gap-2"
                             >
                               Post Comment
                               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1433,14 +1433,14 @@ export default function ProductClient() {
                           </div>
                         </div>
                       ) : (
-                        <div className="bg-gradient-to-br from-gray-50 to-white rounded-[2rem] p-12 border-2 border-dashed border-gray-200 text-center">
-                          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-gray-100 text-indigo-600">
+                        <div className="bg-[#1a1a1a] rounded-[2rem] p-12 border-2 border-dashed border-[#333] text-center">
+                          <div className="w-16 h-16 bg-[#1a1a1a] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-[#333] text-red-500">
                             <ChatBubbleLeftRightIcon className="w-8 h-8" />
                           </div>
-                          <p className="text-base text-gray-500 font-bold mb-6">Sign in to share your thoughts with the community</p>
+                          <p className="text-base text-gray-400 font-bold mb-6">Sign in to share your thoughts with the community</p>
                           <button
                             onClick={() => router.push('/auth/signin')}
-                            className="px-8 py-3.5 bg-white border border-gray-200 text-gray-900 rounded-xl text-sm font-bold hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm active:scale-95"
+                            className="px-8 py-3.5 bg-[#1a1a1a] border border-[#333] text-white rounded-xl text-sm font-bold hover:bg-[#141414] hover:border-gray-300 transition-all shadow-sm active:scale-95"
                           >
                             Sign In to Comment
                           </button>
@@ -1451,8 +1451,8 @@ export default function ProductClient() {
                     {/* Comments List */}
                     <div className="space-y-6">
                       {comments.length === 0 ? (
-                        <div className="py-16 text-center bg-gray-50/50 rounded-[2rem] border-2 border-dashed border-gray-100">
-                          <p className="text-base text-gray-500 font-bold">No comments yet</p>
+                        <div className="py-16 text-center bg-[#1a1a1a] shadow-none rounded-[2rem] border-2 border-dashed border-[#333]">
+                          <p className="text-base text-gray-400 font-bold">No comments yet</p>
                           <p className="text-sm text-gray-400">Start the conversation!</p>
                         </div>
                       ) : (
@@ -1467,7 +1467,7 @@ export default function ProductClient() {
                                     className="w-12 h-12 rounded-full ring-4 ring-gray-50 object-cover shadow-sm"
                                   />
                                 ) : (
-                                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center ring-4 ring-gray-50 border-2 border-white shadow-sm font-black text-indigo-600 text-sm">
+                                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center ring-4 ring-gray-50 border-2 border-white shadow-sm font-black text-red-500 text-sm">
                                     {(comment.user?.name || 'U')[0].toUpperCase()}
                                   </div>
                                 )}
@@ -1475,22 +1475,22 @@ export default function ProductClient() {
                               </div>
                               <div className="flex-1 pb-4">
                                 {/* Main Comment Box */}
-                                <div className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] group-hover:border-indigo-100/50 relative">
+                                <div className="bg-[#1a1a1a] rounded-[2rem] p-6 border border-[#333] shadow-[0_4px_20px_rgb(0,0,0,0.03)] transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] group-hover:border-indigo-100/50 relative">
                                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-                                    <h4 className="font-bold text-gray-900 text-base">
+                                    <h4 className="font-bold text-white text-base">
                                       {comment.user?.name || 'Anonymous'}
                                     </h4>
-                                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-2 py-1 rounded-md w-fit">
+                                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest bg-[#141414] px-2 py-1 rounded-md w-fit">
                                       {new Date(comment.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                     </span>
                                   </div>
-                                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed mb-6">{comment.content}</p>
+                                  <p className="text-sm sm:text-base text-gray-400 leading-relaxed mb-6">{comment.content}</p>
                                   {session?.user?.id && (
                                     <button
                                       onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                                      className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
+                                      className="inline-flex items-center gap-1.5 text-xs font-bold text-red-500 hover:text-indigo-700 transition-colors"
                                     >
-                                      <div className="w-5 h-5 rounded-full bg-indigo-50 flex items-center justify-center">
+                                      <div className="w-5 h-5 rounded-full bg-indigo-900/30 flex items-center justify-center">
                                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                           <path fillRule="evenodd" d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 11-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                                         </svg>
@@ -1502,7 +1502,7 @@ export default function ProductClient() {
 
                                 {/* Reply Form */}
                                 {replyingTo === comment.id && session?.user?.id && (
-                                  <div className="mt-6 bg-indigo-50/50 rounded-2xl p-6 border border-indigo-100/50 animate-in fade-in slide-in-from-top-2 duration-300">
+                                  <div className="mt-6 bg-indigo-900/30/50 rounded-2xl p-6 border border-indigo-100/50 animate-in fade-in slide-in-from-top-2 duration-300">
                                     <div className="flex gap-4 mb-4">
                                       {session.user.image ? (
                                         <img
@@ -1511,7 +1511,7 @@ export default function ProductClient() {
                                           className="w-10 h-10 rounded-full ring-4 ring-white object-cover shadow-sm shrink-0"
                                         />
                                       ) : (
-                                        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm font-black text-indigo-600 text-sm shrink-0 ring-4 ring-white">
+                                        <div className="w-10 h-10 rounded-full bg-[#1a1a1a] flex items-center justify-center shadow-sm font-black text-red-500 text-sm shrink-0 ring-4 ring-white">
                                           {(session.user.name || 'Y')[0].toUpperCase()}
                                         </div>
                                       )}
@@ -1519,7 +1519,7 @@ export default function ProductClient() {
                                         value={replyContent}
                                         onChange={(e) => setReplyContent(e.target.value)}
                                         placeholder="Write your response..."
-                                        className="flex-1 px-5 py-4 bg-white border border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 text-sm text-gray-900 shadow-[0_2px_10px_rgb(0,0,0,0.02)] transition-all resize-none min-h-[100px]"
+                                        className="flex-1 px-5 py-4 bg-[#1a1a1a] border border-[#333] rounded-2xl focus:ring-4 focus:ring-red-500/10 focus:border-red-500 text-sm text-white shadow-[0_2px_10px_rgb(0,0,0,0.02)] transition-all resize-none min-h-[100px]"
                                       />
                                     </div>
                                     <div className="flex justify-end gap-3">
@@ -1528,14 +1528,14 @@ export default function ProductClient() {
                                           setReplyingTo(null);
                                           setReplyContent('');
                                         }}
-                                        className="px-6 py-2.5 text-sm font-bold text-gray-500 hover:text-gray-900 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl transition-all shadow-sm"
+                                        className="px-6 py-2.5 text-sm font-bold text-gray-400 hover:text-white bg-[#1a1a1a] hover:bg-[#141414] border border-[#333] rounded-xl transition-all shadow-sm"
                                       >
                                         Cancel
                                       </button>
                                       <button
                                         onClick={() => handleCommentSubmit(comment.id)}
                                         disabled={!replyContent.trim()}
-                                        className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:shadow-none"
+                                        className="px-6 py-2.5 bg-red-600 text-white rounded-xl text-sm font-bold hover:bg-red-700 transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:shadow-none"
                                       >
                                         Post Reply
                                       </button>
@@ -1545,7 +1545,7 @@ export default function ProductClient() {
 
                                 {/* Replies List */}
                                 {comment.replies && comment.replies.length > 0 && (
-                                  <div className="mt-6 space-y-4 ml-2 border-l-2 border-gray-100 pl-4 md:pl-6">
+                                  <div className="mt-6 space-y-4 ml-2 border-l-2 border-[#333] pl-4 md:pl-6">
                                     {comment.replies.map((reply: any) => (
                                       <div key={reply.id} className="relative">
                                         <div className="flex gap-3 md:gap-4">
@@ -1560,16 +1560,16 @@ export default function ProductClient() {
                                               {(reply.user?.name || 'U')[0].toUpperCase()}
                                             </div>
                                           )}
-                                          <div className="flex-1 bg-gray-50/80 rounded-[1.5rem] p-5 border border-gray-100/50 transition-all hover:border-indigo-100/50 hover:bg-white hover:shadow-sm">
+                                          <div className="flex-1 bg-[#222] rounded-[1.5rem] p-5 border border-[#333]/50 transition-all hover:border-indigo-100/50 hover:bg-[#1a1a1a] hover:shadow-sm">
                                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                                              <span className="font-bold text-sm text-gray-900">
+                                              <span className="font-bold text-sm text-white">
                                                 {reply.user?.name || 'Anonymous'}
                                               </span>
                                               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-100/50 px-2 py-1 rounded-md w-fit">
                                                 {new Date(reply.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                                               </span>
                                             </div>
-                                            <p className="text-sm text-gray-700 leading-relaxed">{reply.content}</p>
+                                            <p className="text-sm text-gray-300 leading-relaxed">{reply.content}</p>
                                           </div>
                                         </div>
                                       </div>
@@ -1586,7 +1586,7 @@ export default function ProductClient() {
                       <div className="mt-8 text-center">
                         <button
                           onClick={() => setVisibleCommentsCount(prev => prev + 5)}
-                          className="inline-flex items-center justify-center px-6 py-2.5 border border-gray-200 shadow-sm text-sm font-bold rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all active:scale-95"
+                          className="inline-flex items-center justify-center px-6 py-2.5 border border-[#333] shadow-sm text-sm font-bold rounded-xl text-gray-300 bg-[#1a1a1a] hover:bg-[#141414] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all active:scale-95"
                         >
                           Show more comments
                         </button>
@@ -1598,15 +1598,15 @@ export default function ProductClient() {
             </div>
 
             {/* Sidebar - Related Products */}
-            <div className="w-full lg:w-96 lg:border-l border-gray-200 bg-white/60 backdrop-blur-md lg:bg-white/80 px-4 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10">
+            <div className="w-full lg:w-96 lg:border-l border-[#333] bg-[#141414] px-4 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg sm:text-xl font-black text-gray-900 tracking-tight">More from {channel.name}</h2>
-                <div className="h-1 w-12 bg-indigo-500 rounded-full hidden lg:block"></div>
+                <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">More from {channel.name}</h2>
+                <div className="h-1 w-12 bg-indigo-900/300 rounded-full hidden lg:block"></div>
               </div>
 
               {relatedProducts.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-3xl">
-                  <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                <div className="flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-[#333] rounded-3xl">
+                  <div className="w-12 h-12 bg-[#141414] rounded-full flex items-center justify-center mb-3">
                     <FolderIcon className="w-6 h-6 text-gray-300" />
                   </div>
                   <p className="text-sm font-bold text-gray-400">No other products available</p>
@@ -1631,12 +1631,12 @@ export default function ProductClient() {
                         key={relatedProduct.id}
                         onClick={handleRelatedProductClick}
                         className={`group flex flex-col lg:flex-row gap-2 rounded-none transition-all duration-500 bg-transparent border-none ${canAccessRelated
-                          ? 'cursor-pointer hover:bg-gray-50/50 hover:-translate-y-1 active:scale-95'
+                          ? 'cursor-pointer hover:bg-[#1a1a1a] shadow-none hover:-translate-y-1 active:scale-95'
                           : 'cursor-not-allowed opacity-75'
                           }`}
                       >
                         {/* Thumbnail Container */}
-                        <div className="relative w-full lg:w-32 h-28 lg:h-20 flex-shrink-0 rounded-none overflow-hidden bg-gray-50 shadow-inner">
+                        <div className="relative w-full lg:w-32 h-28 lg:h-20 flex-shrink-0 rounded-none overflow-hidden bg-[#141414] shadow-inner">
                           {relatedProduct.previewImage ? (
                             <img
                               src={relatedProduct.previewImage}
@@ -1655,7 +1655,7 @@ export default function ProductClient() {
                           {/* Play Icon for Videos */}
                           {(relatedProduct.type === 'VIDEO' || relatedProduct.type === 'VIDEOS') && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="p-1.5 bg-white/20 backdrop-blur-md rounded-full border border-white/30 scale-90 group-hover:scale-100 transition-transform duration-300">
+                              <div className="p-1.5 bg-[#1a1a1a]/20 backdrop-blur-md rounded-full border border-white/30 scale-90 group-hover:scale-100 transition-transform duration-300">
                                 <PlayIcon className="h-5 w-5 text-white shadow-sm" />
                               </div>
                             </div>
@@ -1664,7 +1664,7 @@ export default function ProductClient() {
                           {/* Locked State */}
                           {!canAccessRelated && (
                             <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center">
-                              <div className="p-2 bg-white/20 rounded-full border border-white/40">
+                              <div className="p-2 bg-[#1a1a1a]/20 rounded-full border border-white/40">
                                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
@@ -1683,7 +1683,7 @@ export default function ProductClient() {
                         {/* Content Container */}
                         <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                           <div>
-                            <h3 className="text-xs lg:text-sm font-black text-gray-900 line-clamp-2 leading-tight lg:leading-snug group-hover:text-indigo-600 transition-colors duration-300">
+                            <h3 className="text-xs lg:text-sm font-black text-white line-clamp-2 leading-tight lg:leading-snug group-hover:text-red-500 transition-colors duration-300">
                               {relatedProduct.title}
                             </h3>
                             <div className="flex items-center gap-1.5 mt-1">
@@ -1691,7 +1691,7 @@ export default function ProductClient() {
                                 {channel.name}
                               </span>
                               <span className="w-1 h-1 rounded-full bg-gray-200"></span>
-                              <span className="text-[10px] font-bold text-gray-500">
+                              <span className="text-[10px] font-bold text-gray-400">
                                 {formatNumber(relatedProduct.viewCount || 0)} views
                               </span>
                             </div>
@@ -1700,7 +1700,7 @@ export default function ProductClient() {
                           {/* Sub Only Badge */}
                           {!canAccessRelated && relatedProduct.isSubscriberOnly && channel?.subscriptionEnabled && (
                             <div className="mt-2 flex">
-                              <span className="text-[9px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg border border-indigo-100">
+                              <span className="text-[9px] font-black uppercase tracking-widest text-red-500 bg-indigo-900/30 px-2 py-1 rounded-lg border border-indigo-100">
                                 Sub Exclusive
                               </span>
                             </div>
@@ -1717,12 +1717,12 @@ export default function ProductClient() {
 
         {/* Sticky Mobile CTA for Non-Subscribers */}
         {!hasActiveSubscription && channel?.subscriptionEnabled && !isOwner && (
-          <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 p-4 pb-safe md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.1)] animation-slide-up">
+          <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#1a1a1a] border-t border-[#333] p-4 pb-safe md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.1)] animation-slide-up">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Unlock Full Access</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Unlock Full Access</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-lg font-black text-gray-900">
+                  <span className="text-lg font-black text-white">
                     {(() => {
                       const priceValue = channel.subscriptionPrice;
                       let price = 0;
@@ -1738,7 +1738,7 @@ export default function ProductClient() {
                       return formatPrice(price, channel.subscriptionCurrency || 'INR');
                     })()}
                   </span>
-                  <span className="text-xs font-medium text-gray-500">/month</span>
+                  <span className="text-xs font-medium text-gray-400">/month</span>
                 </div>
               </div>
               <button
@@ -1759,22 +1759,22 @@ export default function ProductClient() {
 
         {/* Subscription Modal */}
         {showSubscriptionModal && channel && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="relative w-full max-w-md rounded-3xl shadow-2xl bg-white overflow-hidden">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#e50914]/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="relative w-full max-w-md rounded-3xl shadow-2xl bg-[#1a1a1a] overflow-hidden">
               {/* Header Pattern */}
               <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-br from-blue-600 to-indigo-600 opacity-10"></div>
 
               <div className="relative p-6 sm:p-8">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h2 className="text-2xl font-black text-gray-900 tracking-tight">Unlock Access</h2>
-                    <p className="text-sm text-gray-500 font-medium">Support {channel.name} & get exclusive content</p>
+                    <h2 className="text-2xl font-black text-white tracking-tight">Unlock Access</h2>
+                    <p className="text-sm text-gray-400 font-medium">Support {channel.name} & get exclusive content</p>
                   </div>
                   <button
                     onClick={() => setShowSubscriptionModal(false)}
-                    className="p-2 rounded-xl hover:bg-gray-100 transition-colors -mr-2 -mt-2"
+                    className="p-2 rounded-xl hover:bg-[#333] transition-colors -mr-2 -mt-2"
                   >
-                    <XMarkIcon className="w-6 h-6 text-gray-400 hover:text-gray-900" />
+                    <XMarkIcon className="w-6 h-6 text-gray-400 hover:text-white" />
                   </button>
                 </div>
 
@@ -1784,7 +1784,7 @@ export default function ProductClient() {
                       Best Value
                     </div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-bold text-gray-900 flex items-center gap-2">
+                      <span className="font-bold text-white flex items-center gap-2">
                         <StarIconSolid className="w-5 h-5 text-yellow-400" />
                         Monthly Access
                       </span>
@@ -1805,20 +1805,20 @@ export default function ProductClient() {
                         })()}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 font-medium leading-relaxed">
+                    <p className="text-sm text-gray-400 font-medium leading-relaxed">
                       Get instant access to all premium videos, documents, and resources in this channel for 30 days.
                     </p>
                   </div>
 
                   {/* Trust Signals */}
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                    <div className="flex items-center gap-2 p-3 rounded-xl bg-[#141414] border border-[#333]">
                       <CheckCircleIcon className="w-5 h-5 text-green-500 flex-shrink-0" />
-                      <span className="text-xs font-bold text-gray-600">Cancel anytime</span>
+                      <span className="text-xs font-bold text-gray-400">Cancel anytime</span>
                     </div>
-                    <div className="flex items-center gap-2 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                    <div className="flex items-center gap-2 p-3 rounded-xl bg-[#141414] border border-[#333]">
                       <div className="w-5 h-5 rounded-full bg-slate-900 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">🔒</div>
-                      <span className="text-xs font-bold text-gray-600">Secure payment</span>
+                      <span className="text-xs font-bold text-gray-400">Secure payment</span>
                     </div>
                   </div>
                 </div>
@@ -1826,14 +1826,14 @@ export default function ProductClient() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowSubscriptionModal(false)}
-                    className="flex-1 px-4 py-3.5 border-2 border-gray-100 text-gray-700 rounded-xl text-base font-bold hover:bg-gray-50 hover:border-gray-200 transition-all"
+                    className="flex-1 px-4 py-3.5 border-2 border-[#333] text-gray-300 rounded-xl text-base font-bold hover:bg-[#141414] hover:border-[#333] transition-all"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSubscribe}
                     disabled={subscribing}
-                    className="flex-[2] px-4 py-3.5 bg-gray-900 text-white rounded-xl text-base font-bold hover:bg-black transition-all shadow-lg shadow-gray-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-[2] px-4 py-3.5 bg-white text-black font-bold rounded-xl text-base font-bold hover:bg-[#e50914] transition-all shadow-lg shadow-gray-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {subscribing ? (
                       <>
@@ -1855,12 +1855,12 @@ export default function ProductClient() {
 
         {/* Subscribers List Modal */}
         {showSubscribersList && channel && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#e50914]/50 backdrop-blur-sm">
             <div
               className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl"
               style={{ backgroundColor }}
             >
-              <div className="sticky top-0 flex items-center justify-between p-6 border-b z-10 backdrop-blur-md bg-white/80" style={{ borderColor: `${textColor}10` }}>
+              <div className="sticky top-0 flex items-center justify-between p-6 border-b z-10 backdrop-blur-md bg-[#1a1a1a]/80" style={{ borderColor: `${textColor}10` }}>
                 <div>
                   <h2 className="text-2xl font-black mb-1" style={{ color: textColor }}>
                     Subscribers
@@ -1871,7 +1871,7 @@ export default function ProductClient() {
                 </div>
                 <button
                   onClick={() => setShowSubscribersList(false)}
-                  className="p-2 rounded-xl transition-colors hover:bg-gray-100"
+                  className="p-2 rounded-xl transition-colors hover:bg-[#333]"
                   style={{ color: textColor }}
                 >
                   <XMarkIcon className="w-6 h-6" />
@@ -1881,7 +1881,7 @@ export default function ProductClient() {
               <div className="p-6">
                 {subscribers.length === 0 ? (
                   <div className="text-center py-16">
-                    <div className="inline-block p-6 rounded-full mb-4 bg-gray-50" style={{ backgroundColor: `${primaryColor}10` }}>
+                    <div className="inline-block p-6 rounded-full mb-4 bg-[#141414]" style={{ backgroundColor: `${primaryColor}10` }}>
                       <UserCircleIcon className="w-16 h-16" style={{ color: primaryColor }} />
                     </div>
                     <p className="text-xl font-bold mb-2" style={{ color: textColor }}>
@@ -1896,7 +1896,7 @@ export default function ProductClient() {
                     {subscribers.map((subscriber: any) => (
                       <div
                         key={subscriber.id}
-                        className="flex items-center gap-4 p-4 rounded-2xl border transition-colors hover:bg-gray-50"
+                        className="flex items-center gap-4 p-4 rounded-2xl border transition-colors hover:bg-[#141414]"
                         style={{
                           borderColor: `${textColor}10`,
                         }}
@@ -1924,7 +1924,7 @@ export default function ProductClient() {
                           <span
                             className={`inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${subscriber.status === 'ACTIVE' && new Date(subscriber.endDate) > new Date()
                               ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-gray-100 text-gray-700'
+                              : 'bg-gray-100 text-gray-300'
                               }`}
                           >
                             {subscriber.status === 'ACTIVE' && new Date(subscriber.endDate) > new Date() ? 'Active' : 'Expired'}
@@ -1944,16 +1944,16 @@ export default function ProductClient() {
 
         {/* Success Modal */}
         {showSuccessModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-            <div className="relative w-full max-w-sm rounded-3xl shadow-2xl bg-white p-8 text-center">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#e50914]/50 backdrop-blur-sm animate-in fade-in">
+            <div className="relative w-full max-w-sm rounded-3xl shadow-2xl bg-[#1a1a1a] p-8 text-center">
               <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6">
                 <CheckCircleIcon className="w-12 h-12 text-emerald-500" />
               </div>
-              <h3 className="text-2xl font-black text-gray-900 mb-2">Success!</h3>
-              <p className="text-gray-500 font-medium mb-8 leading-relaxed">{modalMessage}</p>
+              <h3 className="text-2xl font-black text-white mb-2">Success!</h3>
+              <p className="text-gray-400 font-medium mb-8 leading-relaxed">{modalMessage}</p>
               <button
                 onClick={() => setShowSuccessModal(false)}
-                className="w-full px-6 py-3.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-black transition-transform active:scale-95"
+                className="w-full px-6 py-3.5 bg-white text-black font-bold rounded-xl font-bold hover:bg-[#e50914] transition-transform active:scale-95"
               >
                 Okay, got it
               </button>
@@ -1963,13 +1963,13 @@ export default function ProductClient() {
 
         {/* Error Modal */}
         {showErrorModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-            <div className="relative w-full max-w-sm rounded-3xl shadow-2xl bg-white p-8 text-center">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#e50914]/50 backdrop-blur-sm animate-in fade-in">
+            <div className="relative w-full max-w-sm rounded-3xl shadow-2xl bg-[#1a1a1a] p-8 text-center">
               <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
                 <XCircleIcon className="w-12 h-12 text-red-500" />
               </div>
-              <h3 className="text-2xl font-black text-gray-900 mb-2">Oops!</h3>
-              <p className="text-gray-500 font-medium mb-8 leading-relaxed">{modalMessage}</p>
+              <h3 className="text-2xl font-black text-white mb-2">Oops!</h3>
+              <p className="text-gray-400 font-medium mb-8 leading-relaxed">{modalMessage}</p>
               <button
                 onClick={() => setShowErrorModal(false)}
                 className="w-full px-6 py-3.5 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-transform active:scale-95"
