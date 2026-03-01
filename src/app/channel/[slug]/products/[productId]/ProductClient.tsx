@@ -36,6 +36,7 @@ import MainLayout from '@/components/layout/MainLayout';
 import SaveToPlaylistModal from '@/components/modals/SaveToPlaylistModal';
 import ShareModal from '@/components/modals/ShareModal';
 import OptimizedMediaLoader from '@/components/ui/OptimizedMediaLoader';
+import StreamVideoPlayer from '@/components/ui/StreamVideoPlayer';
 
 // Utility for formatting numbers
 const formatNumber = (num: number): string => {
@@ -720,72 +721,37 @@ export default function ProductClient() {
 
     if (productType === 'VIDEO' || productType === 'VIDEOS') {
       return (
-        <div className="w-full relative">
-          <OptimizedMediaLoader type="video">
-            {canAccess ? (
-              normalizedVideoUrl ? (
-                <div className="absolute inset-0">
-                  <video
-                    ref={(el) => {
-                      if (el) setVideoElement(el);
-                    }}
-                    src={normalizedVideoUrl || ''}
-                    controls
-                    autoPlay
-                    playsInline
-                    muted={false}
-                    preload="metadata"
-                    className="w-full h-full"
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
-                    onError={(e) => {
-                      console.error('Video playback error:', e);
-                      console.error('Video source:', normalizedVideoUrl);
-                    }}
-                    style={{ objectFit: 'cover', backgroundColor: 'transparent' }}
-                  >
-                    <source src={normalizedVideoUrl} type={product.fileType || 'video/mp4'} />
-                    Your browser does not support the video tag.
-                  </video>
-
-                  {/* Quality Selector */}
-                  <div className="absolute bottom-16 right-4 z-10">
-                    <div className="relative">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowQualityMenu(!showQualityMenu);
-                        }}
-                        className="px-3 py-1.5 bg-[#e50914]/70 hover:bg-[#e50914]/90 text-white text-sm font-medium rounded flex items-center gap-2 transition-colors backdrop-blur-sm"
-                      >
-                        <span>{selectedQuality === 'auto' ? 'Auto' : selectedQuality}</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
-                  <div className="text-center">
-                    <VideoCameraIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-400">Video not available</p>
-                  </div>
-                </div>
-              )
+        <div className="w-full relative bg-black" style={{ aspectRatio: '16/9' }}>
+          {canAccess ? (
+            normalizedVideoUrl ? (
+              <StreamVideoPlayer
+                src={normalizedVideoUrl}
+                fileType={product.fileType || 'video/mp4'}
+                createdAt={product.createdAt}
+                onPlayChange={setIsPlaying}
+              />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
                 <div className="text-center">
-                  <VideoCameraIcon className="h-16 w-16 text-white/50 mx-auto mb-4" />
-                  <p className="text-white/70 text-lg font-medium mb-4">Subscribe to watch</p>
-                  <button
-                    onClick={() => setShowSubscriptionModal(true)}
-                    className="px-6 py-3 bg-[#1a1a1a] text-white rounded-lg font-semibold hover:bg-[#333] transition"
-                  >
-                    Subscribe Now
-                  </button>
+                  <VideoCameraIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-400">Video not available</p>
                 </div>
               </div>
-            )}
-          </OptimizedMediaLoader>
+            )
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
+              <div className="text-center">
+                <VideoCameraIcon className="h-16 w-16 text-white/50 mx-auto mb-4" />
+                <p className="text-white/70 text-lg font-medium mb-4">Subscribe to watch</p>
+                <button
+                  onClick={() => setShowSubscriptionModal(true)}
+                  className="px-6 py-3 bg-[#1a1a1a] text-white rounded-lg font-semibold hover:bg-[#333] transition"
+                >
+                  Subscribe Now
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
