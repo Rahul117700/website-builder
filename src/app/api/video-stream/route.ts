@@ -20,15 +20,27 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Missing path parameter' }, { status: 400 });
     }
 
-    // Security: only allow paths inside /uploads/
-    if (!videoPath.startsWith('/uploads/')) {
+    // Security: only allow paths inside /uploads/ (whether in public or root)
+    if (!videoPath.includes('/uploads/')) {
         return NextResponse.json({ error: 'Invalid path' }, { status: 403 });
     }
 
-    const absolutePath = join(process.cwd(), 'public', videoPath);
+    const cwd = process.cwd();
+    // Try both /public/uploads/ and /uploads/ (outside public)
+    const candidatePaths = [
+        join(cwd, 'public', videoPath),
+        join(cwd, videoPath), // For cases where it's stored in /uploads/ at root
+        join(cwd, videoPath.replace(/^\/public/, '')) // Fallback
+    ];
 
-    if (!existsSync(absolutePath)) {
-        return NextResponse.json({ error: 'File not found' }, { status: 404 });
+    const absolutePath = candidatePaths.find(p => existsSync(p));
+
+    if (!absolutePath) {
+        return NextResponse.json({
+            error: 'File not found',
+            searched: candidatePaths,
+            status: 404
+        }, { status: 404 });
     }
 
     let stat;
