@@ -37,9 +37,26 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const videosDir = join(process.cwd(), 'public', 'uploads', 'videos');
-    if (!existsSync(videosDir)) {
-        return NextResponse.json({ message: 'No videos directory found', processed: 0 });
+    const cwd = process.cwd();
+
+    // Try multiple possible video directory locations
+    const candidatePaths = [
+        join(cwd, 'public', 'uploads', 'videos'),
+        join(cwd, '.next', 'static', 'uploads', 'videos'),
+        '/home/rahul/apps/website-builder/public/uploads/videos',
+        '/var/www/html/public/uploads/videos',
+        join(cwd, '..', 'public', 'uploads', 'videos'),
+    ];
+
+    const videosDir = candidatePaths.find(p => existsSync(p));
+
+    if (!videosDir) {
+        return NextResponse.json({
+            message: 'No videos directory found',
+            searched: candidatePaths,
+            cwd,
+            processed: 0
+        });
     }
 
     const files = readdirSync(videosDir).filter(f =>
