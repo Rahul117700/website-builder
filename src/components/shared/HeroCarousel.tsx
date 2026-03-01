@@ -17,60 +17,85 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
     const router = useRouter();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [direction, setDirection] = useState(0);
-    const [isPaused, setIsPaused] = useState(false);
     const [progress, setProgress] = useState(0);
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const [videoReady, setVideoReady] = useState(false);  // true once onCanPlay fires
     const progressRef = useRef<NodeJS.Timeout | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
 
+
+    const goTo = useCallback((idx: number, dir: number) => {
+        setDirection(dir);
+        setCurrentIndex(idx);
+        setProgress(0);
+        setVideoReady(false);
+    }, []);
+
     const slideNext = useCallback(() => {
         if (!items.length) return;
-        setDirection(1);
-        setCurrentIndex((prev) => (prev + 1) % items.length);
-    }, [items.length]);
+        goTo((currentIndex + 1) % items.length, 1);
+    }, [items.length, currentIndex, goTo]);
 
     const slidePrev = useCallback(() => {
         if (!items.length) return;
-        setDirection(-1);
-        setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
-    }, [items.length]);
+        goTo((currentIndex - 1 + items.length) % items.length, -1);
+    }, [items.length, currentIndex, goTo]);
 
+    // Slide autoplay timer
     useEffect(() => {
         if (!items.length) return;
         const timer = setInterval(slideNext, AUTOPLAY_INTERVAL);
         return () => clearInterval(timer);
     }, [slideNext, items.length]);
 
-    // Force video play when slide changes (browsers block the autoPlay attribute)
+    // Progress bar (smooth 60fps fill over 30s)
     useEffect(() => {
-        if (videoRef.current) {
-            videoRef.current.play().catch(() => {
-                // Autoplay blocked – muted should normally allow it
-            });
-        }
+        if (!items.length) return;
+        setProgress(0);
+        const startTime = Date.now();
+        const tick = () => {
+            const elapsed = Date.now() - startTime;
+            const pct = Math.min((elapsed / AUTOPLAY_INTERVAL) * 100, 100);
+            setProgress(pct);
+            if (pct < 100) {
+                progressRef.current = setTimeout(tick, 16);
+            }
+        };
+        progressRef.current = setTimeout(tick, 16);
+        return () => { if (progressRef.current) clearTimeout(progressRef.current); };
+    }, [currentIndex, items.length]);
+
+    // When video element is available, start playing immediately
+    useEffect(() => {
+        const vid = videoRef.current;
+        if (!vid) return;
+
+        // Reset to beginning so we don't wait for previous position
+        vid.currentTime = 0;
+        // Load immediately (triggers network fetch from pos 0)
+        vid.load();
+
+        // As soon as first frames are available, play — don't wait for full buffer
+        const onCanPlay = () => {
+            vid.play().catch(() => { /* blocked by browser policy */ });
+            setVideoReady(true);
+        };
+
+        vid.addEventListener('canplay', onCanPlay);
+        return () => vid.removeEventListener('canplay', onCanPlay);
     }, [currentIndex]);
 
     if (!items.length) {
-        return <div className="w-full h-24 sm:h-32 mb-8 bg-gradient-to-b from-[#1a1a1a] to-[#141414]"></div>;
+        return <div className="w-full h-24 sm:h-32 mb-8 bg-gradient-to-b from-[#1a1a1a] to-[#141414]" />;
     }
 
     const spotlightItem = items[currentIndex];
+    const isVideo = (spotlightItem.type === 'VIDEO' || spotlightItem.type === 'VIDEOS' || spotlightItem.type === 'COURSE') && !!spotlightItem.videoUrl;
 
-    // Animation variants
+
     const variants = {
-        enter: (direction: number) => ({
-            opacity: 0,
-            scale: 1.05,
-        }),
-        center: {
-            zIndex: 1,
-            opacity: 1,
-            scale: 1,
-        },
-        exit: (direction: number) => ({
-            zIndex: 0,
-            opacity: 0,
-        }),
+        enter: () => ({ opacity: 0, scale: 1.05 }),
+        center: { zIndex: 1, opacity: 1, scale: 1 },
+        exit: () => ({ zIndex: 0, opacity: 0 }),
     };
 
     return (
@@ -85,40 +110,43 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
                     exit="exit"
                     transition={{
                         opacity: { duration: 0.8 },
-                        scale: { duration: 0.9, ease: "easeOut" }
+                        scale: { duration: 0.9, ease: 'easeOut' }
                     }}
                     className="absolute inset-0 z-[-2]"
                 >
                     <div className="absolute inset-0 bg-[#141414]">
+                        {/* Thumbnail — always shown, fades out when video is ready */}
                         <Image
                             src={spotlightItem.thumbnail}
                             alt={spotlightItem.title}
                             fill
-                            className="object-cover opacity-100"
+                            className={`object-cover transition-opacity duration-700 ${isVideo && videoReady ? 'opacity-0' : 'opacity-100'}`}
                             unoptimized
                             priority
                         />
-                        {(spotlightItem.type === 'VIDEO' || spotlightItem.type === 'VIDEOS' || spotlightItem.type === 'COURSE') && spotlightItem.videoUrl && (
+
+                        {/* Video — shown on top of thumbnail once ready */}
+                        {isVideo && (
                             <video
                                 ref={videoRef}
-                                src={spotlightItem.videoUrl}
-                                autoPlay
+                                key={spotlightItem.videoUrl} // remount on slide change for clean load
+                                src={spotlightItem.videoUrl!}
                                 loop
                                 muted
                                 playsInline
-                                className="absolute inset-0 w-full h-full object-cover opacity-100"
+                                preload="auto"   // start fetching immediately
+                                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${videoReady ? 'opacity-100' : 'opacity-0'}`}
                             />
                         )}
                     </div>
                 </motion.div>
             </AnimatePresence>
 
-            {/* Gradient Overlay left and bottom */}
-            <div className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-t from-[#141414] via-[#141414]/10 to-transparent lg:bg-gradient-to-r lg:from-[#141414] lg:via-[#141414]/20 lg:to-transparent transition-opacity"></div>
+            {/* Gradient overlays */}
+            <div className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-t from-[#141414] via-[#141414]/10 to-transparent lg:bg-gradient-to-r lg:from-[#141414] lg:via-[#141414]/20 lg:to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-48 sm:h-64 bg-gradient-to-t from-[#141414] via-[#141414]/80 to-transparent z-10 pointer-events-none" />
 
-            {/* Bottom fade into the background */}
-            <div className="absolute inset-x-0 bottom-0 h-48 sm:h-64 bg-gradient-to-t from-[#141414] via-[#141414]/80 to-transparent z-10 pointer-events-none"></div>
-
+            {/* Content */}
             <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
                 <AnimatePresence mode="wait">
                     <motion.div
@@ -156,7 +184,9 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
 
                         <div className="flex flex-wrap gap-3 sm:gap-4 pt-4">
                             <button
-                                onClick={() => router.push(spotlightItem.price === 0 || spotlightItem.hasAccess ? `/channel/${spotlightItem.channelSlug}/products/${spotlightItem.id}` : `/channel/${spotlightItem.channelSlug}`)}
+                                onClick={() => router.push(spotlightItem.price === 0 || spotlightItem.hasAccess
+                                    ? `/channel/${spotlightItem.channelSlug}/products/${spotlightItem.id}`
+                                    : `/channel/${spotlightItem.channelSlug}`)}
                                 className="px-6 py-2.5 sm:py-3 bg-white text-black rounded-lg font-bold flex items-center gap-2 hover:bg-gray-200 transition-colors shadow-lg active:scale-95 text-sm sm:text-base"
                             >
                                 <VideoCameraIcon className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -174,9 +204,10 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
                 </AnimatePresence>
             </div>
 
-            {/* Navigation Controls */}
+
+            {/* Hover nav arrows */}
             {items.length > 1 && (
-                <div className="hidden">
+                <div className="absolute top-1/2 -translate-y-1/2 inset-x-4 flex justify-between pointer-events-none z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <button
                         onClick={(e) => { e.preventDefault(); slidePrev(); }}
                         className="p-3 rounded-full bg-black/40 backdrop-blur-md text-white border border-white/20 pointer-events-auto hover:bg-white/20 hover:scale-110 transition-all shadow-xl"
@@ -192,18 +223,24 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
                 </div>
             )}
 
-            {/* Progress indicators */}
+            {/* Progress dot indicators */}
             {items.length > 1 && (
-                <div className="absolute bottom-6 right-8 flex gap-2 z-30">
+                <div className="absolute bottom-6 right-6 sm:right-8 flex items-center gap-2 z-30">
                     {items.map((_, idx) => (
                         <button
                             key={idx}
-                            onClick={() => {
-                                setDirection(idx > currentIndex ? 1 : -1);
-                                setCurrentIndex(idx);
-                            }}
-                            className={`h-1.5 rounded-full transition-all duration-500 hover:bg-white/80 ${idx === currentIndex ? 'w-8 bg-white shadow-[0_0_10px_#fff]' : 'w-2 bg-white/30'}`}
-                        />
+                            onClick={() => goTo(idx, idx > currentIndex ? 1 : -1)}
+                            className="relative h-1.5 rounded-full overflow-hidden hover:opacity-80 transition-opacity"
+                            style={{ width: idx === currentIndex ? 48 : 8 }}
+                        >
+                            <span className="absolute inset-0 bg-white/30 rounded-full" />
+                            {idx === currentIndex && (
+                                <span
+                                    className="absolute inset-y-0 left-0 rounded-full bg-white shadow-[0_0_10px_#fff]"
+                                    style={{ width: `${progress}%`, transition: 'none' }}
+                                />
+                            )}
+                        </button>
                     ))}
                 </div>
             )}
