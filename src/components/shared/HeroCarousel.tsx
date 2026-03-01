@@ -13,6 +13,18 @@ interface HeroCarouselProps {
 
 const AUTOPLAY_INTERVAL = 30000; // 30 seconds per slide
 
+/** Route local /uploads/ videos through the streaming API for instant playback */
+const toStreamSrc = (url: string | undefined | null): string => {
+    if (!url) return '';
+    try {
+        const path = url.startsWith('http') ? new URL(url).pathname : url;
+        if (path.startsWith('/uploads/')) {
+            return `/api/video-stream?path=${encodeURIComponent(path)}`;
+        }
+    } catch { /* ignore */ }
+    return url;
+};
+
 export default function HeroCarousel({ items }: HeroCarouselProps) {
     const router = useRouter();
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -130,11 +142,11 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
                             <video
                                 ref={videoRef}
                                 key={spotlightItem.videoUrl} // remount on slide change for clean load
-                                src={spotlightItem.videoUrl!}
+                                src={toStreamSrc(spotlightItem.videoUrl)}
                                 loop
                                 muted
                                 playsInline
-                                preload="auto"   // start fetching immediately
+                                preload="auto"
                                 className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${videoReady ? 'opacity-100' : 'opacity-0'}`}
                             />
                         )}
