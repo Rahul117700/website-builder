@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
         const limit = parseInt(searchParams.get('limit') || '20');
         const search = searchParams.get('search') || '';
         const isFeatured = searchParams.get('isFeatured');
+        const isTrendingFeatured = searchParams.get('isTrendingFeatured');
 
         const skip = (page - 1) * limit;
 
@@ -38,6 +39,9 @@ export async function GET(request: NextRequest) {
         }
         if (isFeatured !== null && isFeatured !== '') {
             where.isFeatured = isFeatured === 'true';
+        }
+        if (isTrendingFeatured !== null && isTrendingFeatured !== '') {
+            where.isTrendingFeatured = isTrendingFeatured === 'true';
         }
 
         const [products, total] = await Promise.all([
@@ -93,7 +97,7 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        const { productId, isFeatured } = await request.json();
+        const { productId, isFeatured, isTrendingFeatured } = await request.json();
 
         if (!productId) {
             return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
@@ -101,6 +105,7 @@ export async function PUT(request: NextRequest) {
 
         const updateData: any = {};
         if (isFeatured !== undefined) updateData.isFeatured = isFeatured;
+        if (isTrendingFeatured !== undefined) updateData.isTrendingFeatured = isTrendingFeatured;
 
         const updatedProduct = await prisma.channelProduct.update({
             where: { id: productId },

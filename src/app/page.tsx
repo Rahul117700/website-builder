@@ -5,9 +5,11 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import HomeContent from '@/components/home/HomeContent';
 import {
     getSubscribedProducts,
+    getFollowedProducts,
     getRecommendedProducts,
     getTrendingEbooks,
     getUserSubscriptions,
+    getUserFollows,
     getUserNotifications,
     getUserChannelInfo
 } from '@/app/actions/homepage';
@@ -20,16 +22,20 @@ export default async function HomePage() {
 
     const [
         subscribedProducts,
+        followedProducts,
         recommendedProducts,
         trendingEbooks,
         userSubscriptions,
+        userFollows,
         notifications,
         userChannelInfo
     ] = await Promise.all([
         userId ? getSubscribedProducts(userId) : [],
+        userId ? getFollowedProducts(userId) : [],
         getRecommendedProducts(userId),
         getTrendingEbooks(),
         userId ? getUserSubscriptions(userId) : [],
+        userId ? getUserFollows(userId) : [],
         userId ? getUserNotifications(userId) : [],
         userId ? getUserChannelInfo(userId) : null
     ]);
@@ -37,9 +43,11 @@ export default async function HomePage() {
     return (
         <HomeContent
             subscribedProducts={subscribedProducts}
+            followedProducts={followedProducts}
             recommendedProducts={recommendedProducts}
             trendingEbooks={trendingEbooks}
             userSubscriptions={userSubscriptions}
+            userFollows={userFollows}
             notifications={notifications}
             userChannelInfo={userChannelInfo}
         />

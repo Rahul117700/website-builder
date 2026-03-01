@@ -11,6 +11,7 @@ import {
     CodeBracketIcon,
     PhotoIcon,
     UserIcon,
+    UserPlusIcon,
     FireIcon,
     FolderIcon,
     HeartIcon,
@@ -28,13 +29,16 @@ import ProductCard from '@/components/product/ProductCard';
 import TrendingCarousel from '@/components/home/TrendingCarousel';
 import VerticalDocumentCarousel from '@/components/home/VerticalDocumentCarousel';
 import MobileTrendingWidget from '@/components/trending/MobileTrendingWidget';
+import HeroCarousel from '@/components/shared/HeroCarousel';
 
 // Props Interface
 interface HomeContentProps {
     subscribedProducts?: ProductCardData[];
+    followedProducts?: ProductCardData[];
     recommendedProducts?: ProductCardData[];
     trendingEbooks?: ProductCardData[];
     userSubscriptions?: SubscriptionData[];
+    userFollows?: SubscriptionData[];
     notifications?: NotificationData[];
     userChannelInfo?: { hasChannel: boolean; productCount: number; totalEarnings?: number } | null;
     children?: React.ReactNode;
@@ -42,9 +46,11 @@ interface HomeContentProps {
 
 export default function HomeContent({
     subscribedProducts = [],
+    followedProducts = [],
     recommendedProducts = [],
     trendingEbooks = [],
     userSubscriptions = [],
+    userFollows = [],
     notifications = [],
     userChannelInfo = null,
     children
@@ -83,12 +89,13 @@ export default function HomeContent({
         return { others, documents, videos, trendingItems };
     }, [recommendedProducts, subscribedProducts]);
 
-    const spotlightItem = trendingItems[0];
-    const upNextItems = trendingItems.slice(1, 11);
+    const spotlightItems = trendingItems.slice(0, 5);
+    const upNextItems = trendingItems.slice(1, 11); // Ensure this only skips 1 or maybe we can keep 1
 
     return (
         <MainLayout
             userSubscriptions={userSubscriptions}
+            userFollows={userFollows}
             notifications={notifications}
             isDarkTheme={true}
             noPaddingTop={true}
@@ -98,89 +105,13 @@ export default function HomeContent({
             ) : (
                 <div className="min-h-screen bg-[#141414] pb-20">
 
-                    {/* 1. Hero Spotlight Section - Netflix Style */}
-                    {spotlightItem && (
-                        <div className="w-full relative h-[65vh] lg:h-[85vh] min-h-[500px] flex flex-col justify-end pb-12 sm:pb-24 z-10 isolate mt-[-56px] lg:mt-0">
-                            {/* Absolute Background Image/Video */}
-                            <div className="absolute inset-0 z-[-2] bg-[#141414]">
-                                <Image
-                                    src={spotlightItem.thumbnail}
-                                    alt={spotlightItem.title}
-                                    fill
-                                    className="object-cover opacity-100"
-                                    unoptimized
-                                    priority
-                                />
-                                {(spotlightItem.type === 'VIDEO' || spotlightItem.type === 'VIDEOS' || spotlightItem.type === 'COURSE') && spotlightItem.videoUrl && (
-                                    <video
-                                        src={spotlightItem.videoUrl}
-                                        autoPlay
-                                        loop
-                                        muted
-                                        playsInline
-                                        className="absolute inset-0 w-full h-full object-cover opacity-100"
-                                    />
-                                )}
-                            </div>
+                    {/* 1. Hero Spotlight Section - Netflix Style Animated Carousel */}
+                    <HeroCarousel items={spotlightItems} />
 
-                            {/* Gradient Overlay left and bottom */}
-                            <div className="absolute inset-0 z-[-1] bg-gradient-to-t from-[#141414] via-[#141414]/10 to-transparent lg:bg-gradient-to-r lg:from-[#141414] lg:via-[#141414]/10 lg:to-transparent"></div>
-
-                            {/* Added bottom fade so it blends perfectly into bg-[#141414] */}
-                            <div className="absolute inset-x-0 bottom-[-1px] h-32 bg-gradient-to-t from-[#141414] to-transparent z-[-1]"></div>
-
-                            <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
-                                <div className="max-w-3xl space-y-4">
-                                    <span className="px-2 sm:px-3 py-1 bg-white/10 backdrop-blur-md text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded-md border border-white/20 inline-flex items-center gap-2">
-                                        <SparklesIcon className="w-3 h-3 text-white" />
-                                        Featured Spotlight
-                                    </span>
-
-                                    <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-white leading-tight drop-shadow-2xl text-balance">
-                                        {spotlightItem.title}
-                                    </h1>
-
-                                    <div className="flex items-center gap-3 text-white/90 text-sm font-medium pt-2 pb-2">
-                                        <div className="w-10 h-10 rounded-full overflow-hidden relative border border-white/30 shadow-lg flex-shrink-0">
-                                            {spotlightItem.channelAvatar ? (
-                                                <Image src={spotlightItem.channelAvatar} alt="" fill className="object-cover" />
-                                            ) : (
-                                                <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white text-xs">
-                                                    {spotlightItem.channelName.charAt(0)}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <span className="text-white font-bold block">{spotlightItem.channelName}</span>
-                                            <span className="text-gray-400 text-xs">{spotlightItem.views} views</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex flex-wrap gap-3 sm:gap-4 pt-4">
-                                        <button
-                                            onClick={() => router.push(spotlightItem.price === 0 || spotlightItem.hasAccess ? `/channel/${spotlightItem.channelSlug}/products/${spotlightItem.id}` : `/channel/${spotlightItem.channelSlug}`)}
-                                            className="px-6 py-2.5 sm:py-3 bg-white text-black rounded-lg font-bold flex items-center gap-2 hover:bg-gray-200 transition-colors shadow-lg active:scale-95 text-sm sm:text-base"
-                                        >
-                                            <VideoCameraIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-                                            Play Now
-                                        </button>
-                                        <button
-                                            onClick={() => router.push(`/channel/${spotlightItem.channelSlug}`)}
-                                            className="px-6 py-2.5 sm:py-3 bg-gray-500/40 hover:bg-gray-500/60 text-white rounded-lg font-bold flex items-center gap-2 transition-colors backdrop-blur-sm shadow-lg border border-white/10 active:scale-95 text-sm sm:text-base flex-shrink-0"
-                                        >
-                                            <UserIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-                                            Visit Channel
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-8 space-y-12 relative z-20">
+                    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative z-30 space-y-12 -mt-20 sm:-mt-32 pb-8">
                         {/* Trending Next row */}
                         {upNextItems.length > 0 && (
-                            <section className="-mt-10 sm:-mt-20 relative z-30 mb-8 sm:mb-12">
+                            <section className="mb-8 sm:mb-12">
                                 <h2 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2 tracking-tight mb-3 sm:mb-4 drop-shadow-md">
                                     <FireIcon className="w-5 h-5 text-indigo-400" />
                                     Trending Now
@@ -197,7 +128,7 @@ export default function HomeContent({
                                         className="flex overflow-x-auto gap-3 sm:gap-4 pb-6 pt-2 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth"
                                     >
                                         {upNextItems.map((product) => (
-                                            <div key={product.id} className="min-w-[85vw] sm:min-w-[45vw] md:min-w-[32vw] lg:min-w-[26vw] xl:min-w-[21vw] snap-center shrink-0 flex">
+                                            <div key={product.id} className="w-[85vw] sm:w-[45vw] md:w-[32vw] lg:w-[26vw] xl:w-[21vw] snap-center shrink-0 flex">
                                                 <div className="w-full">
                                                     <ProductCard {...product} isDarkTheme={true} />
                                                 </div>
@@ -226,6 +157,26 @@ export default function HomeContent({
                                 </div>
                                 <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4">
                                     {subscribedProducts.map((product) => (
+                                        <ProductCard key={product.id} {...product} isDarkTheme={true} />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+
+                        {/* From Followed Channels */}
+                        {session && followedProducts.length > 0 && (
+                            <section>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2 tracking-tight">
+                                        <UserPlusIcon className="w-6 h-6 text-emerald-400" />
+                                        My Followings
+                                    </h2>
+                                    <Link href="/followings" className="text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors">
+                                        View All →
+                                    </Link>
+                                </div>
+                                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4">
+                                    {followedProducts.map((product) => (
                                         <ProductCard key={product.id} {...product} isDarkTheme={true} />
                                     ))}
                                 </div>

@@ -18,17 +18,21 @@ import {
     BookmarkIcon,
     PlusIcon,
     FolderIcon,
+    CreditCardIcon,
+    UserPlusIcon,
 } from '@heroicons/react/24/outline';
 import { SubscriptionData } from '@/app/actions/homepage';
 import { useState, useEffect } from 'react';
 
 export function Sidebar({
     userSubscriptions = [],
+    userFollows = [],
     onCreatePlaylist,
     refreshKey = 0,
     isDarkTheme = false
 }: {
     userSubscriptions?: SubscriptionData[];
+    userFollows?: SubscriptionData[];
     onCreatePlaylist?: () => void;
     refreshKey?: number;
     isDarkTheme?: boolean;
@@ -97,6 +101,46 @@ export function Sidebar({
                                         )}
                                     </div>
                                     <span className={`text-sm font-medium truncate transition-colors ${isDarkTheme ? 'text-gray-300 group-hover:text-white' : 'text-gray-700 group-hover:text-black'}`}>{sub.channelName}</span>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* My Subscriptions + My Followings quick links */}
+                <div className="mt-6">
+                    <div className="px-3 mb-2">
+                        <h3 className={`text-[11px] font-bold uppercase tracking-[0.1em] ${isDarkTheme ? 'text-gray-500' : 'text-gray-400'}`}>My Content</h3>
+                    </div>
+                    <SidebarItem icon={CreditCardIcon} label="My Subscriptions" href="/subscriptions" isDarkTheme={isDarkTheme} />
+                    <SidebarItem icon={UserPlusIcon} label="My Followings" href="/followings" isDarkTheme={isDarkTheme} />
+                </div>
+
+                {/* Followed channels list */}
+                {userFollows.length > 0 && (
+                    <div className="mt-6">
+                        <div className="px-3 mb-3">
+                            <h3 className={`text-[11px] font-bold uppercase tracking-[0.1em] ${isDarkTheme ? 'text-gray-500' : 'text-gray-400'}`}>Following</h3>
+                        </div>
+                        <div className="space-y-1">
+                            {userFollows.map(follow => (
+                                <Link key={follow.channelId} href={`/channel/${follow.slug}`} className={`flex items-center gap-3 px-3 py-2 rounded-xl group transition-all ${isDarkTheme ? 'hover:bg-[#2a2a2a]' : 'hover:bg-gray-100'}`}>
+                                    <div className="relative w-6 h-6 flex-shrink-0">
+                                        {follow.channelAvatar ? (
+                                            <Image
+                                                src={follow.channelAvatar}
+                                                alt={follow.channelName}
+                                                fill
+                                                className="rounded-full object-cover"
+                                                unoptimized
+                                            />
+                                        ) : (
+                                            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-black text-[10px]">
+                                                {follow.channelName.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <span className={`text-sm font-medium truncate transition-colors ${isDarkTheme ? 'text-gray-300 group-hover:text-white' : 'text-gray-700 group-hover:text-black'}`}>{follow.channelName}</span>
                                 </Link>
                             ))}
                         </div>

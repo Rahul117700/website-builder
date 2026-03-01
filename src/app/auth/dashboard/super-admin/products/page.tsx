@@ -22,11 +22,11 @@ export default function ProductModerationPage() {
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [pagination, setPagination] = useState({ page: 1, limit: 12, total: 0, pages: 1 });
-    const [filters, setFilters] = useState({ search: '', isFeatured: '' });
+    const [filters, setFilters] = useState({ search: '', isFeatured: '', isTrendingFeatured: '' });
 
     useEffect(() => {
         fetchProducts();
-    }, [pagination.page, filters.search, filters.isFeatured]);
+    }, [pagination.page, filters.search, filters.isFeatured, filters.isTrendingFeatured]);
 
     const fetchProducts = async () => {
         setLoading(true);
@@ -39,6 +39,9 @@ export default function ProductModerationPage() {
             if (filters.isFeatured !== '') {
                 query.append('isFeatured', filters.isFeatured);
             }
+            if (filters.isTrendingFeatured !== '') {
+                query.append('isTrendingFeatured', filters.isTrendingFeatured);
+            }
             const res = await fetch(`/api/admin/products?${query}`);
             const data = await res.json();
             setProducts(data.products || []);
@@ -50,15 +53,19 @@ export default function ProductModerationPage() {
         }
     };
 
-    const handleToggleFeatured = async (productId: string, currentFeatured: boolean) => {
+    const handleToggleFeatured = async (productId: string, currentFeatured: boolean, type: 'home' | 'trending') => {
         try {
+            const bodyData = type === 'home'
+                ? { productId, isFeatured: !currentFeatured }
+                : { productId, isTrendingFeatured: !currentFeatured };
+
             const res = await fetch('/api/admin/products', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId, isFeatured: !currentFeatured })
+                body: JSON.stringify(bodyData)
             });
             if (!res.ok) throw new Error('Update failed');
-            toast.success(currentFeatured ? 'Product removed from featured list' : 'Product successfully featured!');
+            toast.success(currentFeatured ? `Removed from ${type} feature list` : `Successfully featured on ${type}!`);
             fetchProducts();
         } catch (err) {
             toast.error('Moderation protocol failure');
@@ -89,9 +96,18 @@ export default function ProductModerationPage() {
                             value={filters.isFeatured}
                             onChange={(e) => setFilters(prev => ({ ...prev, isFeatured: e.target.value, page: 1 }))}
                         >
-                            <option value="">All Products</option>
-                            <option value="true">Featured Only</option>
-                            <option value="false">Not Featured</option>
+                            <option value="">Home: All</option>
+                            <option value="true">Home: Featured</option>
+                            <option value="false">Home: Not Featured</option>
+                        </select>
+                        <select
+                            className="bg-slate-900 border border-slate-800 rounded-2xl px-6 py-3 text-sm text-white font-bold outline-none cursor-pointer focus:ring-2 focus:ring-red-500"
+                            value={filters.isTrendingFeatured}
+                            onChange={(e) => setFilters(prev => ({ ...prev, isTrendingFeatured: e.target.value, page: 1 }))}
+                        >
+                            <option value="">Trending: All</option>
+                            <option value="true">Trending: Featured</option>
+                            <option value="false">Trending: Not Featured</option>
                         </select>
                     </div>
                 </div>
@@ -110,7 +126,12 @@ export default function ProductModerationPage() {
                                 )}
                                 {product.isFeatured && (
                                     <div className="absolute top-3 left-3 px-3 py-1 bg-yellow-500/20 border border-yellow-500/50 backdrop-blur-md text-yellow-500 font-bold text-[10px] rounded-lg tracking-widest uppercase flex items-center gap-1 shadow-[0_0_15px_rgba(234,179,8,0.3)]">
-                                        <SparklesIcon className="w-3 h-3" /> Featured
+                                        <SparklesIcon className="w-3 h-3" /> Home Feat
+                                    </div>
+                                )}
+                                {product.isTrendingFeatured && (
+                                    <div className="absolute top-3 right-3 px-3 py-1 bg-red-500/20 border border-red-500/50 backdrop-blur-md text-red-500 font-bold text-[10px] rounded-lg tracking-widest uppercase flex items-center gap-1 shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+                                        <SparklesIcon className="w-3 h-3" /> Trend Feat
                                     </div>
                                 )}
                             </div>
@@ -134,16 +155,27 @@ export default function ProductModerationPage() {
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-3 pt-4 border-t border-slate-800/50">
+                                <div className="flex items-center gap-2 pt-4 border-t border-slate-800/50 flex-wrap">
                                     <button
-                                        onClick={() => handleToggleFeatured(product.id, product.isFeatured)}
-                                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${product.isFeatured
+                                        onClick={() => handleToggleFeatured(product.id, product.isFeatured, 'home')}
+                                        className={`flex-1 min-w-[120px] flex items-center justify-center gap-2 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${product.isFeatured
                                             ? 'bg-amber-500/10 border border-amber-500/20 text-amber-500 hover:bg-amber-500 hover:text-amber-950'
                                             : 'bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white'
                                             }`}
                                     >
                                         <SparklesIcon className="w-4 h-4" />
-                                        {product.isFeatured ? 'Remove Featured' : 'Make Featured'}
+                                        {product.isFeatured ? 'Unfeat Home' : 'Feat Home'}
+                                    </button>
+
+                                    <button
+                                        onClick={() => handleToggleFeatured(product.id, product.isTrendingFeatured, 'trending')}
+                                        className={`flex-1 min-w-[120px] flex items-center justify-center gap-2 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${product.isTrendingFeatured
+                                            ? 'bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-red-950'
+                                            : 'bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:bg-red-500/20 hover:text-red-400'
+                                            }`}
+                                    >
+                                        <SparklesIcon className="w-4 h-4" />
+                                        {product.isTrendingFeatured ? 'Unfeat Trend' : 'Feat Trend'}
                                     </button>
 
                                     <a

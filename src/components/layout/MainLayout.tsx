@@ -29,6 +29,7 @@ import CreatePlaylistModal from '@/components/modals/CreatePlaylistModal';
 interface MainLayoutProps {
     children: React.ReactNode;
     userSubscriptions?: SubscriptionData[];
+    userFollows?: SubscriptionData[];
     notifications?: NotificationData[];
     hideSidebar?: boolean;
     isDarkTheme?: boolean;
@@ -38,6 +39,7 @@ interface MainLayoutProps {
 export default function MainLayout({
     children,
     userSubscriptions = [],
+    userFollows = [],
     notifications = [],
     hideSidebar = false,
     isDarkTheme = false,
@@ -384,6 +386,7 @@ export default function MainLayout({
                     <aside className={`hidden lg:block fixed left-0 top-16 bottom-0 w-60 overflow-hidden transition-transform duration-300 z-40 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                         <Sidebar
                             userSubscriptions={userSubscriptions}
+                            userFollows={userFollows}
                             onCreatePlaylist={() => setIsPlaylistModalOpen(true)}
                             refreshKey={playlistRefreshKey}
                             isDarkTheme={isDarkTheme}
@@ -407,6 +410,7 @@ export default function MainLayout({
                                 </div>
                                 <Sidebar
                                     userSubscriptions={userSubscriptions}
+                                    userFollows={userFollows}
                                     onCreatePlaylist={() => setIsPlaylistModalOpen(true)}
                                     refreshKey={playlistRefreshKey}
                                     isDarkTheme={isDarkTheme}

@@ -26,6 +26,7 @@ model User {
   accounts             Account[]
   apiKeys              ApiKey[]
   channelSubscriptions ChannelSubscription[] @relation("UserChannelSubscriptions")
+  channelFollows       ChannelFollow[]       @relation("UserChannelFollows")
   channels             Channel[]
   products             DigitalProduct[]
   domains              Domain[]              @relation("UserDomains")
@@ -621,6 +622,7 @@ model Channel {
   category             String?
   totalViews           Int                   @default(0)
   totalSubscribers     Int                   @default(0)
+  totalFollowers       Int                   @default(0)
   totalRevenue         Decimal               @default(0)
   status               ChannelStatus         @default(DRAFT)
   published            Boolean               @default(false)
@@ -631,6 +633,7 @@ model Channel {
   adCampaigns          AdCampaign[]
   products             ChannelProduct[]
   subscribers          ChannelSubscription[]
+  followers            ChannelFollow[]
   template             ChannelTemplate       @relation(fields: [templateId], references: [id])
   user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   reports              Report[]
@@ -643,27 +646,27 @@ model Channel {
 }
 
 model AdCampaign {
-  id                String         @id @default(cuid())
+  id                String               @id @default(cuid())
   channelId         String
   userId            String
   type              AdCampaignType
-  status            AdStatus       @default(PENDING)
+  status            AdStatus             @default(PENDING)
   goal              AdGoal
   budget            Float
-  currency          String         @default("INR")
-  impressions       Int            @default(0)
-  clicks            Int            @default(0)
-  conversions       Int            @default(0)
-  spent             Float          @default(0)
+  currency          String               @default("INR")
+  impressions       Int                  @default(0)
+  clicks            Int                  @default(0)
+  conversions       Int                  @default(0)
+  spent             Float                @default(0)
   startDate         DateTime
   endDate           DateTime
   targeting         Json?
   metadata          Json?
   razorpayOrderId   String?
   razorpayPaymentId String?
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  channel           Channel        @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  channel           Channel              @relation(fields: [channelId], references: [id], onDelete: Cascade)
   performanceDaily  AdPerformanceDaily[]
 
   @@index([channelId])
@@ -732,6 +735,7 @@ model ChannelProduct {
   status           ChannelProductStatus @default(DRAFT)
   published        Boolean              @default(false)
   isFeatured       Boolean              @default(false)
+  isTrendingFeatured Boolean            @default(false)
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
   likeCount        Int                  @default(0)
@@ -1103,6 +1107,7 @@ enum ProductPurchaseStatus {
   FAILED
   PENDING
 }
+
 model ContactForm {
   id        String            @id @default(cuid())
   name      String
@@ -1168,22 +1173,22 @@ model UserInteraction {
 }
 
 model UserSession {
-  id             String   @id @default(cuid())
+  id             String    @id @default(cuid())
   userId         String?
-  user           User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  sessionId      String   @unique
-  startTime      DateTime @default(now())
+  user           User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sessionId      String    @unique
+  startTime      DateTime  @default(now())
   endTime        DateTime?
   duration       Int?
-  pageViews      Int      @default(0)
-  interactions   Int      @default(0)
+  pageViews      Int       @default(0)
+  interactions   Int       @default(0)
   device         String?
   browser        String?
   os             String?
   country        String?
   exitPage       String?
   conversionGoal String?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime  @default(now())
 
   @@index([userId])
   @@index([sessionId])
@@ -1235,9 +1240,9 @@ model Report {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  user      User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
-  channel   Channel?        @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  product   ChannelProduct? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  channel Channel?        @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  product ChannelProduct? @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([status])
   @@index([createdAt])
@@ -1248,4 +1253,17 @@ enum ReportStatus {
   PENDING
   REVIEWED
   RESOLVED
+}
+
+model ChannelFollow {
+  id        String   @id @default(cuid())
+  channelId String
+  userId    String
+  createdAt DateTime @default(now())
+  channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user      User     @relation("UserChannelFollows", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([channelId, userId])
+  @@index([userId])
+  @@map("channel_follows")
 }

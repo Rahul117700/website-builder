@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import toast from 'react-hot-toast';
 import {
   PlayIcon,
   DocumentTextIcon,
@@ -57,6 +58,8 @@ export default function ProductClient() {
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowLoading, setIsFollowLoading] = useState(false);
   const [selectedQuality, setSelectedQuality] = useState<string>('auto');
   const [showQualityMenu, setShowQualityMenu] = useState(false);
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
@@ -128,6 +131,20 @@ export default function ProductClient() {
           }
         } else {
           setHasActiveSubscription(false);
+        }
+
+        // Check follow status if user is logged in
+        if (session?.user?.id) {
+          try {
+            const followResponse = await fetch(`/api/channels/${channelData.id}/follow`);
+            if (followResponse.ok) {
+              const followData = await followResponse.json();
+              setIsFollowing(followData.isFollowing || false);
+            }
+          } catch (error) {
+            console.error('Error checking follow status:', error);
+            setIsFollowing(false);
+          }
         }
 
         // Find the product
@@ -451,6 +468,38 @@ export default function ProductClient() {
     if (currency === 'USD') return `$${price.toFixed(2)}`;
     if (currency === 'EUR') return `€${price.toFixed(2)}`;
     return `₹${price.toFixed(2)}`;
+  };
+
+  const handleFollow = async () => {
+    if (!session?.user?.id) {
+      router.push('/auth/signin');
+      return;
+    }
+
+    if (!channel?.id) return;
+
+    setIsFollowLoading(true);
+    try {
+      const response = await fetch(`/api/channels/${channel.id}/follow`, {
+        method: 'POST',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setIsFollowing(data.isFollowing);
+        if (data.isFollowing) {
+          toast.success('You are now following this channel!');
+        } else {
+          toast.success('Unfollowed channel.');
+        }
+      } else {
+        toast.error('Failed to change follow status');
+      }
+    } catch (error) {
+      console.error('Error toggling follow:', error);
+      toast.error('An error occurred');
+    } finally {
+      setIsFollowLoading(false);
+    }
   };
 
   const handleSubscribe = async () => {
@@ -1167,6 +1216,18 @@ export default function ProductClient() {
                         {hasActiveSubscription ? 'Subscribed' : 'Subscribe Now'}
                       </button>
                     )}
+                    {!isOwner && (
+                      <button
+                        onClick={handleFollow}
+                        disabled={isFollowLoading}
+                        className={`px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isFollowing
+                          ? 'bg-transparent border border-gray-600 text-gray-300 hover:bg-white/5'
+                          : 'bg-white text-black hover:bg-gray-200'
+                          }`}
+                      >
+                        {isFollowLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
+                      </button>
+                    )}
                   </div>
                   {product.description && (
                     <p className="text-sm sm:text-base text-gray-300 whitespace-pre-wrap">{product.description}</p>
@@ -1779,16 +1840,16 @@ export default function ProductClient() {
                 </div>
 
                 <div className="mb-8">
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 mb-4 relative overflow-hidden group hover:border-blue-200 transition-colors">
-                    <div className="absolute top-0 right-0 px-3 py-1 bg-blue-100 text-blue-700 text-[10px] font-black uppercase tracking-widest rounded-bl-xl">
+                  <div className="bg-gradient-to-br from-indigo-900/40 to-blue-900/40 border border-indigo-500/30 rounded-2xl p-6 mb-4 relative overflow-hidden group hover:border-indigo-500/50 transition-colors shadow-lg">
+                    <div className="absolute top-0 right-0 px-4 py-1.5 bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest rounded-bl-xl shadow-sm">
                       Best Value
                     </div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-bold text-white flex items-center gap-2">
-                        <StarIconSolid className="w-5 h-5 text-yellow-400" />
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="font-black text-white flex items-center gap-2 text-xl tracking-tight">
+                        <StarIconSolid className="w-6 h-6 text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]" />
                         Monthly Access
                       </span>
-                      <span className="text-3xl font-black text-blue-600 tracking-tight">
+                      <span className="text-4xl font-black text-white tracking-tighter drop-shadow-md">
                         {(() => {
                           const priceValue = channel.subscriptionPrice;
                           let price = 0;
@@ -1805,7 +1866,7 @@ export default function ProductClient() {
                         })()}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-400 font-medium leading-relaxed">
+                    <p className="text-sm text-indigo-200/90 font-medium leading-relaxed">
                       Get instant access to all premium videos, documents, and resources in this channel for 30 days.
                     </p>
                   </div>
@@ -1833,7 +1894,7 @@ export default function ProductClient() {
                   <button
                     onClick={handleSubscribe}
                     disabled={subscribing}
-                    className="flex-[2] px-4 py-3.5 bg-white text-black font-bold rounded-xl text-base font-bold hover:bg-[#e50914] transition-all shadow-lg shadow-gray-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-[2] px-4 py-3.5 bg-white text-black font-bold rounded-xl text-base font-bold hover:bg-[#e50914] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {subscribing ? (
                       <>

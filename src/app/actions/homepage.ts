@@ -28,6 +28,7 @@ export type ProductCardData = {
     averageRating?: number; // [NEW] Added for real reviews
     reviewCount?: number;   // [NEW] Added for real reviews
     isFeatured?: boolean;   // [NEW] Added for featured admin dashboard
+    isTrendingFeatured?: boolean; // [NEW] Added for trending admin dashboard
 };
 
 export type SubscriptionData = {
@@ -78,6 +79,42 @@ export async function getSubscribedProducts(userId: string): Promise<ProductCard
         return products.map(mapToCardData).map(p => ({ ...p, hasAccess: true }));
     } catch (error) {
         console.error('Error fetching subscribed products:', error);
+        return [];
+    }
+}
+
+export async function getFollowedProducts(userId?: string): Promise<ProductCardData[]> {
+    if (!userId) return [];
+
+    try {
+        const products = await prisma.channelProduct.findMany({
+            where: {
+                published: true,
+                status: 'ACTIVE',
+                channel: {
+                    followers: {
+                        some: {
+                            userId: userId,
+                        },
+                    },
+                },
+            },
+            include: {
+                channel: {
+                    include: {
+                        user: { select: { image: true, name: true } }, // Fallback for avatar
+                    },
+                },
+                reviews: { select: { rating: true } },
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 10,
+        });
+
+        // Doesn't give them automatic access like active subscriptions, so no hasAccess override
+        return products.map(mapToCardData);
+    } catch (error) {
+        console.error('Error fetching followed products:', error);
         return [];
     }
 }
@@ -175,6 +212,36 @@ export async function getUserSubscriptions(userId: string): Promise<Subscription
         }));
     } catch (error) {
         console.error('Error fetching user subscriptions:', error);
+        return [];
+    }
+}
+
+export async function getUserFollows(userId: string): Promise<SubscriptionData[]> {
+    if (!userId) return [];
+
+    try {
+        const follows = await prisma.channelFollow.findMany({
+            where: {
+                userId: userId,
+            },
+            include: {
+                channel: {
+                    include: {
+                        user: { select: { image: true, name: true } }
+                    }
+                }
+            },
+            take: 20
+        });
+
+        return follows.map(follow => ({
+            channelId: follow.channelId,
+            channelName: follow.channel.name,
+            channelAvatar: follow.channel.profileImage || follow.channel.user?.image || '',
+            slug: follow.channel.slug,
+        }));
+    } catch (error) {
+        console.error('Error fetching user follows:', error);
         return [];
     }
 }
@@ -471,7 +538,8 @@ function mapToCardData(product: any): ProductCardData {
         isSaved: product.saves && product.saves.length > 0,
         averageRating: avgRating,
         reviewCount: revCount,
-        isFeatured: product.isFeatured || false,
+        isFeatured: product.isFeatured,
+        isTrendingFeatured: product.isTrendingFeatured,
     };
 }
 
