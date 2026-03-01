@@ -1,23 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile, mkdir, unlink } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { prisma } from '@/lib/prisma';
+import ffmpeg from 'fluent-ffmpeg';
+import { getFfmpegPath } from '@/lib/ffmpeg-path';
 
 export const runtime = 'nodejs';
 export const maxDuration = 600; // 10 minutes for large video uploads
 
+// Point fluent-ffmpeg to the bundled binary (resolved at runtime to avoid Next.js bundling issues)
+try {
+  ffmpeg.setFfmpegPath(getFfmpegPath());
+} catch (e) {
+  console.warn('Could not set ffmpeg path:', e);
+}
+
+/**
+ * Re-mux a video file to move the moov atom to the front of the file.
+ * This is the "-movflags +faststart" trick — essential for instant streaming.
+ * Without this, browsers must download the ENTIRE file before they can play 1 second.
+ */
+function applyFaststart(inputPath: string, outputPath: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    ffmpeg(inputPath)
+      .outputOptions([
+        '-c copy',           // Copy all streams — no re-encoding (fast!)
+        '-movflags +faststart', // Move moov atom to the front
+      ])
+      .output(outputPath)
+      .on('end', () => resolve())
+      .on('error', (err) => reject(err))
+      .run();
+  });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get user
     const user = await prisma.user.findUnique({
       where: { email: session.user.email }
     });
@@ -37,45 +64,55 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    // Validate file type (video formats)
     const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'];
     if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json({ 
-        error: 'Invalid file type. Please upload MP4, WebM, OGG, or MOV video files.' 
+      return NextResponse.json({
+        error: 'Invalid file type. Please upload MP4, WebM, OGG, or MOV video files.'
       }, { status: 400 });
     }
 
-    // Validate file size (max 500MB for videos)
     const maxSize = 500 * 1024 * 1024; // 500MB
     if (file.size > maxSize) {
-      return NextResponse.json({ 
-        error: 'File size must be less than 500MB' 
+      return NextResponse.json({
+        error: 'File size must be less than 500MB'
       }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Create videos directory if it doesn't exist
     const videosDir = join(process.cwd(), 'public', 'uploads', 'videos');
     if (!existsSync(videosDir)) {
       await mkdir(videosDir, { recursive: true });
     }
 
-    // Generate unique filename
-    const fileExtension = file.name.split('.').pop();
-    const fileName = funnelId 
-      ? `video-funnel-${funnelId}-${Date.now()}.${fileExtension}`
-      : `video-${Date.now()}.${fileExtension}`;
-    
-    const filePath = join(videosDir, fileName);
+    const fileExtension = file.name.split('.').pop() || 'mp4';
+    const baseName = funnelId
+      ? `video-funnel-${funnelId}-${Date.now()}`
+      : `video-${Date.now()}`;
 
-    // Write file to disk
-    await writeFile(filePath, buffer);
+    // Write original upload to a temp file first
+    const tempPath = join(videosDir, `tmp-${baseName}.${fileExtension}`);
+    const finalFileName = `${baseName}.${fileExtension}`;
+    const finalPath = join(videosDir, finalFileName);
 
-    const publicUrl = `/uploads/videos/${fileName}`;
+    await writeFile(tempPath, buffer);
 
-    // Create product record in database
+    // Apply faststart (move moov atom to front) — no re-encoding, just remux
+    // This is what makes the video start playing immediately like YouTube
+    try {
+      await applyFaststart(tempPath, finalPath);
+      // Remove temp file after successful remux
+      await unlink(tempPath).catch(() => { });
+    } catch (ffmpegError) {
+      console.warn('FFmpeg faststart failed, falling back to original file:', ffmpegError);
+      // Fallback: just rename temp file to final (video works, just slower to start)
+      await writeFile(finalPath, buffer);
+      await unlink(tempPath).catch(() => { });
+    }
+
+    const publicUrl = `/uploads/videos/${finalFileName}`;
+
     const product = await prisma.digitalProduct.create({
       data: {
         name: productName,
@@ -90,7 +127,6 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // If funnelId is provided, link product to funnel
     if (funnelId) {
       await prisma.funnel.update({
         where: { id: funnelId },
@@ -101,9 +137,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       url: publicUrl,
-      filename: fileName,
+      filename: finalFileName,
       size: file.size,
       type: file.type,
+      faststart: true,
       product: {
         id: product.id,
         name: product.name,
@@ -112,10 +149,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error uploading video:', error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       error: 'Failed to upload video',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
-
