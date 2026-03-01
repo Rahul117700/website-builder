@@ -64,15 +64,23 @@ export async function GET(request: NextRequest) {
 
     for (const inputPath of allVideoPaths) {
         const file = inputPath.replace(cwd, '');
-        const tempPath = inputPath + '.tmp-faststart';
+        // Use a temp name that preserves the extension (e.g., video.mp4 -> video.faststart.mp4)
+        const ext = inputPath.split('.').pop();
+        const tempPath = inputPath.replace(new RegExp(`\\.${ext}$`), `.fs.${ext}`);
 
         try {
             const stat = statSync(inputPath);
             if (stat.size < 1024) continue;
 
             await applyFaststart(inputPath, tempPath);
-            renameSync(tempPath, inputPath);
-            results.push({ file, status: 'done' });
+
+            // Critical check: only replace if the new file actually exists and has size
+            if (existsSync(tempPath) && statSync(tempPath).size > 0) {
+                renameSync(tempPath, inputPath);
+                results.push({ file, status: 'done' });
+            } else {
+                throw new Error('Faststart file was not created correctly');
+            }
         } catch (err) {
             if (existsSync(tempPath)) unlinkSync(tempPath);
             results.push({ file, status: 'failed', error: err instanceof Error ? err.message : String(err) });
