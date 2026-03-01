@@ -6,7 +6,6 @@
 export function getFfmpegPath(): string {
     try {
         // Try the standard ffmpeg-static resolution first
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const p = require('ffmpeg-static') as string;
         if (p && p.includes('ffmpeg')) return p;
     } catch { /* fall through */ }
