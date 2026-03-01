@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -11,10 +11,17 @@ interface HeroCarouselProps {
     items: ProductCardData[];
 }
 
+const AUTOPLAY_INTERVAL = 30000; // 30 seconds per slide
+
 export default function HeroCarousel({ items }: HeroCarouselProps) {
     const router = useRouter();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [direction, setDirection] = useState(0);
+    const [isPaused, setIsPaused] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const progressRef = useRef<NodeJS.Timeout | null>(null);
+    const videoRef = useRef<HTMLVideoElement | null>(null);
 
     const slideNext = useCallback(() => {
         if (!items.length) return;
@@ -30,9 +37,18 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
 
     useEffect(() => {
         if (!items.length) return;
-        const timer = setInterval(slideNext, 30000); // 30 seconds autoplay
+        const timer = setInterval(slideNext, AUTOPLAY_INTERVAL);
         return () => clearInterval(timer);
     }, [slideNext, items.length]);
+
+    // Force video play when slide changes (browsers block the autoPlay attribute)
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.play().catch(() => {
+                // Autoplay blocked – muted should normally allow it
+            });
+        }
+    }, [currentIndex]);
 
     if (!items.length) {
         return <div className="w-full h-24 sm:h-32 mb-8 bg-gradient-to-b from-[#1a1a1a] to-[#141414]"></div>;
@@ -84,6 +100,7 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
                         />
                         {(spotlightItem.type === 'VIDEO' || spotlightItem.type === 'VIDEOS' || spotlightItem.type === 'COURSE') && spotlightItem.videoUrl && (
                             <video
+                                ref={videoRef}
                                 src={spotlightItem.videoUrl}
                                 autoPlay
                                 loop

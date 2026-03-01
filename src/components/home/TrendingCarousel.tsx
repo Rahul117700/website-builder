@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { RocketLaunchIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
@@ -16,7 +16,11 @@ interface TrendingCarouselProps {
 export default function TrendingCarousel({ items, isCompact = false, isLoading = false, className }: TrendingCarouselProps) {
     const router = useRouter();
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [direction, setDirection] = useState(0); // -1 for left, 1 for right
+    const [direction, setDirection] = useState(0);
+    const [isPaused, setIsPaused] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const progressRef = useRef<NodeJS.Timeout | null>(null);
+    const INTERVAL = 5000;
 
     // Determine sizing class: use override if provided, else default to fixed aspect ratios
     const sizingClass = className || (isCompact ? 'aspect-[3/5]' : 'aspect-[3/4]');
@@ -25,19 +29,38 @@ export default function TrendingCarousel({ items, isCompact = false, isLoading =
         if (!items.length) return;
         setDirection(1);
         setCurrentIndex((prev) => (prev + 1) % items.length);
+        setProgress(0);
     }, [items.length]);
 
     const slidePrev = useCallback(() => {
         if (!items.length) return;
         setDirection(-1);
         setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
+        setProgress(0);
     }, [items.length]);
 
     useEffect(() => {
-        if (isLoading || !items.length) return;
-        const timer = setInterval(slideNext, 5000);
+        if (isLoading || !items.length || isPaused) return;
+        const timer = setInterval(slideNext, INTERVAL);
         return () => clearInterval(timer);
-    }, [slideNext, isLoading, items.length]);
+    }, [slideNext, isLoading, items.length, isPaused]);
+
+    // Progress bar
+    useEffect(() => {
+        if (isLoading || !items.length || isPaused) return;
+        setProgress(0);
+        const startTime = Date.now();
+        const tick = () => {
+            const elapsed = Date.now() - startTime;
+            const pct = Math.min((elapsed / INTERVAL) * 100, 100);
+            setProgress(pct);
+            if (pct < 100) {
+                progressRef.current = setTimeout(tick, 16);
+            }
+        };
+        progressRef.current = setTimeout(tick, 16);
+        return () => { if (progressRef.current) clearTimeout(progressRef.current); };
+    }, [currentIndex, isPaused, isLoading, items.length]);
 
     if (isLoading) {
         return (
@@ -81,7 +104,11 @@ export default function TrendingCarousel({ items, isCompact = false, isLoading =
     };
 
     return (
-        <div className={`relative ${sizingClass} rounded-2xl overflow-hidden bg-gray-900 shadow-2xl group`}>
+        <div
+            className={`relative ${sizingClass} rounded-2xl overflow-hidden bg-gray-900 shadow-2xl group`}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+        >
             <AnimatePresence initial={false} custom={direction} mode="wait">
                 <motion.div
                     key={currentIndex}
@@ -182,14 +209,22 @@ export default function TrendingCarousel({ items, isCompact = false, isLoading =
                 </button>
             </div>
 
-            {/* Pagination Indicators */}
+            {/* Pagination Indicators with progress fill */}
             <div className="absolute top-6 right-6 flex gap-1.5 z-20">
                 {items.map((_, idx) => (
                     <div
                         key={idx}
-                        className={`h-1 rounded-full transition-all duration-500 ${idx === currentIndex ? 'w-6 bg-white shadow-[0_0_10px_#fff]' : 'w-2 bg-white/30'
-                            }`}
-                    />
+                        className="relative h-1 rounded-full overflow-hidden"
+                        style={{ width: idx === currentIndex ? 24 : 8, transition: 'width 0.4s' }}
+                    >
+                        <span className="absolute inset-0 bg-white/30 rounded-full" />
+                        {idx === currentIndex && (
+                            <span
+                                className="absolute inset-y-0 left-0 rounded-full bg-white shadow-[0_0_6px_#fff]"
+                                style={{ width: `${progress}%`, transition: 'none' }}
+                            />
+                        )}
+                    </div>
                 ))}
             </div>
         </div>
