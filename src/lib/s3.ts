@@ -1,6 +1,48 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Upload } from '@aws-sdk/lib-storage';
+import { join } from 'path';
+import { writeFile, readFile, unlink } from 'fs/promises';
+import { getFfmpegPath } from '@/lib/ffmpeg-path';
+import ffmpeg from 'fluent-ffmpeg';
+import os from 'os';
+
+async function applyFaststartToBuffer(fileBuffer: Buffer, fileName: string): Promise<Buffer> {
+  const tempDir = os.tmpdir();
+  const id = Date.now() + '-' + Math.random().toString(36).substring(2, 9);
+
+  // Ensure we have a valid video extension so FFmpeg knows the container type
+  const originalExt = fileName.split('.').pop() || 'mp4';
+  const inputPath = join(tempDir, `input-${id}.${originalExt}`);
+  const outputPath = join(tempDir, `output-${id}.fs.${originalExt}`);
+
+  try {
+    await writeFile(inputPath, fileBuffer);
+
+    try {
+      ffmpeg.setFfmpegPath(getFfmpegPath());
+    } catch (e) {
+      console.warn('Could not set ffmpeg path:', e);
+    }
+
+    await new Promise<void>((resolve, reject) => {
+      ffmpeg(inputPath)
+        .outputOptions(['-c copy', '-movflags +faststart'])
+        .output(outputPath)
+        .on('end', () => resolve())
+        .on('error', (err) => reject(err))
+        .run();
+    });
+
+    return await readFile(outputPath);
+  } catch (err) {
+    console.warn('Faststart buffer processing failed, returning original buffer:', err);
+    return fileBuffer;
+  } finally {
+    unlink(inputPath).catch(() => { });
+    unlink(outputPath).catch(() => { });
+  }
+}
 
 /**
  * S3 Upload Utility
@@ -122,6 +164,12 @@ export async function uploadFileWithFallback(
   localPath: string,
   folder: string = 'products'
 ): Promise<UploadResult> {
+  // If it's a video, automatically apply faststart before saving (works for both S3 and local)
+  if (contentType.startsWith('video/') || /\.(mp4|mov|webm)$/i.test(fileName)) {
+    console.log(`Applying faststart to video upload: ${fileName}`);
+    file = await applyFaststartToBuffer(file, fileName);
+  }
+
   // Try S3 first if credentials are available
   if (hasS3Credentials()) {
     const s3Result = await uploadToS3(file, fileName, contentType, folder);
