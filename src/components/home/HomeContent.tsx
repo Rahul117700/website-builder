@@ -108,7 +108,7 @@ export default function HomeContent({
                     {/* 1. Hero Spotlight Section - Netflix Style Animated Carousel */}
                     <HeroCarousel items={spotlightItems} />
 
-                    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative z-30 space-y-12 -mt-20 sm:-mt-32 pb-8">
+                    <div className="w-full px-4 sm:px-6 lg:px-8 relative z-30 space-y-12 -mt-20 sm:-mt-32 pb-8">
                         {/* Trending Next row */}
                         {upNextItems.length > 0 && (
                             <section className="mb-8 sm:mb-12">

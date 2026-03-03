@@ -159,7 +159,7 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
             <div className="absolute inset-x-0 bottom-0 h-48 sm:h-64 bg-gradient-to-t from-[#141414] via-[#141414]/80 to-transparent z-10 pointer-events-none" />
 
             {/* Content */}
-            <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+            <div className="w-full px-4 sm:px-6 lg:px-8 relative z-20">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={currentIndex}
