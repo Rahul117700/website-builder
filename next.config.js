@@ -1,22 +1,24 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
     ignoreDuringBuilds: false,
   },
   typescript: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has type errors.
     ignoreBuildErrors: false,
   },
   experimental: {
-    serverActions: true, // Enable server actions for Next.js 13.5.x
+    serverActions: true,
   },
-  // Disable Next.js caching completely
-  generateEtags: false,
+
+  // ─── Performance: Enable gzip compression & ETags ─────────────────────────
+  generateEtags: true,
   poweredByHeader: false,
-  compress: false,
+  compress: true,
+
+  // ─── CDN Asset Prefix ────────────────────────────────────────────────────
+  // Set CDN_URL env var on your server to point to your CDN
+  // e.g. CDN_URL=https://cdn.yourdomain.com  (Cloudflare, BunnyCDN, etc.)
+  assetPrefix: process.env.CDN_URL || undefined,
 
   async redirects() {
     return [
@@ -28,20 +30,15 @@ const nextConfig = {
     ];
   },
 
-  // Exclude template folders from compilation
   pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
   onDemandEntries: {
-    // Period (in ms) where the server will keep pages in the buffer
     maxInactiveAge: 25 * 1000,
-    // Number of pages that should be kept simultaneously without being disposed
     pagesBufferLength: 2,
   },
 
   webpack: (config, { isServer }) => {
-    // Disable filesystem cache to fix EPERM issues
     config.cache = false;
 
-    // Set watch options to ignore template folders
     config.watchOptions = {
       ignored: [
         '**/templates_start_bootstrap/**',
@@ -51,7 +48,6 @@ const nextConfig = {
       ]
     };
 
-    // Exclude ffmpeg/ffprobe installers from frontend bundling
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -69,36 +65,22 @@ const nextConfig = {
 
   async headers() {
     return [
+      // ─── Security headers applied to every route ───────────────────────────
       {
         source: '/:path*',
         headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN', // Changed from DENY to allow framing on same origin (better for some previews)
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'no-referrer-when-downgrade',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
-          },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'no-referrer-when-downgrade' },
+          { key: 'X-XSS-Protection', value: '1; mode=block' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
           {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.google.com https://adservice.google.com https://adservice.google.co.in",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://checkout.razorpay.com",
-              "img-src 'self' data: blob: * https://images.pexels.com https://*.pexels.com",
+              "img-src 'self' data: blob: *",
               "font-src 'self' data: https://fonts.gstatic.com https://checkout.razorpay.com",
               "connect-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.google-analytics.com https://www.googletagmanager.com https://connect.facebook.net https://googleads.g.doubleclick.net https://www.google.com https://pagead2.googlesyndication.com https://stats.g.doubleclick.net",
               "frame-src 'self' https://checkout.razorpay.com https://api.razorpay.com https://www.youtube.com https://googleads.g.doubleclick.net https://www.google.com https://tpc.googlesyndication.com",
@@ -106,28 +88,25 @@ const nextConfig = {
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
-              "frame-ancestors 'self'" // Changed from none to self
+              "frame-ancestors 'self'",
             ].join('; '),
-          },
-          {
-            key: 'Cache-Control',
-            value: 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-          },
-          {
-            key: 'Pragma',
-            value: 'no-cache',
-          },
-          {
-            key: 'Expires',
-            value: '0',
-          },
-          {
-            key: 'Surrogate-Control',
-            value: 'no-store',
           },
         ],
       },
-      // Keep your existing static assets rule
+
+      // ─── HTML pages: CDN can cache for 60s, serve stale up to 5 mins ──────
+      {
+        source: '/((?!_next|api|uploads).*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=60, stale-while-revalidate=300',
+          },
+          { key: 'Vary', value: 'Accept-Encoding' },
+        ],
+      },
+
+      // ─── Next.js JS/CSS bundles: hash-fingerprinted → cache forever ────────
       {
         source: '/_next/static/:path*',
         headers: [
@@ -135,20 +114,56 @@ const nextConfig = {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
           },
+          { key: 'Vary', value: 'Accept-Encoding' },
         ],
       },
-      // Allow uploaded images to be accessible
+
+      // ─── Next.js image optimization ────────────────────────────────────────
       {
-        source: '/uploads/:path*',
+        source: '/_next/image',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, stale-while-revalidate=3600',
+          },
+        ],
+      },
+
+      // ─── Public static files (favicon, fonts, icons) ──────────────────────
+      {
+        source: '/(.+\\.(?:ico|png|jpg|jpeg|gif|svg|webp|woff|woff2|ttf|otf|eot))',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=2592000, stale-while-revalidate=86400',
+          },
+          { key: 'Vary', value: 'Accept-Encoding' },
+        ],
+      },
+
+      // ─── API Routes: always fresh (never CDN cached) ───────────────────────
+      {
+        source: '/api/:path*',
         headers: [
           {
             key: 'Cache-Control',
             value: 'no-store, no-cache, must-revalidate',
           },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' },
+        ],
+      },
+
+      // ─── User uploaded content: short CDN cache ────────────────────────────
+      {
+        source: '/uploads/:path*',
+        headers: [
           {
-            key: 'Access-Control-Allow-Origin',
-            value: '*',
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, stale-while-revalidate=86400',
           },
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Vary', value: 'Accept-Encoding, Accept' },
         ],
       },
     ];
@@ -175,17 +190,16 @@ const nextConfig = {
         pathname: '/**',
       }
     ],
-    unoptimized: true, // Disable image optimization for better compatibility
+    unoptimized: true,
+    minimumCacheTTL: 86400, // cache optimized images for 24h
   },
 
   async rewrites() {
     return [
-      // Rewrite /uploads requests to the dynamic image server
       {
         source: '/uploads/:path*',
         destination: '/api/view-image/:path*',
       },
-      // Rewrite API requests to the Express server
       {
         source: '/api/v1/:path*',
         destination: `${process.env.EXPRESS_SERVER_URL || 'http://localhost:3001'}/api/v1/:path*`,
@@ -193,7 +207,6 @@ const nextConfig = {
     ];
   },
 
-  // Configure for large file uploads (500MB)
   serverRuntimeConfig: {
     maxFileSize: 500 * 1024 * 1024, // 500MB
   },
