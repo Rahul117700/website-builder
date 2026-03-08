@@ -75,7 +75,6 @@ export function Sidebar({
             <nav className="flex-1 space-y-1 overflow-y-auto no-scrollbar py-4 px-2">
                 <SidebarItem icon={HomeIcon} label="Home" href="/" isDarkTheme={isDarkTheme} />
                 <SidebarItem icon={FireIcon} label="Trending" href="/trending" isDarkTheme={isDarkTheme} />
-                <SidebarItem icon={ShoppingBagIcon} label="Marketplace" href="/marketplace" isDarkTheme={isDarkTheme} />
 
                 {userSubscriptions.length > 0 && (
                     <div className="mt-8">

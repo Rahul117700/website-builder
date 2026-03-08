@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+import CatLoader from '@/components/loaders/CatLoader';
+
 interface StreamVideoPlayerProps {
     src: string;
     fileType?: string;
@@ -51,14 +53,8 @@ export default function StreamVideoPlayer({ src, fileType = 'video/mp4', onPlayC
         <div className="relative w-full h-full bg-black">
             {/* Spinner shown until first frame is ready */}
             {!isReady && (
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black gap-3">
-                    <div className="relative w-12 h-12">
-                        <div className="absolute inset-0 rounded-full border-4 border-white/10" />
-                        <div className="absolute inset-0 rounded-full border-4 border-t-white/80 animate-spin" />
-                    </div>
-                    <p className="text-white/50 text-xs font-semibold uppercase tracking-widest animate-pulse">
-                        Loading video...
-                    </p>
+                <div className="absolute inset-0 z-[100] bg-black">
+                    <CatLoader fullScreen={false} message="Buffering..." />
                 </div>
             )}
 

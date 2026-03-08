@@ -128,28 +128,28 @@ export default function HomePage() {
   // Top Channel data with images
   const topChannels = [
     {
-      name: "Video Course",
+      name: "Exclusive Vlogs",
       visitors: 3247,
       revenue: 84500,
       imageUrl: "",
       backgroundImage: ""
     },
     {
-      name: "Premium Software",
+      name: "Premium Comedy Shows",
       visitors: 2890,
       revenue: 124500,
       imageUrl: "",
       backgroundImage: ""
     },
     {
-      name: "Code Templates",
+      name: "Short Films & Series",
       visitors: 2156,
       revenue: 98700,
       imageUrl: "",
       backgroundImage: ""
     },
     {
-      name: "Online Course",
+      name: "Masterclass Videos",
       visitors: 1823,
       revenue: 76500,
       imageUrl: "",
@@ -161,13 +161,13 @@ export default function HomePage() {
   const allStories = [
     {
       name: "Priya Sharma",
-      business: "Online Yoga Courses",
-      revenue: "₹15 Lakhs",
+      business: "Exclusive Comedy Channel",
+      revenue: "₹15 Lakhs MRR",
       timePeriod: "6 months",
-      quote: "I started selling my yoga courses as a side hustle. Now it's my full-time business! sedStudios made everything so simple.",
-      before: "Part-time instructor",
-      after: "Full-time entrepreneur",
-      avatar: "🧘‍♀️",
+      quote: "I launched my paid comedy channel here. Now it's my full-time business! My loyal fans love the ad-free premium videos.",
+      before: "Standup Comedian",
+      after: "Channel Owner",
+      avatar: "🎬",
       imageUrl: "/hero/avatar.svg",
       bgGradient: "from-purple-500 to-pink-600",
       backgroundImage: "",
@@ -175,13 +175,13 @@ export default function HomePage() {
     },
     {
       name: "Arjun Kapoor",
-      business: "Premium Software Tools",
-      revenue: "₹45 Lakhs",
+      business: "Premium Filmmaking Masterclass",
+      revenue: "₹45 Lakhs MRR",
       timePeriod: "12 months",
-      quote: "My software development business exploded after I started selling through sedStudios. Best decision I ever made!",
-      before: "Freelance developer",
-      after: "SaaS founder",
-      avatar: "💻",
+      quote: "My monthly subscribers get exclusive behind-the-scenes content and mini-documentaries. Best decision I ever made!",
+      before: "Freelance Director",
+      after: "Creator Studio Founder",
+      avatar: "🎥",
       imageUrl: "/hero/avatar.svg",
       bgGradient: "from-blue-500 to-indigo-600",
       backgroundImage: "",
@@ -189,13 +189,13 @@ export default function HomePage() {
     },
     {
       name: "Vikram Singh",
-      business: "Code Templates & Scripts",
-      revenue: "₹32 Lakhs",
+      business: "Tech & Gadget Reviews (No Ads)",
+      revenue: "₹32 Lakhs MRR",
       timePeriod: "8 months",
-      quote: "My code templates started selling like hotcakes. The automated delivery system is a game-changer!",
-      before: "Software engineer",
-      after: "Product creator",
-      avatar: "⚡",
+      quote: "No YouTube censorship, no ad-dependence. Direct support from my real fans through monthly subscriptions.",
+      before: "YouTuber",
+      after: "Independent Tech Creator",
+      avatar: "📱",
       imageUrl: "/hero/avatar.svg",
       bgGradient: "from-green-500 to-emerald-600",
       backgroundImage: "",
@@ -203,13 +203,13 @@ export default function HomePage() {
     },
     {
       name: "Rahul Reddy",
-      business: "Online Photography Course",
-      revenue: "₹18 Lakhs",
+      business: "Daily Action Sports Vlogs",
+      revenue: "₹18 Lakhs MRR",
       timePeriod: "7 months",
-      quote: "From hobby photographer to profitable course creator. sedStudios gave me the tools to monetize my passion.",
-      before: "Photography enthusiast",
-      after: "Course instructor",
-      avatar: "📸",
+      quote: "From hobby vlogger to running my own mini-OTT platform. Fans gladly pay to see my uninterrupted action videos.",
+      before: "Vlogger",
+      after: "Action Sports Star",
+      avatar: "⚡",
       imageUrl: "/hero/avatar.svg",
       bgGradient: "from-indigo-500 to-blue-600",
       backgroundImage: "",
@@ -700,24 +700,24 @@ export default function HomePage() {
 
   const features: Feature[] = [
     {
-      icon: RocketLaunchIcon,
-      title: 'Easy Store Setup',
-      description: 'Create your online shop in minutes. Very simple - no technical skills needed.'
+      icon: VideoCameraIcon,
+      title: 'Build Your Own Netflix',
+      description: 'Create a beautiful channel to showcase your premium video content.'
     },
     {
-      icon: ShoppingBagIcon,
-      title: 'Sell Your Products',
-      description: 'Upload courses, PDFs, videos, ebooks and start selling. We handle everything.'
+      icon: UserGroupIcon,
+      title: 'Monthly Subscriptions',
+      description: 'Charge fans a recurring fee to access your exclusive content library.'
     },
     {
       icon: CurrencyDollarIcon,
-      title: 'Get Paid Easily',
-      description: 'Accept payments online. Money goes directly to your bank account.'
+      title: 'Keep All Your Earnings',
+      description: 'No marketplace fees. You keep 100% of the subscription revenue.'
     },
     {
       icon: ChartBarIcon,
-      title: 'See Your Sales',
-      description: 'Check how many people visited, bought your products, and how much you earned.'
+      title: 'Grow Your Audience',
+      description: 'Detailed analytics to understand your subscribers and grow faster.'
     }
   ];
 
@@ -1348,24 +1348,24 @@ export default function HomePage() {
               <div className="text-left">
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-500/10 text-orange-400 text-[9px] font-bold uppercase tracking-wider mb-2 border border-orange-500/20">
                   <RocketLaunchIcon className="w-3 h-3" />
-                  Start Earning Today
+                  Indian Patreon + Mini Netflix
                 </div>
                 <h1 className="hero-title text-3xl sm:text-4xl lg:text-5xl font-black text-white mb-2 leading-none tracking-tight" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-title">
-                  Start Selling Online.
+                  Apna Paid OTT Channel
                   <span className="block text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 mt-1">
-                    Earn from Your Skills.
+                    10 Minute Me Banaye.
                   </span>
                 </h1>
                 <p className="hero-subtitle text-sm sm:text-base text-gray-400 mb-3 leading-relaxed max-w-lg" style={{ opacity: 1, transform: 'translateY(0)' }} data-tour="hero-subtitle">
-                  Sell courses, PDFs, and videos. Setup in 5 mins. <span className="text-white font-bold underline decoration-indigo-500 underline-offset-2">Keep 100% money - zero fees!</span>
+                  Build your exclusive paid channel. Fans subscribe monthly to watch your premium videos. <span className="text-white font-bold underline decoration-indigo-500 underline-offset-2">Your rules, your revenue.</span>
                 </p>
 
                 {/* Selling Highlights - Compact */}
                 <div className="flex gap-4 py-2 border-y border-white/10 mb-3">
                   {[
-                    { label: "No Fees", sub: "100% yours", icon: CurrencyDollarIcon },
-                    { label: "Very Easy", sub: "5 min setup", icon: BoltIcon },
-                    { label: "Get Paid", sub: "Direct to bank", icon: BanknotesIcon }
+                    { label: "Create Channel", sub: "Setup in 10 mins", icon: VideoCameraIcon },
+                    { label: "Get Subscribers", sub: "Monthly recurring", icon: UserGroupIcon },
+                    { label: "Earn Revenue", sub: "Direct to bank", icon: BanknotesIcon }
                   ].map((item, i) => (
                     <div key={i} className="flex flex-col gap-0.5">
                       <div className="flex items-center gap-1.5 text-indigo-400">
@@ -1385,7 +1385,7 @@ export default function HomePage() {
                 <div className="relative z-10 grid grid-cols-5 gap-2">
                   {[
                     { id: 1, icon: UserCircleIcon, title: "Create", color: "indigo" },
-                    { id: 2, icon: ShoppingBagIcon, title: "Upload", color: "blue" },
+                    { id: 2, icon: VideoCameraIcon, title: "Upload", color: "blue" },
                     { id: 3, icon: Cog6ToothIcon, title: "Style", color: "emerald" },
                     { id: 4, icon: GlobeAltIcon, title: "Share", color: "orange" },
                     { id: 5, icon: CurrencyDollarIcon, title: "Earn", color: "yellow", success: true }
@@ -1411,7 +1411,7 @@ export default function HomePage() {
                   }}
                   className="group flex-1 flex text-xs sm:text-sm items-center justify-center font-bold shadow-lg hover:shadow-xl px-2 sm:px-6 py-3 bg-white text-black hover:bg-gray-100 rounded-lg transition-all"
                 >
-                  <span className="truncate">Start Selling - Free!</span>
+                  <span className="truncate">Start Your Channel - Free!</span>
                   <RocketLaunchIcon className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                 </button>
 
@@ -1422,7 +1422,7 @@ export default function HomePage() {
                   }}
                   className="group flex-1 flex text-xs sm:text-sm items-center justify-center font-bold shadow-lg hover:shadow-xl px-2 sm:px-6 py-3 bg-black/40 text-white backdrop-blur-md border border-white/20 hover:bg-white/10 rounded-lg transition-all"
                 >
-                  <span className="truncate">Explore Products</span>
+                  <span className="truncate">Explore Channels</span>
                   <ArrowRightIcon className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 group-hover:translate-x-1 transition-transform" />
                 </button>
 

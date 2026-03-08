@@ -109,6 +109,37 @@ export default function HomeContent({
                     <HeroCarousel items={spotlightItems} />
 
                     <div className="w-full px-4 sm:px-6 lg:px-8 relative z-30 space-y-12 -mt-20 sm:-mt-32 pb-8">
+
+                        {/* New Main CTA Banner - placed right above Trending */}
+                        {(!userChannelInfo?.hasChannel || (userChannelInfo?.productCount || 0) === 0) && (
+                            <div className="bg-gradient-to-r from-[#e50914] to-red-900 rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-[0_20px_50px_rgba(229,9,20,0.3)] flex flex-col lg:flex-row items-center justify-between gap-6 hover:scale-[1.02] transition-transform duration-300 isolate border border-red-500/40 ring-4 ring-black/40 xl:mx-8">
+                                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+                                <div className="absolute top-[-50%] left-[-10%] w-[50%] h-[150%] bg-white/20 blur-[100px] rounded-full pointer-events-none"></div>
+                                <div className="absolute bottom-[-50%] right-[-10%] w-[50%] h-[150%] bg-red-400/20 blur-[100px] rounded-full pointer-events-none"></div>
+
+                                <div className="relative z-10 flex flex-col gap-2 text-center lg:text-left items-center lg:items-start">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-black/40 backdrop-blur-md rounded-full text-white text-[10px] sm:text-xs font-black uppercase tracking-widest border border-white/20 shadow-lg">
+                                        <SparklesIcon className="w-4 h-4 text-yellow-400" />
+                                        Creator Subscription Tool + OTT Platform
+                                    </span>
+                                    <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight drop-shadow-lg max-w-4xl mt-3 tracking-tight">
+                                        “Apna Paid OTT Channel 10 Minute Me Banaye”
+                                    </h2>
+                                    <p className="text-red-50 text-sm sm:text-base md:text-lg font-medium max-w-2xl mt-2 drop-shadow-sm">
+                                        Start your own Netflix-like platform today. Sell premium courses, ebooks, and videos directly to your audience. <strong className="text-white font-extrabold">Keep 100% of your earnings.</strong>
+                                    </p>
+                                </div>
+
+                                <Link
+                                    href="/auth/dashboard/my-channel"
+                                    className="relative z-10 px-8 py-4 bg-white text-red-700 font-extrabold rounded-2xl hover:bg-gray-100 transition-all shadow-xl hover:shadow-[0_10px_30px_rgba(255,255,255,0.3)] hover:-translate-y-1 whitespace-nowrap flex items-center gap-3 text-base sm:text-lg group flex-shrink-0"
+                                >
+                                    <VideoCameraIcon className="w-7 h-7 text-red-600 group-hover:scale-110 transition-transform" />
+                                    {userChannelInfo?.hasChannel ? 'Upload Video Now' : 'Create Channel Now'}
+                                </Link>
+                            </div>
+                        )}
+
                         {/* Trending Next row */}
                         {upNextItems.length > 0 && (
                             <section className="mb-8 sm:mb-12">

@@ -55,6 +55,7 @@ import {
   UserGroupIcon,
   ChartBarIcon,
   EnvelopeIcon,
+  CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 import { signOut } from 'next-auth/react';
 import { CreatePlaylistModal, AddToPlaylistModal } from './PlaylistModals';
@@ -5739,68 +5740,85 @@ function SubscriptionModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div
-        className="relative w-full max-w-md rounded-2xl shadow-2xl"
-        style={{ backgroundColor }}
-      >
-        <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: `${textColor}20` }}>
-          <h2 className="text-2xl font-bold" style={{ color: textColor }}>
-            Subscribe to {channel.name}
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg transition-colors"
-            style={{ color: textColor }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = `${textColor}10`}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          >
-            <XMarkIcon className="w-6 h-6" />
-          </button>
-        </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative w-full max-w-md rounded-[24px] shadow-2xl bg-[#111111] overflow-hidden border border-[#333]">
+        {/* Premium Glow Effect */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-gradient-to-b from-purple-600/20 to-transparent blur-3xl opacity-50 pointer-events-none"></div>
 
-        <div className="p-6 space-y-6">
-          <div className="text-center">
-            <p className="text-lg font-medium mb-2" style={{ color: textColor }}>
-              Monthly Subscription
-            </p>
-            <p className="text-sm" style={{ color: `${textColor}80` }}>
-              Get access to all channel content for 1 month
-            </p>
+        <div className="relative p-6 sm:p-8">
+          {/* Header */}
+          <div className="flex items-start justify-between mb-8">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-1">Unlock Access</h2>
+              <p className="text-sm text-gray-400 font-medium">Support {channel.name} & get exclusive content</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 -mr-2 -mt-2 rounded-full hover:bg-white/10 transition-colors text-gray-400 hover:text-white"
+            >
+              <XMarkIcon className="w-6 h-6" />
+            </button>
           </div>
 
-          <div className="p-4 rounded-lg" style={{ backgroundColor: `${primaryColor}10` }}>
-            <div className="flex items-center justify-between">
-              <span className="font-medium" style={{ color: textColor }}>
-                Monthly Amount:
-              </span>
-              <span className="text-2xl font-bold" style={{ color: primaryColor }}>
-                {currencySymbol}{price.toFixed(2)}
-              </span>
+          <div className="mb-8">
+            {/* Plan Card */}
+            <div className="bg-gradient-to-br from-[#1a1a1a] to-[#111] border border-[#333] rounded-[20px] p-6 mb-6 relative overflow-hidden group hover:border-[#444] transition-all">
+              <div className="absolute top-0 right-0 px-4 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[10px] font-black uppercase tracking-widest rounded-bl-xl shadow-sm">
+                Best Value
+              </div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="font-bold text-white flex items-center gap-2 text-lg">
+                  Monthly Access
+                </span>
+                <span className="text-3xl font-black text-white tracking-tighter">
+                  {currencySymbol}{price.toFixed(2)}
+                </span>
+              </div>
+              <p className="text-sm text-gray-400 font-medium leading-relaxed">
+                Get instant access to all premium videos, documents, and resources in this channel for 30 days.
+              </p>
+            </div>
+
+            {/* Trust Signals */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-[#1a1a1a] border border-[#222]">
+                <CheckCircleIcon className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                <span className="text-xs font-semibold text-gray-300">Cancel anytime</span>
+              </div>
+              <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-[#1a1a1a] border border-[#222]">
+                <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">🔒</div>
+                <span className="text-xs font-semibold text-gray-300">Secure payment</span>
+              </div>
             </div>
           </div>
 
-          <div className="flex gap-4 pt-4">
+          {/* Actions */}
+          <div className="flex gap-3">
             <button
-              type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 rounded-lg font-semibold transition-colors"
-              style={{
-                backgroundColor: `${textColor}10`,
-                color: textColor,
-              }}
               disabled={subscribing}
+              className="flex-1 px-4 py-4 bg-[#2a2a2a] hover:bg-[#333] text-white rounded-xl text-sm sm:text-base font-bold transition-all disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               onClick={() => onSubscribe(duration)}
-              className="flex-1 px-6 py-3 rounded-lg font-semibold text-white transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed bg-[#e50914] hover:bg-gray-800"
               disabled={subscribing}
+              className="flex-[2] px-4 py-4 bg-gradient-to-r from-purple-600 hover:from-purple-500 to-pink-600 hover:to-pink-500 text-white font-bold rounded-xl text-sm sm:text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
             >
-              {subscribing ? 'Processing...' : 'Subscribe Now'}
+              {subscribing ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <span>Subscribe Now</span>
+              )}
             </button>
           </div>
+          <p className="text-center text-[11px] text-gray-500 mt-5 font-medium">
+            By subscribing, you agree to our Terms of Service.
+          </p>
         </div>
       </div>
     </div>

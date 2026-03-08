@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import LogoLoader from '@/components/loaders/LogoLoader';
+import CatLoader from '@/components/loaders/CatLoader';
 import ExitIntentPopup from '@/components/retention/ExitIntentPopup';
 
 interface PageLoaderProps {
@@ -54,7 +54,7 @@ export default function PageLoader({ isLoading, message }: PageLoaderProps) {
   }, [hasInteracted]);
 
   if (isLoading) {
-    return <LogoLoader message={message} fullScreen />;
+    return <CatLoader message={message} fullScreen />;
   }
 
   if (showExitIntent) {

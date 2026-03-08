@@ -58,175 +58,182 @@ export default function SignInPage() {
   return (
     <>
       <Toaster position="top-right" />
-      <div className="min-h-screen bg-[#141414] flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Background Ambient Glows */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] pointer-events-none mix-blend-screen -z-10" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none mix-blend-screen -z-10" />
+
+        <div className="w-full max-w-md relative z-10">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex justify-center mb-6">
-              <Link href="/">
-                <Logo variant="white" size="lg" showText={true} />
-              </Link>
+              <Logo variant="white" size="lg" showText={true} />
             </div>
-            <h1 className="text-3xl font-bold text-white mb-2">Welcome back</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Welcome Back 🚀</h1>
             <p className="text-gray-400">Sign in to your account</p>
           </div>
 
           {/* Main Card */}
-          <div className="bg-[#1a1a1a] rounded-2xl shadow-xl border border-[#333] p-8">
-            {/* Social Sign In Buttons */}
-            <div className="space-y-3 mb-8">
-              <button
-                type="button"
-                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium text-white bg-[#222] border border-[#333] hover:bg-[#333] hover:border-[#444] transition-all duration-200 focus:outline-none"
-                onClick={() => {
-                  const url = callbackUrl && callbackUrl !== '/' ? callbackUrl : window.location.origin;
-                  signIn('google', {
-                    callbackUrl: url,
-                    redirect: true
-                  });
-                }}
-              >
-                <FaGoogle className="w-5 h-5 text-red-500" />
-                Continue with Google
-              </button>
-              <button
-                type="button"
-                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium text-white bg-[#222] border border-[#333] hover:bg-[#333] hover:border-[#444] transition-all duration-200 focus:outline-none"
-                onClick={() => {
-                  const url = callbackUrl && callbackUrl !== '/' ? callbackUrl : window.location.origin;
-                  signIn('github', {
-                    callbackUrl: url,
-                    redirect: true
-                  });
-                }}
-              >
-                <FaGithub className="w-5 h-5" />
-                Continue with GitHub
-              </button>
-            </div>
+          <div className="bg-[#111111]/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/5 p-8 relative overflow-hidden">
+            {/* Subtle inner highlight */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
 
-            {/* Divider */}
-            <div className="relative mb-8">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[#333]" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-[#1a1a1a] text-gray-400">Or continue with email</span>
-              </div>
-            </div>
-
-            {/* Sign In Form */}
-            <form className="space-y-6" onSubmit={handleSubmit} method="POST">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                  Email address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="w-full px-4 py-3 border border-[#333] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-[#222]"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                />
+            <div className="relative z-10">
+              {/* Social Sign In Buttons */}
+              <div className="space-y-3 mb-8">
+                <button
+                  type="button"
+                  className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium text-white bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                  onClick={() => {
+                    const url = callbackUrl && callbackUrl !== '/' ? callbackUrl : window.location.origin;
+                    signIn('google', {
+                      callbackUrl: url,
+                      redirect: true
+                    });
+                  }}
+                >
+                  <FaGoogle className="w-5 h-5 text-red-400" />
+                  Continue with Google
+                </button>
+                <button
+                  type="button"
+                  className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl font-medium text-white bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                  onClick={() => {
+                    const url = callbackUrl && callbackUrl !== '/' ? callbackUrl : window.location.origin;
+                    signIn('github', {
+                      callbackUrl: url,
+                      redirect: true
+                    });
+                  }}
+                >
+                  <FaGithub className="w-5 h-5 text-white" />
+                  Continue with GitHub
+                </button>
               </div>
 
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    required
-                    className="w-full px-4 py-3 pr-12 border border-[#333] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-[#222]"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-white" />
-                    ) : (
-                      <EyeIcon className="h-5 w-5 text-gray-400 hover:text-white" />
-                    )}
-                  </button>
+              {/* Divider */}
+              <div className="relative mb-8">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/10" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-[#111111] text-gray-400">Or continue with email</span>
                 </div>
               </div>
 
-              {error && (
-                <div className="p-3 bg-red-900/30 border border-red-500/50 rounded-xl">
-                  <p className="text-sm text-red-500">{error}</p>
-                </div>
-              )}
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-indigo-500 focus:ring-indigo-500 border-[#333] rounded bg-[#222]"
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-400">
-                    Remember me
+              {/* Sign In Form */}
+              <form className="space-y-5" onSubmit={handleSubmit} method="POST">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+                    Email address
                   </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    className="w-full px-4 py-3 pb-3.5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all duration-300 bg-white/5 hover:bg-white/10"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="name@example.com"
+                  />
                 </div>
-                <Link
-                  href="/auth/forgot-password"
-                  className="text-sm text-indigo-400 hover:text-indigo-300 hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 px-4 bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 focus:outline-none border border-indigo-500 shadow-lg shadow-indigo-600/20 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
-              >
-                {loading ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Signing in...
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      required
+                      className="w-full px-4 py-3 pb-3.5 pr-12 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50 transition-all duration-300 bg-white/5 hover:bg-white/10"
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeSlashIcon className="h-5 w-5 text-gray-400 hover:text-white transition-colors" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5 text-gray-400 hover:text-white transition-colors" />
+                      )}
+                    </button>
                   </div>
-                ) : (
-                  'Sign in'
-                )}
-              </button>
-            </form>
+                </div>
 
-            {/* Sign Up Link */}
-            <div className="mt-8 text-center">
-              <p className="text-sm text-gray-400">
-                Don&apos;t have an account?{' '}
-                <Link
-                  href={`/auth/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`}
-                  className="font-medium text-indigo-500 hover:text-indigo-400 hover:underline"
+                {error && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                    <p className="text-sm text-red-500/90 font-medium text-center">{error}</p>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between pt-2">
+                  <div className="flex items-center">
+                    <input
+                      id="remember-me"
+                      name="remember-me"
+                      type="checkbox"
+                      className="h-4 w-4 text-purple-600 focus:ring-purple-500/50 border-white/20 rounded bg-white/5 cursor-pointer"
+                    />
+                    <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-400 cursor-pointer select-none">
+                      Remember me
+                    </label>
+                  </div>
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-sm font-medium text-purple-400 hover:text-purple-300 hover:underline transition-colors"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full mt-2 py-3.5 px-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500/50 shadow-[0_0_30px_-5px_rgba(168,85,247,0.4)] hover:shadow-[0_0_40px_-5px_rgba(168,85,247,0.6)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
                 >
-                  Sign up for free
-                </Link>
-              </p>
+                  {loading ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      Signing in...
+                    </div>
+                  ) : (
+                    'Sign in to account'
+                  )}
+                </button>
+              </form>
+
+              {/* Sign Up Link */}
+              <div className="mt-8 text-center">
+                <p className="text-sm text-gray-400">
+                  Don&apos;t have an account?{' '}
+                  <Link
+                    href={`/auth/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`}
+                    className="font-semibold text-white/90 hover:text-white hover:underline transition-colors"
+                  >
+                    Sign up for free
+                  </Link>
+                </p>
+              </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="mt-8 text-center">
-            <p className="text-xs text-gray-500">
+          <div className="mt-8 text-center text-xs text-gray-500 font-medium">
+            <p>
               By signing in, you agree to our{' '}
-              <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">Terms of Service</Link>
+              <Link href="/terms" className="hover:text-gray-300 transition-colors underline decoration-gray-600 underline-offset-2">Terms of Service</Link>
               {' '}and{' '}
-              <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</Link>
+              <Link href="/privacy" className="hover:text-gray-300 transition-colors underline decoration-gray-600 underline-offset-2">Privacy Policy</Link>
             </p>
           </div>
         </div>

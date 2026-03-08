@@ -262,7 +262,7 @@ export default React.memo(function ProductCard({ id, title, thumbnail, channelNa
             {/* Report Popover - Rendered outside overflow-hidden entirely to prevent clipping */}
             {isReporting && (
                 <div
-                    className={`absolute bottom-16 right-2 w-52 ${isDarkTheme ? 'bg-[#1a1a1a] border-[#333]' : 'bg-white border-gray-100'} shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] rounded-xl border p-3 z-50 transform transition-transform duration-500 group-hover:-translate-y-1 origin-bottom-right`}
+                    className={`absolute bottom-28 right-2 w-[calc(100%-1rem)] max-w-[240px] ${isDarkTheme ? 'bg-[#1a1a1a] border-[#333]' : 'bg-white border-gray-100'} shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] rounded-xl border p-3 z-[60] transform transition-transform duration-500 origin-bottom-right`}
                     onClick={(e) => e.stopPropagation()}
                 >
                     <p className={`text-[10px] font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'} mb-1.5 uppercase tracking-wider`}>Report Content</p>

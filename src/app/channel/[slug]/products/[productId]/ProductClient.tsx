@@ -37,7 +37,7 @@ import SaveToPlaylistModal from '@/components/modals/SaveToPlaylistModal';
 import ShareModal from '@/components/modals/ShareModal';
 import OptimizedMediaLoader from '@/components/ui/OptimizedMediaLoader';
 import StreamVideoPlayer from '@/components/ui/StreamVideoPlayer';
-
+import CatLoader from '@/components/loaders/CatLoader';
 // Utility for formatting numbers
 const formatNumber = (num: number): string => {
   if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -95,6 +95,17 @@ export default function ProductClient() {
   const [isReporting, setIsReporting] = useState(false);
   const [reportReason, setReportReason] = useState('Inappropriate content');
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+
+  // Scroll tracking for header offset
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Check if user is owner
   const isOwner = session?.user?.id === channel?.userId;
@@ -949,14 +960,7 @@ export default function ProductClient() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#141414] flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading product...</p>
-        </div>
-      </div>
-    );
+    return <CatLoader fullScreen={true} />;
   }
 
   if (!product || !channel) {
@@ -982,8 +986,8 @@ export default function ProductClient() {
   const sellerName = channel.user?.name || channel.name || 'Creator';
 
   return (
-    <MainLayout isDarkTheme={true}>
-      <div className="min-h-screen bg-gradient-to-br bg-[#141414] w-full relative overflow-hidden">
+    <MainLayout isDarkTheme={true} noPaddingTop={true}>
+      <div className="min-h-screen bg-gradient-to-br bg-[#141414] w-full relative overflow-clip pt-0 lg:pt-16">
         {/* Decorative Background Elements */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-200/10 to-purple-200/10 rounded-full blur-3xl"></div>
@@ -994,9 +998,9 @@ export default function ProductClient() {
         <div className="w-full">
           <div className="flex flex-col lg:flex-row">
             {/* Main Content Area - Full Width */}
-            <div className="flex-1 w-full">
+            <div className="flex-1 w-full relative">
               {/* Video/Content Player - Full Width */}
-              <div className="w-full">
+              <div className={`w-full sticky ${scrolled ? 'top-[56px]' : 'top-0'} z-40 lg:relative lg:top-0 bg-[#000] transition-all duration-300`}>
                 {renderContent()}
               </div>
 
@@ -1007,16 +1011,16 @@ export default function ProductClient() {
                 {/* Channel Info & Actions */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-6 border-b border-[#333]">
                   <div className="flex items-center gap-3 sm:gap-4">
-                    {channel.user?.image ? (
+                    {channel.profileImage || channel.user?.image ? (
                       <div
                         className="relative group cursor-pointer"
                         onClick={() => router.push(`/channel/${params?.slug}`)}
                       >
                         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-100 blur-md transition-opacity"></div>
                         <img
-                          src={channel.user.image}
-                          alt={channel.user.name || 'Creator'}
-                          className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full ring-2 ring-white shadow-lg"
+                          src={channel.profileImage || channel.user?.image}
+                          alt={channel.user?.name || channel.name || 'Creator'}
+                          className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full ring-2 ring-white shadow-lg object-cover"
                         />
                       </div>
                     ) : (
@@ -1025,7 +1029,7 @@ export default function ProductClient() {
                         onClick={() => router.push(`/channel/${params?.slug}`)}
                       >
                         <span className="text-red-500 font-bold text-lg">
-                          {(channel.user?.name || channel.name || 'C')[0].toUpperCase()}
+                          {(channel.name || channel.user?.name || 'C')[0].toUpperCase()}
                         </span>
                       </div>
                     )}
@@ -1060,68 +1064,76 @@ export default function ProductClient() {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <button
-                      onClick={handleLikeToggle}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1a1a1a] border-2 border-[#333] hover:border-red-500 hover:bg-red-900/30 transition-all hover:shadow-md"
-                    >
-                      {isLiked ? (
-                        <HeartIconSolid className="h-5 w-5 text-red-600" />
-                      ) : (
-                        <HeartIcon className="h-5 w-5 text-gray-400" />
-                      )}
-                      <span className="text-xs sm:text-sm font-medium text-gray-300">
-                        {product.likeCount || 0}
-                      </span>
-                    </button>
-                    <button
-                      onClick={() => setIsBookmarked(!isBookmarked)}
-                      className="p-2.5 rounded-xl bg-[#1a1a1a] border-2 border-[#333] hover:border-blue-500 hover:bg-blue-900/30 transition-all hover:shadow-md"
-                    >
-                      {isBookmarked ? (
-                        <BookmarkIconSolid className="h-5 w-5 text-blue-600" />
-                      ) : (
-                        <BookmarkIcon className="h-5 w-5 text-gray-400" />
-                      )}
-                    </button>
+                  <div className="flex items-center gap-2 flex-wrap w-full">
+                    {/* Grouped Like & Bookmark */}
+                    <div className="flex items-center bg-[#2a2a2a] rounded-full flex-1">
+                      <button
+                        onClick={handleLikeToggle}
+                        className="flex-1 flex items-center justify-center gap-2 px-2 py-2.5 hover:bg-white/10 transition-all rounded-l-full sm:px-4"
+                      >
+                        {isLiked ? (
+                          <HeartIconSolid className="h-5 w-5 text-red-500 shrink-0" />
+                        ) : (
+                          <HeartIcon className="h-5 w-5 text-gray-300 shrink-0" />
+                        )}
+                        <span className="text-sm font-semibold text-gray-100 truncate">
+                          {product.likeCount || 0}
+                        </span>
+                      </button>
+                      <div className="w-[1px] h-6 bg-white/10" />
+                      <button
+                        onClick={() => setIsBookmarked(!isBookmarked)}
+                        className="flex-[0.5] sm:flex-1 flex items-center justify-center px-2 py-2.5 hover:bg-white/10 transition-all rounded-r-full sm:px-4"
+                      >
+                        {isBookmarked ? (
+                          <BookmarkIconSolid className="h-5 w-5 text-blue-500 shrink-0" />
+                        ) : (
+                          <BookmarkIcon className="h-5 w-5 text-gray-300 shrink-0" />
+                        )}
+                      </button>
+                    </div>
+
                     <button
                       onClick={() => setIsSaveModalOpen(true)}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1a1a1a] border-2 border-[#333] hover:border-indigo-500 hover:bg-indigo-900/30 transition-all hover:shadow-md"
+                      className="flex-1 flex items-center justify-center gap-2 px-2 sm:px-4 py-2.5 rounded-full bg-[#2a2a2a] hover:bg-white/10 transition-all text-gray-100 min-w-[3rem]"
                     >
-                      <PlusCircleIcon className="h-5 w-5 text-gray-400" />
-                      <span className="hidden sm:inline text-sm font-medium text-gray-300">Save</span>
+                      <PlusCircleIcon className="h-5 w-5 shrink-0" />
+                      <span className="hidden sm:inline text-sm font-semibold truncate">Playlist</span>
                     </button>
+
                     <button
                       onClick={handleShare}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1a1a1a] border-2 border-[#333] hover:border-indigo-500 hover:bg-indigo-900/30 transition-all hover:shadow-md"
+                      className="flex-1 flex items-center justify-center gap-2 px-2 sm:px-4 py-2.5 rounded-full bg-[#2a2a2a] hover:bg-white/10 transition-all text-gray-100 min-w-[3rem]"
                     >
-                      <ShareIcon className="h-5 w-5 text-gray-400" />
-                      <span className="hidden sm:inline text-sm font-medium text-gray-300">Share</span>
+                      <ShareIcon className="h-5 w-5 shrink-0" />
+                      <span className="hidden sm:inline text-sm font-semibold truncate">Share</span>
                     </button>
+
                     {product.fileUrl && (product.type?.toUpperCase() !== 'VIDEO' && product.type?.toUpperCase() !== 'VIDEOS') && (
-                      <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1a1a1a] border-2 border-[#333] hover:border-emerald-500 hover:bg-emerald-900/30 transition-all hover:shadow-md">
-                        <ArrowDownTrayIcon className="h-5 w-5 text-gray-400" />
-                        <span className="hidden sm:inline text-sm font-medium text-gray-300">Download</span>
+                      <button className="flex-1 flex items-center justify-center gap-2 px-2 sm:px-4 py-2.5 rounded-full bg-[#2a2a2a] hover:bg-white/10 transition-all text-gray-100 min-w-[3rem]">
+                        <ArrowDownTrayIcon className="h-5 w-5 shrink-0" />
+                        <span className="hidden sm:inline text-sm font-semibold truncate">Download</span>
                       </button>
                     )}
-                    <div className="relative">
+
+                    <div className="relative flex-1 min-w-[3rem]">
                       <button
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsReporting(!isReporting); }}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 transition-all hover:shadow-md ${isReporting ? 'bg-amber-50 text-amber-600 border-amber-300' : 'bg-[#1a1a1a] border-[#333] hover:border-amber-300 hover:bg-amber-50 hover:text-amber-600 text-gray-300'}`}
+                        className={`w-full flex items-center justify-center gap-2 px-2 sm:px-4 py-2.5 rounded-full transition-all ${isReporting ? 'bg-amber-50 text-amber-600' : 'bg-[#2a2a2a] hover:bg-[#3f3f3f] text-gray-100'}`}
                       >
-                        {isReporting ? <FlagIconSolid className="h-5 w-5 text-amber-500" /> : <FlagIcon className="h-5 w-5" />}
-                        <span className="hidden sm:inline text-sm font-medium">Report</span>
+                        {isReporting ? <FlagIconSolid className="h-5 w-5 text-amber-500 shrink-0" /> : <FlagIcon className="h-5 w-5 shrink-0" />}
+                        <span className="hidden sm:inline text-sm font-semibold truncate">Report</span>
                       </button>
 
                       {isReporting && (
-                        <div className="absolute right-0 top-14 w-60 bg-[#1a1a1a] shadow-[0_10px_40px_-5px_rgba(0,0,0,0.2)] rounded-2xl border border-[#333] p-4 z-50 animate-in fade-in slide-in-from-top-2">
+                        <div className="absolute right-0 sm:right-auto sm:left-0 top-14 w-60 bg-[#1a1a1a] shadow-[0_10px_40px_-5px_rgba(0,0,0,0.2)] rounded-2xl border border-[#333] p-4 z-[100] animate-in fade-in slide-in-from-top-2">
                           <p className="text-xs font-bold text-white mb-3 uppercase tracking-wider flex items-center gap-2">
                             <FlagIcon className="w-4 h-4 text-amber-500" /> Report Content
                           </p>
                           <select
                             value={reportReason}
                             onChange={(e) => setReportReason(e.target.value)}
-                            className="w-full text-sm p-2.5 rounded-xl border border-[#333] mb-4 outline-none bg-[#141414] focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+                            className="w-full text-sm p-2.5 rounded-xl border border-[#333] mb-4 outline-none bg-[#141414] focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-white"
                           >
                             <option>Inappropriate content</option>
                             <option>Pornography or Nudity</option>
@@ -1132,7 +1144,7 @@ export default function ProductClient() {
                           <div className="flex gap-2">
                             <button
                               onClick={() => setIsReporting(false)}
-                              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-300 text-sm font-bold py-2.5 rounded-xl transition-colors"
+                              className="flex-1 bg-[#2a2a2a] hover:bg-[#3f3f3f] text-gray-300 text-sm font-bold py-2.5 rounded-xl transition-colors border border-[#333]"
                             >
                               Cancel
                             </button>
@@ -1776,7 +1788,7 @@ export default function ProductClient() {
                   }
                   setShowSubscriptionModal(true);
                 }}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-200 active:scale-95 transition-transform"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-bold active:scale-95 transition-transform"
               >
                 Subscribe Now
               </button>
@@ -1786,36 +1798,37 @@ export default function ProductClient() {
 
         {/* Subscription Modal */}
         {showSubscriptionModal && channel && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#e50914]/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="relative w-full max-w-md rounded-3xl shadow-2xl bg-[#1a1a1a] overflow-hidden">
-              {/* Header Pattern */}
-              <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-br from-blue-600 to-indigo-600 opacity-10"></div>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="relative w-full max-w-md rounded-[24px] shadow-2xl bg-[#111111] overflow-hidden border border-[#333]">
+              {/* Premium Glow Effect */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-gradient-to-b from-purple-600/20 to-transparent blur-3xl opacity-50 pointer-events-none"></div>
 
               <div className="relative p-6 sm:p-8">
-                <div className="flex items-center justify-between mb-6">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-8">
                   <div>
-                    <h2 className="text-2xl font-black text-white tracking-tight">Unlock Access</h2>
+                    <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-1">Unlock Access</h2>
                     <p className="text-sm text-gray-400 font-medium">Support {channel.name} & get exclusive content</p>
                   </div>
                   <button
                     onClick={() => setShowSubscriptionModal(false)}
-                    className="p-2 rounded-xl hover:bg-[#333] transition-colors -mr-2 -mt-2"
+                    className="p-2 -mr-2 -mt-2 rounded-full hover:bg-white/10 transition-colors text-gray-400 hover:text-white"
                   >
-                    <XMarkIcon className="w-6 h-6 text-gray-400 hover:text-white" />
+                    <XMarkIcon className="w-6 h-6" />
                   </button>
                 </div>
 
                 <div className="mb-8">
-                  <div className="bg-gradient-to-br from-indigo-900/40 to-blue-900/40 border border-indigo-500/30 rounded-2xl p-6 mb-4 relative overflow-hidden group hover:border-indigo-500/50 transition-colors shadow-lg">
-                    <div className="absolute top-0 right-0 px-4 py-1.5 bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest rounded-bl-xl shadow-sm">
+                  {/* Plan Card */}
+                  <div className="bg-gradient-to-br from-[#1a1a1a] to-[#111] border border-[#333] rounded-[20px] p-6 mb-6 relative overflow-hidden group hover:border-[#444] transition-all">
+                    <div className="absolute top-0 right-0 px-4 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[10px] font-black uppercase tracking-widest rounded-bl-xl shadow-sm">
                       Best Value
                     </div>
                     <div className="flex items-center justify-between mb-4">
-                      <span className="font-black text-white flex items-center gap-2 text-xl tracking-tight">
-                        <StarIconSolid className="w-6 h-6 text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]" />
+                      <span className="font-bold text-white flex items-center gap-2 text-lg">
                         Monthly Access
                       </span>
-                      <span className="text-4xl font-black text-white tracking-tighter drop-shadow-md">
+                      <span className="text-3xl font-black text-white tracking-tighter">
                         {(() => {
                           const priceValue = channel.subscriptionPrice;
                           let price = 0;
@@ -1832,39 +1845,40 @@ export default function ProductClient() {
                         })()}
                       </span>
                     </div>
-                    <p className="text-sm text-indigo-200/90 font-medium leading-relaxed">
+                    <p className="text-sm text-gray-400 font-medium leading-relaxed">
                       Get instant access to all premium videos, documents, and resources in this channel for 30 days.
                     </p>
                   </div>
 
                   {/* Trust Signals */}
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="flex items-center gap-2 p-3 rounded-xl bg-[#141414] border border-[#333]">
-                      <CheckCircleIcon className="w-5 h-5 text-green-500 flex-shrink-0" />
-                      <span className="text-xs font-bold text-gray-400">Cancel anytime</span>
+                    <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-[#1a1a1a] border border-[#222]">
+                      <CheckCircleIcon className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                      <span className="text-xs font-semibold text-gray-300">Cancel anytime</span>
                     </div>
-                    <div className="flex items-center gap-2 p-3 rounded-xl bg-[#141414] border border-[#333]">
-                      <div className="w-5 h-5 rounded-full bg-slate-900 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">🔒</div>
-                      <span className="text-xs font-bold text-gray-400">Secure payment</span>
+                    <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-[#1a1a1a] border border-[#222]">
+                      <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">🔒</div>
+                      <span className="text-xs font-semibold text-gray-300">Secure payment</span>
                     </div>
                   </div>
                 </div>
 
+                {/* Actions */}
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowSubscriptionModal(false)}
-                    className="flex-1 px-4 py-3.5 border-2 border-[#333] text-gray-300 rounded-xl text-base font-bold hover:bg-[#141414] hover:border-[#333] transition-all"
+                    className="flex-1 px-4 py-4 bg-[#2a2a2a] hover:bg-[#333] text-white rounded-xl text-sm sm:text-base font-bold transition-all"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSubscribe}
                     disabled={subscribing}
-                    className="flex-[2] px-4 py-3.5 bg-white text-black font-bold rounded-xl text-base font-bold hover:bg-[#e50914] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-[2] px-4 py-4 bg-gradient-to-r from-purple-600 hover:from-purple-500 to-pink-600 hover:to-pink-500 text-white font-bold rounded-xl text-sm sm:text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
                   >
                     {subscribing ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         <span>Processing...</span>
                       </>
                     ) : (
@@ -1872,7 +1886,7 @@ export default function ProductClient() {
                     )}
                   </button>
                 </div>
-                <p className="text-center text-[10px] text-gray-400 mt-4 font-medium">
+                <p className="text-center text-[11px] text-gray-500 mt-5 font-medium">
                   By subscribing, you agree to our Terms of Service.
                 </p>
               </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import TemplateRenderer from '@/components/channel/TemplateRenderer';
-import LogoLoader from '@/components/loaders/LogoLoader';
+import CatLoader from '@/components/loaders/CatLoader';
 import MainLayout from '@/components/layout/MainLayout';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
@@ -39,7 +39,7 @@ export default function ChannelClient({ initialChannel, slug }: { initialChannel
     };
 
     if (loading) {
-        return <LogoLoader fullScreen />;
+        return <CatLoader fullScreen />;
     }
 
     if (error || !channel) {
