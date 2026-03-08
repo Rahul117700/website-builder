@@ -12,7 +12,7 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -33,13 +33,24 @@ export async function POST(
       return NextResponse.json({ error: 'Subscriptions are not enabled for this channel' }, { status: 400 });
     }
 
-    if (!channel.subscriptionPrice) {
+    // Convert subscription price to a normal number safely
+    let basePrice = 0;
+    if (channel.subscriptionPrice !== null && channel.subscriptionPrice !== undefined) {
+      if (typeof channel.subscriptionPrice === 'object' && 'toNumber' in channel.subscriptionPrice) {
+        basePrice = (channel.subscriptionPrice as any).toNumber();
+      } else if (typeof channel.subscriptionPrice === 'string') {
+        basePrice = parseFloat(channel.subscriptionPrice);
+      } else {
+        basePrice = Number(channel.subscriptionPrice);
+      }
+    }
+
+    if (basePrice <= 0) {
       return NextResponse.json({ error: 'Subscription price is not set' }, { status: 400 });
     }
 
     // Monthly subscription - 30 days
     const durationConfig = { days: 30, multiplier: 1 };
-    const basePrice = Number(channel.subscriptionPrice);
     const subscriptionPrice = basePrice; // Monthly price
     const currency = channel.subscriptionCurrency || 'INR';
 
@@ -122,7 +133,7 @@ export async function POST(
       // Format: ch_sub_<timestamp> (keeping it under 40 chars)
       const timestamp = Date.now().toString().slice(-10); // Last 10 digits of timestamp
       const receipt = `ch_sub_${timestamp}`; // Max 18 chars, well under 40 limit
-      
+
       const order = await razorpay.orders.create({
         amount: orderAmount,
         currency: currency,
@@ -146,29 +157,29 @@ export async function POST(
       });
     } catch (razorpayError: any) {
       console.error('Razorpay API Error:', razorpayError);
-      
+
       // Provide more specific error messages
       if (razorpayError.error) {
         const errorDescription = razorpayError.error.description || razorpayError.error.reason || 'Unknown Razorpay error';
         return NextResponse.json(
-          { 
+          {
             error: `Payment gateway error: ${errorDescription}`,
             details: razorpayError.error
           },
           { status: 500 }
         );
       }
-      
+
       throw razorpayError; // Re-throw to be caught by outer catch
     }
   } catch (error: any) {
     console.error('Error creating subscription order:', error);
-    
+
     // Provide more detailed error information
     const errorMessage = error?.message || error?.error?.description || 'Failed to create subscription order';
-    
+
     return NextResponse.json(
-      { 
+      {
         error: errorMessage,
         details: process.env.NODE_ENV === 'development' ? error : undefined
       },

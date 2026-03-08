@@ -635,16 +635,16 @@ export default function ChannelEditorPage() {
   };
 
   return (
-    <MainLayout>
-      <div className="h-full flex flex-col bg-gray-50 overflow-hidden relative">
+    <MainLayout isDarkTheme={true}>
+      <div className="h-full flex flex-col bg-[#141414] overflow-hidden relative">
         {/* Sticky Editor Toolbar */}
-        <div className="bg-white border-b border-gray-200 px-3 sm:px-4 py-2 sm:py-3 shrink-0 relative sticky top-0 z-30 shadow-sm">
+        <div className="bg-[#1a1a1a] border-b border-[#333] px-3 sm:px-4 py-2 sm:py-3 shrink-0 relative sticky top-0 z-30 shadow-sm">
           {/* Top Row - Title and Actions */}
           <div className="flex items-center justify-between gap-2 mb-2 sm:mb-0">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-sm sm:text-lg font-bold text-gray-900 truncate flex items-center gap-2">
+                  <h1 className="text-sm sm:text-lg font-bold text-white truncate flex items-center gap-2">
                     {viewMode === 'editor' ? (channel ? channel.name || 'Untitled Channel' : 'Loading...') :
                       viewMode === 'analytics' ? 'Channel Analytics' :
                         viewMode === 'channels' ? 'My Channels' :
@@ -660,9 +660,9 @@ export default function ChannelEditorPage() {
                   {viewMode === 'editor' && (
                     <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-600">
                       {saving ? (
-                        <CloudArrowUpIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-pulse" />
+                        <CloudArrowUpIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-pulse text-gray-300" />
                       ) : lastSaved ? (
-                        <CheckCircleIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-green-600" />
+                        <CheckCircleIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-green-500" />
                       ) : null}
                     </div>
                   )}
@@ -720,7 +720,7 @@ export default function ChannelEditorPage() {
               {/* Publishing Options Button - Opens Modal */}
               <button
                 onClick={() => setShowPublishingModal(true)}
-                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors touch-manipulation text-xs sm:text-sm font-medium text-gray-700 relative z-10"
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors touch-manipulation text-xs sm:text-sm font-medium text-white relative z-10"
                 aria-label="Open Channel Options"
               >
                 <RocketLaunchIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />

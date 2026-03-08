@@ -192,9 +192,12 @@ export default function MainLayout({
                                     className={`p-1.5 sm:p-2 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 relative flex-shrink-0 ${isDarkTheme ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100/80'}`}
                                 >
                                     <BellIcon className="w-5 h-5" />
-                                    {/* Show ping indicator to represent mock notifications */}
-                                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-                                    <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
+                                    {notifications && notifications.some(n => !n.read) && (
+                                        <>
+                                            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-[#141414]"></span>
+                                            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
+                                        </>
+                                    )}
                                 </button>
 
                                 {notiMenuOpen && (
@@ -206,41 +209,46 @@ export default function MainLayout({
                                             </button>
                                         </div>
 
-                                        {/* Mock Timely Notifications */}
-                                        <div className={`px-4 py-3 border-b last:border-0 transition-colors cursor-pointer ${isDarkTheme ? 'bg-white/5 border-[#333] hover:bg-[#333]' : 'bg-indigo-50/30 border-gray-50 hover:bg-gray-50/80'}`}>
-                                            <div className="flex gap-3">
-                                                <div className="w-2 h-2 mt-2 rounded-full flex-shrink-0 bg-[#e50914] sm:bg-indigo-600"></div>
-                                                <div>
-                                                    <p className={`text-sm font-medium line-clamp-1 ${isDarkTheme ? 'text-gray-200' : 'text-gray-800'}`}>Welcome to Sed Studios</p>
-                                                    <p className={`text-xs mt-1 line-clamp-2 ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>Explore premium content and engage with the community.</p>
-                                                    <p className="text-[10px] text-gray-500 mt-1">Just now</p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className={`px-4 py-3 border-b last:border-0 transition-colors cursor-pointer ${isDarkTheme ? 'border-[#333] hover:bg-[#2a2a2a]' : 'border-gray-50 hover:bg-gray-50/80'}`}>
-                                            <div className="flex gap-3">
-                                                <div className="w-2 h-2 mt-2 rounded-full flex-shrink-0 bg-gray-600"></div>
-                                                <div>
-                                                    <p className={`text-sm font-medium line-clamp-1 ${isDarkTheme ? 'text-gray-200' : 'text-gray-800'}`}>New tools added</p>
-                                                    <p className={`text-xs mt-1 line-clamp-2 ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>A huge update was applied to your creator dashboard.</p>
-                                                    <p className="text-[10px] text-gray-500 mt-1">2 hours ago</p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {notifications && notifications.length > 0 && notifications.map(note => (
-                                            <div key={note.id} className={`px-4 py-3 border-b last:border-0 transition-colors cursor-pointer ${isDarkTheme ? (!note.read ? 'bg-white/5 border-[#333] hover:bg-[#333]' : 'border-[#333] hover:bg-[#2a2a2a]') : (!note.read ? 'bg-indigo-50/30 border-gray-50 hover:bg-gray-50/80' : 'border-gray-50 hover:bg-gray-50/80')}`}>
-                                                <div className="flex gap-3">
-                                                    <div className={`w-2 h-2 mt-2 rounded-full flex-shrink-0 ${!note.read ? (isDarkTheme ? 'bg-[#e50914]' : 'bg-indigo-600') : 'bg-gray-600'}`}></div>
-                                                    <div>
-                                                        <p className={`text-sm font-medium line-clamp-1 ${isDarkTheme ? 'text-gray-200' : 'text-gray-800'}`}>{note.title}</p>
-                                                        <p className={`text-xs mt-1 line-clamp-2 ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>{note.message}</p>
-                                                        <p className="text-[10px] text-gray-500 mt-1">{note.createdAt}</p>
+                                        {/* Notifications List */}
+                                        {notifications && notifications.length > 0 ? (
+                                            notifications.slice(0, 5).map(note => {
+                                                const hasLink = note.metadata && note.metadata.url;
+                                                const content = (
+                                                    <div className={`px-4 py-3 border-b border-[#333] last:border-0 transition-colors cursor-pointer ${isDarkTheme ? (!note.read ? 'bg-white/5 hover:bg-[#333]' : 'hover:bg-[#2a2a2a]') : (!note.read ? 'bg-indigo-50/30 hover:bg-gray-50/80' : 'hover:bg-gray-50/80')}`}>
+                                                        <div className="flex gap-3">
+                                                            <div className={`w-2 h-2 mt-2 rounded-full flex-shrink-0 ${!note.read ? (isDarkTheme ? 'bg-[#e50914]' : 'bg-indigo-600') : 'bg-gray-600'}`}></div>
+                                                            <div>
+                                                                <p className={`text-sm font-medium line-clamp-1 ${isDarkTheme ? 'text-gray-200' : 'text-gray-800'}`}>{note.title}</p>
+                                                                <p className={`text-xs mt-1 line-clamp-2 ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>{note.message}</p>
+                                                                <p className="text-[10px] text-gray-500 mt-1">{note.createdAt}</p>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                );
+
+                                                return (
+                                                    <div key={note.id}>
+                                                        {hasLink ? (
+                                                            <Link href={note.metadata.url} onClick={() => setNotiMenuOpen(false)}>
+                                                                {content}
+                                                            </Link>
+                                                        ) : (
+                                                            content
+                                                        )}
+                                                    </div>
+                                                );
+                                            })
+                                        ) : (
+                                            <div className="px-4 py-8 text-center text-sm text-gray-500">
+                                                No new notifications
                                             </div>
-                                        ))}
+                                        )}
+
+                                        <div className={`px-4 py-3 text-center border-t sticky bottom-0 z-10 ${isDarkTheme ? 'border-[#333] bg-[#1a1a1a]/95 text-white' : 'border-gray-100 bg-white/95 text-gray-900'}`}>
+                                            <Link href="/notifications" onClick={() => setNotiMenuOpen(false)} className="text-sm font-bold text-indigo-500 hover:text-indigo-400 transition-colors">
+                                                View all notifications
+                                            </Link>
+                                        </div>
                                     </div>
                                 )}
                             </div>

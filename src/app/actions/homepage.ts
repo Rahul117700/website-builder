@@ -45,6 +45,7 @@ export type NotificationData = {
     createdAt: string;
     read: boolean;
     type: NotificationType;
+    metadata?: any;
 };
 
 export async function getSubscribedProducts(userId: string): Promise<ProductCardData[]> {
@@ -265,7 +266,8 @@ export async function getUserNotifications(userId: string): Promise<Notification
             message: n.message,
             createdAt: timeAgo(n.createdAt),
             read: n.read,
-            type: n.type
+            type: n.type,
+            metadata: n.metadata
         }));
     } catch (error) {
         console.error('Error fetching notifications:', error);
