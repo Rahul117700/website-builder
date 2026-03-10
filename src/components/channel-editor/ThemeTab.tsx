@@ -57,7 +57,7 @@ export default function ThemeTab({ channel, onUpdate }: ThemeTabProps) {
 
   const ColorInput = ({ label, colorKey, description }: { label: string; colorKey: string; description?: string }) => (
     <div>
-      <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wide">
+      <label className="block text-xs font-bold text-gray-300 mb-2 uppercase tracking-wide">
         {label}
       </label>
       <div className="flex items-center gap-2">
@@ -68,7 +68,7 @@ export default function ThemeTab({ channel, onUpdate }: ThemeTabProps) {
             style={{ backgroundColor: getCurrentColor(colorKey) }}
           />
           {showColorPicker === colorKey && (
-            <div className="absolute top-full left-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-3 z-50 w-64">
+            <div className="absolute top-full left-0 mt-2 bg-[#1e1e1e] rounded-lg shadow-xl border border-white/10 p-3 z-50 w-64">
               <div className="mb-3">
                 <input
                   type="color"
@@ -78,17 +78,17 @@ export default function ThemeTab({ channel, onUpdate }: ThemeTabProps) {
                 />
               </div>
               <div className="mb-3">
-                <label className="block text-xs font-medium text-gray-700 mb-1">Hex</label>
+                <label className="block text-xs font-medium text-gray-400 mb-1">Hex</label>
                 <input
                   type="text"
                   value={getCurrentColor(colorKey)}
                   onChange={(e) => updateThemeColor(colorKey, e.target.value)}
-                  className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                  className="w-full px-2 py-1 border border-white/10 rounded text-sm bg-white/5 text-white"
                   placeholder="#000000"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-2">Popular Colors</label>
+                <label className="block text-xs font-medium text-gray-400 mb-2">Popular Colors</label>
                 <div className="grid grid-cols-4 gap-2">
                   {popularColors.map((color) => (
                     <button
@@ -109,7 +109,7 @@ export default function ThemeTab({ channel, onUpdate }: ThemeTabProps) {
             type="text"
             value={getCurrentColor(colorKey)}
             onChange={(e) => updateThemeColor(colorKey, e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm font-mono text-gray-900"
+            className="w-full px-3 py-2 border border-white/10 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm font-mono text-white bg-white/5"
             placeholder="#000000"
           />
           {description && (
@@ -123,18 +123,18 @@ export default function ThemeTab({ channel, onUpdate }: ThemeTabProps) {
   return (
     <div className="space-y-6">
       {/* Template Info */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+      <div className="bg-white/5 border border-white/10 rounded-lg p-3">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-bold text-gray-900 uppercase tracking-wide">Current Template</span>
+          <span className="text-xs font-bold text-gray-300 uppercase tracking-wide">Current Template</span>
           <SwatchIcon className="h-4 w-4 text-gray-600" />
         </div>
-        <p className="text-sm font-medium text-gray-900">{template.name || 'Default'}</p>
-        <p className="text-xs text-gray-600 mt-1">{template.category || 'General'}</p>
+        <p className="text-sm font-medium text-white">{template.name || 'Default'}</p>
+        <p className="text-xs text-gray-500 mt-1">{template.category || 'General'}</p>
       </div>
 
       {/* Colors */}
       <div className="space-y-4">
-        <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+        <h3 className="text-sm font-bold text-gray-300 flex items-center gap-2">
           <SparklesIcon className="h-4 w-4" />
           Colors
         </h3>
@@ -166,16 +166,16 @@ export default function ThemeTab({ channel, onUpdate }: ThemeTabProps) {
 
       {/* Fonts */}
       <div className="space-y-4">
-        <h3 className="text-sm font-bold text-gray-900">Typography</h3>
+        <h3 className="text-sm font-bold text-gray-300">Typography</h3>
 
         <div>
-          <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wide">
+          <label className="block text-xs font-bold text-gray-300 mb-2 uppercase tracking-wide">
             Heading Font
           </label>
           <select
             value={customTheme.headingFont || theme.fonts?.heading || 'Inter'}
             onChange={(e) => updateThemeColor('headingFont', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900"
+            className="w-full px-3 py-2 border border-white/10 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-white bg-white/5 [&>option]:bg-[#1e1e1e]"
           >
             {fonts.map((font) => (
               <option key={font} value={font} style={{ fontFamily: font }}>
@@ -186,13 +186,13 @@ export default function ThemeTab({ channel, onUpdate }: ThemeTabProps) {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wide">
+          <label className="block text-xs font-bold text-gray-300 mb-2 uppercase tracking-wide">
             Body Font
           </label>
           <select
             value={customTheme.bodyFont || theme.fonts?.body || 'Inter'}
             onChange={(e) => updateThemeColor('bodyFont', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent text-sm text-gray-900"
+            className="w-full px-3 py-2 border border-white/10 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-white bg-white/5 [&>option]:bg-[#1e1e1e]"
           >
             {fonts.map((font) => (
               <option key={font} value={font} style={{ fontFamily: font }}>
@@ -205,11 +205,11 @@ export default function ThemeTab({ channel, onUpdate }: ThemeTabProps) {
 
       {/* Spacing */}
       <div>
-        <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wide">
+        <label className="block text-xs font-bold text-gray-300 mb-2 uppercase tracking-wide">
           Spacing
         </label>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-600">Compact</span>
+          <span className="text-xs text-gray-500">Compact</span>
           <input
             type="range"
             min="1"
@@ -219,7 +219,7 @@ export default function ThemeTab({ channel, onUpdate }: ThemeTabProps) {
             onChange={(e) => updateThemeColor('spacing', e.target.value + 'rem')}
             className="flex-1"
           />
-          <span className="text-xs text-gray-600">Spacious</span>
+          <span className="text-xs text-gray-500">Spacious</span>
         </div>
         <p className="text-xs text-gray-500 mt-1">
           Current: {customTheme.spacing || theme.spacing || '2rem'}
@@ -228,11 +228,11 @@ export default function ThemeTab({ channel, onUpdate }: ThemeTabProps) {
 
       {/* Border Radius */}
       <div>
-        <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wide">
+        <label className="block text-xs font-bold text-gray-300 mb-2 uppercase tracking-wide">
           Border Radius
         </label>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-600">Square</span>
+          <span className="text-xs text-gray-500">Square</span>
           <input
             type="range"
             min="0"
@@ -242,7 +242,7 @@ export default function ThemeTab({ channel, onUpdate }: ThemeTabProps) {
             onChange={(e) => updateThemeColor('borderRadius', e.target.value + 'rem')}
             className="flex-1"
           />
-          <span className="text-xs text-gray-600">Rounded</span>
+          <span className="text-xs text-gray-500">Rounded</span>
         </div>
         <p className="text-xs text-gray-500 mt-1">
           Current: {customTheme.borderRadius || theme.borderRadius || '0.5rem'}
@@ -257,15 +257,15 @@ export default function ThemeTab({ channel, onUpdate }: ThemeTabProps) {
             theme: {},
           },
         })}
-        className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+        className="w-full px-4 py-2 border border-white/10 text-gray-300 rounded-lg hover:bg-white/10 transition-colors text-sm font-medium"
       >
         Reset to Template Defaults
       </button>
 
       {/* Tip */}
-      <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-        <p className="text-xs font-medium text-purple-900 mb-1">🎨 Design Tip</p>
-        <p className="text-xs text-purple-800">
+      <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-3">
+        <p className="text-xs font-medium text-indigo-300 mb-1">🎨 Design Tip</p>
+        <p className="text-xs text-indigo-400">
           Stick to 2-3 colors for a cohesive look. Use your primary color for CTAs and important elements!
         </p>
       </div>

@@ -206,7 +206,7 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
           return (
             <>
               {/* Products Added */}
-              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between min-h-[100px] group hover:border-indigo-100 hover:shadow-md transition-all">
+              <div className="bg-[#1e1e1e] p-4 rounded-2xl border border-white/10 shadow-sm flex flex-col justify-between min-h-[100px] group hover:border-indigo-500/30 hover:shadow-md transition-all">
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-lg bg-indigo-50 flex items-center justify-center">
                     <ShoppingBagIcon className="w-3 h-3 text-indigo-600" />
@@ -214,13 +214,13 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
                   <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Products</span>
                 </div>
                 <div className="flex items-end gap-1.5 mt-2">
-                  <span className="text-2xl font-black text-gray-900 leading-none">{productCount}</span>
+                  <span className="text-2xl font-black text-white leading-none">{productCount}</span>
                   <span className="text-[10px] font-bold text-gray-400 mb-0.5 whitespace-nowrap">items added</span>
                 </div>
               </div>
 
               {/* Storage Limit */}
-              <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between min-h-[100px] group hover:border-blue-100 hover:shadow-md transition-all">
+              <div className="bg-[#1e1e1e] p-4 rounded-2xl border border-white/10 shadow-sm flex flex-col justify-between min-h-[100px] group hover:border-blue-500/30 hover:shadow-md transition-all">
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 rounded-lg bg-blue-50 flex items-center justify-center">
                     <CloudArrowUpIcon className="w-3 h-3 text-blue-600" />
@@ -228,7 +228,7 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
                   <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Total Limit</span>
                 </div>
                 <div className="flex items-end gap-1.5 mt-2">
-                  <span className="text-2xl font-black text-gray-900 leading-none">{maxProducts === -1 ? '∞' : maxProducts}</span>
+                  <span className="text-2xl font-black text-white leading-none">{maxProducts === -1 ? '∞' : maxProducts}</span>
                   <span className="text-[10px] font-bold text-gray-400 mb-0.5 whitespace-nowrap">max slots</span>
                 </div>
               </div>
@@ -272,14 +272,14 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-3 rounded-2xl border border-gray-100 shadow-sm">
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-[#1e1e1e] p-3 rounded-2xl border border-white/10">
         <div className="relative w-full sm:w-64">
           <input
             type="text"
             placeholder="Search your products..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-gray-50 border-none focus:ring-2 focus:ring-indigo-500 rounded-xl text-sm transition-all"
+            className="w-full pl-9 pr-4 py-2 bg-white/10 border border-white/10 focus:ring-2 focus:ring-indigo-500 rounded-xl text-sm transition-all text-white placeholder-gray-500"
           />
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -292,8 +292,8 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
               key={type}
               onClick={() => setFilterType(type)}
               className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${filterType === type
-                ? 'bg-gray-900 text-white shadow-md'
-                : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+                ? 'bg-indigo-600 text-white shadow-md'
+                : 'bg-white/10 text-gray-400 hover:bg-white/20 hover:text-white'
                 }`}
             >
               {type}
@@ -313,7 +313,7 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
         if (products.length > 0 && filteredProducts.length === 0) {
           return (
             <div className="text-center py-20 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
-              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <ShoppingBagIcon className="w-6 h-6 text-gray-300" />
               </div>
               <h3 className="text-sm font-bold text-gray-900">No matching products</h3>
@@ -334,7 +334,7 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
 
               <div
                 key={product.id}
-                className="group relative bg-white rounded-3xl border border-gray-100 overflow-hidden hover:shadow-xl hover:border-indigo-100 transition-all duration-500 flex flex-col"
+                className="group relative bg-[#1e1e1e] rounded-3xl border border-white/10 overflow-hidden hover:shadow-xl hover:border-indigo-500/30 transition-all duration-500 flex flex-col"
               >
                 {/* Image Preview Container */}
                 <div className="relative aspect-video w-full overflow-hidden bg-gray-50/50">
@@ -380,7 +380,7 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
                     <div className="flex gap-2 p-1.5 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl">
                       <button
                         onClick={() => handleEdit(product)}
-                        className="flex-1 h-10 rounded-xl bg-white text-gray-900 flex items-center justify-center gap-2 text-xs font-bold hover:bg-gray-50 transition-colors"
+                        className="flex-1 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center gap-2 text-xs font-bold hover:bg-white/30 transition-colors"
                       >
                         <PencilIcon className="w-4 h-4" />
                         Edit
@@ -404,7 +404,7 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
                 <div className="p-6 flex-1 flex flex-col">
                   <div className="flex-1">
                     <div className="flex items-start justify-between gap-3 mb-2">
-                      <h4 className="font-black text-gray-900 text-lg leading-tight line-clamp-2 group-hover:text-indigo-600 transition-colors">
+                      <h4 className="font-black text-white text-lg leading-tight line-clamp-2 group-hover:text-indigo-400 transition-colors">
                         {product.title}
                       </h4>
                     </div>
@@ -418,7 +418,7 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
                   </div>
 
                   {/* Meta Information */}
-                  <div className="mt-auto pt-5 border-t border-gray-100 flex items-center justify-between">
+                  <div className="mt-auto pt-5 border-t border-white/10 flex items-center justify-between">
                     <div className="flex -space-x-1 overflow-hidden">
                       {product.tags && product.tags.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
@@ -692,16 +692,16 @@ function ProductUploadModal({
   return (
     <ModalPortal>
       <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-        <div className="relative w-full max-w-5xl max-h-[95vh] overflow-y-auto rounded-3xl shadow-2xl bg-white border border-gray-100 flex flex-col">
+        <div className="relative w-full max-w-5xl max-h-[95vh] overflow-y-auto rounded-3xl shadow-2xl bg-[#141414] border border-white/10 flex flex-col">
           {/* Header */}
-          <div className="sticky top-0 flex items-center justify-between px-8 py-6 border-b border-gray-100 bg-white/80 backdrop-blur-md z-10">
+          <div className="sticky top-0 flex items-center justify-between px-8 py-6 border-b border-white/10 bg-[#141414]/90 backdrop-blur-md z-10">
             <div>
-              <h2 className="text-2xl font-black text-gray-900 tracking-tight">Add New Product</h2>
+              <h2 className="text-2xl font-black text-white tracking-tight">Add New Product</h2>
               <p className="text-sm text-gray-500 mt-1">Share your content with the world</p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-xl transition-all text-gray-400 hover:bg-gray-100 hover:text-gray-900"
+              className="p-2 rounded-xl transition-all text-gray-400 hover:bg-white/10 hover:text-white"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
@@ -713,24 +713,24 @@ function ProductUploadModal({
               {/* Left Column: Details */}
               <div className="space-y-8">
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-900">Product Title <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-bold mb-2 text-gray-300">Product Title <span className="text-red-400">*</span></label>
                   <input
                     type="text"
                     required
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 placeholder-gray-400 bg-gray-50/50 transition-all font-medium"
+                    className="w-full px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white placeholder-gray-600 bg-white/5 transition-all font-medium"
                     placeholder="e.g., Ultimate Web Development Course"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-900">Description</label>
+                  <label className="block text-sm font-bold mb-2 text-gray-300">Description</label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={4}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 placeholder-gray-400 bg-gray-50/50 transition-all resize-none"
+                    className="w-full px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white placeholder-gray-600 bg-white/5 transition-all resize-none"
                     placeholder="Tell your audience what makes this product special..."
                   />
                   <p className="text-right text-xs text-gray-400 mt-2">{formData.description.length} characters</p>
@@ -785,8 +785,8 @@ function ProductUploadModal({
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 rounded-2xl p-1">
-                    <label className="flex items-center p-3 rounded-xl cursor-pointer hover:bg-white transition-all group">
+                  <div className="bg-white/5 rounded-2xl p-1">
+                    <label className="flex items-center p-3 rounded-xl cursor-pointer hover:bg-white/10 transition-all group">
                       <input
                         type="checkbox"
                         checked={!formData.isSubscriberOnly}
@@ -799,7 +799,7 @@ function ProductUploadModal({
                       </div>
                     </label>
 
-                    <label className="flex items-center p-3 rounded-xl cursor-pointer hover:bg-white transition-all group">
+                    <label className="flex items-center p-3 rounded-xl cursor-pointer hover:bg-white/10 transition-all group">
                       <input
                         type="checkbox"
                         checked={formData.isSubscriberOnly}
@@ -967,7 +967,7 @@ function SuccessModal({
   return (
     <ModalPortal>
       <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-        <div className="relative w-full max-w-md rounded-2xl shadow-2xl bg-white animate-in fade-in zoom-in duration-200">
+        <div className="relative w-full max-w-md rounded-2xl shadow-2xl bg-[#1a1a1a] border border-white/10 animate-in fade-in zoom-in duration-200">
           <div className="p-6">
             <div className="flex items-start">
               <div className="flex-shrink-0">
@@ -1018,7 +1018,7 @@ function ErrorModal({
   return (
     <ModalPortal>
       <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-        <div className="relative w-full max-w-md rounded-2xl shadow-2xl bg-white animate-in fade-in zoom-in duration-200">
+        <div className="relative w-full max-w-md rounded-2xl shadow-2xl bg-[#1a1a1a] border border-white/10 animate-in fade-in zoom-in duration-200">
           <div className="p-6">
             <div className="flex items-start">
               <div className="flex-shrink-0">
@@ -1145,9 +1145,9 @@ function ProductEditModal({
   return (
     <ModalPortal>
       <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-        <div className="relative w-full max-w-5xl max-h-[95vh] overflow-y-auto rounded-3xl shadow-2xl bg-white border border-gray-100 flex flex-col">
+        <div className="relative w-full max-w-5xl max-h-[95vh] overflow-y-auto rounded-3xl shadow-2xl bg-[#141414] border border-white/10 flex flex-col">
           {/* Header */}
-          <div className="sticky top-0 flex items-center justify-between px-8 py-6 border-b border-gray-100 bg-white/80 backdrop-blur-md z-10">
+          <div className="sticky top-0 flex items-center justify-between px-8 py-6 border-b border-white/10 bg-[#141414]/90 backdrop-blur-md z-10">
             <div>
               <h2 className="text-2xl font-black text-gray-900 tracking-tight">Edit Product</h2>
               <p className="text-sm text-gray-500 mt-1">Update your content details</p>
@@ -1245,7 +1245,7 @@ function ProductEditModal({
                   </div>
 
                   <div className="bg-gray-50 rounded-2xl p-1">
-                    <label className="flex items-center p-3 rounded-xl cursor-pointer hover:bg-white transition-all group">
+                    <label className="flex items-center p-3 rounded-xl cursor-pointer hover:bg-white/10 transition-all group">
                       <input
                         type="checkbox"
                         checked={!formData.isSubscriberOnly}
@@ -1258,7 +1258,7 @@ function ProductEditModal({
                       </div>
                     </label>
 
-                    <label className="flex items-center p-3 rounded-xl cursor-pointer hover:bg-white transition-all group">
+                    <label className="flex items-center p-3 rounded-xl cursor-pointer hover:bg-white/10 transition-all group">
                       <input
                         type="checkbox"
                         checked={formData.isSubscriberOnly}
@@ -1349,7 +1349,7 @@ function DeleteConfirmationModal({
   return (
     <ModalPortal>
       <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-        <div className="relative w-full max-w-md rounded-2xl shadow-2xl bg-white animate-in fade-in zoom-in duration-200">
+        <div className="relative w-full max-w-md rounded-2xl shadow-2xl bg-[#1a1a1a] border border-white/10 animate-in fade-in zoom-in duration-200">
           <div className="p-6 text-center">
             <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <TrashIcon className="h-8 w-8 text-red-600" />
