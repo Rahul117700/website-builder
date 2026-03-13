@@ -1349,28 +1349,28 @@ export default function ChannelEditorPage() {
                                 className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/10 hover:border-indigo-500/40 hover:bg-indigo-500/10 transition-all group text-left"
                               >
                                 <div className="flex items-center gap-2.5">
-                                  <div className="w-6 h-6 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center group-hover:bg-indigo-100 group-hover:border-indigo-200 transition-all duration-300">
-                                    {req.id === 'coverImage' && <PaintBrushIcon className="w-3.5 h-3.5 text-gray-500 group-hover:text-indigo-600" />}
-                                    {req.id === 'profileImage' && <UserCircleIcon className="w-3.5 h-3.5 text-gray-500 group-hover:text-indigo-600" />}
-                                    {req.id === 'products' && <ShoppingBagIcon className="w-3.5 h-3.5 text-gray-500 group-hover:text-indigo-600" />}
-                                    {req.id === 'subscription' && <CreditCardIcon className="w-3.5 h-3.5 text-gray-500 group-hover:text-indigo-600" />}
+                                  <div className="w-6 h-6 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center group-hover:bg-indigo-500/20 group-hover:border-indigo-500/40 transition-all duration-300">
+                                    {req.id === 'coverImage' && <PaintBrushIcon className="w-3.5 h-3.5 text-gray-400 group-hover:text-indigo-400" />}
+                                    {req.id === 'profileImage' && <UserCircleIcon className="w-3.5 h-3.5 text-gray-400 group-hover:text-indigo-400" />}
+                                    {req.id === 'products' && <ShoppingBagIcon className="w-3.5 h-3.5 text-gray-400 group-hover:text-indigo-400" />}
+                                    {req.id === 'subscription' && <CreditCardIcon className="w-3.5 h-3.5 text-gray-400 group-hover:text-indigo-400" />}
                                   </div>
                                   <div className="flex flex-col">
-                                    <span className="text-xs font-bold text-gray-700 group-hover:text-indigo-700 transition-colors">
+                                    <span className="text-xs font-bold text-gray-300 group-hover:text-white transition-colors">
                                       {req.id === 'coverImage' ? 'Update Cover Photo' :
                                         req.id === 'profileImage' ? 'Set Profile Picture' :
                                           req.id === 'products' ? 'Add Your First Product' :
                                             req.id === 'subscription' ? 'Enable Subscriptions' : req.label}
                                     </span>
-                                    <span className="text-[9px] text-gray-400 group-hover:text-indigo-500/70 font-medium">In {
+                                    <span className="text-[9px] text-gray-500 group-hover:text-indigo-400 font-medium">In {
                                       req.id === 'coverImage' || req.id === 'profileImage' ? 'Basic Tab' :
                                         req.id === 'products' ? 'Products Tab' :
                                           req.id === 'subscription' ? 'Subscription Tab' : 'Settings'
                                     }</span>
                                   </div>
                                 </div>
-                                <div className="w-5 h-5 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300">
-                                  <ArrowRightIcon className="w-2.5 h-2.5" />
+                                <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-indigo-500 transition-all duration-300">
+                                  <ArrowRightIcon className="w-2.5 h-2.5 text-gray-400 group-hover:text-white" />
                                 </div>
                               </button>
                             ))}
@@ -1381,7 +1381,7 @@ export default function ChannelEditorPage() {
                 </div>
 
                 {/* Panel Content - Mobile Optimized */}
-                <div className="flex-1 overflow-y-auto overflow-x-hidden bg-white custom-scrollbar-light">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden bg-transparent custom-scrollbar-light">
                   <div className="p-4 sm:p-6">
                     {activeTab === 'basic' && (
                       <BasicInfoTab channel={channel} onUpdate={handleChannelUpdate} />

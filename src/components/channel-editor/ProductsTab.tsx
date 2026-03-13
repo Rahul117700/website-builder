@@ -312,11 +312,11 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
 
         if (products.length > 0 && filteredProducts.length === 0) {
           return (
-            <div className="text-center py-20 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
-              <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <ShoppingBagIcon className="w-6 h-6 text-gray-300" />
+            <div className="text-center py-20 bg-[#1e1e1e]/50 rounded-3xl border border-dashed border-white/10">
+              <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <ShoppingBagIcon className="w-6 h-6 text-gray-400" />
               </div>
-              <h3 className="text-sm font-bold text-gray-900">No matching products</h3>
+              <h3 className="text-sm font-bold text-white">No matching products</h3>
               <p className="text-xs text-gray-500 mt-1">Try adjusting your search or filter</p>
               <button
                 onClick={() => { setSearchQuery(''); setFilterType('ALL'); }}
@@ -447,14 +447,14 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
           </div>
         ) : (
           <div className="text-center py-12">
-            <ShoppingBagIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Add Products</h3>
-            <p className="text-sm text-gray-600 mb-6">
+            <ShoppingBagIcon className="h-16 w-16 text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-white mb-2">Add Products</h3>
+            <p className="text-sm text-gray-400 mb-6">
               Products will be displayed in a beautiful grid on your channel
             </p>
             <button
               onClick={handleOpenUploadModal}
-              className="px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-black transition-colors flex items-center gap-2 mx-auto"
+              className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2 mx-auto"
             >
               <PlusIcon className="h-5 w-5" />
               Add Your First Product
@@ -738,13 +738,13 @@ function ProductUploadModal({
 
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-bold mb-2 text-gray-900">Product Type <span className="text-red-500">*</span></label>
+                    <label className="block text-sm font-bold mb-2 text-gray-300">Product Type <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <select
                         required
                         value={formData.type}
                         onChange={(e) => setFormData({ ...formData, type: e.target.value as ChannelProductType })}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 bg-gray-50/50 appearance-none font-medium cursor-pointer"
+                        className="w-full px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-white bg-white/5 appearance-none font-medium cursor-pointer"
                       >
                         <option value="VIDEOS">Video Content</option>
                         <option value="DOCUMENTS">Document / PDF</option>
@@ -756,12 +756,12 @@ function ProductUploadModal({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold mb-2 text-gray-900">Product Tag</label>
+                    <label className="block text-sm font-bold mb-2 text-gray-300">Product Tag</label>
                     <div className="relative">
                       <select
                         value={formData.tags}
                         onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 bg-gray-50/50 appearance-none font-medium cursor-pointer"
+                        className="w-full px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-white bg-white/5 appearance-none font-medium cursor-pointer"
                       >
                         <option value="">No Tag</option>
                         <option value="MUSIC">🎵 Music</option>
@@ -780,7 +780,7 @@ function ProductUploadModal({
                 <div className="pt-4 border-t border-gray-100">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h4 className="text-sm font-bold text-gray-900">Access Control</h4>
+                      <h4 className="text-sm font-bold text-gray-300">Access Control</h4>
                       <p className="text-xs text-gray-500 mt-0.5">Who can view this content?</p>
                     </div>
                   </div>
@@ -794,7 +794,7 @@ function ProductUploadModal({
                         className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
                       />
                       <div className="ml-3">
-                        <span className="block text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">Free for Everyone</span>
+                        <span className="block text-sm font-bold text-white group-hover:text-primary transition-colors">Free for Everyone</span>
                         <span className="block text-xs text-gray-500">Visible to all visitors</span>
                       </div>
                     </label>
@@ -807,7 +807,7 @@ function ProductUploadModal({
                         className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
                       />
                       <div className="ml-3">
-                        <span className="block text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">Subscribers Only</span>
+                        <span className="block text-sm font-bold text-white group-hover:text-primary transition-colors">Subscribers Only</span>
                         <span className="block text-xs text-gray-500">Premium content for members</span>
                       </div>
                     </label>
@@ -818,8 +818,8 @@ function ProductUploadModal({
               {/* Right Column: Media */}
               <div className="space-y-8">
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-900">Cover Image <span className="text-red-500">*</span></label>
-                  <div className="group relative w-full aspect-video rounded-2xl overflow-hidden border-2 border-dashed border-gray-200 bg-gray-50/50 hover:bg-gray-50 hover:border-primary/50 transition-all">
+                  <label className="block text-sm font-bold mb-2 text-gray-300">Cover Image <span className="text-red-500">*</span></label>
+                  <div className="group relative w-full aspect-video rounded-2xl overflow-hidden border-2 border-dashed border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/30 transition-all">
                     {coverPreview ? (
                       <>
                         <img src={coverPreview} alt="Cover Preview" className="w-full h-full object-cover" />
@@ -829,10 +829,10 @@ function ProductUploadModal({
                       </>
                     ) : (
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                        <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                           <CloudArrowUpIcon className="w-6 h-6 text-gray-400" />
                         </div>
-                        <span className="text-sm font-semibold text-gray-600">Upload Thumbnail</span>
+                        <span className="text-sm font-semibold text-gray-300">Upload Thumbnail</span>
                         <span className="text-xs text-gray-400 mt-1">1280x720 (16:9) recommended</span>
                       </div>
                     )}
@@ -848,8 +848,8 @@ function ProductUploadModal({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-900">Product File</label>
-                  <div className={`relative w-full rounded-2xl overflow-hidden border-2 border-dashed transition-all ${uploading ? 'border-primary bg-primary/5' : 'border-gray-200 bg-gray-50/50 hover:bg-gray-50 hover:border-primary/50'}`}>
+                  <label className="block text-sm font-bold mb-2 text-gray-300">Product File</label>
+                  <div className={`relative w-full rounded-2xl overflow-hidden border-2 border-dashed transition-all ${uploading ? 'border-primary bg-primary/5' : 'border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/30'}`}>
                     <input
                       type="file"
                       id="file-upload-new"
@@ -873,10 +873,10 @@ function ProductUploadModal({
                         </div>
                       ) : file ? (
                         <>
-                          <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mb-4">
-                            <CheckCircleIcon className="w-8 h-8 text-green-600" />
+                          <div className="w-14 h-14 rounded-full bg-green-500/20 flex items-center justify-center mb-4">
+                            <CheckCircleIcon className="w-8 h-8 text-green-500" />
                           </div>
-                          <h4 className="text-gray-900 font-bold mb-1 truncate max-w-full px-4">{file.name}</h4>
+                          <h4 className="text-white font-bold mb-1 truncate max-w-full px-4">{file.name}</h4>
                           <p className="text-xs text-gray-500 mb-4">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                           <button type="button" className="text-sm font-medium text-red-500 hover:text-red-700 z-20 relative" onClick={(e) => {
                             e.stopPropagation();
@@ -888,12 +888,12 @@ function ProductUploadModal({
                         </>
                       ) : (
                         <>
-                          <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                          <div className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                             <CloudArrowUpIcon className="w-8 h-8 text-gray-400 group-hover:text-primary" />
                           </div>
-                          <h4 className="text-gray-900 font-bold mb-1">Upload Product File</h4>
+                          <h4 className="text-white font-bold mb-1">Upload Product File</h4>
                           <p className="text-sm text-gray-500">Drag & drop or click to browse</p>
-                          <p className="text-xs text-gray-400 mt-4 border border-gray-200 rounded-full px-3 py-1">Max 500MB • Video supported</p>
+                          <p className="text-xs text-gray-400 mt-4 border border-white/10 rounded-full px-3 py-1">Max 500MB • Video supported</p>
                         </>
                       )}
                     </div>
@@ -904,12 +904,12 @@ function ProductUploadModal({
 
             {/* Footer / Guidelines */}
             <div className="px-8 pb-8">
-              <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5 mb-6">
-                <h4 className="flex items-center gap-2 text-sm font-bold text-gray-900 mb-2">
-                  <ShieldCheckIcon className="w-5 h-5 text-gray-600" />
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-5 mb-6">
+                <h4 className="flex items-center gap-2 text-sm font-bold text-gray-300 mb-2">
+                  <ShieldCheckIcon className="w-5 h-5 text-gray-400" />
                   3. Copyright & DMCA Compliance
                 </h4>
-                <p className="text-xs leading-relaxed text-gray-600">
+                <p className="text-xs leading-relaxed text-gray-400">
                   By uploading content to this platform, you certify that you own the rights to this content or have explicit permission to use it.
                   Uploading copyrighted material without permission is a violation of our terms and may result in account termination.
                   Please ensure your content adheres to all community guidelines and local laws.
@@ -920,14 +920,14 @@ function ProductUploadModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-8 py-4 rounded-xl font-bold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  className="px-8 py-4 rounded-xl font-bold text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
                   disabled={uploading}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-8 py-4 rounded-xl font-bold text-white bg-gray-900 hover:bg-black transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                  className="flex-1 px-8 py-4 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
                   disabled={uploading || !formData.title.trim()}
                 >
                   {uploading ? 'Processing...' : 'Publish Product'}
@@ -974,21 +974,21 @@ function SuccessModal({
                 <CheckCircleIcon className="h-12 w-12 text-green-500" />
               </div>
               <div className="ml-4 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">Success!</h3>
-                <p className="text-sm text-gray-600">{message}</p>
+                <h3 className="text-lg font-semibold text-white mb-1">Success!</h3>
+                <p className="text-sm text-gray-400">{message}</p>
               </div>
               <button
                 onClick={onClose}
-                className="ml-4 flex-shrink-0 p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                className="ml-4 flex-shrink-0 p-1 rounded-lg text-gray-500 hover:text-white hover:bg-white/10 transition-colors"
               >
                 <XMarkIcon className="h-5 w-5" />
               </button>
             </div>
           </div>
-          <div className="px-6 py-4 bg-gray-50 rounded-b-2xl flex justify-end">
+          <div className="px-6 py-4 bg-white/5 rounded-b-2xl flex justify-end border-t border-white/10">
             <button
               onClick={onClose}
-              className="px-6 py-2 bg-gray-900 text-white rounded-lg font-medium hover:bg-black transition-colors"
+              className="px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
             >
               OK
             </button>
@@ -1027,23 +1027,23 @@ function ErrorModal({
                 </div>
               </div>
               <div className="ml-4 flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                <h3 className="text-lg font-semibold text-white mb-1">
                   {isLimitError ? 'Plan Limit Reached' : 'Error'}
                 </h3>
-                <p className="text-sm text-gray-600">{message}</p>
+                <p className="text-sm text-gray-400">{message}</p>
               </div>
               <button
                 onClick={onClose}
-                className="ml-4 flex-shrink-0 p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                className="ml-4 flex-shrink-0 p-1 rounded-lg text-gray-500 hover:text-white hover:bg-white/10 transition-colors"
               >
                 <XMarkIcon className="h-5 w-5" />
               </button>
             </div>
           </div>
-          <div className="px-6 py-4 bg-gray-50 rounded-b-2xl flex justify-end gap-3">
+          <div className="px-6 py-4 bg-white/5 rounded-b-2xl flex justify-end gap-3 border-t border-white/10">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition-colors"
+              className="px-4 py-2 text-gray-400 font-medium hover:bg-white/10 hover:text-white rounded-lg transition-colors"
             >
               Close
             </button>
@@ -1166,24 +1166,24 @@ function ProductEditModal({
               {/* Left Column: Details */}
               <div className="space-y-8">
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-900">Product Title <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-bold mb-2 text-gray-300">Product Title <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     required
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 placeholder-gray-400 bg-gray-50/50 transition-all font-medium"
+                    className="w-full px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-white placeholder-gray-500 bg-white/5 transition-all font-medium"
                     placeholder="Enter product title"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-900">Description</label>
+                  <label className="block text-sm font-bold mb-2 text-gray-300">Description</label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={6}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 placeholder-gray-400 bg-gray-50/50 transition-all resize-none"
+                    className="w-full px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-white placeholder-gray-500 bg-white/5 transition-all resize-none"
                     placeholder="Describe your product..."
                   />
                   <p className="text-right text-xs text-gray-400 mt-2">{formData.description.length} characters</p>
@@ -1193,13 +1193,13 @@ function ProductEditModal({
               {/* Right Column: Settings */}
               <div className="space-y-8">
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-900">Product Type <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-bold mb-2 text-gray-300">Product Type <span className="text-red-500">*</span></label>
                   <div className="relative">
                     <select
                       required
                       value={formData.type}
                       onChange={(e) => setFormData({ ...formData, type: e.target.value as ChannelProductType })}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 bg-gray-50/50 appearance-none font-medium cursor-pointer"
+                      className="w-full px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-white bg-white/5 appearance-none font-medium cursor-pointer"
                     >
                       <option value="VIDEOS">Videos</option>
                       <option value="DOCUMENTS">Documents</option>
@@ -1216,12 +1216,12 @@ function ProductEditModal({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold mb-2 text-gray-900">Product Tag</label>
+                  <label className="block text-sm font-bold mb-2 text-gray-300">Product Tag</label>
                   <div className="relative">
                     <select
                       value={formData.tags}
                       onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-gray-900 bg-gray-50/50 appearance-none font-medium cursor-pointer"
+                      className="w-full px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-white bg-white/5 appearance-none font-medium cursor-pointer"
                     >
                       <option value="">No Tag</option>
                       <option value="MUSIC">🎵 Music</option>
@@ -1239,12 +1239,12 @@ function ProductEditModal({
                 <div className="pt-4 border-t border-gray-100">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h4 className="text-sm font-bold text-gray-900">Access Control</h4>
+                      <h4 className="text-sm font-bold text-gray-300">Access Control</h4>
                       <p className="text-xs text-gray-500 mt-0.5">Who can view this content?</p>
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 rounded-2xl p-1">
+                  <div className="bg-white/5 rounded-2xl p-1">
                     <label className="flex items-center p-3 rounded-xl cursor-pointer hover:bg-white/10 transition-all group">
                       <input
                         type="checkbox"
@@ -1253,7 +1253,7 @@ function ProductEditModal({
                         className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
                       />
                       <div className="ml-3">
-                        <span className="block text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">Free for Everyone</span>
+                        <span className="block text-sm font-bold text-white group-hover:text-primary transition-colors">Free for Everyone</span>
                         <span className="block text-xs text-gray-500">Visible to all visitors</span>
                       </div>
                     </label>
@@ -1266,7 +1266,7 @@ function ProductEditModal({
                         className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
                       />
                       <div className="ml-3">
-                        <span className="block text-sm font-bold text-gray-900 group-hover:text-primary transition-colors">Subscribers Only</span>
+                        <span className="block text-sm font-bold text-white group-hover:text-primary transition-colors">Subscribers Only</span>
                         <span className="block text-xs text-gray-500">Premium content for members</span>
                       </div>
                     </label>
@@ -1275,9 +1275,9 @@ function ProductEditModal({
 
                 {/* Media Placeholder (Read-only for now) */}
                 <div className="pt-4 border-t border-gray-100">
-                  <h4 className="text-sm font-bold text-gray-900 mb-4">Media & Files</h4>
-                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-200 text-center">
-                    <p className="text-sm text-gray-500">
+                  <h4 className="text-sm font-bold text-gray-300 mb-4">Media & Files</h4>
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
+                    <p className="text-sm text-gray-400">
                       To update the product file or cover image, please delete this product and upload a new one.
                       <br /><span className="text-xs opacity-75">(File replacement feature coming soon)</span>
                     </p>
@@ -1289,12 +1289,12 @@ function ProductEditModal({
 
             {/* Footer / Guidelines */}
             <div className="px-8 pb-8">
-              <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5 mb-6">
-                <h4 className="flex items-center gap-2 text-sm font-bold text-gray-900 mb-2">
-                  <ShieldCheckIcon className="w-5 h-5 text-gray-600" />
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-5 mb-6">
+                <h4 className="flex items-center gap-2 text-sm font-bold text-gray-300 mb-2">
+                  <ShieldCheckIcon className="w-5 h-5 text-gray-400" />
                   3. Copyright & DMCA Compliance
                 </h4>
-                <p className="text-xs leading-relaxed text-gray-600">
+                <p className="text-xs leading-relaxed text-gray-400">
                   By uploading content to this platform, you certify that you own the rights to this content or have explicit permission to use it.
                   Uploading copyrighted material without permission is a violation of our terms and may result in account termination.
                   Please ensure your content adheres to all community guidelines and local laws.
@@ -1305,14 +1305,14 @@ function ProductEditModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-8 py-4 rounded-xl font-bold text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                  className="px-8 py-4 rounded-xl font-bold text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
                   disabled={updating}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-8 py-4 rounded-xl font-bold text-white bg-gray-900 hover:bg-black transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                  className="flex-1 px-8 py-4 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
                   disabled={updating || !formData.title.trim()}
                 >
                   {updating ? 'Updating...' : 'Save Changes'}
@@ -1354,15 +1354,15 @@ function DeleteConfirmationModal({
             <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <TrashIcon className="h-8 w-8 text-red-600" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Product?</h3>
-            <p className="text-gray-600 mb-8">
+            <h3 className="text-xl font-bold text-white mb-2">Delete Product?</h3>
+            <p className="text-gray-400 mb-8">
               Are you sure you want to delete this product? This action cannot be undone and the file will be permanently removed.
             </p>
 
             <div className="flex gap-3">
               <button
                 onClick={onClose}
-                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                className="flex-1 py-3 bg-white/10 text-white rounded-xl font-bold hover:bg-white/20 transition-colors"
               >
                 Cancel
               </button>

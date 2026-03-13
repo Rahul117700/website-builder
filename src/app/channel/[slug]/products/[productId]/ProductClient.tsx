@@ -81,6 +81,7 @@ export default function ProductClient() {
   const [subscribers, setSubscribers] = useState<any[]>([]);
   const [commentsExpanded, setCommentsExpanded] = useState(false);
   const [reviewsExpanded, setReviewsExpanded] = useState(false);
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [visibleReviewsCount, setVisibleReviewsCount] = useState(4);
   const [visibleCommentsCount, setVisibleCommentsCount] = useState(5);
 
@@ -1040,9 +1041,6 @@ export default function ProductClient() {
                       >
                         {channel.name}
                       </h3>
-                      <p className="text-sm text-gray-400">
-                        {channel._count?.subscribers || channel.subscribers?.length || 0} subscribers
-                      </p>
                     </div>
                     {channel.subscriptionEnabled && !isOwner && (
                       <button
@@ -1208,7 +1206,36 @@ export default function ProductClient() {
                     )}
                   </div>
                   {product.description && (
-                    <p className="text-sm sm:text-base text-gray-300 whitespace-pre-wrap">{product.description}</p>
+                    <div>
+                      {/* Desktop: always show full description */}
+                      <p className="hidden md:block text-sm sm:text-base text-gray-300 whitespace-pre-wrap">{product.description}</p>
+
+                      {/* Mobile: collapsible description */}
+                      <div className="md:hidden">
+                        <p
+                          className={`text-sm text-gray-300 whitespace-pre-wrap transition-all duration-300 ${descriptionExpanded ? '' : 'line-clamp-3'
+                            }`}
+                        >
+                          {product.description}
+                        </p>
+                        <button
+                          onClick={() => setDescriptionExpanded(!descriptionExpanded)}
+                          className="mt-2 flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-white transition-colors"
+                        >
+                          {descriptionExpanded ? (
+                            <>
+                              <ChevronUpIcon className="w-4 h-4" />
+                              Show less
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDownIcon className="w-4 h-4" />
+                              Show more
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </div>
 
@@ -1221,52 +1248,66 @@ export default function ProductClient() {
 
                 {/* Ratings Section */}
                 <div className="mb-12">
+                  {/* Mobile Toggle Header */}
                   <button
                     onClick={() => setReviewsExpanded(!reviewsExpanded)}
-                    className="w-full flex md:hidden items-center justify-between p-4 bg-[#1a1a1a] rounded-2xl border border-[#333] shadow-sm mb-4"
+                    className="w-full flex md:hidden items-center justify-between p-4 bg-[#1a1a1a] rounded-2xl border border-[#333] mb-3"
                   >
                     <div className="flex items-center gap-3">
-                      <StarIconSolid className="w-5 h-5 text-yellow-400" />
-                      <span className="font-bold text-white">Ratings & Reviews ({totalReviews})</span>
+                      <div className="w-8 h-8 bg-yellow-400/10 rounded-xl flex items-center justify-center">
+                        <StarIconSolid className="w-4 h-4 text-yellow-400" />
+                      </div>
+                      <div className="text-left">
+                        <span className="font-bold text-white text-sm">Ratings & Reviews</span>
+                        <p className="text-xs text-gray-400">{totalReviews} verified ratings</p>
+                      </div>
                     </div>
-                    {reviewsExpanded ? (
-                      <ChevronUpIcon className="w-5 h-5 text-gray-400" />
-                    ) : (
-                      <ChevronDownIcon className="w-5 h-5 text-gray-400" />
-                    )}
+                    <div className="flex items-center gap-2">
+                      {averageRating > 0 && (
+                        <span className="text-sm font-black text-white bg-[#2a2a2a] px-2.5 py-1 rounded-lg">{averageRating.toFixed(1)} ★</span>
+                      )}
+                      {reviewsExpanded ? (
+                        <ChevronUpIcon className="w-4 h-4 text-gray-400" />
+                      ) : (
+                        <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+                      )}
+                    </div>
                   </button>
 
                   <div className={`${reviewsExpanded ? 'block' : 'hidden'} md:block`}>
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 bg-[#1a1a1a] p-8 rounded-[2rem] border border-[#333]/80 shadow-sm">
-                      <div className="flex flex-col md:flex-row items-center gap-8">
-                        <div className="text-center md:text-left flex flex-col items-center md:items-start">
-                          <div className="flex items-baseline gap-2 mb-2">
-                            <span className="text-5xl sm:text-7xl font-black text-white tracking-tighter">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-[#1a1a1a] p-5 md:p-8 rounded-2xl md:rounded-[2rem] border border-[#333]/80">
+                      <div className="flex flex-col md:flex-row items-center gap-5 md:gap-8">
+                        {/* Rating Score */}
+                        <div className="flex items-center gap-4 md:flex-col md:items-start md:gap-2">
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="text-4xl md:text-7xl font-black text-white tracking-tighter">
                               {averageRating > 0 ? averageRating.toFixed(1) : '0.0'}
                             </span>
-                            <span className="text-xl text-gray-400 font-bold">/ 5</span>
+                            <span className="text-base md:text-xl text-gray-400 font-bold">/ 5</span>
                           </div>
-                          <div className="flex items-center gap-1 mb-2">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <StarIconSolid
-                                key={star}
-                                className={`h-5 w-5 ${star <= Math.round(averageRating)
-                                  ? 'text-yellow-400 drop-shadow-sm'
-                                  : 'text-gray-200'
-                                  }`}
-                              />
-                            ))}
+                          <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center gap-0.5">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <StarIconSolid
+                                  key={star}
+                                  className={`h-4 w-4 md:h-5 md:w-5 ${star <= Math.round(averageRating)
+                                    ? 'text-yellow-400'
+                                    : 'text-gray-600'
+                                    }`}
+                                />
+                              ))}
+                            </div>
+                            <div className="text-xs text-gray-400 font-medium bg-[#333]/60 px-2.5 py-0.5 rounded-full">{totalReviews} verified ratings</div>
                           </div>
-                          <div className="text-sm text-gray-400 font-medium bg-gray-100/80 px-3 py-1 rounded-full">{totalReviews} verified ratings</div>
                         </div>
-                        <div className="h-px w-full md:w-px md:h-24 bg-gradient-to-b from-transparent via-gray-200 to-transparent" />
-                        <div className="text-center md:text-left">
-                          <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
+                        <div className="hidden md:block h-px w-full md:w-px md:h-24 bg-gradient-to-b from-transparent via-[#444] to-transparent" />
+                        <div className="hidden md:block text-left">
+                          <div className="flex items-center gap-3 mb-2">
                             <h2 className="text-2xl font-black text-white tracking-tight">Ratings & Reviews</h2>
-                            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm text-[10px] font-extrabold uppercase tracking-widest shrink-0">
-                              <span className="relative flex h-2 w-2">
+                            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-900/40 text-emerald-400 border border-emerald-700/50 text-[9px] font-extrabold uppercase tracking-widest shrink-0">
+                              <span className="relative flex h-1.5 w-1.5">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                               </span>
                               LIVE
                             </span>
@@ -1391,42 +1432,53 @@ export default function ProductClient() {
 
                 {/* Comments Section */}
                 <div className="mb-6">
+                  {/* Mobile Toggle Header */}
                   <button
                     onClick={() => setCommentsExpanded(!commentsExpanded)}
-                    className="w-full flex md:hidden items-center justify-between p-4 bg-[#1a1a1a] rounded-2xl border border-[#333] shadow-sm mb-4"
+                    className="w-full flex md:hidden items-center justify-between p-4 bg-[#1a1a1a] rounded-2xl border border-[#333] mb-3"
                   >
                     <div className="flex items-center gap-3">
-                      <ChatBubbleLeftRightIcon className="h-5 w-5 text-gray-300" />
-                      <span className="font-bold text-white">Comments ({comments.length})</span>
+                      <div className="w-8 h-8 bg-red-500/10 rounded-xl flex items-center justify-center">
+                        <ChatBubbleLeftRightIcon className="h-4 w-4 text-red-400" />
+                      </div>
+                      <div className="text-left">
+                        <span className="font-bold text-white text-sm">Comments</span>
+                        <p className="text-xs text-gray-400">{comments.length} discussions</p>
+                      </div>
                     </div>
-                    {commentsExpanded ? (
-                      <ChevronUpIcon className="w-5 h-5 text-gray-400" />
-                    ) : (
-                      <ChevronDownIcon className="w-5 h-5 text-gray-400" />
-                    )}
+                    <div className="flex items-center gap-2">
+                      {comments.length > 0 && (
+                        <span className="text-xs font-bold text-white bg-[#2a2a2a] px-2.5 py-1 rounded-lg">{comments.length}</span>
+                      )}
+                      {commentsExpanded ? (
+                        <ChevronUpIcon className="w-4 h-4 text-gray-400" />
+                      ) : (
+                        <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+                      )}
+                    </div>
                   </button>
 
                   <div className={`${commentsExpanded ? 'block' : 'hidden'} md:block`}>
                     {/* Comments Header */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 bg-[#1a1a1a] p-8 rounded-[2rem] border border-[#333]/80 shadow-sm">
-                      <div className="flex items-center gap-6">
-                        <div className="p-4 bg-indigo-900/30 rounded-2xl border border-indigo-100/50 text-red-500 shadow-sm">
-                          <ChatBubbleLeftRightIcon className="h-8 w-8" />
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-[#1a1a1a] p-5 md:p-8 rounded-2xl md:rounded-[2rem] border border-[#333]/80">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 md:p-4 bg-red-500/10 rounded-xl md:rounded-2xl text-red-400">
+                          <ChatBubbleLeftRightIcon className="h-5 w-5 md:h-8 md:w-8" />
                         </div>
                         <div>
-                          <div className="flex items-center gap-3 mb-2">
-                            <h2 className="text-2xl font-black text-white tracking-tight">
+                          <div className="flex items-center gap-2.5 mb-1">
+                            <h2 className="text-lg md:text-2xl font-black text-white tracking-tight">
                               Comments
                             </h2>
-                            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm text-[10px] font-extrabold uppercase tracking-widest shrink-0">
-                              <span className="relative flex h-2 w-2">
+                            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-900/40 text-emerald-400 border border-emerald-700/50 text-[9px] md:text-[10px] font-extrabold uppercase tracking-widest shrink-0">
+                              <span className="relative flex h-1.5 w-1.5">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                               </span>
                               LIVE
                             </span>
                           </div>
-                          <p className="text-base text-gray-400 font-medium">{comments.length} discussions happening live right now</p>
+                          <p className="text-sm text-gray-400">{comments.length} discussions happening live right now</p>
                         </div>
                       </div>
                     </div>

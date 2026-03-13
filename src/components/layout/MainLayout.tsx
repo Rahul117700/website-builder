@@ -47,7 +47,7 @@ export default function MainLayout({
 }: MainLayoutProps) {
     const { data: session } = useSession();
     const router = useRouter();
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
     const [notiMenuOpen, setNotiMenuOpen] = useState(false);

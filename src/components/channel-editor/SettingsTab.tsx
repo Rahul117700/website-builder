@@ -12,21 +12,21 @@ export default function SettingsTab({ channel, onUpdate }: SettingsTabProps) {
     <div className="space-y-6">
       {/* Channel Slug */}
       <div>
-        <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wide">
+        <label className="block text-xs font-bold text-gray-300 mb-2 uppercase tracking-wide">
           Channel URL
         </label>
         <div className="flex items-start gap-2">
           <LinkIcon className="h-5 w-5 text-gray-400 mt-2" />
           <div className="flex-1">
             <div className="flex items-center">
-              <span className="px-3 py-2 bg-gray-100 text-gray-600 text-sm border border-r-0 border-gray-300 rounded-l-lg">
+              <span className="px-3 py-2 bg-white/10 text-gray-400 text-sm border border-r-0 border-white/10 rounded-l-lg">
                 /channel/
               </span>
               <input
                 type="text"
                 value={channel.slug || ''}
                 readOnly
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-r-lg bg-gray-50 text-sm text-gray-700"
+                className="flex-1 px-3 py-2 border border-white/10 rounded-r-lg bg-white/5 text-sm text-gray-300"
               />
             </div>
             <p className="text-xs text-gray-500 mt-1">
@@ -38,12 +38,12 @@ export default function SettingsTab({ channel, onUpdate }: SettingsTabProps) {
 
       {/* Status */}
       <div>
-        <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wide">
+        <label className="block text-xs font-bold text-gray-300 mb-2 uppercase tracking-wide">
           Channel Status
         </label>
-        <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+        <div className="flex items-center gap-2 p-3 bg-white/5 border border-white/10 rounded-lg">
           <div className={`w-2 h-2 rounded-full ${channel.published ? 'bg-green-500' : 'bg-gray-400'}`} />
-          <span className="text-sm font-medium text-gray-900">
+          <span className="text-sm font-medium text-white">
             {channel.published ? 'Published' : 'Draft'}
           </span>
         </div>
@@ -56,14 +56,14 @@ export default function SettingsTab({ channel, onUpdate }: SettingsTabProps) {
 
       {/* SEO Section */}
       <div>
-        <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+        <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
           <GlobeAltIcon className="h-4 w-4" />
           SEO Settings
         </h3>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wide">
+            <label className="block text-xs font-bold text-gray-300 mb-2 uppercase tracking-wide">
               Meta Title
             </label>
             <input
@@ -79,7 +79,7 @@ export default function SettingsTab({ channel, onUpdate }: SettingsTabProps) {
                 },
               })}
               placeholder="Your channel title for search engines"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 text-sm text-gray-900"
+              className="w-full px-3 py-2 border border-white/10 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white/5 text-sm text-white placeholder-gray-600"
               maxLength={60}
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -88,7 +88,7 @@ export default function SettingsTab({ channel, onUpdate }: SettingsTabProps) {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wide">
+            <label className="block text-xs font-bold text-gray-300 mb-2 uppercase tracking-wide">
               Meta Description
             </label>
             <textarea
@@ -104,7 +104,7 @@ export default function SettingsTab({ channel, onUpdate }: SettingsTabProps) {
               })}
               placeholder="Brief description for search engines"
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 text-sm resize-none text-gray-900"
+              className="w-full px-3 py-2 border border-white/10 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white/5 text-sm resize-none text-white placeholder-gray-600"
               maxLength={160}
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -115,15 +115,15 @@ export default function SettingsTab({ channel, onUpdate }: SettingsTabProps) {
       </div>
 
       {/* Marketing & Analytics Section */}
-      <div className="pt-6 border-t border-gray-100">
-        <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <ChartBarIcon className="h-4 w-4 text-indigo-600" />
+      <div className="pt-6 border-t border-white/10">
+        <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+          <ChartBarIcon className="h-4 w-4 text-indigo-400" />
           Marketing Tracking
         </h3>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wide">
+            <label className="block text-xs font-bold text-gray-300 mb-2 uppercase tracking-wide">
               Meta Pixel ID
             </label>
             <input
@@ -139,12 +139,12 @@ export default function SettingsTab({ channel, onUpdate }: SettingsTabProps) {
                 },
               })}
               placeholder="e.g., 1234567890"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 text-sm text-gray-900"
+              className="w-full px-3 py-2 border border-white/10 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white/5 text-sm text-white placeholder-gray-600"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-900 mb-2 uppercase tracking-wide">
+            <label className="block text-xs font-bold text-gray-300 mb-2 uppercase tracking-wide">
               Google Analytics ID
             </label>
             <input
@@ -160,19 +160,19 @@ export default function SettingsTab({ channel, onUpdate }: SettingsTabProps) {
                 },
               })}
               placeholder="e.g., G-XXXXXXXXXX"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 text-sm text-gray-900"
+              className="w-full px-3 py-2 border border-white/10 rounded-lg focus:ring-2 focus:ring-indigo-500 bg-white/5 text-sm text-white placeholder-gray-600"
             />
           </div>
-          <p className="text-[10px] text-gray-500 italic bg-gray-50 p-2 rounded-lg">
+          <p className="text-[10px] text-gray-400 italic bg-white/5 p-2 rounded-lg border border-white/10">
             Note: These IDs will be automatically integrated into your channel and used to attribute conversions to your ad campaigns.
           </p>
         </div>
       </div>
 
       {/* Tip */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-        <p className="text-xs font-medium text-blue-900 mb-1">🔍 SEO Tip</p>
-        <p className="text-xs text-blue-800">
+      <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-3">
+        <p className="text-xs font-medium text-indigo-300 mb-1">🔍 SEO Tip</p>
+        <p className="text-xs text-indigo-400">
           Good meta titles and descriptions help your channel rank better in search engines and get more clicks!
         </p>
       </div>
