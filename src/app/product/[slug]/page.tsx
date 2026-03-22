@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -46,6 +48,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductDetailsPage({ params }: Props) {
     const { slug } = params;
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+
+    if (!userId) {
+        redirect(`/auth/signin?callbackUrl=${encodeURIComponent(`/product/${slug}`)}`);
+    }
 
     // Try finding by slug first, then ID
     const product = await prisma.channelProduct.findFirst({

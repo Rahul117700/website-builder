@@ -4,11 +4,11 @@
     "description": "Premium Video Streaming & Digital Product Platform",
     "start_url": "/?v=logo4",
     "display": "standalone",
-    "background_color": "#020617",
-    "theme_color": "#6366f1",
+    "background_color": "#000000",
+    "theme_color": "#e50914",
     "icons": [
         {
-            "src": "/logo/sed_premium_icon.svg",
+            "src": "/logo/sed_premium_icon.svg?v=2",
             "sizes": "512x512",
             "type": "image/svg+xml",
             "purpose": "any"

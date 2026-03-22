@@ -474,7 +474,7 @@ export async function getTrendingShots(userId?: string): Promise<ProductCardData
                 reviews: { select: { rating: true } },
             },
             orderBy: [
-                { viewCount: 'desc' }
+                { createdAt: 'desc' }
             ],
             take: 20,
         });

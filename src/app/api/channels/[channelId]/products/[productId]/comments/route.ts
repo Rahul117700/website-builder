@@ -109,6 +109,29 @@ export async function POST(
       },
     });
 
+    // Notify channel owner
+    try {
+      const product = await prisma.channelProduct.findUnique({
+        where: { id: productId },
+        include: { channel: true }
+      });
+      if (product && product.channel.userId !== session.user.id) {
+        await prisma.userNotification.create({
+          data: {
+            userId: product.channel.userId,
+            title: '💬 New Comment!',
+            message: `${session.user.name || 'Someone'} commented on your product "${product.title}"`,
+            type: 'INFO',
+            category: 'COMMUNITY',
+            read: false,
+            metadata: { productId: product.id, channelId: product.channelId, actorId: session.user.id, actorName: session.user.name }
+          }
+        });
+      }
+    } catch (notifErr) {
+      console.error('Failed to create comment notification:', notifErr);
+    }
+
     return NextResponse.json({
       success: true,
       comment,

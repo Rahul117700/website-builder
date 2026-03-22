@@ -87,14 +87,41 @@ export async function POST(
         });
 
         // Increment like count
-        await prisma.channelProduct.update({
+        const updatedProduct = await prisma.channelProduct.update({
           where: { id: productId },
           data: {
             likeCount: {
               increment: 1,
             },
           },
+          include: {
+            channel: true,
+          }
         });
+
+        // Create Notification for the channel owner
+        if (updatedProduct.channel.userId !== session.user.id) {
+          try {
+            await prisma.userNotification.create({
+              data: {
+                userId: updatedProduct.channel.userId,
+                title: '❤️ New Like!',
+                message: `${session.user.name || 'Someone'} liked your product "${updatedProduct.title}"`,
+                type: 'INFO',
+                category: 'COMMUNITY',
+                read: false,
+                metadata: {
+                  productId: updatedProduct.id,
+                  channelId: updatedProduct.channelId,
+                  actorId: session.user.id,
+                  actorName: session.user.name
+                }
+              }
+            });
+          } catch (notifErr) {
+            console.error('Failed to create like notification:', notifErr);
+          }
+        }
 
         return NextResponse.json({
           success: true,

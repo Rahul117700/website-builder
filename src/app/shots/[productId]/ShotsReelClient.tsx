@@ -60,7 +60,30 @@ export default function ShotsReelClient({ product, hasAccess: initialHasAccess, 
     const [isFitMode, setIsFitMode] = useState(false);
     const [hasAccess, setHasAccess] = useState(initialHasAccess);
     const [isSubscribing, setIsSubscribing] = useState(false);
+    const [showLoginPrompt, setShowLoginPrompt] = useState(false);
     
+    // Check 5 guest shots limit
+    useEffect(() => {
+        if (!userId) {
+            try {
+                const viewedShots = JSON.parse(localStorage.getItem('unauth_shot_ids') || '[]');
+                if (!viewedShots.includes(product.id)) {
+                    viewedShots.push(product.id);
+                    localStorage.setItem('unauth_shot_ids', JSON.stringify(viewedShots));
+                }
+                if (viewedShots.length > 5) {
+                    setShowLoginPrompt(true);
+                    setIsPlaying(false);
+                    if (videoRef.current) {
+                        videoRef.current.pause();
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to parse unauth_shot_ids', e);
+            }
+        }
+    }, [userId, product.id]);
+
     // Following
     const [isFollowing, setIsFollowing] = useState<boolean>(initialFollowing || false);
     const [isFollowLoading, setIsFollowLoading] = useState(false);
@@ -479,6 +502,29 @@ export default function ShotsReelClient({ product, hasAccess: initialHasAccess, 
                                         </span>
                                     </>
                                 )}
+                            </button>
+                        </motion.div>
+                    )}
+
+                    {showLoginPrompt && (
+                        <motion.div 
+                            initial={{ opacity: 0, y: 50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="absolute inset-0 z-[60] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-8 text-center"
+                            onClick={(e) => e.stopPropagation()} 
+                        >
+                            <div className="w-20 h-20 bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-indigo-500/20">
+                                <LockClosedIcon className="w-10 h-10 text-white" />
+                            </div>
+                            <h2 className="text-3xl font-black text-white mb-3">Login to Continue</h2>
+                            <p className="text-gray-300 text-lg mb-8 max-w-sm font-medium">
+                                You have viewed your 5 free shots! Please log in to your account to continue exploring amazing content.
+                            </p>
+                            <button 
+                                onClick={(e) => { e.stopPropagation(); router.push(`/auth/signin?callbackUrl=${encodeURIComponent(`/shots/${product.id}`)}`); }}
+                                className="w-full sm:w-auto px-10 py-4 bg-white text-black font-black rounded-full hover:bg-gray-200 transition-all text-sm uppercase tracking-widest shadow-xl flex items-center justify-center gap-2"
+                            >
+                                Log in or Sign up
                             </button>
                         </motion.div>
                     )}

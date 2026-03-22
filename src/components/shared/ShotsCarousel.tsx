@@ -73,17 +73,19 @@ export default function ShotsCarousel({ shots, autoPlayMs = 4000 }: ShotsCarouse
         >
             {/* Cinematic blurred backdrop */}
             {shots[activeIdx]?.thumbnail && (
-                <div
-                    className="absolute inset-0 -z-10 rounded-3xl overflow-hidden opacity-25 pointer-events-none transition-all duration-700"
-                    style={{ filter: 'blur(50px)', transform: 'scale(1.15)' }}
-                >
-                    <Image
-                        src={shots[activeIdx].thumbnail}
-                        alt=""
-                        fill
-                        className="object-cover transition-all duration-700"
-                        unoptimized
-                    />
+                <div className="absolute inset-0 overflow-hidden rounded-3xl -z-10 pointer-events-none">
+                    <div
+                        className="absolute inset-0 opacity-25 transition-all duration-700"
+                        style={{ filter: 'blur(50px)', transform: 'scale(1.15)' }}
+                    >
+                        <Image
+                            src={shots[activeIdx].thumbnail}
+                            alt=""
+                            fill
+                            className="object-cover transition-all duration-700"
+                            unoptimized
+                        />
+                    </div>
                 </div>
             )}
 
@@ -121,7 +123,7 @@ export default function ShotsCarousel({ shots, autoPlayMs = 4000 }: ShotsCarouse
                         <ChevronRightIcon className="w-4 h-4" />
                     </button>
 
-                    <Link href="/explore" className="text-[10px] font-black text-red-500 hover:text-red-400 uppercase tracking-[0.15em] flex items-center gap-1 transition-colors ml-1">
+                    <Link href="/shots" className="text-[10px] font-black text-red-500 hover:text-red-400 uppercase tracking-[0.15em] flex items-center gap-1 transition-colors ml-1">
                         All <ArrowRightIcon className="w-3 h-3" />
                     </Link>
                 </div>
@@ -130,7 +132,7 @@ export default function ShotsCarousel({ shots, autoPlayMs = 4000 }: ShotsCarouse
             {/* Card strip */}
             <div
                 ref={scrollRef}
-                className="flex gap-3 overflow-x-auto py-6 -my-2 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden scroll-smooth -mx-4 px-4 sm:-mx-2 sm:px-2"
+                className="flex gap-3 overflow-x-auto py-6 -my-2 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden scroll-smooth w-full"
             >
                 {shots.map((shot, idx) => {
                     const isActive = idx === activeIdx;

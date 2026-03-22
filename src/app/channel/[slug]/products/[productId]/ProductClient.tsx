@@ -181,6 +181,17 @@ export default function ProductClient() {
                 .slice(0, 10);
               setRelatedProducts(related);
 
+              // Fetch products from other channels for exploration
+              try {
+                const exploreRes = await fetch(`/api/products/explore?excludeChannelId=${channelData.id}&limit=8`);
+                if (exploreRes.ok) {
+                  const exploreData = await exploreRes.json();
+                  setOtherChannelProducts(exploreData.products || []);
+                }
+              } catch (err) {
+                console.error('Error fetching other channel products:', err);
+              }
+
               // Track product view
               try {
                 await fetch(`/api/channels/${channelData.id}/products/${productId}`, {
@@ -206,6 +217,17 @@ export default function ProductClient() {
             .filter((p: any) => p.id !== productId && p.published)
             .slice(0, 10);
           setRelatedProducts(related);
+
+          // Fetch products from other channels for exploration
+          try {
+            const exploreRes = await fetch(`/api/products/explore?excludeChannelId=${channelData.id}&limit=8`);
+            if (exploreRes.ok) {
+              const exploreData = await exploreRes.json();
+              setOtherChannelProducts(exploreData.products || []);
+            }
+          } catch (err) {
+            console.error('Error fetching other channel products:', err);
+          }
 
           // Track product view
           try {
@@ -1849,15 +1871,18 @@ export default function ProductClient() {
               {otherChannelProducts.length > 0 && (
                 <div className="mt-8 pt-6 border-t border-[#2a2a2a]">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">You May Also Like</h2>
-                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Other Channels</span>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                      <h2 className="text-base sm:text-lg font-black text-white tracking-tight">Explore More</h2>
+                    </div>
+                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-[#1a1a1a] border border-[#333] px-2 py-1 rounded-full">Other Channels</span>
                   </div>
                   <div className="grid grid-cols-2 lg:grid-cols-1 gap-1 lg:gap-2">
                     {otherChannelProducts.map((p: any) => (
                       <div
                         key={p.id}
                         onClick={() => router.push(`/channel/${p.channelSlug}/products/${p.id}`)}
-                        className="group flex flex-col lg:flex-row gap-2 rounded-none transition-all duration-500 bg-transparent border-none cursor-pointer hover:bg-[#1a1a1a] active:scale-95"
+                        className="group flex flex-col lg:flex-row gap-2 rounded-xl p-1 transition-all duration-300 cursor-pointer hover:bg-[#1a1a1a] active:scale-95"
                       >
                         {/* Thumbnail */}
                         <div className="relative w-full lg:w-32 h-28 lg:h-20 flex-shrink-0 rounded-none overflow-hidden bg-[#141414]">

@@ -118,9 +118,9 @@ export default function InstallPWA() {
                             exit={{ scale: 0.95, opacity: 0, y: 20 }}
                             className="relative w-full max-w-[420px] bg-[#141414] rounded-[2.5rem] shadow-[0_40px_80px_-15px_rgba(0,0,0,0.5)] overflow-hidden border border-[#333]"
                         >
-                            <div className="relative h-28 bg-[#1a1a1a] flex items-center justify-center border-b border-[#333] text-[#e50914]">
-                                <div className="relative w-14 h-14 bg-[#222] rounded-2xl shadow-[0_10px_20px_-5px_rgba(0,0,0,0.5)] border border-[#333] flex items-center justify-center scale-110">
-                                    <img src="/logo/sed_premium_icon.svg" className="w-10 h-10 object-cover rounded-lg shadow-sm" alt="App Icon"
+                            <div className="relative h-28 bg-black flex items-center justify-center border-b border-[#1a1a1a]">
+                                <div className="relative w-16 h-16 bg-black rounded-2xl shadow-[0_0_30px_rgba(229,9,20,0.3)] border border-[#1a1a1a] flex items-center justify-center scale-110 overflow-hidden">
+                                    <img src="/logo/sed_premium_icon.svg?v=2" className="w-full h-full object-cover" alt="SED STUDIOS"
                                         onError={(e) => {
                                             e.currentTarget.style.display = 'none';
                                             const parent = e.currentTarget.parentElement;

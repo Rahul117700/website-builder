@@ -21,29 +21,13 @@ export default function Logo({
 }: LogoProps) {
   const isDark = variant === 'white';
 
-  // Adjusted sizes for perfect rendering
-  const widthMap = {
-    sm: 130,
-    md: 160,
-    lg: 190,
-    xl: 220
-  };
+  const widthMap = { sm: 130, md: 160, lg: 190, xl: 220 };
+  const heightMap = { sm: 28, md: 34, lg: 40, xl: 46 };
 
-  const heightMap = {
-    sm: 28,
-    md: 34,
-    lg: 40,
-    xl: 46
-  };
-
-  // If icon-only, use height for both so it's a square
   const w = variant === 'icon-only' ? heightMap[size] : widthMap[size];
   const h = heightMap[size];
 
-  // Theming colors
-  const textColor = isDark ? '#FFFFFF' : '#111827';
-  const pillBg = isDark ? '#FFFFFF' : '#111827';
-  const pillText = isDark ? '#000000' : '#FFFFFF';
+  const textColor = isDark ? '#FFFFFF' : '#CCCCCC';
 
   const content = (
     <svg
@@ -54,41 +38,95 @@ export default function Logo({
       xmlns="http://www.w3.org/2000/svg"
       className={`${className} transition-transform hover:scale-105 origin-left`}
     >
+      <defs>
+        <clipPath id="pill-clip-lg">
+          <rect x="0" y="15" width="112" height="70" rx="35" />
+        </clipPath>
+        <clipPath id="pill-clip-icon">
+          <rect x="0" y="0" width="100" height="100" rx="22" />
+        </clipPath>
+      </defs>
+
       {variant === 'icon-only' ? (
-        // Render just the 3x3 grid for icon only
-        <g transform="translate(14, 14) scale(1.6)">
-          <circle cx="0" cy="0" r="6" fill="#ef4444" />
-          <circle cx="18" cy="0" r="6" fill="#f97316" />
-          <circle cx="36" cy="0" r="6" fill="#eab308" />
-
-          <circle cx="0" cy="18" r="6" fill="#22c55e" />
-          <circle cx="18" cy="18" r="6" fill="#10b981" />
-          <circle cx="36" cy="18" r="6" fill="#14b8a6" />
-
-          <circle cx="0" cy="36" r="6" fill="#fbbf24" />
-          <circle cx="18" cy="36" r="6" fill="#059669" />
-          <circle cx="36" cy="36" r="6" fill="#3b82f6" />
-        </g>
-      ) : (
         <>
-          {/* Pill */}
-          <rect x="0" y="15" width="112" height="70" rx="35" fill={pillBg} />
-          <text x="56" y="63" fontFamily="Inter, system-ui, sans-serif" fontSize="48" fontWeight="800" fill={pillText} textAnchor="middle" letterSpacing="-1.5">SED</text>
-
-          {/* STUDIOS Text */}
-          <text x="125" y="63" fontFamily="Inter, system-ui, sans-serif" fontSize="48" fontWeight="400" fill={textColor} letterSpacing="-1">STUDIOS</text>
-
-          {/* 3x3 Dots Grid */}
-          <g transform="translate(325, 30)">
+          {/* Pure black base */}
+          <rect x="0" y="0" width="100" height="100" rx="22" fill="#000000" />
+          {/* Cinematic stripes */}
+          <g clipPath="url(#pill-clip-icon)">
+            <rect x="8"  y="0" width="3" height="100" fill="#ef4444" opacity="0.55" />
+            <rect x="18" y="0" width="1.5" height="100" fill="#3b82f6" opacity="0.35" />
+            <rect x="32" y="0" width="1.5" height="100" fill="#22c55e" opacity="0.25" />
+            <rect x="50" y="0" width="4" height="100" fill="#ef4444" opacity="0.60" />
+            <rect x="62" y="0" width="1.5" height="100" fill="#a855f7" opacity="0.35" />
+            <rect x="76" y="0" width="2" height="100" fill="#f59e0b" opacity="0.40" />
+            <rect x="88" y="0" width="3" height="100" fill="#ef4444" opacity="0.50" />
+          </g>
+          {/* Dot grid */}
+          <g transform="translate(14, 14) scale(1.6)">
             <circle cx="0" cy="0" r="6" fill="#ef4444" />
             <circle cx="18" cy="0" r="6" fill="#f97316" />
             <circle cx="36" cy="0" r="6" fill="#eab308" />
-
             <circle cx="0" cy="18" r="6" fill="#22c55e" />
             <circle cx="18" cy="18" r="6" fill="#10b981" />
             <circle cx="36" cy="18" r="6" fill="#14b8a6" />
-
             <circle cx="0" cy="36" r="6" fill="#fbbf24" />
+            <circle cx="18" cy="36" r="6" fill="#059669" />
+            <circle cx="36" cy="36" r="6" fill="#3b82f6" />
+          </g>
+        </>
+      ) : (
+        <>
+          {/* ── SED Pill ── */}
+          {/* Pure black base */}
+          <rect x="0" y="15" width="112" height="70" rx="35" fill="#000000" />
+
+          {/* Cinematic spectral stripe accents — clipped inside pill */}
+          <g clipPath="url(#pill-clip-lg)">
+            <rect x="10" y="15" width="3"   height="70" fill="#ef4444" opacity="0.55" />
+            <rect x="22" y="15" width="1.5" height="70" fill="#3b82f6" opacity="0.35" />
+            <rect x="36" y="15" width="1.5" height="70" fill="#22c55e" opacity="0.28" />
+            <rect x="54" y="15" width="4"   height="70" fill="#ef4444" opacity="0.60" />
+            <rect x="68" y="15" width="1.5" height="70" fill="#a855f7" opacity="0.38" />
+            <rect x="80" y="15" width="2"   height="70" fill="#f59e0b" opacity="0.42" />
+            <rect x="96" y="15" width="3"   height="70" fill="#ef4444" opacity="0.50" />
+          </g>
+
+          {/* SED label */}
+          <text
+            x="56"
+            y="63"
+            fontFamily="Inter, system-ui, sans-serif"
+            fontSize="48"
+            fontWeight="800"
+            fill="#FFFFFF"
+            textAnchor="middle"
+            letterSpacing="-1.5"
+          >
+            SED
+          </text>
+
+          {/* STUDIOS text */}
+          <text
+            x="125"
+            y="63"
+            fontFamily="Inter, system-ui, sans-serif"
+            fontSize="48"
+            fontWeight="400"
+            fill={textColor}
+            letterSpacing="-1"
+          >
+            STUDIOS
+          </text>
+
+          {/* 3×3 Dots */}
+          <g transform="translate(325, 30)">
+            <circle cx="0"  cy="0"  r="6" fill="#ef4444" />
+            <circle cx="18" cy="0"  r="6" fill="#f97316" />
+            <circle cx="36" cy="0"  r="6" fill="#eab308" />
+            <circle cx="0"  cy="18" r="6" fill="#22c55e" />
+            <circle cx="18" cy="18" r="6" fill="#10b981" />
+            <circle cx="36" cy="18" r="6" fill="#14b8a6" />
+            <circle cx="0"  cy="36" r="6" fill="#fbbf24" />
             <circle cx="18" cy="36" r="6" fill="#059669" />
             <circle cx="36" cy="36" r="6" fill="#3b82f6" />
           </g>
