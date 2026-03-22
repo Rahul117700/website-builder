@@ -19,7 +19,8 @@ import {
     ArrowRightIcon,
     SparklesIcon,
     ChevronLeftIcon,
-    ChevronRightIcon
+    ChevronRightIcon,
+    PlayIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid, BookmarkIcon as BookmarkIconSolid } from '@heroicons/react/24/solid';
 import Image from 'next/image';
@@ -30,8 +31,8 @@ import TrendingCarousel from '@/components/home/TrendingCarousel';
 import VerticalDocumentCarousel from '@/components/home/VerticalDocumentCarousel';
 import MobileTrendingWidget from '@/components/trending/MobileTrendingWidget';
 import HeroCarousel from '@/components/shared/HeroCarousel';
+import ShotsCarousel from '@/components/shared/ShotsCarousel';
 
-// Props Interface
 interface HomeContentProps {
     subscribedProducts?: ProductCardData[];
     followedProducts?: ProductCardData[];
@@ -41,6 +42,7 @@ interface HomeContentProps {
     userFollows?: SubscriptionData[];
     notifications?: NotificationData[];
     userChannelInfo?: { hasChannel: boolean; productCount: number; totalEarnings?: number } | null;
+    trendingShots?: ProductCardData[];
     children?: React.ReactNode;
 }
 
@@ -53,6 +55,7 @@ export default function HomeContent({
     userFollows = [],
     notifications = [],
     userChannelInfo = null,
+    trendingShots = [],
     children
 }: HomeContentProps) {
     const { data: session } = useSession();
@@ -72,13 +75,13 @@ export default function HomeContent({
 
     // Filter Logic - Memoized for performance
     const { others, documents, videos, trendingItems } = React.useMemo(() => {
-        const others = recommendedProducts.filter(p => p.type !== 'EBOOK' && p.type !== 'DOCUMENT');
-        const documents = recommendedProducts.filter(p => p.type === 'DOCUMENT');
-        const videos = others.filter(p => p.type === 'VIDEO' || p.type === 'VIDEOS' || p.type === 'COURSE');
+        const others = recommendedProducts.filter((p: ProductCardData) => p.type !== 'EBOOK' && p.type !== 'DOCUMENT');
+        const documents = recommendedProducts.filter((p: ProductCardData) => p.type === 'DOCUMENT');
+        const videos = others.filter((p: ProductCardData) => p.type === 'VIDEO' || p.type === 'VIDEOS' || p.type === 'COURSE');
 
         const trendingItems = [...recommendedProducts, ...subscribedProducts]
-            .filter((v, i, a) => a.findIndex(t => t.id === v.id) === i) // Unique
-            .sort((a, b) => {
+            .filter((v: ProductCardData, i: number, a: ProductCardData[]) => a.findIndex(t => t.id === v.id) === i) // Unique
+            .sort((a: ProductCardData, b: ProductCardData) => {
                 if (a.isFeatured !== b.isFeatured) return a.isFeatured ? -1 : 1;
                 const aVal = (a.type === 'VIDEO' || a.type === 'VIDEOS') ? 10 : 0;
                 const bVal = (b.type === 'VIDEO' || b.type === 'VIDEOS') ? 10 : 0;
@@ -139,6 +142,8 @@ export default function HomeContent({
                                 </Link>
                             </div>
                         )}
+
+                        <ShotsCarousel shots={trendingShots} autoPlayMs={4000} />
 
                         {/* Trending Next row */}
                         {upNextItems.length > 0 && (
@@ -295,7 +300,7 @@ export default function HomeContent({
                                         {videos.length > 0 ? (
                                             <>
                                                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
-                                                    {videos.slice(0, 50).map((product) => (
+                                                    {videos.slice(0, 50).map((product: ProductCardData) => (
                                                         <ProductCard key={product.id} {...product} isDarkTheme={true} />
                                                     ))}
                                                 </div>
@@ -347,7 +352,7 @@ export default function HomeContent({
                                 /* Filtered View */
                                 <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4">
                                     {(activeCategory === 'Videos' ? videos : documents).length > 0 ? (
-                                        (activeCategory === 'Videos' ? videos : documents).map((product) => (
+                                        (activeCategory === 'Videos' ? videos : documents).map((product: ProductCardData) => (
                                             <ProductCard key={product.id} {...product} isDarkTheme={true} />
                                         ))
                                     ) : (
@@ -362,7 +367,7 @@ export default function HomeContent({
                             )}
                         </section>
 
-                        {/* 4. Trending Videos - Section Removed per user request */}
+
 
                         {/* 5. Resources / Ebooks Grid */}
                         {trendingEbooks.length > 0 && (
@@ -374,7 +379,7 @@ export default function HomeContent({
                                         Popular Reads
                                     </h3>
                                     <div className="flex flex-col gap-5">
-                                        {trendingEbooks.slice(0, 3).map(book => (
+                                        {trendingEbooks.slice(0, 3).map((book: ProductCardData) => (
                                             <div key={book.id} className="flex gap-4 group cursor-pointer" onClick={() => router.push(`/channel/${book.channelSlug}/products/${book.id}`)}>
                                                 <div className="w-20 h-28 bg-[#2a2a2a] rounded-lg shadow-md border border-[#444] relative flex-shrink-0 overflow-hidden group-hover:-translate-y-1 transition-transform">
                                                     <Image src={book.thumbnail} alt="" fill className="object-cover" unoptimized />

@@ -9,6 +9,7 @@ import MobileTrendingWidget from '@/components/trending/MobileTrendingWidget';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import HeroCarousel from '@/components/shared/HeroCarousel';
+import ShotsCarousel from '@/components/shared/ShotsCarousel';
 
 interface TrendingContentProps {
     overallTrending: ProductCardData[];
@@ -19,6 +20,7 @@ interface TrendingContentProps {
     learningTrending: ProductCardData[];
     userSubscriptions?: SubscriptionData[];
     notifications?: NotificationData[];
+    trendingShots?: ProductCardData[];
 }
 
 export default function TrendingContent({
@@ -29,7 +31,8 @@ export default function TrendingContent({
     newsTrending = [],
     learningTrending = [],
     userSubscriptions = [],
-    notifications = []
+    notifications = [],
+    trendingShots = []
 }: TrendingContentProps) {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState('overall');
@@ -71,6 +74,11 @@ export default function TrendingContent({
                             The most popular products and videos across SellEarnDirect right now.
                         </p>
                     </div>
+
+                    {/* Premium Shots Carousel */}
+                    {trendingShots.length > 0 && (
+                        <ShotsCarousel shots={trendingShots} autoPlayMs={4000} />
+                    )}
 
                     {/* Tabs */}
                     <div className="flex gap-2 overflow-x-auto pb-4 mb-8 no-scrollbar border-b border-[#333]">

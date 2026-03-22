@@ -718,6 +718,7 @@ model ChannelProduct {
   price            Decimal
   currency         String               @default("INR")
   isSubscriberOnly Boolean              @default(false)
+  isShots          Boolean              @default(false)
   isFree           Boolean              @default(false)
   fileUrl          String?
   fileType         String?

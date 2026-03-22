@@ -366,7 +366,7 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
 
                   <div className="absolute top-4 left-4 flex flex-col gap-2">
                     <span className="px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-gray-900 text-[10px] font-black uppercase tracking-widest border border-white shadow-sm">
-                      {product.type === 'VIDEOS' ? '🎥 Video' : '📄 Doc'}
+                      {product.type === 'VIDEO' ? '🎥 Video' : '📄 Doc'}
                     </span>
                     {product.isSubscriberOnly && (
                       <span className="px-3 py-1 rounded-full bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest border border-emerald-400/30 shadow-sm">
@@ -563,6 +563,7 @@ function ProductUploadModal({
     description: '',
     type: 'DOCUMENTS' as ChannelProductType,
     isSubscriberOnly: false,
+    isShots: false,
     tags: '',
   });
   const [file, setFile] = useState<File | null>(null);
@@ -579,6 +580,7 @@ function ProductUploadModal({
         description: '',
         type: 'DOCUMENTS' as ChannelProductType,
         isSubscriberOnly: false,
+        isShots: false,
         tags: '',
       });
       setFile(null);
@@ -624,6 +626,7 @@ function ProductUploadModal({
     uploadFormData.append('tags', formData.tags); // Selected tag
     uploadFormData.append('isFree', 'true');
     uploadFormData.append('isSubscriberOnly', formData.isSubscriberOnly.toString());
+    uploadFormData.append('isShots', formData.isShots.toString());
 
     if (file) {
       uploadFormData.append('file', file);
@@ -746,7 +749,7 @@ function ProductUploadModal({
                         onChange={(e) => setFormData({ ...formData, type: e.target.value as ChannelProductType })}
                         className="w-full px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-white bg-white/5 appearance-none font-medium cursor-pointer"
                       >
-                        <option value="VIDEOS">Video Content</option>
+                        <option value="VIDEO">Video Content</option>
                         <option value="DOCUMENTS">Document / PDF</option>
                       </select>
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
@@ -811,6 +814,21 @@ function ProductUploadModal({
                         <span className="block text-xs text-gray-500">Premium content for members</span>
                       </div>
                     </label>
+
+                    {formData.type === 'VIDEO' && (
+                      <label className="flex items-center p-3 rounded-xl cursor-pointer hover:bg-white/10 transition-all group">
+                        <input
+                          type="checkbox"
+                          checked={formData.isShots}
+                          onChange={(e) => setFormData({ ...formData, isShots: e.target.checked })}
+                          className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                        />
+                        <div className="ml-3">
+                          <span className="block text-sm font-bold text-white group-hover:text-primary transition-colors">Break into 30s Sedstudio Shots</span>
+                          <span className="block text-xs text-gray-500">Automatically creates a short video sequence</span>
+                        </div>
+                      </label>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1081,6 +1099,7 @@ function ProductEditModal({
     description: product?.description || '',
     type: product?.type || 'DOCUMENTS' as ChannelProductType,
     isSubscriberOnly: product?.isSubscriberOnly || false,
+    isShots: product?.isShots || false,
     tags: product?.tags?.[0] || '',
   });
   const [updating, setUpdating] = useState(false);
@@ -1094,6 +1113,7 @@ function ProductEditModal({
         description: product.description || '',
         type: product.type || 'DOCUMENTS' as ChannelProductType,
         isSubscriberOnly: product.isSubscriberOnly || false,
+        isShots: product.isShots || false,
         tags: product.tags?.[0] || '',
       });
     }
@@ -1121,6 +1141,7 @@ function ProductEditModal({
           type: formData.type,
           tags: formData.tags ? [formData.tags] : [],
           isSubscriberOnly: formData.isSubscriberOnly,
+          isShots: formData.isShots,
         }),
       });
 
@@ -1201,7 +1222,7 @@ function ProductEditModal({
                       onChange={(e) => setFormData({ ...formData, type: e.target.value as ChannelProductType })}
                       className="w-full px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-white bg-white/5 appearance-none font-medium cursor-pointer"
                     >
-                      <option value="VIDEOS">Videos</option>
+                      <option value="VIDEO">Videos</option>
                       <option value="DOCUMENTS">Documents</option>
                       <option value="IMAGES">Images</option>
                       <option value="SOFTWARE">Software</option>
@@ -1270,6 +1291,21 @@ function ProductEditModal({
                         <span className="block text-xs text-gray-500">Premium content for members</span>
                       </div>
                     </label>
+
+                    {formData.type === 'VIDEO' && (
+                      <label className="flex items-center p-3 rounded-xl cursor-pointer hover:bg-white/10 transition-all group">
+                        <input
+                          type="checkbox"
+                          checked={formData.isShots}
+                          onChange={(e) => setFormData({ ...formData, isShots: e.target.checked })}
+                          className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                        />
+                        <div className="ml-3">
+                          <span className="block text-sm font-bold text-white group-hover:text-primary transition-colors">Break into 30s Sedstudio Shots</span>
+                          <span className="block text-xs text-gray-500">Automatically creates a short video sequence</span>
+                        </div>
+                      </label>
+                    )}
                   </div>
                 </div>
 

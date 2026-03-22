@@ -11,7 +11,8 @@ import {
     getUserSubscriptions,
     getUserFollows,
     getUserNotifications,
-    getUserChannelInfo
+    getUserChannelInfo,
+    getTrendingShots
 } from '@/app/actions/homepage';
 
 export const dynamic = 'force-dynamic';
@@ -28,7 +29,8 @@ export default async function HomePage() {
         userSubscriptions,
         userFollows,
         notifications,
-        userChannelInfo
+        userChannelInfo,
+        trendingShots
     ] = await Promise.all([
         userId ? getSubscribedProducts(userId) : [],
         userId ? getFollowedProducts(userId) : [],
@@ -37,7 +39,8 @@ export default async function HomePage() {
         userId ? getUserSubscriptions(userId) : [],
         userId ? getUserFollows(userId) : [],
         userId ? getUserNotifications(userId) : [],
-        userId ? getUserChannelInfo(userId) : null
+        userId ? getUserChannelInfo(userId) : null,
+        getTrendingShots(userId)
     ]);
 
     return (
@@ -50,6 +53,7 @@ export default async function HomePage() {
             userFollows={userFollows}
             notifications={notifications}
             userChannelInfo={userChannelInfo}
+            trendingShots={trendingShots}
         />
     );
 }

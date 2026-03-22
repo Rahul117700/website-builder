@@ -1,7 +1,7 @@
 import React from 'react';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { getTrendingProducts, getUserSubscriptions, getUserNotifications } from '@/app/actions/homepage';
+import { getTrendingProducts, getUserSubscriptions, getUserNotifications, getTrendingShots } from '@/app/actions/homepage';
 import TrendingContent from '@/components/trending/TrendingContent';
 
 export const dynamic = 'force-dynamic';
@@ -18,7 +18,8 @@ export default async function TrendingPage() {
         newsTrending,
         learningTrending,
         userSubscriptions,
-        notifications
+        notifications,
+        trendingShots
     ] = await Promise.all([
         getTrendingProducts(undefined, userId),
         getTrendingProducts('music', userId),
@@ -27,7 +28,8 @@ export default async function TrendingPage() {
         getTrendingProducts('news', userId),
         getTrendingProducts('learning', userId),
         userId ? getUserSubscriptions(userId) : [],
-        userId ? getUserNotifications(userId) : []
+        userId ? getUserNotifications(userId) : [],
+        getTrendingShots(userId)
     ]);
 
     return (
@@ -40,6 +42,7 @@ export default async function TrendingPage() {
             learningTrending={learningTrending}
             userSubscriptions={userSubscriptions}
             notifications={notifications}
+            trendingShots={trendingShots}
         />
     );
 }

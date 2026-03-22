@@ -14,7 +14,6 @@ import {
   ArrowPathIcon,
   ComputerDesktopIcon,
   XMarkIcon,
-  FireIcon,
   HomeIcon,
   PaintBrushIcon,
   RectangleStackIcon,
@@ -30,7 +29,6 @@ import {
   UserCircleIcon,
   BanknotesIcon,
   SparklesIcon,
-  ArrowRightIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
 import MainLayout from '@/components/layout/MainLayout';
@@ -46,8 +44,6 @@ import ChannelsView from '@/components/dashboard/views/ChannelsView';
 import PlansView from '@/components/dashboard/views/PlansView';
 import SettingsView from '@/components/dashboard/views/SettingsView';
 import AnalyticsTab from '@/components/channel-editor/AnalyticsTab';
-import SharePromoteModal from '@/components/channel-editor/SharePromoteModal';
-import { ShareIcon } from '@heroicons/react/24/outline';
 
 // Add Razorpay type definition
 declare global {
@@ -84,7 +80,6 @@ export default function ChannelEditorPage() {
   const [showPlansModal, setShowPlansModal] = useState(false);
   const [plans, setPlans] = useState<any[]>([]);
   const [purchasing, setPurchasing] = useState<string | null>(null);
-  const [showShareModal, setShowShareModal] = useState(false);
 
   // Default to Analytics tab on desktop
   useEffect(() => {
@@ -92,7 +87,7 @@ export default function ChannelEditorPage() {
       setActiveTab('analytics');
     }
     loadRazorpayScript();
-  }, [channelId]);
+  }, []);
 
   const loadRazorpayScript = () => {
     if (typeof window === 'undefined') return;
@@ -332,17 +327,17 @@ export default function ChannelEditorPage() {
   // Calculate completion percentage based on template requirements
   const completionData = useMemo(() => {
     if (!channel) {
-      return { percentage: 0, canPublish: false, requirements: [] };
+      return { percentage: 0, canPublish: false };
     }
 
     // If template is not loaded yet, use basic calculation
     if (!channel.template) {
       const basicRequirements = [
-        { id: 'name', required: true, completed: !!(channel.name && channel.name.length >= 3), weight: 3, label: 'Channel Name' },
-        { id: 'description', required: false, completed: !!(channel.description && channel.description.length > 0), weight: 1, label: 'Description' },
-        { id: 'welcomeMessage', required: false, completed: !!(channel.welcomeMessage && channel.welcomeMessage.length > 0), weight: 1, label: 'Welcome Message' },
-        { id: 'coverImage', required: false, completed: !!channel.coverImage, weight: 1, label: 'Cover Photo' },
-        { id: 'profileImage', required: false, completed: !!channel.profileImage, weight: 1, label: 'Profile Image' },
+        { id: 'name', required: true, completed: channel.name && channel.name.length >= 3, weight: 3 },
+        { id: 'description', required: false, completed: !!(channel.description && channel.description.length > 0), weight: 1 },
+        { id: 'welcomeMessage', required: false, completed: !!(channel.welcomeMessage && channel.welcomeMessage.length > 0), weight: 1 },
+        { id: 'coverImage', required: false, completed: !!channel.coverImage, weight: 1 },
+        { id: 'profileImage', required: false, completed: !!channel.profileImage, weight: 1 },
       ];
 
       const totalWeight = basicRequirements.reduce((sum, req) => sum + req.weight, 0);
@@ -353,20 +348,19 @@ export default function ChannelEditorPage() {
       const percentage = totalWeight > 0 ? Math.round((completedWeight / totalWeight) * 100) : 0;
       const canPublish = basicRequirements.filter((r) => r.required).every((r) => r.completed);
 
-      return { percentage, canPublish, requirements: basicRequirements };
+      return { percentage, canPublish };
     }
 
     const template = channel.template as any;
     const sections = template.sections || {};
-    const requirements: Array<{ id: string; required: boolean; completed: boolean; weight: number; label?: string }> = [];
+    const requirements: Array<{ id: string; required: boolean; completed: boolean; weight: number }> = [];
 
     // Always required: Channel name
     requirements.push({
       id: 'name',
       required: true,
       completed: !!(channel.name && channel.name.length >= 3),
-      weight: 3,
-      label: 'Channel Name'
+      weight: 3
     });
 
     // Check hero section requirements
@@ -376,8 +370,7 @@ export default function ChannelEditorPage() {
           id: 'coverImage',
           required: false,
           completed: !!channel.coverImage,
-          weight: 1,
-          label: 'Cover Photo'
+          weight: 1
         });
       }
       if (sections.hero.showProfile) {
@@ -385,8 +378,7 @@ export default function ChannelEditorPage() {
           id: 'profileImage',
           required: false,
           completed: !!channel.profileImage,
-          weight: 1,
-          label: 'Profile Image'
+          weight: 1
         });
       }
       if (sections.hero.showWelcome) {
@@ -394,8 +386,7 @@ export default function ChannelEditorPage() {
           id: 'welcomeMessage',
           required: false,
           completed: !!(channel.welcomeMessage && channel.welcomeMessage.length > 0),
-          weight: 1,
-          label: 'Welcome Message'
+          weight: 1
         });
       }
       // Description is often shown in hero
@@ -403,8 +394,7 @@ export default function ChannelEditorPage() {
         id: 'description',
         required: false,
         completed: !!(channel.description && channel.description.length > 0),
-        weight: 1,
-        label: 'Description'
+        weight: 1
       });
     }
 
@@ -415,8 +405,7 @@ export default function ChannelEditorPage() {
         id: 'products',
         required: false,
         completed: productCount > 0,
-        weight: 2,
-        label: 'Add Products'
+        weight: 2
       });
     }
 
@@ -426,8 +415,7 @@ export default function ChannelEditorPage() {
         id: 'subscription',
         required: false,
         completed: !!(channel.subscriptionEnabled && channel.subscriptionPrice),
-        weight: 1,
-        label: 'Setup Subscription'
+        weight: 1
       });
     }
 
@@ -437,8 +425,7 @@ export default function ChannelEditorPage() {
         id: 'about',
         required: false,
         completed: !!(channel.description && channel.description.length > 0),
-        weight: 1,
-        label: 'About Section'
+        weight: 1
       });
     }
 
@@ -452,7 +439,7 @@ export default function ChannelEditorPage() {
     const percentage = totalWeight > 0 ? Math.round((completedWeight / totalWeight) * 100) : 0;
     const canPublish = requirements.filter((r) => r.required).every((r) => r.completed);
 
-    return { percentage, canPublish, requirements };
+    return { percentage, canPublish };
   }, [channel, completionKey]);
 
   const handlePublish = async () => {
@@ -635,34 +622,28 @@ export default function ChannelEditorPage() {
   };
 
   return (
-    <MainLayout isDarkTheme={true}>
-      <div className="h-full flex flex-col bg-[#141414] overflow-hidden relative">
+    <MainLayout>
+      <div className="h-full flex flex-col bg-gray-50 overflow-hidden relative">
         {/* Sticky Editor Toolbar */}
-        <div className="bg-[#1a1a1a] border-b border-[#333] px-3 sm:px-4 py-2 sm:py-3 shrink-0 relative sticky top-0 z-30 shadow-sm">
+        <div className="bg-white border-b border-gray-200 px-3 sm:px-4 py-2 sm:py-3 shrink-0 relative sticky top-0 z-30 shadow-sm">
           {/* Top Row - Title and Actions */}
           <div className="flex items-center justify-between gap-2 mb-2 sm:mb-0">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-sm sm:text-lg font-bold text-white truncate flex items-center gap-2">
+                  <h1 className="text-sm sm:text-lg font-bold text-gray-900 truncate">
                     {viewMode === 'editor' ? (channel ? channel.name || 'Untitled Channel' : 'Loading...') :
                       viewMode === 'analytics' ? 'Channel Analytics' :
                         viewMode === 'channels' ? 'My Channels' :
                           viewMode === 'plans' ? 'Subscription Plans' :
                             viewMode === 'settings' ? 'Settings' : ''}
-                    {/* {viewMode === 'editor' && channel?.isPromoted && (
-                      <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-indigo-100 border border-indigo-200 rounded text-[8px] font-black text-indigo-700 uppercase tracking-widest animate-pulse flex-shrink-0">
-                        <FireIcon className="w-2.5 h-2.5" />
-                        Promoted
-                      </span>
-                    )} */}
                   </h1>
                   {viewMode === 'editor' && (
                     <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-600">
                       {saving ? (
-                        <CloudArrowUpIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-pulse text-gray-300" />
+                        <CloudArrowUpIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 animate-pulse" />
                       ) : lastSaved ? (
-                        <CheckCircleIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-green-500" />
+                        <CheckCircleIcon className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-green-600" />
                       ) : null}
                     </div>
                   )}
@@ -670,16 +651,16 @@ export default function ChannelEditorPage() {
 
                 {/* Mobile Status Bar - Metrics visible on small screens */}
                 <div className="flex sm:hidden items-center gap-1.5 mt-1">
-                  <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/30 rounded-full">
-                    <BanknotesIcon className="h-3 w-3 text-emerald-400" />
-                    <span className="text-[10px] font-bold text-emerald-400">
+                  <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-50 border border-emerald-100 rounded-full">
+                    <BanknotesIcon className="h-3 w-3 text-emerald-600" />
+                    <span className="text-[10px] font-bold text-emerald-700">
                       ₹{channel?.totalRevenue?.toLocaleString() || '0'}
                     </span>
                   </div>
                   {subscriptionData?.hasActivePlan && (
-                    <div className="flex items-center gap-1 px-2 py-0.5 bg-indigo-500/20 border border-indigo-500/30 rounded-full">
-                      <SparklesIcon className="h-3 w-3 text-indigo-400" />
-                      <span className="text-[10px] font-bold text-indigo-400">
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-indigo-50 border border-indigo-100 rounded-full">
+                      <SparklesIcon className="h-3 w-3 text-indigo-600" />
+                      <span className="text-[10px] font-bold text-indigo-700">
                         {subscriptionData.tier?.planName || 'Active'}
                       </span>
                     </div>
@@ -689,17 +670,17 @@ export default function ChannelEditorPage() {
 
               {/* Gross Revenue & Plan Info */}
               <div className="hidden sm:flex items-center gap-2 ml-4">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 border border-emerald-500/30 rounded-full">
-                  <BanknotesIcon className="h-4 w-4 text-emerald-400" />
-                  <span className="text-xs font-bold text-emerald-400">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-full">
+                  <BanknotesIcon className="h-4 w-4 text-emerald-600" />
+                  <span className="text-xs font-bold text-emerald-700">
                     ₹{channel?.totalRevenue?.toLocaleString() || '0'}
                   </span>
                 </div>
 
                 {subscriptionData?.hasActivePlan ? (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/20 border border-indigo-500/30 rounded-full">
-                    <SparklesIcon className="h-4 w-4 text-indigo-400" />
-                    <span className="text-xs font-bold text-indigo-400">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-full">
+                    <SparklesIcon className="h-4 w-4 text-indigo-600" />
+                    <span className="text-xs font-bold text-indigo-700">
                       {subscriptionData.tier?.planName || 'Active Plan'}
                     </span>
                   </div>
@@ -720,22 +701,12 @@ export default function ChannelEditorPage() {
               {/* Publishing Options Button - Opens Modal */}
               <button
                 onClick={() => setShowPublishingModal(true)}
-                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors touch-manipulation text-xs sm:text-sm font-medium text-white relative z-10"
+                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors touch-manipulation text-xs sm:text-sm font-medium text-gray-700 relative z-10"
                 aria-label="Open Channel Options"
               >
                 <RocketLaunchIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="hidden xs:inline">{channel.published ? 'Live Options' : 'Options'}</span>
                 <span className="xs:hidden">Options</span>
-              </button>
-
-              {/* Share Button - Highly Visible */}
-              <button
-                onClick={() => setShowShareModal(true)}
-                className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-lg hover:from-indigo-500 hover:to-violet-500 transition-all shadow-lg shadow-indigo-600/20 text-xs sm:text-sm font-bold active:scale-95 touch-manipulation"
-              >
-                <ShareIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline">Share Channel</span>
-                <span className="xs:hidden">Share</span>
               </button>
 
               {/* Publishing Options Modal - All Screen Sizes - Rendered via Portal */}
@@ -758,7 +729,7 @@ export default function ChannelEditorPage() {
                   />
                   {/* Modal - Centered Modal Style */}
                   <div
-                    className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#1a1a1a] rounded-2xl shadow-2xl border border-white/10 overflow-hidden publishing-modal-container animate-in fade-in zoom-in duration-200"
+                    className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden publishing-modal-container animate-in fade-in zoom-in duration-200"
                     style={{
                       zIndex: 100000,
                       width: 'calc(100vw - 2rem)',
@@ -767,40 +738,40 @@ export default function ChannelEditorPage() {
                       display: 'flex',
                       flexDirection: 'column',
                       position: 'fixed',
-                      backgroundColor: '#1a1a1a',
+                      backgroundColor: 'white',
                       isolation: 'isolate'
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
                     {/* Publishing Options Header */}
-                    <div className="px-6 py-5 border-b border-white/10 bg-[#1a1a1a] flex-shrink-0 relative z-10">
+                    <div className="px-6 py-5 border-b border-gray-200 bg-white flex-shrink-0 relative z-10">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1 relative z-10">
-                          <h3 className="text-lg font-bold text-white break-words relative z-10">Channel Options</h3>
+                          <h3 className="text-lg font-bold text-gray-900 break-words relative z-10">Channel Options</h3>
                           <p className="text-sm text-gray-500 mt-1.5 break-words relative z-10">Manage your channel settings and visibility</p>
                         </div>
                         <button
                           onClick={() => setShowPublishingModal(false)}
-                          className="p-2 hover:bg-white/10 rounded-lg transition-colors flex-shrink-0 relative z-10"
+                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0 relative z-10"
                           aria-label="Close"
                         >
-                          <XMarkIcon className="h-5 w-5 text-gray-400" />
+                          <XMarkIcon className="h-5 w-5 text-gray-500" />
                         </button>
                       </div>
                     </div>
 
                     {/* Scrollable Content */}
-                    <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar-light bg-[#1a1a1a] relative z-10" style={{ minHeight: 0 }}>
+                    <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar-light bg-white relative z-10" style={{ minHeight: 0 }}>
                       {/* Preview Link - More Prominent */}
-                      <div className="px-6 py-4 border-b border-white/10">
-                        <label className="block text-sm font-semibold text-gray-400 mb-3 break-words">
+                      <div className="px-6 py-4 border-b border-gray-100">
+                        <label className="block text-sm font-semibold text-gray-700 mb-3 break-words">
                           Preview Channel
                         </label>
                         <Link
                           href={`/channel/${channel.slug}`}
                           target="_blank"
                           onClick={() => setShowPublishingModal(false)}
-                          className="flex items-center justify-center gap-2 px-4 py-3 bg-white/10 text-gray-300 rounded-lg hover:bg-white/20 hover:text-white transition-colors text-sm font-medium touch-manipulation active:scale-95 w-full"
+                          className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium touch-manipulation active:scale-95 w-full"
                         >
                           <EyeIcon className="h-5 w-5 flex-shrink-0" />
                           <span className="truncate">Open Preview in New Tab</span>
@@ -808,8 +779,8 @@ export default function ChannelEditorPage() {
                       </div>
 
                       {/* Template Switcher */}
-                      <div className="px-6 py-4 border-b border-white/10">
-                        <label className="block text-sm font-semibold text-gray-400 mb-3 break-words">
+                      <div className="px-6 py-4 border-b border-gray-100">
+                        <label className="block text-sm font-semibold text-gray-700 mb-3 break-words">
                           Template
                         </label>
                         <select
@@ -844,7 +815,7 @@ export default function ChannelEditorPage() {
                               setSaving(false);
                             }
                           }}
-                          className="w-full px-4 py-3 border border-white/10 rounded-lg text-sm font-medium text-gray-300 bg-white/5 hover:bg-white/10 transition-colors focus:ring-2 focus:ring-indigo-500 focus:border-transparent touch-manipulation [&>option]:bg-[#1e1e1e]"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-gray-900 focus:border-transparent touch-manipulation"
                         >
                           <option value="">Select Template</option>
                           {templates.map((template) => (
@@ -856,26 +827,26 @@ export default function ChannelEditorPage() {
                       </div>
 
                       {/* Device Preview Toggle - Desktop Only */}
-                      <div className="px-6 py-4 border-b border-white/10">
-                        <label className="block text-sm font-semibold text-gray-400 mb-3 break-words">
+                      <div className="px-6 py-4 border-b border-gray-100">
+                        <label className="block text-sm font-semibold text-gray-700 mb-3 break-words">
                           Preview Size
                         </label>
-                        <div className="flex items-center justify-center bg-white/10 p-2 rounded-lg">
+                        <div className="flex items-center justify-center bg-gray-100 p-2 rounded-lg">
                           <button
                             onClick={() => {
                               setDevicePreview('desktop');
                               setShowPublishingModal(false);
                             }}
-                            className="p-3 rounded-md transition-all touch-manipulation active:scale-95 bg-white/20 shadow-md border-2 border-white/20"
+                            className="p-3 rounded-md transition-all touch-manipulation active:scale-95 bg-white shadow-md border-2 border-gray-300"
                             title="Desktop view"
                           >
-                            <ComputerDesktopIcon className="h-5 w-5 mx-auto text-white" />
+                            <ComputerDesktopIcon className="h-5 w-5 mx-auto text-gray-900" />
                           </button>
                         </div>
                       </div>
 
                       {/* View Link - More Prominent if not published, but by default it should be */}
-                      <div className="px-6 py-5 bg-[#141414] border-t border-white/10 flex-shrink-0">
+                      <div className="px-6 py-5 bg-gradient-to-br from-gray-50 to-white border-t border-gray-200 flex-shrink-0">
                         {channel.published ? (
                           <Link
                             href={`/channel/${channel.slug}`}
@@ -914,7 +885,7 @@ export default function ChannelEditorPage() {
                     onClick={() => setShowPlansModal(false)}
                   />
                   <div
-                    className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#141414] rounded-[2.5rem] shadow-2xl border border-white/10 overflow-hidden animate-in fade-in zoom-in duration-300"
+                    className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden animate-in fade-in zoom-in duration-300"
                     style={{
                       zIndex: 1000000,
                       width: 'calc(100vw - 2rem)',
@@ -925,9 +896,9 @@ export default function ChannelEditorPage() {
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div className="px-8 py-6 border-b border-white/10 flex items-center justify-between shrink-0">
+                    <div className="px-8 py-6 border-b border-gray-100 flex items-center justify-between shrink-0">
                       <div>
-                        <h2 className="text-2xl font-black text-white tracking-tight">Subscription Plans</h2>
+                        <h2 className="text-2xl font-black text-gray-900 tracking-tight">Subscription Plans</h2>
                         <div className="flex flex-col gap-1 mt-1">
                           <p className="text-sm text-gray-500 font-medium">Scale your business with the perfect plan</p>
                           {subscriptionData?.hasActivePlan && (
@@ -940,18 +911,18 @@ export default function ChannelEditorPage() {
                       </div>
                       <button
                         onClick={() => setShowPlansModal(false)}
-                        className="p-3 hover:bg-white/10 rounded-2xl transition-all active:scale-90"
+                        className="p-3 hover:bg-gray-100 rounded-2xl transition-all active:scale-90"
                       >
                         <XMarkIcon className="h-6 w-6 text-gray-400" />
                       </button>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-4 sm:p-8 bg-[#141414]">
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar-light">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {plans.map((plan, index) => (
                           <div
                             key={plan.id}
-                            className={`relative bg-[#1e1e1e] rounded-[2rem] p-6 border-2 transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-900/30 group ${index === 1 ? 'border-indigo-500 shadow-xl scale-105' : 'border-white/10 hover:border-indigo-500/40'
+                            className={`relative bg-white rounded-[2rem] p-6 border-2 transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-100/50 group ${index === 1 ? 'border-indigo-600 shadow-xl scale-105' : 'border-gray-100 hover:border-indigo-200'
                               }`}
                           >
                             {index === 1 && (
@@ -961,13 +932,13 @@ export default function ChannelEditorPage() {
                             )}
 
                             <div className="mb-6">
-                              <h3 className="text-xl font-black text-white mb-2">{plan.name}</h3>
+                              <h3 className="text-xl font-black text-gray-900 mb-2">{plan.name}</h3>
                               <p className="text-sm text-gray-500 font-medium leading-relaxed">{plan.description}</p>
                             </div>
 
                             <div className="mb-8">
                               <div className="flex items-baseline gap-1">
-                                <span className="text-4xl font-black text-white">₹{plan.price}</span>
+                                <span className="text-4xl font-black text-gray-900">₹{plan.price}</span>
                                 <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">
                                   /{plan.duration === 365 ? 'Year' : 'Month'}
                                 </span>
@@ -980,10 +951,10 @@ export default function ChannelEditorPage() {
                             <div className="space-y-4 mb-8">
                               {plan.features?.map((feature: string, fIdx: number) => (
                                 <div key={fIdx} className="flex items-center gap-3">
-                                  <div className="w-5 h-5 bg-indigo-900/40 rounded-full flex items-center justify-center shrink-0">
-                                    <CheckCircleSolid className="w-4 h-4 text-indigo-400" />
+                                  <div className="w-5 h-5 bg-indigo-50 rounded-full flex items-center justify-center shrink-0">
+                                    <CheckCircleSolid className="w-4 h-4 text-indigo-600" />
                                   </div>
-                                  <span className="text-sm font-medium text-gray-400">{feature}</span>
+                                  <span className="text-sm font-medium text-gray-600">{feature}</span>
                                 </div>
                               ))}
                             </div>
@@ -1052,7 +1023,7 @@ export default function ChannelEditorPage() {
                       setSaving(false);
                     }
                   }}
-                  className="px-3 sm:px-4 py-1.5 sm:py-2 border border-white/10 rounded-lg text-xs sm:text-sm font-medium text-gray-300 bg-white/5 hover:bg-white/10 transition-colors focus:ring-2 focus:ring-indigo-500 focus:border-transparent [&>option]:bg-[#1e1e1e]"
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-gray-900 focus:border-transparent"
                 >
                   <option value="">Select Template</option>
                   {templates.map((template) => (
@@ -1064,13 +1035,13 @@ export default function ChannelEditorPage() {
               </div>
 
               {/* Device Toggle - Desktop Only */}
-              <div className="hidden md:flex items-center gap-1 bg-white/10 p-1 rounded-lg">
+              <div className="hidden md:flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
                 <button
                   onClick={() => setDevicePreview('desktop')}
-                  className="p-1.5 sm:p-2 rounded transition-colors touch-manipulation bg-white/20 shadow-sm"
+                  className="p-1.5 sm:p-2 rounded transition-colors touch-manipulation bg-white shadow-sm"
                   title="Desktop view"
                 >
-                  <ComputerDesktopIcon className="h-4 w-4 text-white" />
+                  <ComputerDesktopIcon className="h-4 w-4 text-gray-700" />
                 </button>
               </div>
 
@@ -1078,7 +1049,7 @@ export default function ChannelEditorPage() {
               <Link
                 href={`/channel/${channel.slug}`}
                 target="_blank"
-                className="hidden sm:flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 text-gray-300 rounded-lg hover:bg-white/20 hover:text-white transition-colors text-xs sm:text-sm font-medium touch-manipulation"
+                className="hidden sm:flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-xs sm:text-sm font-medium touch-manipulation"
               >
                 <EyeIcon className="h-4 w-4" />
                 <span className="hidden md:inline">Preview</span>
@@ -1120,12 +1091,12 @@ export default function ChannelEditorPage() {
                     onClick={() => handleTabClick(tab.id)}
                     className={`group relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-sm font-bold transition-all whitespace-nowrap touch-manipulation active:scale-95 snap-start flex-shrink-0 ${activeTab === tab.id
                       ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/40'
-                      : 'bg-[#2a2a2a] text-gray-300 hover:bg-[#333] hover:text-white'
+                      : 'bg-slate-100 text-slate-700 active:bg-slate-200'
                       }`}
                     title={tab.title}
                     style={{ minWidth: 'max-content' }}
                   >
-                    <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0 ${activeTab === tab.id ? 'text-white' : 'text-gray-400'}`} />
+                    <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0 ${activeTab === tab.id ? 'text-white' : 'text-slate-600'}`} />
                     <span>{tab.label}</span>
                   </button>
                 );
@@ -1133,7 +1104,7 @@ export default function ChannelEditorPage() {
             </nav>
 
             {/* Separator */}
-            <div className="w-px h-8 bg-white/10 mx-1 flex-shrink-0 hidden sm:block"></div>
+            <div className="w-px h-8 bg-gray-200 mx-1 flex-shrink-0 hidden sm:block"></div>
 
             {/* Studio Dropdown - Always Visible */}
             <div className="relative flex-shrink-0">
@@ -1152,15 +1123,38 @@ export default function ChannelEditorPage() {
                     className="fixed inset-0 z-30"
                     onClick={() => setShowStudioMenu(false)}
                   />
-                  <div className="absolute right-0 mt-2 w-56 bg-[#1e1e1e] rounded-xl shadow-xl border border-white/10 z-50 overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
                     <div className="py-1">
+                      <Link
+                        href="/auth/dashboard"
+                        className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="p-1.5 bg-violet-100 rounded-lg text-violet-600">
+                          <HomeIcon className="w-4 h-4" />
+                        </div>
+                        <span className="font-medium">Go To my studio</span>
+                      </Link>
+
+                      <div className="h-px bg-gray-100 my-1"></div>
+
+                      <button
+                        onClick={() => {
+                          setViewMode('channels');
+                          setShowStudioMenu(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                      >
+                        <RocketLaunchIcon className="w-4 h-4" />
+                        My Channels
+                      </button>
+
                       <button
                         onClick={() => {
                           setViewMode('editor');
                           setActiveTab('analytics');
                           setShowStudioMenu(false);
                         }}
-                        className="w-full flex items-center gap-3 px-4 py-4 text-sm text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
                       >
                         <ChartBarIcon className="w-4 h-4" />
                         Analytics
@@ -1171,18 +1165,28 @@ export default function ChannelEditorPage() {
                           setViewMode('plans');
                           setShowStudioMenu(false);
                         }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
                       >
                         <CreditCardIcon className="w-4 h-4" />
                         Plans
                       </button>
+
+                      <Link
+                        href="/auth/dashboard/blog"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                      >
+                        <DocumentTextIcon className="w-4 h-4" />
+                        Blog
+                      </Link>
+
+                      <div className="h-px bg-gray-100 my-1"></div>
 
                       <button
                         onClick={() => {
                           setViewMode('settings');
                           setShowStudioMenu(false);
                         }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
                       >
                         <Cog6ToothIcon className="w-4 h-4" />
                         My Profile
@@ -1198,11 +1202,11 @@ export default function ChannelEditorPage() {
         {/* Content Wrapper */}
         <div className="flex-1 flex overflow-hidden relative">
 
-          <main className="flex-1 bg-[#0d0d0d] overflow-auto relative safe-area-inset-bottom">
+          <main className="flex-1 bg-gray-100 overflow-auto relative safe-area-inset-bottom">
             {viewMode === 'editor' ? (
               <div className="h-full flex items-start justify-center p-2 sm:p-4">
                 <div
-                  className="bg-[#0d0d0d] rounded-lg sm:rounded-lg shadow-xl overflow-hidden transition-all duration-300 relative w-full"
+                  className="bg-white rounded-lg sm:rounded-lg shadow-xl overflow-hidden transition-all duration-300 relative w-full"
                   style={{
                     width: getPreviewWidth(),
                     maxWidth: '100%',
@@ -1221,8 +1225,8 @@ export default function ChannelEditorPage() {
                   ) : (
                     <div className="flex items-center justify-center min-h-screen p-4 sm:p-8">
                       <div className="text-center">
-                        <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-white/10 border-t-white/60 rounded-full animate-spin mx-auto mb-4"></div>
-                        <p className="text-sm sm:text-base text-gray-500">Loading preview...</p>
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-gray-300 border-t-gray-900 rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-sm sm:text-base text-gray-600">Loading preview...</p>
                       </div>
                     </div>
                   )}
@@ -1248,9 +1252,9 @@ export default function ChannelEditorPage() {
               />
 
               {/* Edit Panel - Component */}
-              <div className="fixed inset-y-0 right-0 w-full sm:w-[450px] lg:static lg:w-[450px] lg:h-full bg-[#141414] shadow-2xl lg:shadow-none z-50 lg:z-auto transform transition-transform duration-300 ease-out overflow-hidden flex flex-col border-l border-[#2a2a2a] safe-area-inset">
+              <div className="fixed inset-y-0 right-0 w-full sm:w-[450px] lg:static lg:w-[450px] lg:h-full bg-white shadow-2xl lg:shadow-none z-50 lg:z-auto transform transition-transform duration-300 ease-out overflow-hidden flex flex-col border-l border-gray-200 safe-area-inset">
                 {/* Panel Header - Mobile Optimized */}
-                <div className="relative bg-[#1a1a1a] border-b border-[#2a2a2a] safe-area-inset-top">
+                <div className="relative bg-white border-b border-gray-200 safe-area-inset-top">
                   {/* Top Row - Title and Actions */}
                   <div className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
                     <div className="relative flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
@@ -1265,7 +1269,7 @@ export default function ChannelEditorPage() {
                         );
                       })()}
                       <div className="min-w-0 flex-1">
-                        <h2 className="text-base sm:text-lg font-bold text-white tracking-wide truncate">
+                        <h2 className="text-base sm:text-lg font-bold text-gray-900 tracking-wide truncate">
                           {tabs.find(t => t.id === activeTab)?.title || 'Edit'}
                         </h2>
                         <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">Customize your channel</p>
@@ -1292,21 +1296,21 @@ export default function ChannelEditorPage() {
                       </button>
                       <button
                         onClick={() => setActiveTab(null)}
-                        className="p-1.5 sm:p-2 hover:bg-white/10 rounded-xl transition-all active:scale-95 touch-manipulation"
+                        className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-xl transition-all active:scale-95 touch-manipulation"
                         aria-label="Close"
                       >
-                        <XMarkIcon className="h-5 w-5 text-gray-400" />
+                        <XMarkIcon className="h-5 w-5 text-gray-700" />
                       </button>
                     </div>
                   </div>
 
                   {/* Completion Status Bar */}
-                  <div className="px-4 sm:px-6 pb-3 sm:pb-4 border-t border-[#2a2a2a]">
+                  <div className="px-4 sm:px-6 pb-3 sm:pb-4 border-t border-gray-100">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-gray-300 uppercase tracking-wide">Completion</span>
-                      <span className="text-base sm:text-lg font-bold text-purple-400">{completionData.percentage}%</span>
+                      <span className="text-xs font-bold text-gray-900 uppercase tracking-wide">Completion</span>
+                      <span className="text-base sm:text-lg font-bold text-purple-600">{completionData.percentage}%</span>
                     </div>
-                    <div className="relative h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
                       <div
                         className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-600 to-pink-600 rounded-full transition-all duration-500"
                         style={{ width: `${completionData.percentage}%` }}
@@ -1323,65 +1327,11 @@ export default function ChannelEditorPage() {
                         Ready to launch!
                       </p>
                     )}
-
-                    {/* Next Steps Checklist */}
-                    {completionData.percentage < 100 && (
-                      <div className="mt-4 pt-4 border-t border-white/5 flex flex-col gap-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Recommended Steps</span>
-                          <span className="text-[9px] font-medium text-gray-500 px-1.5 py-0.5 bg-white/5 rounded border border-white/10">Click to action</span>
-                        </div>
-                        <div className="grid grid-cols-1 gap-1.5">
-                          {completionData.requirements
-                            .filter(r => !r.completed && ['coverImage', 'profileImage', 'products', 'subscription'].includes(r.id))
-                            .map((req) => (
-                              <button
-                                key={req.id}
-                                onClick={() => {
-                                  const tabMap: Record<string, TabType> = {
-                                    coverImage: 'basic',
-                                    profileImage: 'basic',
-                                    products: 'products',
-                                    subscription: 'subscription'
-                                  };
-                                  setActiveTab(tabMap[req.id] || 'basic');
-                                }}
-                                className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/10 hover:border-indigo-500/40 hover:bg-indigo-500/10 transition-all group text-left"
-                              >
-                                <div className="flex items-center gap-2.5">
-                                  <div className="w-6 h-6 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center group-hover:bg-indigo-500/20 group-hover:border-indigo-500/40 transition-all duration-300">
-                                    {req.id === 'coverImage' && <PaintBrushIcon className="w-3.5 h-3.5 text-gray-400 group-hover:text-indigo-400" />}
-                                    {req.id === 'profileImage' && <UserCircleIcon className="w-3.5 h-3.5 text-gray-400 group-hover:text-indigo-400" />}
-                                    {req.id === 'products' && <ShoppingBagIcon className="w-3.5 h-3.5 text-gray-400 group-hover:text-indigo-400" />}
-                                    {req.id === 'subscription' && <CreditCardIcon className="w-3.5 h-3.5 text-gray-400 group-hover:text-indigo-400" />}
-                                  </div>
-                                  <div className="flex flex-col">
-                                    <span className="text-xs font-bold text-gray-300 group-hover:text-white transition-colors">
-                                      {req.id === 'coverImage' ? 'Update Cover Photo' :
-                                        req.id === 'profileImage' ? 'Set Profile Picture' :
-                                          req.id === 'products' ? 'Add Your First Product' :
-                                            req.id === 'subscription' ? 'Enable Subscriptions' : req.label}
-                                    </span>
-                                    <span className="text-[9px] text-gray-500 group-hover:text-indigo-400 font-medium">In {
-                                      req.id === 'coverImage' || req.id === 'profileImage' ? 'Basic Tab' :
-                                        req.id === 'products' ? 'Products Tab' :
-                                          req.id === 'subscription' ? 'Subscription Tab' : 'Settings'
-                                    }</span>
-                                  </div>
-                                </div>
-                                <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-indigo-500 transition-all duration-300">
-                                  <ArrowRightIcon className="w-2.5 h-2.5 text-gray-400 group-hover:text-white" />
-                                </div>
-                              </button>
-                            ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
 
                 {/* Panel Content - Mobile Optimized */}
-                <div className="flex-1 overflow-y-auto overflow-x-hidden bg-transparent custom-scrollbar-light">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden bg-white custom-scrollbar-light">
                   <div className="p-4 sm:p-6">
                     {activeTab === 'basic' && (
                       <BasicInfoTab channel={channel} onUpdate={handleChannelUpdate} />
@@ -1418,13 +1368,6 @@ export default function ChannelEditorPage() {
             </>
           )}
         </div>
-
-        {/* Share & Promote Modal */}
-        <SharePromoteModal
-          isOpen={showShareModal}
-          onClose={() => setShowShareModal(false)}
-          channel={channel}
-        />
 
         {/* Publish Success Modal */}
         {showPublishSuccessModal && (
@@ -1486,16 +1429,6 @@ export default function ChannelEditorPage() {
                     <EyeIcon className="h-5 w-5" />
                     Go to Channel
                   </button>
-
-                  {publishedChannelSlug && (
-                    <button
-                      onClick={() => setShowShareModal(true)}
-                      className="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all text-sm font-bold shadow-lg shadow-indigo-600/20 touch-manipulation active:scale-95 flex items-center justify-center gap-2"
-                    >
-                      <ShareIcon className="h-5 w-5" />
-                      Share My Channel
-                    </button>
-                  )}
 
                   {publishedChannelSlug && (
                     <button

@@ -47,6 +47,7 @@ export async function PUT(
       type,
       tags = [],
       isSubscriberOnly = false,
+      isShots = false,
     } = body;
 
     if (!title || !type) {
@@ -64,6 +65,7 @@ export async function PUT(
         type: type as ChannelProductType,
         tags: Array.isArray(tags) ? tags : [],
         isSubscriberOnly,
+        isShots,
       },
     });
 

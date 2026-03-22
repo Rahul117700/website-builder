@@ -283,6 +283,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
 
   // Check if user has active subscription
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+  const [subscriptionEndDate, setSubscriptionEndDate] = useState<Date | null>(null);
 
   // State for Minimal Classic Layout
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -395,6 +396,9 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
         if (response.ok) {
           const data = await response.json();
           setHasActiveSubscription(data.hasActiveSubscription || false);
+          if (data.subscription?.endDate) {
+            setSubscriptionEndDate(new Date(data.subscription.endDate));
+          }
         }
       } catch (error) {
         console.error('Error checking subscription:', error);
@@ -1017,19 +1021,45 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-2 w-full md:w-auto">
-              {!isOwner && channel.subscriptionEnabled && (
-                <button
-                  onClick={() => !hasActiveSubscription && setShowSubscriptionModal(true)}
-                  disabled={hasActiveSubscription}
-                  className={`px-6 py-2.5 rounded-full font-semibold text-sm transition-all shadow-sm ${hasActiveSubscription
-                    ? 'bg-[#222] text-gray-400 cursor-default'
-                    : 'bg-white text-black hover:bg-[#333] hover:shadow-md active:scale-95'
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
+              {!isOwner && channel.subscriptionEnabled && (() => {
+                const daysLeft = subscriptionEndDate 
+                  ? Math.max(0, Math.ceil((subscriptionEndDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+                  : null;
+                return (
+                  <button
+                    onClick={() => !hasActiveSubscription && setShowSubscriptionModal(true)}
+                    disabled={hasActiveSubscription}
+                    className={`relative flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-black text-[14px] transition-all overflow-hidden group w-full md:w-auto shadow-xl tracking-wide uppercase ${hasActiveSubscription
+                      ? 'bg-[#222] text-gray-300 border border-white/10 cursor-default'
+                      : 'bg-white text-black hover:bg-gray-100 hover:scale-[1.03] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] active:scale-95 shadow-[0_4px_14px_0_rgba(255,255,255,0.15)]'
                     }`}
-                >
-                  {hasActiveSubscription ? 'Subscribed' : 'Subscribe'}
-                </button>
-              )}
+                  >
+                    {hasActiveSubscription ? (
+                      <div className="flex flex-col items-center leading-tight">
+                        <div className="flex items-center gap-1.5">
+                          <CheckCircleIcon className="w-4 h-4 text-emerald-400" />
+                          <span className="text-sm font-black text-white">Premium Member</span>
+                        </div>
+                        {daysLeft !== null && (
+                          <span className="text-[10px] font-semibold text-gray-400 mt-0.5">
+                            {daysLeft === 0 ? 'Expires today' : `${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining`}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <>
+                        <RocketLaunchIcon className="w-[18px] h-[18px] text-[#e50914] shrink-0 transform group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
+                        Subscribe
+                        <span className="bg-black/10 px-2 py-0.5 rounded-lg text-[12px] font-black">
+                          {formatPrice(channel.subscriptionPrice, channel.subscriptionCurrency)}/mo
+                        </span>
+                        <div className="absolute inset-0 bg-black/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300 pointer-events-none rounded-full"></div>
+                      </>
+                    )}
+                  </button>
+                );
+              })()}
             </div>
           </div>
 

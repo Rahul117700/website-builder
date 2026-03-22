@@ -29,6 +29,7 @@ export type ProductCardData = {
     reviewCount?: number;   // [NEW] Added for real reviews
     isFeatured?: boolean;   // [NEW] Added for featured admin dashboard
     isTrendingFeatured?: boolean; // [NEW] Added for trending admin dashboard
+    isShots?: boolean; // Added for Sedstudio Shots
 };
 
 export type SubscriptionData = {
@@ -449,6 +450,49 @@ export async function getTrendingProducts(tag?: string, userId?: string): Promis
     }
 }
 
+export async function getTrendingShots(userId?: string): Promise<ProductCardData[]> {
+    try {
+        const products = await prisma.channelProduct.findMany({
+            where: {
+                published: true,
+            },
+            include: {
+                channel: {
+                    include: {
+                        user: { select: { image: true, name: true } },
+                        subscribers: userId ? {
+                            where: {
+                                userId: userId,
+                                status: 'ACTIVE'
+                            },
+                            take: 1
+                        } : false
+                    },
+                },
+                likes: userId ? { where: { userId: userId } } : false,
+                saves: userId ? { where: { userId: userId } } : false,
+                reviews: { select: { rating: true } },
+            },
+            orderBy: [
+                { viewCount: 'desc' }
+            ],
+            take: 20,
+        });
+
+        // Keep only products that have a videoUrl (actual video content)
+        const videoProducts = products.filter((p: any) => p.videoUrl && p.videoUrl.trim() !== '');
+
+        return videoProducts.map((p: any) => ({
+            ...mapToCardData(p),
+            hasAccess: p.channel?.subscribers && p.channel.subscribers.length > 0,
+            isPromoted: p.channel?.isPromoted
+        }));
+    } catch (error) {
+        console.error('Error fetching trending shots:', error);
+        return [];
+    }
+}
+
 export async function getMarketplaceChannels(): Promise<any[]> {
     try {
         const channels = await prisma.channel.findMany({
@@ -542,6 +586,7 @@ function mapToCardData(product: any): ProductCardData {
         reviewCount: revCount,
         isFeatured: product.isFeatured,
         isTrendingFeatured: product.isTrendingFeatured,
+        isShots: product.isShots,
     };
 }
 

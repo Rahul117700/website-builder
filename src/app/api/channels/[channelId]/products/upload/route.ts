@@ -84,6 +84,7 @@ export async function POST(
     const tags = formData.get('tags') as string;
     const isFree = formData.get('isFree') === 'true';
     const isSubscriberOnly = formData.get('isSubscriberOnly') === 'true';
+    const isShots = formData.get('isShots') === 'true';
 
     if (!title || !type || (!price && !isFree)) {
       return NextResponse.json(
@@ -263,6 +264,7 @@ export async function POST(
         fileSize,
         tags: tagsArray,
         isSubscriberOnly,
+        isShots,
         isFree,
         previewImage: previewImageUrl, // Save cover image URL
         published: true,
@@ -279,7 +281,7 @@ export async function POST(
   } catch (error) {
     console.error('Error uploading channel product:', error);
     return NextResponse.json(
-      { error: 'Failed to upload product' },
+      { error: 'Failed to upload product: ' + String(error) },
       { status: 500 }
     );
   }

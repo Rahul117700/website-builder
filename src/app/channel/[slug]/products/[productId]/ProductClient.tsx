@@ -23,7 +23,8 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   FolderIcon,
-  FlagIcon
+  FlagIcon,
+  FilmIcon
 } from '@heroicons/react/24/outline';
 import {
   HeartIcon as HeartIconSolid,
@@ -52,6 +53,7 @@ export default function ProductClient() {
   const [product, setProduct] = useState<any>(null);
   const [channel, setChannel] = useState<any>(null);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [otherChannelProducts, setOtherChannelProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -233,6 +235,34 @@ export default function ProductClient() {
       fetchData();
     }
   }, [params?.slug, params?.productId, session?.user?.id]);
+
+  // Fetch products from other channels for discovery
+  useEffect(() => {
+    const fetchOtherChannels = async () => {
+      try {
+        const res = await fetch('/api/channels?limit=10');
+        if (!res.ok) return;
+        const data = await res.json();
+        const channels: any[] = data.channels || [];
+        // Filter out the current channel
+        const otherChannels = channels.filter((c: any) => c.slug !== (Array.isArray(params?.slug) ? params?.slug[0] : params?.slug));
+        // Collect up to 10 products across those channels
+        const collected: any[] = [];
+        for (const ch of otherChannels) {
+          if (ch.products?.length) {
+            ch.products.forEach((p: any) => {
+              if (collected.length < 10) collected.push({ ...p, channelName: ch.name, channelSlug: ch.slug });
+            });
+          }
+          if (collected.length >= 10) break;
+        }
+        setOtherChannelProducts(collected);
+      } catch (err) {
+        console.error('Error fetching other channel products:', err);
+      }
+    };
+    fetchOtherChannels();
+  }, [params?.slug]);
 
   // Track product view in history
   useEffect(() => {
@@ -1114,6 +1144,18 @@ export default function ProductClient() {
                       </button>
                     )}
 
+                    {/* View in Reel Mode button - visible for all video products */}
+                    {(product.type?.toUpperCase() === 'VIDEO' || product.type?.toUpperCase() === 'VIDEOS') && (
+                      <a
+                        href={`/shots/${product.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1 flex items-center justify-center gap-2 px-2 sm:px-4 py-2.5 rounded-full bg-gradient-to-r from-red-600/20 to-rose-600/20 border border-red-500/30 hover:from-red-600/30 hover:to-rose-600/30 transition-all text-red-400 min-w-[3rem] font-semibold"
+                      >
+                        <FilmIcon className="h-5 w-5 shrink-0" />
+                        <span className="hidden sm:inline text-sm font-bold truncate">Reel Mode</span>
+                      </a>
+                    )}
+
                     <div className="relative flex-1 min-w-[3rem]">
                       <button
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsReporting(!isReporting); }}
@@ -1800,6 +1842,55 @@ export default function ProductClient() {
                       </div>
                     );
                   })}
+                </div>
+              )}
+
+              {/* You May Also Like - products from other channels */}
+              {otherChannelProducts.length > 0 && (
+                <div className="mt-8 pt-6 border-t border-[#2a2a2a]">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">You May Also Like</h2>
+                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Other Channels</span>
+                  </div>
+                  <div className="grid grid-cols-2 lg:grid-cols-1 gap-1 lg:gap-2">
+                    {otherChannelProducts.map((p: any) => (
+                      <div
+                        key={p.id}
+                        onClick={() => router.push(`/channel/${p.channelSlug}/products/${p.id}`)}
+                        className="group flex flex-col lg:flex-row gap-2 rounded-none transition-all duration-500 bg-transparent border-none cursor-pointer hover:bg-[#1a1a1a] active:scale-95"
+                      >
+                        {/* Thumbnail */}
+                        <div className="relative w-full lg:w-32 h-28 lg:h-20 flex-shrink-0 rounded-none overflow-hidden bg-[#141414]">
+                          {p.previewImage ? (
+                            <img src={p.previewImage} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-500">
+                              <VideoCameraIcon className="w-8 h-8" />
+                            </div>
+                          )}
+                          {(p.type === 'VIDEO' || p.type === 'VIDEOS') && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="p-1.5 bg-black/30 backdrop-blur-md rounded-full border border-white/20 scale-90 group-hover:scale-100 transition-transform">
+                                <PlayIcon className="h-5 w-5 text-white" />
+                              </div>
+                            </div>
+                          )}
+                          {p.isFree && (
+                            <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-green-500 text-white text-[8px] font-black uppercase tracking-widest rounded-md">Free</div>
+                          )}
+                        </div>
+                        {/* Info */}
+                        <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                          <h3 className="text-xs lg:text-sm font-black text-white line-clamp-2 leading-tight group-hover:text-red-500 transition-colors">{p.title}</h3>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <span className="text-[10px] font-bold text-red-400 truncate max-w-[90px]">{p.channelName}</span>
+                            <span className="w-1 h-1 rounded-full bg-gray-600"></span>
+                            <span className="text-[10px] font-bold text-gray-500">{formatNumber(p.viewCount || 0)} views</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
