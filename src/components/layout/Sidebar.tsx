@@ -56,7 +56,7 @@ export function Sidebar({
     };
 
     return (
-        <div className={`flex flex-col h-full backdrop-blur-xl border-r sidebar-container ${isDarkTheme ? 'bg-[#141414]/90 border-[#2a2a2a]' : 'bg-white/70 border-gray-100/50'}`}>
+        <div className={`flex flex-col h-full backdrop-blur-xl border-r sidebar-container ${isDarkTheme ? 'bg-black/90 border-white/5' : 'bg-white/70 border-gray-100/50'}`}>
             <style jsx global>{`
                 .sidebar-container::-webkit-scrollbar {
                     width: 4px;
@@ -83,7 +83,7 @@ export function Sidebar({
                         </div>
                         <div className="space-y-1">
                             {userSubscriptions.map(sub => (
-                                <Link key={sub.channelId} href={`/channel/${sub.slug}`} className={`flex items-center gap-3 px-3 py-2 rounded-xl group transition-all ${isDarkTheme ? 'hover:bg-[#2a2a2a]' : 'hover:bg-gray-100'}`}>
+                                <Link key={sub.channelId} href={`/channel/${sub.slug}`} className={`flex items-center gap-3 px-3 py-2 rounded-xl group transition-all ${isDarkTheme ? 'hover:bg-white/5' : 'hover:bg-gray-100'}`}>
                                     <div className="relative w-6 h-6 flex-shrink-0">
                                         {sub.channelAvatar ? (
                                             <Image
@@ -123,7 +123,7 @@ export function Sidebar({
                         </div>
                         <div className="space-y-1">
                             {userFollows.map(follow => (
-                                <Link key={follow.channelId} href={`/channel/${follow.slug}`} className={`flex items-center gap-3 px-3 py-2 rounded-xl group transition-all ${isDarkTheme ? 'hover:bg-[#2a2a2a]' : 'hover:bg-gray-100'}`}>
+                                <Link key={follow.channelId} href={`/channel/${follow.slug}`} className={`flex items-center gap-3 px-3 py-2 rounded-xl group transition-all ${isDarkTheme ? 'hover:bg-white/5' : 'hover:bg-gray-100'}`}>
                                     <div className="relative w-6 h-6 flex-shrink-0">
                                         {follow.channelAvatar ? (
                                             <Image
@@ -170,7 +170,7 @@ export function Sidebar({
 
                     <button
                         onClick={onCreatePlaylist}
-                        className={`w-full flex items-center gap-4 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 relative overflow-hidden group ${isDarkTheme ? 'text-gray-300 hover:bg-[#2a2a2a]' : 'text-gray-700 hover:bg-white hover:shadow-md hover:scale-[1.02]'}`}
+                        className={`w-full flex items-center gap-4 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 relative overflow-hidden group ${isDarkTheme ? 'text-gray-300 hover:bg-white/5' : 'text-gray-700 hover:bg-white hover:shadow-md hover:scale-[1.02]'}`}
                     >
                         <PlusIcon className={`w-5 h-5 transition-colors ${isDarkTheme ? 'text-gray-400 group-hover:text-white' : 'text-gray-400 group-hover:text-indigo-600'}`} />
                         <span>Create Playlist</span>
@@ -189,7 +189,7 @@ export function Sidebar({
                 </div>
             </nav>
 
-            <div className={`px-5 py-6 border-t ${isDarkTheme ? 'border-[#2a2a2a] bg-[#1a1a1a]' : 'border-gray-100/50 bg-gray-50/30'}`}>
+            <div className={`px-5 py-6 border-t ${isDarkTheme ? 'border-white/5 bg-black' : 'border-gray-100/50 bg-gray-50/30'}`}>
                 <div className="space-y-3">
                     <div className={`flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-medium uppercase tracking-wider ${isDarkTheme ? 'text-gray-500' : 'text-gray-400'}`}>
                         <a href="#" className={`transition-colors ${isDarkTheme ? 'hover:text-white' : 'hover:text-indigo-600'}`}>About</a>
@@ -210,8 +210,8 @@ export function SidebarItem({ icon: Icon, label, active = false, href, isDarkThe
     let className;
     if (isDarkTheme) {
         className = `w-full flex items-center gap-4 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 relative overflow-hidden group ${active
-            ? 'bg-[#2a2a2a] text-white shadow-sm border border-[#333]'
-            : 'text-gray-300 hover:bg-[#2a2a2a] hover:text-white'
+            ? 'bg-white/10 text-white shadow-sm border border-white/10'
+            : 'text-gray-300 hover:bg-white/5 hover:text-white'
             }`;
     } else {
         className = `w-full flex items-center gap-4 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 relative overflow-hidden group ${active

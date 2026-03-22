@@ -94,8 +94,8 @@ export default function ShotsCarousel({ shots, autoPlayMs = 4000 }: ShotsCarouse
                 <div className="flex items-center gap-3">
                     <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-red-600 to-rose-700 flex items-center justify-center shadow-2xl shadow-red-700/50 flex-shrink-0">
                         <VideoCameraIcon className="w-5 h-5 text-white" />
-                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#141414] animate-ping" />
-                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-[#141414]" />
+                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-black animate-ping" />
+                        <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-black" />
                     </div>
                     <div>
                         <h2 className="text-xl font-black text-white tracking-tight leading-none">Shots</h2>
@@ -181,7 +181,7 @@ export default function ShotsCarousel({ shots, autoPlayMs = 4000 }: ShotsCarouse
 
                             {/* Channel avatar */}
                             <div className="absolute top-3 left-0 right-0 flex justify-center">
-                                <div className={`relative flex-shrink-0 rounded-full bg-[#1a1a1a] overflow-hidden ring-2 shadow-lg transition-all duration-300 ${isActive ? 'w-10 h-10 ring-red-500' : 'w-8 h-8 ring-white/20'}`}>
+                                <div className={`relative flex-shrink-0 rounded-full bg-black overflow-hidden ring-2 shadow-lg transition-all duration-300 ${isActive ? 'w-10 h-10 ring-red-500' : 'w-8 h-8 ring-white/20'}`}>
                                     {shot.channelAvatar ? (
                                         <Image src={shot.channelAvatar} alt="" fill className="object-cover" unoptimized />
                                     ) : (

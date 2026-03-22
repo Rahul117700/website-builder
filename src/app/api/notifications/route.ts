@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
+import { formatDistanceToNow } from 'date-fns';
+
 
 // GET /api/notifications - Get user notifications
 export async function GET(request: NextRequest) {
@@ -41,7 +43,10 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json({ 
-      notifications, 
+      notifications: notifications.map(n => ({
+        ...n,
+        createdAt: formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })
+      })),
       unreadCount 
     });
   } catch (error) {

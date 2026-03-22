@@ -55,6 +55,8 @@ export default function MainLayout({
     const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
     const [playlistRefreshKey, setPlaylistRefreshKey] = useState(0);
     const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+    const [localNotifications, setLocalNotifications] = useState<NotificationData[]>(notifications);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     // Close mobile menu on resize
     useEffect(() => {
@@ -88,10 +90,32 @@ export default function MainLayout({
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // Fetch and poll for notifications
+    useEffect(() => {
+        if (!session?.user) return;
+
+        const fetchNotifications = async () => {
+            try {
+                const res = await fetch('/api/notifications');
+                if (res.ok) {
+                    const data = await res.json();
+                    setLocalNotifications(data.notifications || []);
+                    setUnreadCount(data.unreadCount || 0);
+                }
+            } catch (error) {
+                console.error('Error fetching notifications:', error);
+            }
+        };
+
+        fetchNotifications();
+        const interval = setInterval(fetchNotifications, 60000); // Poll every minute
+        return () => clearInterval(interval);
+    }, [session?.user]);
+
     return (
-        <div className={`min-h-screen font-sans ${isDarkTheme ? 'bg-[#141414] text-white' : 'bg-white text-gray-900'}`}>
+        <div className={`min-h-screen font-sans ${isDarkTheme ? 'bg-black text-white' : 'bg-white text-gray-900'}`}>
             {/* Header - Premium Global Standard Design */}
-            <header className={`fixed top-0 left-0 right-0 z-50 h-[56px] flex items-center justify-between px-4 lg:px-6 transition-all duration-300 ${isDarkTheme ? (scrolled ? 'bg-[#141414]/95 backdrop-blur-xl border-b border-[#2a2a2a] shadow-sm' : 'bg-transparent border-transparent') : 'backdrop-blur-xl bg-white/95 border-b border-gray-200/50'}`}>
+            <header className={`fixed top-0 left-0 right-0 z-50 h-[56px] flex items-center justify-between px-4 lg:px-6 transition-all duration-300 ${isDarkTheme ? (scrolled ? 'bg-black/95 backdrop-blur-xl border-b border-white/5 shadow-sm' : 'bg-transparent border-transparent') : 'backdrop-blur-xl bg-white/95 border-b border-gray-200/50'}`}>
                 {/* Left Section - Menu & Logo */}
                 <div className="flex items-center gap-3 lg:gap-4">
                     {!hideSidebar && (
@@ -116,7 +140,7 @@ export default function MainLayout({
                 </div>
 
                 {/* Center Section - Enhanced Search Bar */}
-                <div className={`flex-1 max-w-2xl mx-2 md:mx-4 ${isMobileSearchOpen ? `flex absolute inset-x-0 top-0 bottom-0 z-[60] px-4 items-center gap-2 ${isDarkTheme ? 'bg-[#141414]' : 'bg-white'}` : 'hidden md:flex'} items-center gap-4`}>
+                <div className={`flex-1 max-w-2xl mx-2 md:mx-4 ${isMobileSearchOpen ? `flex absolute inset-x-0 top-0 bottom-0 z-[60] px-4 items-center gap-2 ${isDarkTheme ? 'bg-black' : 'bg-white'}` : 'hidden md:flex'} items-center gap-4`}>
                     <form onSubmit={handleSearch} className="flex-1 group relative flex items-center gap-2">
                         <div className="relative flex-1">
                             {isMobileSearchOpen && (
@@ -188,11 +212,25 @@ export default function MainLayout({
                             {/* Enhanced Notification Bell */}
                             <div className="relative">
                                 <button
-                                    onClick={() => setNotiMenuOpen(!notiMenuOpen)}
+                                    onClick={async () => {
+                                        const newOpenState = !notiMenuOpen;
+                                        setNotiMenuOpen(newOpenState);
+                                        
+                                        // If opening the menu, mark all as read
+                                        if (newOpenState && unreadCount > 0) {
+                                            try {
+                                                await fetch('/api/notifications', { method: 'PUT' });
+                                                setUnreadCount(0);
+                                                setLocalNotifications(prev => prev.map(n => ({ ...n, read: true })));
+                                            } catch (err) {
+                                                console.error('Error marking notifications as read:', err);
+                                            }
+                                        }
+                                    }}
                                     className={`p-1.5 sm:p-2 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 relative flex-shrink-0 ${isDarkTheme ? 'text-white hover:bg-white/10' : 'text-gray-700 hover:bg-gray-100/80'}`}
                                 >
                                     <BellIcon className="w-5 h-5" />
-                                    {notifications && notifications.some(n => !n.read) && (
+                                    {unreadCount > 0 && (
                                         <>
                                             <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-[#141414]"></span>
                                             <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
@@ -201,7 +239,7 @@ export default function MainLayout({
                                 </button>
 
                                 {notiMenuOpen && (
-                                    <div className={`fixed left-4 right-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-3 sm:w-80 backdrop-blur-xl rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-4 duration-300 max-h-[70vh] sm:max-h-[400px] overflow-y-auto ${isDarkTheme ? 'bg-[#1a1a1a]/95 border border-[#333]' : 'bg-white/95 border border-gray-200/50'}`}>
+                                    <div className={`fixed left-4 right-4 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-3 sm:w-80 backdrop-blur-xl rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-4 duration-300 max-h-[70vh] sm:max-h-[400px] overflow-y-auto ${isDarkTheme ? 'bg-black/95 border border-white/10' : 'bg-white/95 border border-gray-200/50'}`}>
                                         <div className={`px-4 py-3 border-b flex justify-between items-center sticky top-0 z-10 ${isDarkTheme ? 'border-[#333] bg-[#1a1a1a]/95 text-white' : 'border-gray-100 bg-white/95 text-gray-900'}`}>
                                             <h3 className="font-bold">Notifications</h3>
                                             <button onClick={() => setNotiMenuOpen(false)} className={`p-1 rounded-lg transition-colors ${isDarkTheme ? 'hover:bg-white/10 text-gray-400' : 'hover:bg-gray-100 text-gray-500'}`}>
@@ -210,17 +248,19 @@ export default function MainLayout({
                                         </div>
 
                                         {/* Notifications List */}
-                                        {notifications && notifications.length > 0 ? (
-                                            notifications.slice(0, 5).map(note => {
-                                                const hasLink = note.metadata && note.metadata.url;
+                                        {localNotifications.length > 0 ? (
+                                            localNotifications.slice(0, 10).map(note => {
+                                                const hasLink = note.metadata && (note.metadata.productId || note.metadata.url);
+                                                const linkUrl = note.metadata?.url || (note.metadata?.productId ? `/channel/${note.metadata.channelSlug || 'u'}/products/${note.metadata.productId}` : '');
+                                                
                                                 const content = (
                                                     <div className={`px-4 py-3 border-b border-[#333] last:border-0 transition-colors cursor-pointer ${isDarkTheme ? (!note.read ? 'bg-white/5 hover:bg-[#333]' : 'hover:bg-[#2a2a2a]') : (!note.read ? 'bg-indigo-50/30 hover:bg-gray-50/80' : 'hover:bg-gray-50/80')}`}>
                                                         <div className="flex gap-3">
-                                                            <div className={`w-2 h-2 mt-2 rounded-full flex-shrink-0 ${!note.read ? (isDarkTheme ? 'bg-[#e50914]' : 'bg-indigo-600') : 'bg-gray-600'}`}></div>
-                                                            <div>
-                                                                <p className={`text-sm font-medium line-clamp-1 ${isDarkTheme ? 'text-gray-200' : 'text-gray-800'}`}>{note.title}</p>
-                                                                <p className={`text-xs mt-1 line-clamp-2 ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>{note.message}</p>
-                                                                <p className="text-[10px] text-gray-500 mt-1">{note.createdAt}</p>
+                                                            <div className={`w-2 h-2 mt-2 rounded-full flex-shrink-0 ${!note.read ? 'bg-red-500' : 'bg-gray-600'}`}></div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className={`text-sm font-bold line-clamp-1 ${isDarkTheme ? 'text-gray-100' : 'text-gray-800'}`}>{note.title}</p>
+                                                                <p className={`text-xs mt-1 line-clamp-2 leading-relaxed ${isDarkTheme ? 'text-gray-400' : 'text-gray-500'}`}>{note.message}</p>
+                                                                <p className="text-[10px] text-gray-500 mt-2 font-medium">Recently</p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -229,7 +269,7 @@ export default function MainLayout({
                                                 return (
                                                     <div key={note.id}>
                                                         {hasLink ? (
-                                                            <Link href={note.metadata.url} onClick={() => setNotiMenuOpen(false)}>
+                                                            <Link href={linkUrl} onClick={() => setNotiMenuOpen(false)}>
                                                                 {content}
                                                             </Link>
                                                         ) : (
@@ -239,8 +279,9 @@ export default function MainLayout({
                                                 );
                                             })
                                         ) : (
-                                            <div className="px-4 py-8 text-center text-sm text-gray-500">
-                                                No new notifications
+                                            <div className="px-4 py-12 text-center">
+                                                <BellIcon className="w-10 h-10 mx-auto text-gray-600 mb-2 opacity-20" />
+                                                <p className="text-sm text-gray-600 font-medium">No new notifications</p>
                                             </div>
                                         )}
 
@@ -284,7 +325,7 @@ export default function MainLayout({
                                 </button>
 
                                 {profileMenuOpen && (
-                                    <div className={`absolute right-0 mt-3 w-72 backdrop-blur-xl rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-4 duration-300 ${isDarkTheme ? 'bg-[#1a1a1a]/95 border border-[#333]' : 'bg-white/95 border border-gray-200/50'}`}>
+                                    <div className={`absolute right-0 mt-3 w-72 backdrop-blur-xl rounded-2xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-4 duration-300 ${isDarkTheme ? 'bg-black/95 border border-white/10' : 'bg-white/95 border border-gray-200/50'}`}>
                                         <div className={`px-4 py-3 border-b flex items-start gap-3 ${isDarkTheme ? 'border-[#333]' : 'border-gray-100'}`}>
                                             {session.user?.image ? (
                                                 <img
@@ -409,7 +450,7 @@ export default function MainLayout({
                                 onClick={() => setMobileMenuOpen(false)}
                                 aria-hidden="true"
                             />
-                            <aside className={`fixed left-0 top-0 bottom-0 w-64 z-50 overflow-y-auto no-scrollbar shadow-2xl transition-transform duration-300 p-4 ${isDarkTheme ? 'bg-[#141414]' : 'bg-white'}`}>
+                            <aside className={`fixed left-0 top-0 bottom-0 w-64 z-50 overflow-y-auto no-scrollbar shadow-2xl transition-transform duration-300 p-4 ${isDarkTheme ? 'bg-black' : 'bg-white'}`}>
                                 <div className="flex items-center gap-4 mb-6 px-2">
                                     <button onClick={() => setMobileMenuOpen(false)}>
                                         <Bars3Icon className={`w-6 h-6 ${isDarkTheme ? 'text-white' : 'text-gray-700'}`} />

@@ -61,8 +61,10 @@ export default function ShotsReelClient({ product, hasAccess: initialHasAccess, 
     const [hasAccess, setHasAccess] = useState(initialHasAccess);
     const [isSubscribing, setIsSubscribing] = useState(false);
     const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+    const [isHardLock, setIsHardLock] = useState(false);
+    const [hasDismissedSoftLock, setHasDismissedSoftLock] = useState(false);
     
-    // Check 5 guest shots limit
+    // Updated guest limit: 25 free shots, prompt at 10th
     useEffect(() => {
         if (!userId) {
             try {
@@ -71,18 +73,26 @@ export default function ShotsReelClient({ product, hasAccess: initialHasAccess, 
                     viewedShots.push(product.id);
                     localStorage.setItem('unauth_shot_ids', JSON.stringify(viewedShots));
                 }
-                if (viewedShots.length > 5) {
+                
+                // Hard lock at 25
+                if (viewedShots.length >= 25) {
                     setShowLoginPrompt(true);
+                    setIsHardLock(true);
                     setIsPlaying(false);
-                    if (videoRef.current) {
-                        videoRef.current.pause();
-                    }
+                    if (videoRef.current) videoRef.current.pause();
+                } 
+                // Soft/Dismissible lock at 10
+                else if (viewedShots.length >= 10 && !hasDismissedSoftLock) {
+                    setShowLoginPrompt(true);
+                    setIsHardLock(false);
+                    setIsPlaying(false);
+                    if (videoRef.current) videoRef.current.pause();
                 }
             } catch (e) {
                 console.error('Failed to parse unauth_shot_ids', e);
             }
         }
-    }, [userId, product.id]);
+    }, [userId, product.id, hasDismissedSoftLock]);
 
     // Following
     const [isFollowing, setIsFollowing] = useState<boolean>(initialFollowing || false);
@@ -370,8 +380,16 @@ export default function ShotsReelClient({ product, hasAccess: initialHasAccess, 
         }
     };
 
-    const isNextLocked = (currentShot + 1 >= 10) && product.isSubscriberOnly && !hasAccess;
-    const overlayVisible = currentShot >= 10 && product.isSubscriberOnly && !hasAccess;
+    // Check if user is the owner
+    const isOwner = userId === product.channel?.userId;
+    const canAccessProduct = isOwner || !product.isSubscriberOnly || hasAccess;
+
+    // For logged-in users, block Subscriber-Only content after a 1-shot teaser (Index 0)
+    // For guests, they follow the global 10/25 limit enforced by showLoginPrompt
+    const isSubscriberGateActive = !!userId && product.isSubscriberOnly && !canAccessProduct;
+    
+    const isNextLocked = isSubscriberGateActive ? (currentShot + 1 >= 1) : false;
+    const overlayVisible = isSubscriberGateActive ? (currentShot >= 1) : false;
 
     const channelFallbackAvatar = "/hero/avatar.svg";
     const creatorName = product.channel?.name || "Channel";
@@ -485,9 +503,9 @@ export default function ShotsReelClient({ product, hasAccess: initialHasAccess, 
                             <div className="w-20 h-20 bg-gradient-to-r from-red-600 to-red-500 rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-red-500/20">
                                 <PlayIcon className="w-10 h-10 text-white translate-x-1" />
                             </div>
-                            <h2 className="text-2xl font-black text-white mb-3">Premium Content</h2>
+                            <h2 className="text-2xl font-black text-white mb-3">Subscribe to Watch</h2>
                             <p className="text-gray-300 text-base mb-8 max-w-sm font-medium">
-                                You have viewed your 10 free shots! Subscribe to unlock the remaining shots and exclusive content.
+                                Enjoying this premium content? Subscribe to {product.channel?.name || 'this channel'} to unlock the full length and exclusive future drops.
                             </p>
                             <button 
                                 onClick={(e) => { e.stopPropagation(); handleSubscribe(); }}
@@ -510,22 +528,46 @@ export default function ShotsReelClient({ product, hasAccess: initialHasAccess, 
                         <motion.div 
                             initial={{ opacity: 0, y: 50 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="absolute inset-0 z-[60] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-8 text-center"
+                            className="absolute inset-0 z-[60] bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center p-8 text-center"
                             onClick={(e) => e.stopPropagation()} 
                         >
-                            <div className="w-20 h-20 bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-indigo-500/20">
-                                <LockClosedIcon className="w-10 h-10 text-white" />
+                            <div className={`w-20 h-20 ${isHardLock ? 'bg-red-600 shadow-red-500/20' : 'bg-indigo-600 shadow-indigo-500/20'} rounded-2xl flex items-center justify-center mb-6 shadow-2xl transition-colors duration-500`}>
+                                {isHardLock ? <LockClosedIcon className="w-10 h-10 text-white" /> : <StarIcon className="w-10 h-10 text-white" />}
                             </div>
-                            <h2 className="text-3xl font-black text-white mb-3">Login to Continue</h2>
-                            <p className="text-gray-300 text-lg mb-8 max-w-sm font-medium">
-                                You have viewed your 5 free shots! Please log in to your account to continue exploring amazing content.
+                            
+                            <h2 className="text-3xl font-black text-white mb-3">
+                                {isHardLock ? 'Daily Limit Reached' : 'Enjoying the Experience?'}
+                            </h2>
+                            <p className="text-gray-300 text-lg mb-8 max-w-sm font-medium leading-relaxed">
+                                {isHardLock 
+                                    ? "You've viewed your 25 free shots! Sign up now to unlock unlimited access and support your favorite creators."
+                                    : "You've unlocked 10 amazing shots! Create a free account to save your progress and never miss a drop."
+                                }
                             </p>
-                            <button 
-                                onClick={(e) => { e.stopPropagation(); router.push(`/auth/signin?callbackUrl=${encodeURIComponent(`/shots/${product.id}`)}`); }}
-                                className="w-full sm:w-auto px-10 py-4 bg-white text-black font-black rounded-full hover:bg-gray-200 transition-all text-sm uppercase tracking-widest shadow-xl flex items-center justify-center gap-2"
-                            >
-                                Log in or Sign up
-                            </button>
+                            
+                            <div className="flex flex-col gap-4 w-full max-w-xs">
+                                <button 
+                                    onClick={(e) => { e.stopPropagation(); router.push(`/auth/signin?callbackUrl=${encodeURIComponent(`/shots/${product.id}`)}`); }}
+                                    className="w-full px-10 py-4 bg-white text-black font-black rounded-full hover:bg-gray-200 transition-all text-sm uppercase tracking-widest shadow-xl flex items-center justify-center gap-2 active:scale-95"
+                                >
+                                    Log in or Sign up
+                                </button>
+                                
+                                {!isHardLock && (
+                                    <button 
+                                        onClick={(e) => { 
+                                            e.stopPropagation(); 
+                                            setShowLoginPrompt(false); 
+                                            setHasDismissedSoftLock(true);
+                                            setIsPlaying(true);
+                                            if (videoRef.current) videoRef.current.play();
+                                        }}
+                                        className="text-gray-400 text-xs font-bold hover:text-white transition-colors uppercase tracking-widest py-2"
+                                    >
+                                        Maybe Later (15 more remaining)
+                                    </button>
+                                )}
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>

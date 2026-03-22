@@ -60,7 +60,7 @@ export default function TrendingContent({
             isDarkTheme={true}
             noPaddingTop={true}
         >
-            <div className="min-h-screen bg-[#141414]">
+            <div className="min-h-screen bg-black">
                 {/* 1. Hero Spotlight Section - Netflix Style Animated Carousel */}
                 <HeroCarousel items={spotlightItems} />
 
@@ -81,7 +81,7 @@ export default function TrendingContent({
                     )}
 
                     {/* Tabs */}
-                    <div className="flex gap-2 overflow-x-auto pb-4 mb-8 no-scrollbar border-b border-[#333]">
+                    <div className="flex gap-2 overflow-x-auto pb-4 mb-8 no-scrollbar border-b border-white/5">
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
                             const isActive = activeTab === tab.id;
@@ -91,7 +91,7 @@ export default function TrendingContent({
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-all whitespace-nowrap ${isActive
                                         ? 'bg-white text-black shadow-lg scale-105'
-                                        : 'bg-[#1a1a1a] text-gray-400 border border-[#333] hover:bg-[#2a2a2a]'
+                                        : 'bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10'
                                         }`}
                                 >
                                     <Icon className={`w-5 h-5 ${isActive ? 'text-black' : tab.color}`} />
@@ -113,7 +113,7 @@ export default function TrendingContent({
                             ))}
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center justify-center py-20 bg-[#1a1a1a] rounded-2xl border-2 border-dashed border-[#333]">
+                        <div className="flex flex-col items-center justify-center py-20 bg-white/5 rounded-2xl border-2 border-dashed border-white/10">
                             <FireIcon className="w-16 h-16 text-[#444] mb-4" />
                             <h3 className="text-xl font-bold text-gray-200 mb-2">No trending {activeTab} yet</h3>
                             <p className="text-gray-500 text-center max-w-md">

@@ -106,7 +106,7 @@ export default function HomeContent({
             {children ? (
                 children
             ) : (
-                <div className="min-h-screen bg-[#141414] pb-20">
+                <div className="min-h-screen bg-black pb-20">
 
                     {/* 1. Hero Spotlight Section - Netflix Style Animated Carousel */}
                     <HeroCarousel items={spotlightItems} />
@@ -248,26 +248,36 @@ export default function HomeContent({
                                     Recommended for You
                                 </h2>
                                 <div className="flex flex-wrap items-center gap-2 sm:gap-3 self-start sm:self-auto w-full sm:w-auto">
-                                    {/* Earnings Badge */}
+                                    {/* Premium Earnings Badge - Redesigned for Excitement */}
                                     <Link
                                         href="/auth/dashboard/my-channel"
-                                        className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 bg-[#1a1a1a] border border-[#333] rounded-full hover:bg-[#2a2a2a] transition-all shadow-sm group whitespace-nowrap"
+                                        className="relative flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600/20 to-teal-500/20 border border-emerald-500/30 rounded-full hover:scale-105 hover:border-emerald-400/50 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-300 group overflow-hidden"
                                     >
-                                        <span className="text-emerald-400 font-bold text-[11px] sm:text-xs">
-                                            Earnings: <span className={userChannelInfo?.hasChannel ? "text-emerald-300" : "text-emerald-500"}>₹{userChannelInfo?.totalEarnings || 0}</span>
-                                        </span>
+                                        {/* Shimmer Effect */}
+                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out"></div>
+                                        
+                                        <div className="flex items-center gap-1.5">
+                                            <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                                                <span className="text-white text-[10px] font-black">₹</span>
+                                            </div>
+                                            <span className="text-emerald-300 font-black text-xs sm:text-sm tracking-tight">
+                                                Earnings: <span className="text-white drop-shadow-md">₹{userChannelInfo?.totalEarnings || 0}</span>
+                                            </span>
+                                        </div>
 
-                                        {!userChannelInfo?.hasChannel && (
-                                            <span className="bg-emerald-600 text-white px-2 py-0.5 rounded-full text-[10px] font-bold group-hover:bg-emerald-500 animate-pulse">
-                                                Start earning now?
+                                        {!userChannelInfo?.hasChannel ? (
+                                            <span className="flex items-center gap-1 px-2.5 py-1 bg-white text-emerald-600 rounded-lg text-[10px] font-black uppercase tracking-wider animate-pulse border border-emerald-100 shadow-sm ml-1 flex-shrink-0">
+                                                Get Paid
+                                            </span>
+                                        ) : (
+                                            <span className="flex items-center gap-1 px-2.5 py-1 bg-emerald-500 hover:bg-emerald-400 text-white rounded-lg text-[10px] font-black uppercase tracking-wider transition-all border border-emerald-400/50 ml-1 shadow-[0_2px_10px_rgba(16,185,129,0.3)] flex-shrink-0 group-hover:scale-105">
+                                                Manage Channel
                                             </span>
                                         )}
-
-                                        <ArrowRightIcon className="w-3 h-3 text-emerald-400 group-hover:translate-x-0.5 transition-transform" />
                                     </Link>
 
                                     {/* Category Filter */}
-                                    <div className="flex gap-2 bg-[#1a1a1a] rounded-full p-1 border border-[#333] shadow-sm">
+                                    <div className="flex gap-2 bg-white/5 rounded-full p-1 border border-white/10 shadow-sm">
                                         {['All', 'Videos', 'Docs'].map(cat => (
                                             <button
                                                 key={cat}
@@ -285,7 +295,7 @@ export default function HomeContent({
                                 <div className="flex flex-col xl:flex-row gap-8">
                                     {/* 70% Column - Videos */}
                                     <div className="w-full xl:w-[70%] space-y-4">
-                                        <div className="flex items-center justify-between pb-2 border-b border-[#333]">
+                                        <div className="flex items-center justify-between pb-2 border-b border-white/5">
                                             <div className="flex items-center gap-2">
                                                 <VideoCameraIcon className="w-5 h-5 text-gray-400" />
                                                 <h3 className="font-bold text-gray-300 text-sm uppercase tracking-wider">Videos</h3>
@@ -308,7 +318,7 @@ export default function HomeContent({
                                                     <div className="flex justify-center pt-2">
                                                         <button
                                                             onClick={() => setActiveCategory('Videos')}
-                                                            className="px-6 py-2 bg-[#1a1a1a] border border-[#333] text-gray-300 text-sm font-bold rounded-full hover:bg-[#2a2a2a] hover:text-white transition-all shadow-sm"
+                                                            className="px-6 py-2 bg-white/5 border border-white/10 text-gray-300 text-sm font-bold rounded-full hover:bg-white/10 hover:text-white transition-all shadow-sm"
                                                         >
                                                             Show All Videos ({videos.length})
                                                         </button>
@@ -324,7 +334,7 @@ export default function HomeContent({
 
                                     {/* 30% Column - Documents (Compact & Sticky) */}
                                     <div className="w-full xl:w-[30%] flex flex-col h-[500px] sticky top-24 self-start">
-                                        <div className="flex items-center justify-between pb-3 border-b border-[#333] mb-4 bg-[#141414] z-10">
+                                        <div className="flex items-center justify-between pb-3 border-b border-white/5 mb-4 bg-black z-10">
                                             <div className="flex items-center gap-2">
                                                 <FolderIcon className="w-5 h-5 text-gray-400" />
                                                 <h3 className="font-bold text-gray-300 text-sm uppercase tracking-wider">Documents</h3>

@@ -105,6 +105,30 @@ export async function POST(
                 })
             ]);
 
+            // Notify channel owner
+            if (channel.userId !== user.id) {
+                try {
+                    await prisma.userNotification.create({
+                        data: {
+                            userId: channel.userId,
+                            title: '✨ New Follower!',
+                            message: `${user.name || 'Someone'} is now following your channel "${channel.name}"`,
+                            type: 'INFO',
+                            category: 'COMMUNITY',
+                            read: false,
+                            metadata: {
+                                channelId: channel.id,
+                                actorId: user.id,
+                                actorName: user.name,
+                                url: `/channel/${channel.slug}`
+                            }
+                        }
+                    });
+                } catch (notifErr) {
+                    console.error('Failed to create follow notification:', notifErr);
+                }
+            }
+
             return NextResponse.json({ isFollowing: true, success: true });
         }
     } catch (error) {

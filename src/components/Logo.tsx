@@ -51,15 +51,16 @@ export default function Logo({
         <>
           {/* Pure black base */}
           <rect x="0" y="0" width="100" height="100" rx="22" fill="#000000" />
-          {/* Cinematic stripes */}
+          {/* Cinematic stripes - High Contrast */}
           <g clipPath="url(#pill-clip-icon)">
-            <rect x="8"  y="0" width="3" height="100" fill="#ef4444" opacity="0.55" />
-            <rect x="18" y="0" width="1.5" height="100" fill="#3b82f6" opacity="0.35" />
-            <rect x="32" y="0" width="1.5" height="100" fill="#22c55e" opacity="0.25" />
-            <rect x="50" y="0" width="4" height="100" fill="#ef4444" opacity="0.60" />
-            <rect x="62" y="0" width="1.5" height="100" fill="#a855f7" opacity="0.35" />
-            <rect x="76" y="0" width="2" height="100" fill="#f59e0b" opacity="0.40" />
-            <rect x="88" y="0" width="3" height="100" fill="#ef4444" opacity="0.50" />
+            <rect x="0"  y="0" width="8"   height="100" fill="#ef4444" opacity="0.85" />
+            <rect x="12" y="0" width="4"   height="100" fill="#3b82f6" opacity="0.75" />
+            <rect x="22" y="0" width="3"   height="100" fill="#22c55e" opacity="0.65" />
+            <rect x="35" y="0" width="12"  height="100" fill="#ef4444" opacity="0.95" />
+            <rect x="52" y="0" width="5"   height="100" fill="#a855f7" opacity="0.75" />
+            <rect x="65" y="0" width="4"   height="100" fill="#06b6d4" opacity="0.80" />
+            <rect x="78" y="0" width="6"   height="100" fill="#f59e0b" opacity="0.85" />
+            <rect x="92" y="0" width="8"   height="100" fill="#ef4444" opacity="0.90" />
           </g>
           {/* Dot grid */}
           <g transform="translate(14, 14) scale(1.6)">
@@ -80,15 +81,15 @@ export default function Logo({
           {/* Pure black base */}
           <rect x="0" y="15" width="112" height="70" rx="35" fill="#000000" />
 
-          {/* Cinematic spectral stripe accents — clipped inside pill */}
+          {/* Cinematic spectral stripe accents - High Contrast */}
           <g clipPath="url(#pill-clip-lg)">
-            <rect x="10" y="15" width="3"   height="70" fill="#ef4444" opacity="0.55" />
-            <rect x="22" y="15" width="1.5" height="70" fill="#3b82f6" opacity="0.35" />
-            <rect x="36" y="15" width="1.5" height="70" fill="#22c55e" opacity="0.28" />
-            <rect x="54" y="15" width="4"   height="70" fill="#ef4444" opacity="0.60" />
-            <rect x="68" y="15" width="1.5" height="70" fill="#a855f7" opacity="0.38" />
-            <rect x="80" y="15" width="2"   height="70" fill="#f59e0b" opacity="0.42" />
-            <rect x="96" y="15" width="3"   height="70" fill="#ef4444" opacity="0.50" />
+            <rect x="4"  y="15" width="8" height="70" fill="#ef4444" opacity="0.85" />
+            <rect x="18" y="15" width="4" height="70" fill="#3b82f6" opacity="0.75" />
+            <rect x="28" y="15" width="3" height="70" fill="#22c55e" opacity="0.65" />
+            <rect x="45" y="15" width="12" height="70" fill="#ef4444" opacity="0.95" />
+            <rect x="65" y="15" width="4" height="70" fill="#a855f7" opacity="0.75" />
+            <rect x="80" y="15" width="5" height="70" fill="#06b6d4" opacity="0.80" />
+            <rect x="95" y="15" width="10" height="70" fill="#ef4444" opacity="0.90" />
           </g>
 
           {/* SED label */}

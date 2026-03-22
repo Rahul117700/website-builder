@@ -170,7 +170,7 @@ export default React.memo(function ProductCard({ id, title, thumbnail, channelNa
             {/* Thumbnail Wrapper - Isolating relative context from overflow-hidden */}
             <div className="relative w-full mb-3">
                 {/* Thumbnail Container - Cinematic Aspect Ratio */}
-                <div className={`relative w-full aspect-video ${isDarkTheme ? 'bg-[#2a2a2a] ring-white/5' : 'bg-gray-100 ring-black/5'} rounded-none overflow-hidden isolate shadow-sm transition-all duration-500 ring-1 group-hover:shadow-2xl ${isDarkTheme ? 'group-hover:ring-white/10' : 'group-hover:ring-black/10'} group-hover:-translate-y-1`}>
+                <div className={`relative w-full aspect-video ${isDarkTheme ? 'bg-black ring-white/5' : 'bg-gray-100 ring-black/5'} rounded-none overflow-hidden isolate shadow-sm transition-all duration-500 ring-1 group-hover:shadow-2xl ${isDarkTheme ? 'group-hover:ring-white/10' : 'group-hover:ring-black/10'} group-hover:-translate-y-1`}>
 
                     {/* Image / Video Layer */}
                     <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-105">
@@ -231,19 +231,19 @@ export default React.memo(function ProductCard({ id, title, thumbnail, channelNa
                     <div className="absolute bottom-3 right-3 flex gap-2 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 z-20">
                         <button
                             onClick={handleLike}
-                            className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 border border-white/10 backdrop-blur-sm ${isLiked ? 'bg-red-500 text-white' : (isDarkTheme ? 'bg-[#1a1a1a]/90 text-white hover:bg-[#2a2a2a]' : 'bg-white/90 text-gray-900 hover:bg-white')}`}
+                            className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 border border-white/10 backdrop-blur-sm ${isLiked ? 'bg-red-500 text-white' : (isDarkTheme ? 'bg-black/90 text-white hover:bg-white/10' : 'bg-white/90 text-gray-900 hover:bg-white')}`}
                         >
                             {isLiked ? <HeartIconSolid className="w-5 h-5" /> : <HeartIcon className="w-5 h-5" />}
                         </button>
                         <button
                             onClick={handleSave}
-                            className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 border border-white/10 backdrop-blur-sm ${isSaved ? 'bg-indigo-600 text-white' : (isDarkTheme ? 'bg-[#1a1a1a]/90 text-white hover:bg-[#2a2a2a]' : 'bg-white/90 text-gray-900 hover:bg-white')}`}
+                            className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 border border-white/10 backdrop-blur-sm ${isSaved ? 'bg-indigo-600 text-white' : (isDarkTheme ? 'bg-black/90 text-white hover:bg-white/10' : 'bg-white/90 text-gray-900 hover:bg-white')}`}
                         >
                             {isSaved ? <BookmarkIconSolid className="w-5 h-5" /> : <BookmarkIcon className="w-5 h-5" />}
                         </button>
                         <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsReporting(!isReporting); }}
-                            className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 border border-white/10 backdrop-blur-sm ${isReporting ? 'bg-amber-500 text-white' : (isDarkTheme ? 'bg-[#1a1a1a]/90 text-white hover:bg-[#2a2a2a]' : 'bg-white/90 text-gray-900 hover:bg-white')}`}
+                            className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 active:scale-95 border border-white/10 backdrop-blur-sm ${isReporting ? 'bg-amber-500 text-white' : (isDarkTheme ? 'bg-black/90 text-white hover:bg-white/10' : 'bg-white/90 text-gray-900 hover:bg-white')}`}
                             title="Report this content"
                         >
                             {isReporting ? <FlagIconSolid className="w-4 h-4" /> : <FlagIcon className={`w-4 h-4 ${isDarkTheme ? 'text-amber-400' : 'text-amber-600'}`} />}
@@ -262,15 +262,15 @@ export default React.memo(function ProductCard({ id, title, thumbnail, channelNa
             {/* Report Popover - Rendered outside overflow-hidden entirely to prevent clipping */}
             {isReporting && (
                 <div
-                    className={`absolute bottom-28 right-2 w-[calc(100%-1rem)] max-w-[240px] ${isDarkTheme ? 'bg-[#1a1a1a] border-[#333]' : 'bg-white border-gray-100'} shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] rounded-xl border p-3 z-[60] transform transition-transform duration-500 origin-bottom-right`}
+                    className={`absolute bottom-28 right-2 w-[calc(100%-1rem)] max-w-[240px] ${isDarkTheme ? 'bg-black border-white/10 shadow-2xl shadow-black' : 'bg-white border-gray-100'} shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] rounded-xl border p-3 z-[60] transform transition-transform duration-500 origin-bottom-right`}
                     onClick={(e) => e.stopPropagation()}
                 >
                     <p className={`text-[10px] font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'} mb-1.5 uppercase tracking-wider`}>Report Content</p>
-                    <select
-                        value={reportReason}
-                        onChange={(e) => setReportReason(e.target.value)}
-                        className={`w-full text-xs p-1.5 rounded-lg border mb-2 outline-none ${isDarkTheme ? 'bg-[#2a2a2a] border-[#444] text-white focus:border-amber-400 focus:ring-amber-400' : 'bg-gray-50 border-gray-200 text-gray-900 focus:border-amber-500 focus:ring-amber-500'} focus:ring-1 transition-shadow truncate`}
-                    >
+                        <select
+                            value={reportReason}
+                            onChange={(e) => setReportReason(e.target.value)}
+                            className={`w-full text-xs p-1.5 rounded-lg border mb-2 outline-none ${isDarkTheme ? 'bg-white/5 border-white/10 text-white focus:border-amber-400 focus:ring-amber-400' : 'bg-gray-50 border-gray-200 text-gray-900 focus:border-amber-500 focus:ring-amber-500'} focus:ring-1 transition-shadow truncate`}
+                        >
                         <option>Inappropriate content</option>
                         <option>Pornography or Nudity</option>
                         <option>Copyright violation</option>
@@ -280,7 +280,7 @@ export default React.memo(function ProductCard({ id, title, thumbnail, channelNa
                     <div className="flex gap-1.5">
                         <button
                             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsReporting(false); }}
-                            className={`flex-1 ${isDarkTheme ? 'bg-[#2a2a2a] hover:bg-[#333] text-gray-300 border-[#444]' : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-200/50'} text-[10px] font-bold py-1.5 rounded-lg transition-colors border`}
+                            className={`flex-1 ${isDarkTheme ? 'bg-white/5 hover:bg-white/10 text-gray-300 border-white/10' : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-200/50'} text-[10px] font-bold py-1.5 rounded-lg transition-colors border`}
                         >
                             Cancel
                         </button>

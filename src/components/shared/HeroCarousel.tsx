@@ -96,13 +96,25 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
         return () => vid.removeEventListener('canplay', onCanPlay);
     }, [currentIndex]);
 
+    // Safety: Reset index if items change and current index is out of bounds
+    useEffect(() => {
+        if (items.length > 0 && currentIndex >= items.length) {
+            setCurrentIndex(0);
+        }
+    }, [items.length, currentIndex]);
+
     if (!items.length) {
-        return <div className="w-full h-24 sm:h-32 mb-8 bg-gradient-to-b from-[#1a1a1a] to-[#141414]" />;
+        return <div className="w-full h-24 sm:h-32 mb-8 bg-gradient-to-b from-black to-black" />;
     }
 
     const spotlightItem = items[currentIndex];
-    const isVideo = (spotlightItem.type === 'VIDEO' || spotlightItem.type === 'VIDEOS' || spotlightItem.type === 'COURSE') && !!spotlightItem.videoUrl;
 
+    // Final safety check for undefined spotlightItem
+    if (!spotlightItem) {
+        return <div className="w-full h-[65vh] bg-[#141414]" />;
+    }
+
+    const isVideo = (spotlightItem.type === 'VIDEO' || spotlightItem.type === 'VIDEOS' || spotlightItem.type === 'COURSE') && !!spotlightItem.videoUrl;
 
     const variants = {
         enter: () => ({ opacity: 0, scale: 1.05 }),
@@ -126,7 +138,7 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
                     }}
                     className="absolute inset-0 z-[-2]"
                 >
-                    <div className="absolute inset-0 bg-[#141414]">
+                    <div className="absolute inset-0 bg-black">
                         {/* Thumbnail — always shown, fades out when video is ready */}
                         <Image
                             src={spotlightItem.thumbnail}
@@ -155,8 +167,8 @@ export default function HeroCarousel({ items }: HeroCarouselProps) {
             </AnimatePresence>
 
             {/* Gradient overlays */}
-            <div className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-t from-[#141414] via-[#141414]/10 to-transparent lg:bg-gradient-to-r lg:from-[#141414] lg:via-[#141414]/20 lg:to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 h-48 sm:h-64 bg-gradient-to-t from-[#141414] via-[#141414]/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-t from-black via-black/10 to-transparent lg:bg-gradient-to-r lg:from-black lg:via-black/20 lg:to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-48 sm:h-64 bg-gradient-to-t from-black via-black/80 to-transparent z-10 pointer-events-none" />
 
             {/* Content */}
             <div className="w-full px-4 sm:px-6 lg:px-8 relative z-20">

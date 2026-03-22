@@ -49,7 +49,7 @@ const formatNumber = (num: number): string => {
 export default function ProductClient() {
   const params = useParams();
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [product, setProduct] = useState<any>(null);
   const [channel, setChannel] = useState<any>(null);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
@@ -784,9 +784,45 @@ export default function ProductClient() {
     const canAccess = isOwner || !product.isSubscriberOnly || !channel?.subscriptionEnabled || hasActiveSubscription;
 
     if (productType === 'VIDEO' || productType === 'VIDEOS') {
+      if (status === 'loading') {
+        return (
+          <div className="w-full relative bg-gray-900 animate-pulse" style={{ aspectRatio: '16/9' }}>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-12 h-12 border-4 border-white/10 border-t-white rounded-full animate-spin" />
+            </div>
+          </div>
+        );
+      }
+
+      const isGuest = !session?.user;
+
       return (
         <div className="w-full relative bg-black" style={{ aspectRatio: '16/9' }}>
-          {canAccess ? (
+          {isGuest ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a]">
+              <div className="text-center px-6">
+                <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/10 shadow-2xl">
+                  <UserCircleIcon className="h-10 w-10 text-white/40" />
+                </div>
+                <h3 className="text-white text-xl font-bold mb-2">Join the Community</h3>
+                <p className="text-gray-400 text-sm mb-8 max-w-xs mx-auto">Sign in to watch this content and explore premium creators around the world.</p>
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => router.push('/auth/signin')}
+                    className="px-8 py-3 bg-white text-black rounded-xl font-bold hover:bg-gray-200 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-white/5"
+                  >
+                    Sign In to Watch
+                  </button>
+                  <button
+                    onClick={() => router.push('/auth/signup')}
+                    className="text-gray-400 text-xs font-bold hover:text-white transition-colors uppercase tracking-widest"
+                  >
+                    Create Account
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : canAccess ? (
             normalizedVideoUrl ? (
               <StreamVideoPlayer
                 src={normalizedVideoUrl}
@@ -803,13 +839,16 @@ export default function ProductClient() {
               </div>
             )
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
-              <div className="text-center">
-                <VideoCameraIcon className="h-16 w-16 text-white/50 mx-auto mb-4" />
-                <p className="text-white/70 text-lg font-medium mb-4">Subscribe to watch</p>
+            <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a]">
+              <div className="text-center px-6">
+                <div className="w-16 h-16 bg-red-600/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-red-500/20 shadow-2xl">
+                  <VideoCameraIcon className="h-10 w-10 text-red-500" />
+                </div>
+                <h3 className="text-white text-xl font-bold mb-2">Subscriber Only</h3>
+                <p className="text-gray-400 text-sm mb-8 max-w-xs mx-auto">This premium content is exclusive to channel subscribers. Support the creator to unlock.</p>
                 <button
                   onClick={() => setShowSubscriptionModal(true)}
-                  className="px-6 py-3 bg-[#1a1a1a] text-white rounded-lg font-semibold hover:bg-[#333] transition"
+                  className="px-8 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-500 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-red-600/20"
                 >
                   Subscribe Now
                 </button>
