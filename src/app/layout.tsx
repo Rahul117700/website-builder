@@ -105,15 +105,16 @@ export default function RootLayout({
         />
 
         {/* PWA & Mobile Optimization */}
-        <link rel="manifest" href="/manifest.json?v=5" />
+        <link rel="manifest" href="/manifest.json?v=10.0" />
         <meta name="theme-color" content="#e50914" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="SED STUDIOS" />
 
         {/* Favicon */}
         <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
         <link rel="alternate icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/logo/sed_premium_icon.svg?v=2" />
+        <link rel="apple-touch-icon" href="/logo/sed_premium_icon.svg?v=10.0" />
 
         {/* RSS Feed */}
         <link rel="alternate" type="application/rss+xml" title="sedStudios Blog RSS Feed" href="/feed.xml" />

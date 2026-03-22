@@ -120,7 +120,7 @@ export default function InstallPWA() {
                         >
                             <div className="relative h-28 bg-black flex items-center justify-center border-b border-[#1a1a1a]">
                                 <div className="relative w-16 h-16 bg-black rounded-2xl shadow-[0_0_30px_rgba(229,9,20,0.3)] border border-[#1a1a1a] flex items-center justify-center scale-110 overflow-hidden">
-                                    <img src="/logo/sed_premium_icon.svg?v=2" className="w-full h-full object-cover" alt="SED STUDIOS"
+                                    <img src="/logo/sed_premium_icon.svg?v=10.0" className="w-full h-full object-cover" alt="SED STUDIOS"
                                         onError={(e) => {
                                             e.currentTarget.style.display = 'none';
                                             const parent = e.currentTarget.parentElement;

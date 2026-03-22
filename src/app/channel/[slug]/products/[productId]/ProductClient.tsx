@@ -797,27 +797,27 @@ export default function ProductClient() {
       const isGuest = !session?.user;
 
       return (
-        <div className="w-full relative bg-black" style={{ aspectRatio: '16/9' }}>
+        <div className="w-full relative bg-black min-h-[400px] sm:min-h-0 sm:aspect-video flex items-center justify-center">
           {isGuest ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a]">
-              <div className="text-center px-6">
-                <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/10 shadow-2xl">
-                  <UserCircleIcon className="h-10 w-10 text-white/40" />
+            <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a] overflow-hidden">
+              <div className="text-center px-6 py-10 w-full max-w-sm mx-auto">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-white/10 shadow-2xl">
+                  <UserCircleIcon className="h-10 w-10 sm:h-12 sm:w-12 text-white/40" />
                 </div>
-                <h3 className="text-white text-xl font-bold mb-2">Join the Community</h3>
-                <p className="text-gray-400 text-sm mb-8 max-w-xs mx-auto">Sign in to watch this content and explore premium creators around the world.</p>
+                <h3 className="text-white text-xl sm:text-2xl font-black mb-3">Join the Community</h3>
+                <p className="text-gray-400 text-sm mb-8 leading-relaxed">Sign in to watch this content and explore premium creators around the world.</p>
                 <div className="flex flex-col gap-3">
                   <button
                     onClick={() => router.push('/auth/signin')}
-                    className="px-8 py-3 bg-white text-black rounded-xl font-bold hover:bg-gray-200 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-white/5"
+                    className="w-full py-4 bg-white text-black rounded-2xl font-black hover:bg-gray-200 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-white/5"
                   >
                     Sign In to Watch
                   </button>
                   <button
                     onClick={() => router.push('/auth/signup')}
-                    className="text-gray-400 text-xs font-bold hover:text-white transition-colors uppercase tracking-widest"
+                    className="text-gray-400 text-xs font-bold hover:text-white transition-colors uppercase tracking-widest py-2"
                   >
-                    Create Account
+                    Create Free Account
                   </button>
                 </div>
               </div>
@@ -831,24 +831,24 @@ export default function ProductClient() {
                 onPlayChange={setIsPlaying}
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50">
                 <div className="text-center">
-                  <VideoCameraIcon className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-400">Video not available</p>
+                  <VideoCameraIcon className="h-16 w-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-500 font-medium">Video not available</p>
                 </div>
               </div>
             )
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a]">
-              <div className="text-center px-6">
-                <div className="w-16 h-16 bg-red-600/10 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-red-500/20 shadow-2xl">
-                  <VideoCameraIcon className="h-10 w-10 text-red-500" />
+            <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a] overflow-hidden">
+              <div className="text-center px-6 py-10 w-full max-w-sm mx-auto">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-red-600/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-red-500/20 shadow-2xl">
+                  <VideoCameraIcon className="h-10 w-10 sm:h-12 sm:w-12 text-red-500" />
                 </div>
-                <h3 className="text-white text-xl font-bold mb-2">Subscriber Only</h3>
-                <p className="text-gray-400 text-sm mb-8 max-w-xs mx-auto">This premium content is exclusive to channel subscribers. Support the creator to unlock.</p>
+                <h3 className="text-white text-xl sm:text-2xl font-black mb-3">Subscriber Only</h3>
+                <p className="text-gray-400 text-sm mb-8 leading-relaxed">This premium content is exclusive to channel subscribers. Support the creator to unlock.</p>
                 <button
                   onClick={() => setShowSubscriptionModal(true)}
-                  className="px-8 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-500 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-red-600/20"
+                  className="w-full py-4 bg-red-600 text-white rounded-2xl font-black hover:bg-red-500 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-red-600/20"
                 >
                   Subscribe Now
                 </button>
