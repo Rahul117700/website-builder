@@ -368,14 +368,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const currentPlanName = 'All Features';
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-black">
       {/* Mobile sidebar */}
       <div className="lg:hidden">
         {/* Hamburger menu button (only when sidebar is closed) */}
         {!isSidebarOpen && (
           <button
             type="button"
-            className="absolute top-4 left-4 z-50 p-2 rounded-md bg-white text-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-md border border-gray-200"
+            className="absolute top-4 left-4 z-50 p-2 rounded-md bg-black text-white focus:outline-none focus:ring-2 focus:ring-white/20 shadow-md border border-white/10"
             onClick={toggleSidebar}
             aria-label="Open sidebar"
           >
@@ -392,7 +392,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             />
             {/* Sidebar */}
             <div
-              className="fixed inset-y-0 left-0 flex w-full max-w-xs flex-col bg-white pt-6 pb-6 transform transition ease-in-out duration-300 translate-x-0 shadow-2xl z-50"
+              className="fixed inset-y-0 left-0 flex w-full max-w-xs flex-col bg-black pt-6 pb-6 transform transition ease-in-out duration-300 translate-x-0 shadow-2xl z-50"
             >
               <div className="absolute top-0 right-0 -mr-12 pt-2">
                 <button
@@ -420,15 +420,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="flex-1 h-0 overflow-y-auto scrollbar-hide">
                 <nav className="px-4 space-y-3">
                   {/* Main Navigation Group */}
-                  <div className="bg-gray-50 rounded-2xl p-3 space-y-1 border border-gray-200">
+                  <div className="bg-white/5 rounded-2xl p-3 space-y-1 border border-white/10">
                     {finalNavigation.slice(0, 2).map((item) => (
                       <Link
                         key={item.name}
                         href={item.href}
                         data-tour={item.name === 'My Channels' ? 'channels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
-                        className={`group relative flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${item.current
-                          ? 'bg-gray-900 text-white shadow-lg shadow-gray-200'
-                          : 'text-gray-500 hover:bg-white hover:text-gray-900 hover:shadow-sm'
+                        className={`group relative flex items-center px-4 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 ${item.current
+                          ? 'bg-white text-black shadow-lg shadow-white/5'
+                          : 'text-gray-500 hover:bg-white/5 hover:text-white hover:shadow-sm'
                           }`}
                       >
                         <item.icon
@@ -444,15 +444,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   </div>
 
                   {/* Analytics & Settings Group */}
-                  <div className="bg-gray-50 rounded-2xl p-3 space-y-1 border border-gray-200">
+                  <div className="bg-white/5 rounded-2xl p-3 space-y-1 border border-white/10">
                     {finalNavigation.slice(2).map((item) => (
                       <Link
                         key={item.name}
                         href={item.href}
                         data-tour={item.name === 'My Channels' ? 'channels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
-                        className={`group relative flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${item.current
-                          ? 'bg-gray-900 text-white shadow-lg shadow-gray-200'
-                          : 'text-gray-500 hover:bg-white hover:text-gray-900 hover:shadow-sm'
+                        className={`group relative flex items-center px-4 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 ${item.current
+                          ? 'bg-white text-black shadow-lg shadow-white/5'
+                          : 'text-gray-500 hover:bg-white/5 hover:text-white hover:shadow-sm'
                           }`}
                       >
                         <item.icon
@@ -503,7 +503,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </div>
 
                 {/* User Profile Card */}
-                <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
+                <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
                   <div className="flex items-center gap-3">
                     <div className="flex-shrink-0 relative">
                       {session?.user?.image ? (
@@ -514,23 +514,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                           alt=""
                         />
                       ) : (
-                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-xl bg-white/10 text-white flex items-center justify-center">
                           <UserIcon className="h-5 w-5" />
                         </div>
                       )}
-                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-black"></div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">
+                      <p className="text-[10px] font-black text-white truncate uppercase tracking-widest">
                         {session?.user?.name || 'User'}
                       </p>
-                      <p className="text-xs text-gray-500 truncate">
+                      <p className="text-[10px] font-bold text-gray-500 truncate uppercase tracking-widest">
                         {session?.user?.role || 'User'}
                       </p>
                     </div>
                     <button
                       onClick={() => router.push('/auth/dashboard/settings')}
-                      className="flex-shrink-0 p-1.5 rounded-lg text-gray-600 hover:text-purple-600 hover:bg-white transition-all duration-200"
+                      className="flex-shrink-0 p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-all duration-200"
                       title="Settings"
                     >
                       <Cog6ToothIcon className="h-4 w-4" />
@@ -562,7 +562,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </svg>
           </button>
         )}
-        <div className="flex min-h-0 flex-1 flex-col bg-white shadow-2xl border-r border-gray-200">
+        <div className="flex min-h-0 flex-1 flex-col bg-black shadow-2xl border-r border-white/10">
           <div className="flex flex-1 flex-col pt-4 pb-4 h-full">
             {/* Logo Section */}
             {/* Logo Section */}
@@ -571,14 +571,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 // Collapsed Logo - Show a modern icon design
                 <Link href="/" className="flex items-center justify-center w-full">
                   <div className="relative">
-                    <div className="w-12 h-12 bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-2xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-white/10">
+                    <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
                       <div className="relative">
-                        <span className="text-white font-bold text-xl tracking-tight">S</span>
-                        <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full border border-white/30"></div>
+                        <span className="text-white font-black text-xl tracking-tighter">S</span>
+                        <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-400 rounded-full border border-black"></div>
                       </div>
                     </div>
                     {/* Subtle glow effect */}
-                    <div className="absolute inset-0 w-12 h-12 bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-2xl opacity-20 blur-md -z-10"></div>
+                    <div className="absolute inset-0 w-12 h-12 bg-white/5 rounded-2xl opacity-20 blur-md -z-10"></div>
                   </div>
                 </Link>
               ) : (
@@ -596,12 +596,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                           maxWidth: '180px'
                         }}
                       />
-                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wide whitespace-nowrap flex-shrink-0">Studio</span>
+                      <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest whitespace-nowrap flex-shrink-0">Studio</span>
                     </div>
                   </Link>
                   <button
                     onClick={toggleSidebarCollapse}
-                    className="hidden lg:flex p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200 ml-2 group"
+                    className="hidden lg:flex p-2 rounded-xl text-gray-500 hover:text-white hover:bg-white/5 transition-all duration-200 ml-2 group"
                     aria-label="Collapse sidebar"
                     title="Collapse sidebar"
                   >
@@ -615,15 +615,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               {(!isSidebarCollapsed || isSidebarHovered) ? (
                 <>
                   {/* Main Navigation Group */}
-                  <div className="bg-gray-50 rounded-2xl p-3 space-y-1 border border-gray-200">
+                  <div className="bg-white/5 rounded-2xl p-3 space-y-1 border border-white/10">
                     {finalNavigation.slice(0, 2).map((item) => (
                       <Link
                         key={item.name}
                         href={item.href}
                         data-tour={item.name === 'My Channels' ? 'channels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
-                        className={`group relative flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${item.current
-                          ? 'bg-gray-900 text-white shadow-md shadow-gray-200'
-                          : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                        className={`group relative flex items-center px-4 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 ${item.current
+                          ? 'bg-white text-black shadow-md shadow-white/5'
+                          : 'text-gray-500 hover:bg-white/5 hover:text-white'
                           }`}
                       >
                         <item.icon
@@ -639,15 +639,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   </div>
 
                   {/* Analytics & Settings Group */}
-                  <div className="bg-gray-50 rounded-2xl p-3 space-y-1 border border-gray-200">
+                  <div className="bg-white/5 rounded-2xl p-3 space-y-1 border border-white/10">
                     {finalNavigation.slice(2).map((item) => (
                       <Link
                         key={item.name}
                         href={item.href}
                         data-tour={item.name === 'My Channels' ? 'channels-link' : item.name === 'Analytics' ? 'analytics-link' : item.name === 'Settings' ? 'settings-link' : undefined}
-                        className={`group relative flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 ${item.current
-                          ? 'bg-gray-900 text-white shadow-md shadow-gray-200'
-                          : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                        className={`group relative flex items-center px-4 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 ${item.current
+                          ? 'bg-white text-black shadow-md shadow-white/5'
+                          : 'text-gray-500 hover:bg-white/5 hover:text-white'
                           }`}
                       >
                         <item.icon
@@ -663,10 +663,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   </div>
 
                   {/* Notifications Button */}
-                  <div className="bg-white rounded-2xl p-3 shadow-lg border-2 border-gray-200">
+                  <div className="bg-white/5 rounded-2xl p-3 shadow-lg border border-white/10">
                     <button
                       onClick={() => setShowNotifications(true)}
-                      className="group relative flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 w-full text-gray-900 hover:bg-gray-100 hover:shadow-xl"
+                      className="group relative flex items-center px-4 py-3 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-200 w-full text-white hover:bg-white/10"
                     >
                       <div className="relative">
                         <BellIcon
@@ -741,14 +741,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <button
                     onClick={() => setShowNotifications(!showNotifications)}
                     className={`p-2.5 rounded-xl transition-all duration-200 relative ${showNotifications
-                      ? 'bg-white text-gray-900 shadow-lg'
-                      : 'bg-gray-100 text-gray-600 hover:bg-white hover:text-gray-900'
+                      ? 'bg-white text-black shadow-lg'
+                      : 'bg-white/5 text-gray-500 hover:bg-white/10 hover:text-white'
                       }`}
                     title="Notifications"
                   >
                     <BellIcon className="h-4 w-4" />
                     {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                      <span className="absolute -top-1 -right-1 h-4 w-4 bg-emerald-500 text-black text-[10px] rounded-full flex items-center justify-center font-black">
                         {unreadCount}
                       </span>
                     )}
@@ -756,7 +756,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <button
                     onClick={handleSignOut}
                     disabled={isLoading}
-                    className="p-2.5 rounded-xl bg-gray-100 text-gray-600 hover:bg-red-500 hover:text-white transition-all duration-200"
+                    className="p-2.5 rounded-xl bg-white/5 text-gray-500 hover:bg-red-500/20 hover:text-red-400 border border-white/10 transition-all duration-200"
                     title="Sign Out"
                   >
                     {isLoading ? (
@@ -768,7 +768,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 </div>
 
                 {/* User Profile Card */}
-                <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200">
+                <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
                   <div className="flex items-center gap-3">
                     <div className="flex-shrink-0 relative">
                       {session?.user?.image ? (
@@ -779,23 +779,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                           alt=""
                         />
                       ) : (
-                        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-xl bg-white/10 text-white flex items-center justify-center">
                           <UserIcon className="h-5 w-5" />
                         </div>
                       )}
-                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                      <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-black"></div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-gray-900 truncate">
+                      <p className="text-[10px] font-black text-white truncate uppercase tracking-widest">
                         {session?.user?.name || 'User'}
                       </p>
-                      <p className="text-xs text-gray-500 truncate">
+                      <p className="text-[10px] font-bold text-gray-500 truncate uppercase tracking-widest">
                         {session?.user?.role || 'User'}
                       </p>
                     </div>
                     <button
                       onClick={() => router.push('/auth/dashboard/settings')}
-                      className="flex-shrink-0 p-1.5 rounded-lg text-gray-600 hover:text-purple-600 hover:bg-white transition-all duration-200"
+                      className="flex-shrink-0 p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-all duration-200"
                       title="Settings"
                     >
                       <Cog6ToothIcon className="h-4 w-4" />
@@ -809,7 +809,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <button
                   onClick={handleSignOut}
                   disabled={isLoading}
-                  className="p-3 rounded-xl bg-gray-100 text-gray-600 hover:bg-red-500 hover:text-white transition-all duration-200"
+                  className="p-3 rounded-xl bg-white/5 text-gray-500 hover:bg-red-500/20 hover:text-red-400 border border-white/10 transition-all duration-200"
                   title="Sign Out"
                 >
                   {isLoading ? (
@@ -828,7 +828,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className={`flex flex-col flex-1 transition-all duration-300 relative z-10 ${isSidebarCollapsed ? (isSidebarHovered ? 'lg:pl-72' : 'lg:pl-16') : 'lg:pl-72'
         }`}>
         {/* Modern Mobile Header */}
-        <div className="lg:hidden sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm" data-tour="dashboard-header">
+        <div className="lg:hidden sticky top-0 z-20 bg-black border-b border-white/10 shadow-sm" data-tour="dashboard-header">
           <div className="flex items-center justify-between px-4 py-3">
             <button
               type="button"
@@ -855,12 +855,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="relative flex items-center justify-center h-10 w-10 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                className="relative flex items-center justify-center h-10 w-10 rounded-lg text-white hover:bg-white/5 transition-colors"
                 aria-label="Notifications"
               >
                 <BellIcon className="h-6 w-6" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                  <span className="absolute top-1.5 right-1.5 h-4 w-4 bg-emerald-500 text-black text-[10px] rounded-full flex items-center justify-center font-black">
                     {unreadCount}
                   </span>
                 )}
@@ -885,18 +885,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
           {/* Modal */}
           <div className="flex min-h-full items-center justify-center p-2 sm:p-4">
-            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-auto transform transition-all max-h-[90vh] flex flex-col">
+            <div className="relative bg-[#0a0a0a] rounded-2xl shadow-2xl w-full max-w-lg mx-auto transform transition-all max-h-[90vh] flex flex-col border border-white/10">
               {/* Header - Mobile Optimized */}
-              <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-white rounded-t-2xl flex-shrink-0">
+              <div className="px-4 sm:px-6 py-4 border-b border-white/10 bg-[#0a0a0a] rounded-t-2xl flex-shrink-0">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="p-2 bg-gray-900 rounded-xl flex-shrink-0">
-                      <BellIcon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+                    <div className="p-2 bg-white rounded-xl flex-shrink-0">
+                      <BellIcon className="h-5 w-5 sm:h-6 sm:w-6 text-black" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900 truncate">Notifications & Activity</h3>
+                      <h3 className="text-base sm:text-lg font-black text-white uppercase tracking-widest truncate">Communications</h3>
                       {unreadCount > 0 && (
-                        <p className="text-xs sm:text-sm text-gray-900 font-medium">{unreadCount} unread notifications</p>
+                        <p className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase tracking-widest">{unreadCount} UNREAD BROADCASTS</p>
                       )}
                     </div>
                   </div>
@@ -905,9 +905,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     {notifications.length > 0 && unreadCount > 0 && (
                       <button
                         onClick={handleMarkAllAsRead}
-                        className="hidden sm:block px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-black transition-colors"
+                        className="hidden sm:block px-4 py-2 text-[10px] font-black uppercase tracking-widest text-black bg-white rounded-lg hover:bg-gray-200 transition-colors"
                       >
-                        Mark all as read
+                        Acknowledge all
                       </button>
                     )}
                     <button
@@ -922,12 +922,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
                 {/* Mobile Mark All Button */}
                 {notifications.length > 0 && unreadCount > 0 && (
-                  <div className="sm:hidden mt-3 pt-3 border-t border-gray-200">
+                  <div className="sm:hidden mt-3 pt-3 border-t border-white/10">
                     <button
                       onClick={handleMarkAllAsRead}
-                      className="w-full px-4 py-2 text-sm font-semibold text-white bg-gray-900 rounded-lg hover:bg-black transition-colors touch-manipulation"
+                      className="w-full px-4 py-3 text-[10px] font-black uppercase tracking-widest text-black bg-white rounded-lg hover:bg-gray-200 transition-colors touch-manipulation"
                     >
-                      Mark all as read
+                      Acknowledge all
                     </button>
                   </div>
                 )}
@@ -937,18 +937,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <div className="flex-1 overflow-y-auto">
                 {notifications.length === 0 ? (
                   <div className="px-4 sm:px-6 py-8 sm:py-12 text-center">
-                    <div className="p-3 bg-gray-100 rounded-full w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 flex items-center justify-center">
-                      <BellIcon className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
+                    <div className="p-3 bg-white/5 rounded-full w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 flex items-center justify-center border border-white/10">
+                      <BellIcon className="h-6 w-6 sm:h-8 sm:w-8 text-gray-500" />
                     </div>
-                    <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">No notifications yet</h4>
-                    <p className="text-sm text-gray-500 px-4">You'll see your activity and updates here</p>
+                    <h4 className="text-base sm:text-lg font-black text-white uppercase tracking-widest mb-2">Zero traffic detected</h4>
+                    <p className="text-[10px] font-bold text-gray-500 px-4 uppercase tracking-widest">Protocol is standing by for new events</p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-gray-100">
+                  <div className="divide-y divide-white/5">
                     {notifications.map((activity) => (
                       <div
                         key={activity.id}
-                        className={`p-3 sm:p-4 hover:bg-gray-50 transition-colors cursor-pointer touch-manipulation ${!activity.read ? 'bg-gray-50 border-l-4 border-gray-900' : 'bg-white'
+                        className={`p-3 sm:p-4 hover:bg-white/5 transition-colors cursor-pointer touch-manipulation ${!activity.read ? 'bg-white/5 border-l-4 border-white' : 'bg-transparent'
                           }`}
                         onClick={() => !activity.read && handleMarkAsRead(activity.id)}
                       >

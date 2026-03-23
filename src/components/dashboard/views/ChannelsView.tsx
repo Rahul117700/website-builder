@@ -421,7 +421,7 @@ export default function ChannelsView() {
     }
 
     return (
-        <div className="w-full min-h-screen m-0 p-6 space-y-8 bg-gray-50/50 overflow-y-auto">
+        <div className="w-full min-h-screen m-0 p-6 space-y-8 bg-black overflow-y-auto">
             {/* Hero Section */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -431,33 +431,33 @@ export default function ChannelsView() {
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
                     <div className="flex-1">
                         <div className="flex items-center gap-4 mb-3">
-                            <div className="p-3 bg-slate-900 rounded-2xl shadow-xl shadow-slate-200">
+                            <div className="p-3 bg-white/5 border border-white/10 rounded-2xl shadow-xl">
                                 <RocketLaunchIcon className="h-7 w-7 text-white" />
                             </div>
                             <div>
-                                <h1 className="text-4xl font-black text-gray-900 tracking-tight">
+                                <h1 className="text-4xl font-black text-white tracking-tight">
                                     My Channels
                                 </h1>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Architecture & Asset Management</p>
+                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Architecture & Asset Management</p>
                             </div>
                         </div>
 
-                        <p className="text-gray-600 max-w-2xl leading-relaxed font-medium">
+                        <p className="text-gray-400 max-w-2xl leading-relaxed font-medium">
                             Engineered for distribution. Create branded content hubs, manage your audience, and scale your digital footprint with high-conversion templates.
                         </p>
 
                         <div className="flex flex-wrap items-center gap-3 mt-6">
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 rounded-2xl shadow-sm">
+                            <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-2xl shadow-sm">
                                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                                <span className="text-[10px] font-black text-gray-900 uppercase tracking-widest">Global Protocol</span>
+                                <span className="text-[10px] font-black text-white uppercase tracking-widest">Global Protocol</span>
                             </div>
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 rounded-2xl shadow-sm">
-                                <SparklesIcon className="h-4 w-4 text-blue-500" />
-                                <span className="text-[10px] font-black text-gray-900 uppercase tracking-widest">Modular Design</span>
+                            <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-2xl shadow-sm">
+                                <SparklesIcon className="h-4 w-4 text-blue-400" />
+                                <span className="text-[10px] font-black text-white uppercase tracking-widest">Modular Design</span>
                             </div>
-                            <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 rounded-2xl shadow-sm">
-                                <ShieldCheckIcon className="h-4 w-4 text-slate-900" />
-                                <span className="text-[10px] font-black text-gray-900 uppercase tracking-widest">Secure Entry</span>
+                            <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-2xl shadow-sm">
+                                <ShieldCheckIcon className="h-4 w-4 text-white" />
+                                <span className="text-[10px] font-black text-white uppercase tracking-widest">Secure Entry</span>
                             </div>
                         </div>
                     </div>
@@ -470,7 +470,7 @@ export default function ChannelsView() {
                                     setShowCreateModal(true);
                                 }}
                                 disabled={loadingSubscription || templates.length === 0}
-                                className="group relative px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 hover:shadow-2xl hover:shadow-slate-300 hover:-translate-y-1 active:scale-95 disabled:opacity-50"
+                                className="group relative px-8 py-4 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 hover:bg-gray-200 hover:-translate-y-1 active:scale-95 disabled:opacity-50"
                             >
                                 <div className="flex items-center gap-3">
                                     <PlusIcon className="h-5 w-5" />
@@ -494,52 +494,52 @@ export default function ChannelsView() {
                 {/* Stats Overview */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-10">
                     {[
-                        { label: 'Asset Clusters', value: channels.length, sub: 'Total Channels', icon: RocketLaunchIcon, color: 'text-slate-900', bg: 'bg-slate-50' },
-                        { label: 'Operational', value: channels.filter(c => c.status === 'ACTIVE').length, sub: 'Live Protocols', icon: CheckCircleIcon, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                        { label: 'Audience Node', value: channels.reduce((sum, c) => sum + (c._count?.subscribers || 0), 0), sub: 'Total Recurrents', icon: UserGroupIcon, color: 'text-blue-600', bg: 'bg-blue-50' },
-                        { label: 'Content Depth', value: channels.reduce((sum, c) => sum + (c._count?.products || 0), 0), sub: 'Live Assets', icon: VideoCameraIcon, color: 'text-orange-600', bg: 'bg-orange-50' }
+                        { label: 'Asset Clusters', value: channels.length, sub: 'Total Channels', icon: RocketLaunchIcon, color: 'text-white', bg: 'bg-white/5' },
+                        { label: 'Operational', value: channels.filter(c => c.status === 'ACTIVE').length, sub: 'Live Protocols', icon: CheckCircleIcon, color: 'text-emerald-400', bg: 'bg-emerald-50/5' },
+                        { label: 'Audience Node', value: channels.reduce((sum, c) => sum + (c._count?.subscribers || 0), 0), sub: 'Total Recurrents', icon: UserGroupIcon, color: 'text-blue-400', bg: 'bg-blue-50/5' },
+                        { label: 'Content Depth', value: channels.reduce((sum, c) => sum + (c._count?.products || 0), 0), sub: 'Live Assets', icon: VideoCameraIcon, color: 'text-orange-400', bg: 'bg-orange-50/5' }
                     ].map((stat, i) => (
                         <motion.div
                             key={i}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.1 }}
-                            className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all group"
+                            className="bg-white/5 rounded-3xl p-6 border border-white/10 shadow-sm hover:shadow-md transition-all group"
                         >
                             <div className="flex items-center justify-between mb-4">
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{stat.label}</span>
-                                <div className={`p-2 ${stat.bg} rounded-xl group-hover:scale-110 transition-transform`}>
+                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{stat.label}</span>
+                                <div className={`p-2 bg-white/5 rounded-xl group-hover:scale-110 transition-transform`}>
                                     <stat.icon className={`h-4 w-4 ${stat.color}`} />
                                 </div>
                             </div>
                             <p className={`text-3xl font-black ${stat.color} tracking-tight`}>{stat.value}</p>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">{stat.sub}</p>
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">{stat.sub}</p>
                         </motion.div>
                     ))}
                 </div>
             </motion.div>
 
             {/* Search & Filter */}
-            <div className="flex flex-col md:flex-row gap-4 items-center bg-white p-4 rounded-3xl border border-gray-100 shadow-sm">
+            <div className="flex flex-col md:flex-row gap-4 items-center bg-white/5 p-4 rounded-3xl border border-white/10 shadow-sm">
                 <div className="flex-1 w-full relative group">
-                    <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-slate-900 transition-colors" />
+                    <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 group-focus-within:text-white transition-colors" />
                     <input
                         type="text"
                         placeholder="Search assets by name or protocol description..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-slate-900 focus:bg-white text-sm font-bold text-gray-900 placeholder-gray-400 transition-all font-black"
+                        className="w-full pl-12 pr-4 py-3 bg-white/5 border-none rounded-2xl focus:ring-2 focus:ring-white focus:bg-white/10 text-sm font-bold text-white placeholder-gray-500 transition-all font-black"
                     />
                 </div>
 
                 <div className="flex items-center gap-3 w-full md:w-auto">
-                    <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
-                        <FunnelIcon className="h-5 w-5 text-gray-400" />
+                    <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
+                        <FunnelIcon className="h-5 w-5 text-gray-500" />
                     </div>
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="px-6 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-slate-900 focus:bg-white text-sm font-black text-gray-900 transition-all min-w-[180px]"
+                        className="px-6 py-3 bg-white/5 border-none rounded-2xl focus:ring-2 focus:ring-white focus:bg-white/10 text-sm font-black text-white transition-all min-w-[180px]"
                     >
                         <option value="">All Architectures</option>
                         <option value="ACTIVE">✅ Operational</option>
@@ -568,7 +568,7 @@ export default function ChannelsView() {
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.9 }}
                                     transition={{ delay: index * 0.05 }}
-                                    className="group bg-white rounded-[2rem] border border-gray-100 hover:border-gray-200 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden flex flex-col"
+                                    className="group bg-[#0a0a0a] rounded-[2rem] border border-white/10 hover:border-white/20 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden flex flex-col"
                                 >
                                     {/* Header Image/Gradient */}
                                     <div className="relative h-32 bg-slate-900 overflow-hidden">
@@ -579,15 +579,15 @@ export default function ChannelsView() {
                                                 {channel.status}
                                             </span>
                                         </div>
-                                        <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+                                        <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-white/5 rounded-full blur-2xl"></div>
                                     </div>
 
                                     {/* Content Section */}
                                     <div className="relative p-6 pt-0 -mt-10 flex-1">
-                                        <div className="bg-white rounded-2xl p-4 shadow-xl shadow-slate-200/50 border border-gray-100 mb-4 group-hover:-translate-y-1 transition-transform">
-                                            <h3 className="text-xl font-black text-gray-900 tracking-tight line-clamp-1">{channel.name}</h3>
-                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
-                                                Template: <span className="text-slate-900">{channel.template.name}</span>
+                                        <div className="bg-[#111] rounded-2xl p-4 shadow-xl border border-white/10 mb-4 group-hover:-translate-y-1 transition-transform">
+                                            <h3 className="text-xl font-black text-white tracking-tight line-clamp-1">{channel.name}</h3>
+                                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">
+                                                Template: <span className="text-gray-300">{channel.template.name}</span>
                                             </p>
                                         </div>
 
@@ -599,12 +599,12 @@ export default function ChannelsView() {
 
                                         {/* Rapid Stats */}
                                         <div className="grid grid-cols-2 gap-4 mb-6">
-                                            <div className="p-3 bg-slate-50 rounded-2xl border border-gray-100 group/stat">
+                                            <div className="p-3 bg-white/5 rounded-2xl border border-white/10 group/stat">
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <EyeIcon className="w-3.5 h-3.5 text-slate-400" />
-                                                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Views</span>
+                                                    <EyeIcon className="w-3.5 h-3.5 text-gray-500" />
+                                                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Views</span>
                                                 </div>
-                                                <p className="text-lg font-black text-slate-900">{totalViews.toLocaleString()}</p>
+                                                <p className="text-lg font-black text-white">{totalViews.toLocaleString()}</p>
                                             </div>
                                             <div className="p-3 bg-emerald-50/50 rounded-2xl border border-emerald-100 group/stat">
                                                 <div className="flex items-center gap-2 mb-1">
@@ -616,10 +616,10 @@ export default function ChannelsView() {
                                         </div>
 
                                         {/* Growth Map Indicator */}
-                                        <div className="mb-6 p-3 bg-amber-50 rounded-2xl border border-amber-100/50 group/tip">
+                                        <div className="mb-6 p-3 bg-amber-500/10 rounded-2xl border border-amber-500/20 group/tip">
                                             <div className="flex gap-3">
-                                                <LightBulbIcon className="h-5 w-5 text-amber-500 shrink-0 group-hover/tip:rotate-12 transition-transform" />
-                                                <p className="text-[10px] font-bold text-amber-900 leading-relaxed uppercase tracking-tight">
+                                                <LightBulbIcon className="h-5 w-5 text-amber-400 shrink-0 group-hover/tip:rotate-12 transition-transform" />
+                                                <p className="text-[10px] font-bold text-amber-200 leading-relaxed uppercase tracking-tight">
                                                     {randomTip}
                                                 </p>
                                             </div>
@@ -632,7 +632,7 @@ export default function ChannelsView() {
                                             {canAccess ? (
                                                 <Link
                                                     href={`/auth/dashboard/channels/${channel.id}/customize`}
-                                                    className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg shadow-slate-200"
+                                                    className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-all shadow-lg"
                                                 >
                                                     <PencilIcon className="w-3.5 h-3.5" />
                                                     <span>Forge Content</span>
@@ -648,7 +648,7 @@ export default function ChannelsView() {
                                                 <Link
                                                     href={`/channel/${channel.slug}`}
                                                     target="_blank"
-                                                    className="p-3.5 bg-blue-50 text-blue-600 rounded-2xl hover:bg-blue-100 transition-colors border border-blue-100"
+                                                    className="p-3.5 bg-white/5 text-blue-400 rounded-2xl hover:bg-white/10 transition-colors border border-white/10"
                                                 >
                                                     <ArrowTrendingUpIcon className="w-5 h-5" />
                                                 </Link>
@@ -656,7 +656,7 @@ export default function ChannelsView() {
 
                                             <button
                                                 onClick={() => handleDeleteChannel(channel.id)}
-                                                className="p-3.5 bg-red-50 text-red-500 rounded-2xl hover:bg-red-100 transition-colors border border-red-100"
+                                                className="p-3.5 bg-red-500/10 text-red-400 rounded-2xl hover:bg-red-500/20 transition-colors border border-red-500/20"
                                             >
                                                 <TrashIcon className="w-5 h-5" />
                                             </button>
@@ -890,41 +890,32 @@ export default function ChannelsView() {
                                         <span>Advanced analytics & insights</span>
                                     </div>
                                     <div className="flex items-center gap-2 text-xs text-gray-700">
-                                        <CheckCircleIcon className="h-4 w-4 text-green-600 flex-shrink-0" />
-                                        <span>Priority support</span>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-xs text-gray-700">
-                                        <CheckCircleIcon className="h-4 w-4 text-green-600 flex-shrink-0" />
-                                        <span>Custom branding & domains</span>
+                                        <p className="text-sm font-bold text-white mb-1">Scale your distribution</p>
+                                        <p className="text-xs text-gray-500 leading-relaxed font-medium">Deploy unlimited channels across multiple niches and maximize your reach.</p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* CTA Buttons */}
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                                 <button
                                     onClick={() => {
                                         setShowUpgradeModal(false);
                                         window.location.href = '/auth/dashboard/plans';
                                     }}
-                                    className="w-full px-4 py-2.5 bg-gradient-to-r from-gray-900 to-black text-white rounded-xl font-bold hover:from-gray-800 hover:to-gray-900 transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2 text-sm"
+                                    className="w-full px-6 py-4 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all duration-300 transform active:scale-95 shadow-xl shadow-white/5 flex items-center justify-center gap-2"
                                 >
-                                    <SparklesIcon className="h-5 w-5" />
-                                    <span>View Plans & Pricing</span>
+                                    <SparklesIcon className="h-4 w-4" />
+                                    <span>View Advanced Plans</span>
                                 </button>
 
                                 <button
                                     onClick={() => setShowUpgradeModal(false)}
-                                    className="w-full px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                                    className="w-full px-6 py-4 bg-white/5 text-gray-400 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:text-white transition-all"
                                 >
                                     Maybe Later
                                 </button>
                             </div>
-
-                            {/* Footer Note */}
-                            <p className="text-center text-[10px] text-gray-500">
-                                💡 <strong>Tip:</strong> Annual plans save up to 20%!
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -932,86 +923,70 @@ export default function ChannelsView() {
 
             {/* Delete Confirmation Modal */}
             {showDeleteModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-                    <div className="relative bg-white rounded-2xl max-w-md w-full animate-in zoom-in duration-200">
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-md overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+                    <div className="relative bg-[#0a0a0a] rounded-[2.5rem] max-w-md w-full shadow-2xl border border-white/10 animate-in zoom-in duration-200 overflow-hidden">
                         {/* Header with Gradient */}
-                        <div className="bg-gradient-to-r from-red-500 via-red-600 to-red-700 p-4 rounded-t-2xl text-white">
-                            <div className="flex items-center justify-between mb-1">
-                                <div className="flex items-center gap-2">
-                                    <div className="p-2 bg-white/20 backdrop-blur-sm rounded-xl">
-                                        <TrashIcon className="h-6 w-6" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold">Delete Channel</h3>
-                                        <p className="text-white/90 text-xs">This action cannot be undone</p>
-                                    </div>
+                        <div className="bg-gradient-to-br from-red-900 via-red-950 to-black p-8 text-white relative">
+                            <div className="absolute top-0 right-0 p-8 opacity-10">
+                                <TrashIcon className="h-32 w-32 text-white" />
+                            </div>
+                            <div className="relative z-10">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-500/20 backdrop-blur-md rounded-full border border-red-500/20 mb-3">
+                                    <ExclamationTriangleIcon className="h-3 w-3 text-red-500" />
+                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Danger Zone</span>
                                 </div>
-                                <button
-                                    onClick={() => {
-                                        setShowDeleteModal(false);
-                                        setChannelToDelete(null);
-                                    }}
-                                    disabled={deleting}
-                                    className="p-1.5 hover:bg-white/20 rounded-lg transition-colors disabled:opacity-50"
-                                >
-                                    <XMarkIcon className="h-5 w-5" />
-                                </button>
+                                <h3 className="text-3xl font-black text-white leading-none">Delete Protocol</h3>
+                                <p className="text-red-400/80 text-[10px] font-bold uppercase tracking-widest mt-2 px-1">Permanent Clearance Authorized</p>
                             </div>
                         </div>
 
                         {/* Content */}
-                        <div className="p-4 space-y-4">
-                            <div className="text-center">
-                                <p className="text-base text-gray-800 mb-3">
-                                    Are you sure you want to delete <strong className="text-red-600">this channel</strong>?
+                        <div className="p-8 space-y-6">
+                            <div className="text-center px-2">
+                                <p className="text-lg font-black text-white mb-3">
+                                    Purge <span className="text-red-500">this channel matrix</span>?
                                 </p>
-                                <p className="text-sm text-gray-600">
-                                    All content, products, and subscriber data associated with this channel will be permanently deleted.
+                                <p className="text-xs text-gray-400 font-medium leading-relaxed">
+                                    All content nodes, products, and subscriber data associated with this protocol will be permanently erased from the network.
                                 </p>
                             </div>
 
                             {/* Warning Box */}
-                            <div className="bg-red-50 border-2 border-red-200 rounded-xl p-3">
-                                <div className="flex items-start gap-2">
-                                    <ExclamationTriangleIcon className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                                    <div className="flex-1">
-                                        <p className="font-semibold text-red-900 text-sm mb-0.5">Warning</p>
-                                        <p className="text-xs text-red-800">
-                                            This action is <strong>permanent</strong> and cannot be reversed. Please make sure you have backed up any important data.
-                                        </p>
-                                    </div>
+                            <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-4">
+                                <div className="flex items-start gap-3">
+                                    <BoltIcon className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                                    <p className="text-[10px] text-red-400/80 font-black uppercase tracking-widest leading-relaxed">
+                                        This process is <strong>irreversible</strong>. Node data cannot be recovered once the purge begins.
+                                    </p>
                                 </div>
                             </div>
 
                             {/* CTA Buttons */}
-                            <div className="flex gap-2">
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={confirmDelete}
+                                    disabled={deleting}
+                                    className="w-full px-6 py-4 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-xl shadow-red-900/20"
+                                >
+                                    {deleting ? (
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    ) : (
+                                        <>
+                                            <TrashIcon className="h-4 w-4" />
+                                            <span>Initialize Purge</span>
+                                        </>
+                                    )}
+                                </button>
+
                                 <button
                                     onClick={() => {
                                         setShowDeleteModal(false);
                                         setChannelToDelete(null);
                                     }}
                                     disabled={deleting}
-                                    className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full px-6 py-4 bg-white/5 text-gray-500 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:text-white transition-all"
                                 >
-                                    Cancel
-                                </button>
-
-                                <button
-                                    onClick={confirmDelete}
-                                    disabled={deleting}
-                                    className="flex-1 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg text-sm font-bold hover:from-red-700 hover:to-red-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                >
-                                    {deleting ? (
-                                        <>
-                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                            <span>Deleting...</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <TrashIcon className="h-4 w-4" />
-                                            <span>Delete Forever</span>
-                                        </>
-                                    )}
+                                    Abort Operation
                                 </button>
                             </div>
                         </div>

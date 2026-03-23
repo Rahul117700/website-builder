@@ -147,19 +147,22 @@ export default function AnalyticsView() {
     };
 
     return (
-        <div className="w-full min-h-screen bg-gray-50/50 p-4 sm:p-6 space-y-6 overflow-y-auto">
+        <div className="w-full min-h-screen bg-black p-4 sm:p-6 space-y-8 overflow-y-auto">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pb-6 border-b border-white/10">
                 <div>
-                    <h1 className="text-2xl font-black text-gray-900 tracking-tight">Analytics Command</h1>
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1">Performance & Growth Data</p>
+                    <h1 className="text-3xl font-black text-white tracking-tighter">Analytics Command</h1>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-[0.2em] mt-1.5 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Performance & Growth Data
+                    </p>
                 </div>
                 <button
                     onClick={loadData}
                     disabled={loading}
-                    className="p-2 rounded-xl hover:bg-white hover:shadow-sm transition-all text-gray-500 hover:text-gray-900"
+                    className="p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-gray-400 hover:text-white group"
                 >
-                    <ArrowPathIcon className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+                    <ArrowPathIcon className={`h-5 w-5 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
                 </button>
             </div>
 

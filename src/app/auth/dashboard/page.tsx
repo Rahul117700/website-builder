@@ -358,8 +358,8 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="w-full h-screen m-0 p-4 flex items-center justify-center bg-gray-50">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        <div className="w-full h-screen m-0 p-4 flex items-center justify-center bg-black">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
         </div>
       </DashboardLayout>
     );
@@ -371,21 +371,21 @@ export default function DashboardPage() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full h-screen m-0 p-4 sm:p-6 lg:p-8 space-y-6 bg-white overflow-y-auto no-scrollbar"
+        className="w-full h-screen m-0 p-4 sm:p-6 lg:p-8 space-y-6 bg-black overflow-y-auto no-scrollbar"
       >
         {/* Header */}
         <div ref={heroRef} data-tour="dashboard-header">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-black text-gray-900 tracking-tight">Overview</h1>
-              <p className="text-sm font-medium text-gray-500">Welcome back! Here's what's happening today.</p>
+              <h1 className="text-2xl font-black text-white tracking-tighter uppercase">Overview Matrix</h1>
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Operational Node Status & Metrics</p>
             </div>
             <Link
               href="/auth/dashboard/channels"
-              className="bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-xl font-bold transition-all duration-300 flex items-center shadow-lg shadow-gray-200 hover:scale-105"
+              className="bg-white hover:bg-gray-200 text-black px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 flex items-center shadow-lg"
             >
               <PlusIcon className="h-5 w-5 mr-2" />
-              <span>Create Channel</span>
+              <span>Initialize Channel</span>
             </Link>
           </div>
         </div>
@@ -394,62 +394,62 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Subscription Status Banner */}
           {!loadingSubscription && (
-            <div className={`relative overflow-hidden rounded-2xl p-4 transition-all duration-300 hover:shadow-lg border border-gray-100 ${subscriptionData?.hasActivePlan
-              ? 'bg-emerald-50/50'
+            <div className={`relative overflow-hidden rounded-2xl p-4 transition-all duration-300 hover:shadow-lg border border-white/10 ${subscriptionData?.hasActivePlan
+              ? 'bg-emerald-500/5'
               : subscriptionData?.trial?.isActive
-                ? 'bg-blue-50/50'
-                : 'bg-amber-50/50'
+                ? 'bg-blue-500/5'
+                : 'bg-amber-500/5'
               }`}>
               <div className="relative z-10">
                 <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className={`p-2 rounded-xl ${subscriptionData?.hasActivePlan ? 'bg-emerald-100 text-emerald-600' :
-                        subscriptionData?.trial?.isActive ? 'bg-blue-100 text-blue-600' :
-                          'bg-amber-100 text-amber-600'
+                      <div className={`p-2 rounded-xl ${subscriptionData?.hasActivePlan ? 'bg-emerald-500/10 text-emerald-400' :
+                        subscriptionData?.trial?.isActive ? 'bg-blue-500/10 text-blue-400' :
+                          'bg-amber-500/10 text-amber-400'
                         }`}>
                         <CreditCardIcon className="h-5 w-5" />
                       </div>
-                      <h3 className="text-base font-bold text-gray-900">
+                      <h3 className="text-sm font-black text-white uppercase tracking-widest">
                         {subscriptionData?.hasActivePlan
-                          ? 'Active Subscription'
+                          ? 'Protocol Active'
                           : subscriptionData?.trial?.isActive
                             ? 'Free Trial Mode'
-                            : 'Plan Expired'}
+                            : 'Protocol Halted'}
                       </h3>
                     </div>
 
                     {subscriptionData?.hasActivePlan ? (
                       <div className="space-y-1">
-                        <p className="text-sm font-semibold text-gray-700">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                           {subscriptionData.activeSubscription.plan.name} Plan
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
                           Renewing on {new Date(subscriptionData.activeSubscription.endDate).toLocaleDateString()}
-                          <span className="ml-1 text-emerald-600 font-bold">({subscriptionData.usage.daysRemaining} days left)</span>
+                          <span className="ml-1 text-emerald-400 font-black">({subscriptionData.usage.daysRemaining} days left)</span>
                         </p>
                       </div>
                     ) : subscriptionData?.trial?.isActive ? (
                       <div className="space-y-1">
-                        <p className="text-sm font-semibold text-gray-700">
-                          <span className="text-blue-600">{subscriptionData.trial.daysRemaining} days</span> remaining in trial
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                          <span className="text-blue-400">{subscriptionData.trial.daysRemaining} days</span> remaining in trial
                         </p>
-                        <p className="text-xs text-gray-500">Upgrade early to lock in your live funnels.</p>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Upgrade early to lock in your live funnels.</p>
                       </div>
                     ) : (
                       <div className="space-y-1">
-                        <p className="text-sm font-bold text-amber-700">Action Required</p>
-                        <p className="text-xs text-gray-500">Upgrade to reactivate your selling channels.</p>
+                        <p className="text-[10px] font-black text-amber-400 uppercase tracking-widest">Action Required</p>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Upgrade to reactivate your selling channels.</p>
                       </div>
                     )}
                   </div>
                   <Link
                     href="/auth/dashboard/plans"
-                    className={`px-4 py-2 rounded-xl font-bold text-sm transition-all duration-300 ${subscriptionData?.hasActivePlan
-                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'
+                    className={`px-4 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 ${subscriptionData?.hasActivePlan
+                      ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-900'
                       : subscriptionData?.trial?.isActive
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200'
-                        : 'bg-amber-600 hover:bg-amber-700 text-white shadow-amber-200'
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-900'
+                        : 'bg-amber-600 hover:bg-amber-700 text-white shadow-amber-900'
                       } shadow-lg flex items-center gap-2`}
                   >
                     {subscriptionData?.hasActivePlan ? 'Manage Plan' : 'View Plans'}
@@ -644,13 +644,13 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recent Activity Timeline */}
-          <div className="lg:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+          <div className="lg:col-span-2 bg-white/5 backdrop-blur-xl rounded-3xl p-6 shadow-xl shadow-black/50 border border-white/10">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h3 className="text-lg font-black text-gray-900 tracking-tight">Recent Activity</h3>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Event Timeline</p>
+                <h3 className="text-lg font-black text-white uppercase tracking-widest">System Events</h3>
+                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Protocol Timeline</p>
               </div>
-              <ClockIcon className="h-5 w-5 text-gray-400" />
+              <ClockIcon className="h-5 w-5 text-gray-500" />
             </div>
 
             <div className="space-y-6">
@@ -660,9 +660,9 @@ export default function DashboardPage() {
                   return (
                     <div key={activity.id} className="flex gap-4 relative">
                       {!isLast && <div className="absolute left-[19px] top-10 bottom-[-24px] w-0.5 bg-gray-100"></div>}
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 z-10 ${activity.icon === 'dollar' ? 'bg-emerald-100 text-emerald-600' :
-                        activity.icon === 'plus' ? 'bg-blue-100 text-blue-600' :
-                          'bg-purple-100 text-purple-600'
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 z-10 ${activity.icon === 'dollar' ? 'bg-emerald-500/10 text-emerald-400' :
+                        activity.icon === 'plus' ? 'bg-blue-500/10 text-blue-400' :
+                          'bg-purple-500/10 text-purple-400'
                         }`}>
                         {activity.icon === 'dollar' ? <CurrencyDollarIcon className="h-5 w-5" /> :
                           activity.icon === 'plus' ? <PlusIcon className="h-5 w-5" /> :
@@ -670,15 +670,15 @@ export default function DashboardPage() {
                       </div>
                       <div className="flex-1 pb-4">
                         <div className="flex items-center justify-between mb-1">
-                          <p className="text-sm font-bold text-gray-900">{activity.title}</p>
-                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                          <p className="text-sm font-black text-white tracking-widest uppercase">{activity.title}</p>
+                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                             {(() => {
                               const d = new Date(activity.timestamp);
                               return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                             })()}
                           </span>
                         </div>
-                        <p className="text-xs font-medium text-gray-500">{activity.description}</p>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{activity.description}</p>
                       </div>
                     </div>
                   );
@@ -716,7 +716,7 @@ export default function DashboardPage() {
                   {/* Progress */}
                   <div>
                     <div className="flex justify-between items-end mb-2">
-                      <span className="text-xs font-bold text-indigo-100">Current Milestone</span>
+                      <span className="text-[10px] font-bold text-indigo-100 uppercase tracking-widest">Current Milestone</span>
                       <span className="text-xl font-black">₹{stats.totalRevenue.toLocaleString()}</span>
                     </div>
                     <div className="h-3 bg-black/20 rounded-full overflow-hidden">
@@ -724,11 +724,11 @@ export default function DashboardPage() {
                         initial={{ width: 0 }}
                         animate={{ width: `${Math.min((stats.totalRevenue / 50000) * 100, 100)}%` }}
                         transition={{ duration: 1.5, ease: "easeOut" }}
-                        className="h-full bg-gradient-to-r from-yellow-300 to-orange-400 rounded-full"
+                        className="h-full bg-white"
                       />
                     </div>
                     <p className="text-[10px] font-bold text-indigo-100 mt-2 uppercase tracking-widest">
-                      {stats.totalRevenue < 50000 ? `₹${(50000 - stats.totalRevenue).toLocaleString()} to Next Badge` : 'Master Level Achieved!'}
+                      {stats.totalRevenue < 50000 ? `₹${(50000 - stats.totalRevenue).toLocaleString()} TO NEXT NODE` : 'MASTER LEVEL ACHIEVED!'}
                     </p>
                   </div>
 
@@ -746,35 +746,35 @@ export default function DashboardPage() {
 
                   <Link
                     href="/auth/dashboard/analytics"
-                    className="block w-full text-center py-4 bg-white text-indigo-600 rounded-2xl font-black text-sm hover:bg-indigo-50 transition-all duration-300 shadow-lg"
+                    className="block w-full text-center py-4 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-200 transition-all duration-300 shadow-lg"
                   >
-                    View Achievement Wall
+                    Examine achievements →
                   </Link>
                 </div>
               </div>
             </div>
 
             {/* Best Performers */}
-            <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 shadow-xl shadow-black/50 border border-white/10">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-black text-gray-900 tracking-tight">Best Performers</h3>
-                <FunnelIcon className="h-5 w-5 text-gray-400" />
+                <h3 className="text-lg font-black text-white uppercase tracking-widest">High Performers</h3>
+                <FunnelIcon className="h-5 w-5 text-gray-500" />
               </div>
               <div className="space-y-4">
                 {topChannels.slice(0, 4).map((channel, index) => (
-                  <div key={channel.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl border border-gray-100 hover:border-blue-100 hover:bg-white transition-all duration-300">
+                  <div key={channel.id} className="flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all duration-300">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm text-lg">
+                      <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-lg">
                         {index === 0 ? '🏆' : index === 1 ? '🥈' : index === 2 ? '🥉' : '✨'}
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-gray-900 truncate max-w-[120px]">{channel.name}</p>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{channel.visitors} Visits</p>
+                        <p className="text-sm font-black text-white truncate max-w-[120px] uppercase tracking-widest">{channel.name}</p>
+                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{channel.visitors} Visits</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-black text-gray-900">₹{channel.revenue.toLocaleString()}</p>
-                      <p className="text-[10px] font-bold text-emerald-600">+{channel.conversionRate}%</p>
+                      <p className="text-sm font-black text-white tracking-widest">₹{channel.revenue.toLocaleString()}</p>
+                      <p className="text-[10px] font-bold text-emerald-400">+{channel.conversionRate}%</p>
                     </div>
                   </div>
                 ))}

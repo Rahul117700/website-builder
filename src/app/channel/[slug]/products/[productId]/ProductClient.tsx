@@ -33,6 +33,7 @@ import {
   FlagIcon as FlagIconSolid
 } from '@heroicons/react/24/solid';
 import { PlusCircleIcon } from '@heroicons/react/24/outline';
+import { AnimatePresence } from 'framer-motion';
 import MainLayout from '@/components/layout/MainLayout';
 import SaveToPlaylistModal from '@/components/modals/SaveToPlaylistModal';
 import ShareModal from '@/components/modals/ShareModal';
@@ -797,25 +798,25 @@ export default function ProductClient() {
       const isGuest = !session?.user;
 
       return (
-        <div className="w-full relative bg-black min-h-[400px] sm:min-h-0 sm:aspect-video flex items-center justify-center">
+        <div className="w-full relative bg-black aspect-video flex items-center justify-center border-b border-[#1a1a1a]">
           {isGuest ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a] overflow-hidden">
-              <div className="text-center px-6 py-10 w-full max-w-sm mx-auto">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/5 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-white/10 shadow-2xl">
-                  <UserCircleIcon className="h-10 w-10 sm:h-12 sm:w-12 text-white/40" />
+            <div className="absolute inset-0 flex items-center justify-center overflow-hidden bg-black/90 backdrop-blur-xl">
+              <div className="text-center px-4 py-6 sm:py-8 w-full max-w-[340px] mx-auto scale-95 sm:scale-100">
+                <div className="flex w-14 h-14 bg-[#111] rounded-2xl items-center justify-center mx-auto mb-4 border border-white/5 shadow-[0_0_50px_rgba(255,255,255,0.05)]">
+                  <UserCircleIcon className="h-7 w-7 text-gray-500" />
                 </div>
-                <h3 className="text-white text-xl sm:text-2xl font-black mb-3">Join the Community</h3>
-                <p className="text-gray-400 text-sm mb-8 leading-relaxed">Sign in to watch this content and explore premium creators around the world.</p>
-                <div className="flex flex-col gap-3">
+                <h3 className="text-white text-lg sm:text-2xl font-black mb-1 uppercase tracking-tighter">Join the Community</h3>
+                <p className="text-gray-500 text-[10px] sm:text-xs mb-6 leading-relaxed max-w-[260px] mx-auto uppercase tracking-widest font-bold">Sign in to unlock premium content and support {channel.name}.</p>
+                <div className="flex flex-col gap-3 w-full">
                   <button
                     onClick={() => router.push('/auth/signin')}
-                    className="w-full py-4 bg-white text-black rounded-2xl font-black hover:bg-gray-200 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-white/5"
+                    className="w-full py-4 bg-white text-black rounded-xl font-black hover:bg-gray-200 transition-all active:scale-95 shadow-2xl text-xs uppercase tracking-[0.2em]"
                   >
                     Sign In to Watch
                   </button>
                   <button
                     onClick={() => router.push('/auth/signup')}
-                    className="text-gray-400 text-xs font-bold hover:text-white transition-colors uppercase tracking-widest py-2"
+                    className="text-gray-400 text-[10px] font-black hover:text-white transition-colors uppercase tracking-[0.2em] py-2"
                   >
                     Create Free Account
                   </button>
@@ -831,27 +832,35 @@ export default function ProductClient() {
                 onPlayChange={setIsPlaying}
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-900/50">
+              <div className="absolute inset-0 flex items-center justify-center bg-black">
                 <div className="text-center">
-                  <VideoCameraIcon className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-500 font-medium">Video not available</p>
+                  <VideoCameraIcon className="h-16 w-16 text-gray-800 mx-auto mb-4" />
+                  <p className="text-gray-600 font-black uppercase tracking-widest text-xs">Video not available</p>
                 </div>
               </div>
             )
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#0a0a0a] overflow-hidden">
-              <div className="text-center px-6 py-10 w-full max-w-sm mx-auto">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-red-600/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-red-500/20 shadow-2xl">
-                  <VideoCameraIcon className="h-10 w-10 sm:h-12 sm:w-12 text-red-500" />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/95 overflow-hidden backdrop-blur-2xl">
+              <div className="text-center px-4 py-6 sm:py-8 w-full max-w-[340px] mx-auto scale-95 sm:scale-100">
+                <div className="flex w-14 h-14 bg-red-600/5 rounded-2xl items-center justify-center mx-auto mb-4 border border-red-500/10 shadow-[0_0_50px_rgba(239,68,68,0.05)]">
+                  <VideoCameraIcon className="h-7 w-7 text-red-500" />
                 </div>
-                <h3 className="text-white text-xl sm:text-2xl font-black mb-3">Subscriber Only</h3>
-                <p className="text-gray-400 text-sm mb-8 leading-relaxed">This premium content is exclusive to channel subscribers. Support the creator to unlock.</p>
-                <button
-                  onClick={() => setShowSubscriptionModal(true)}
-                  className="w-full py-4 bg-red-600 text-white rounded-2xl font-black hover:bg-red-500 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl shadow-red-600/20"
-                >
-                  Subscribe Now
-                </button>
+                <h3 className="text-white text-lg sm:text-2xl font-black mb-1 uppercase tracking-tighter">Subscriber Only</h3>
+                <p className="text-gray-500 text-[10px] sm:text-xs mb-6 leading-relaxed max-w-[260px] mx-auto uppercase tracking-widest font-bold">Premium content exclusive to channel members. Support to unlock.</p>
+                <div className="flex flex-col gap-3 w-full">
+                  <button
+                    onClick={() => setShowSubscriptionModal(true)}
+                    className="w-full py-4 bg-[#e50914] text-white rounded-xl font-black hover:bg-red-700 transition-all active:scale-95 shadow-[0_10px_30px_rgba(229,9,20,0.3)] text-xs uppercase tracking-[0.2em]"
+                  >
+                    Subscribe Now
+                  </button>
+                  <button
+                    onClick={() => router.push(`/channel/${params?.slug}`)}
+                    className="text-gray-400 text-[10px] font-black hover:text-white transition-colors uppercase tracking-[0.2em] py-2"
+                  >
+                    Visit Channel
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -1057,7 +1066,7 @@ export default function ProductClient() {
 
   if (!product || !channel) {
     return (
-      <div className="min-h-screen bg-[#141414] flex items-center justify-center">
+      <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-2">Product not found</h1>
           <button
@@ -1079,826 +1088,383 @@ export default function ProductClient() {
 
   return (
     <MainLayout isDarkTheme={true} noPaddingTop={true}>
-      <div className="min-h-screen bg-gradient-to-br bg-[#141414] w-full relative overflow-clip pt-0 lg:pt-16">
+      <div className="min-h-screen bg-black w-full relative overflow-clip pt-0 lg:pt-16">
         {/* Decorative Background Elements */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-200/10 to-purple-200/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-br from-indigo-200/10 to-pink-200/10 rounded-full blur-3xl"></div>
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-white/5 to-transparent rounded-full blur-3xl opacity-20"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-br from-white/5 to-transparent rounded-full blur-3xl opacity-20"></div>
         </div>
 
         {/* Main Content - Full Width */}
         <div className="w-full">
           <div className="flex flex-col lg:flex-row">
             {/* Main Content Area - Full Width */}
-            <div className="flex-1 w-full relative">
+            <div className="flex-1 w-full relative bg-black">
               {/* Video/Content Player - Full Width */}
-              <div className={`w-full sticky ${scrolled ? 'top-[56px]' : 'top-0'} z-40 lg:relative lg:top-0 bg-[#000] transition-all duration-300`}>
+              <div className={`w-full sticky ${scrolled ? 'top-[56px]' : 'top-0'} z-40 lg:relative lg:top-0 bg-[#000] transition-all duration-300 overflow-hidden`}>
                 {renderContent()}
               </div>
 
               {/* Content Details - Full Width with Padding */}
-              <div className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-6 leading-tight">{product.title}</h1>
-
-                {/* Channel Info & Actions */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-6 border-b border-[#333]">
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    {channel.profileImage || channel.user?.image ? (
-                      <div
-                        className="relative group cursor-pointer"
-                        onClick={() => router.push(`/channel/${params?.slug}`)}
-                      >
-                        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-100 blur-md transition-opacity"></div>
-                        <img
-                          src={channel.profileImage || channel.user?.image}
-                          alt={channel.user?.name || channel.name || 'Creator'}
-                          className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full ring-2 ring-white shadow-lg object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center ring-2 ring-white shadow-lg cursor-pointer"
-                        onClick={() => router.push(`/channel/${params?.slug}`)}
-                      >
-                        <span className="text-red-500 font-bold text-lg">
-                          {(channel.name || channel.user?.name || 'C')[0].toUpperCase()}
-                        </span>
-                      </div>
-                    )}
-                    <div>
-                      <h3
-                        className="font-bold text-white text-base sm:text-lg cursor-pointer hover:text-red-500 transition-colors"
-                        onClick={() => router.push(`/channel/${params?.slug}`)}
-                      >
-                        {channel.name}
-                      </h3>
-                    </div>
-                    {channel.subscriptionEnabled && !isOwner && (
-                      <button
-                        onClick={() => {
-                          if (!session?.user?.id) {
-                            router.push('/auth/signin');
-                            return;
-                          }
-                          if (!hasActiveSubscription) {
-                            setShowSubscriptionModal(true);
-                          }
-                        }}
-                        disabled={hasActiveSubscription}
-                        className="hidden sm:block px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl text-sm font-bold hover:shadow-lg hover:shadow-red-200/50 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-                      >
-                        {hasActiveSubscription ? 'Subscribed' : 'Subscribe'}
-                      </button>
-                    )}
+              <div className="w-full px-4 sm:px-6 lg:px-12 py-8 sm:py-12 relative z-10">
+                <div className="max-w-7xl mx-auto">
+                  <div className="flex flex-wrap items-center gap-2 mb-4">
+                    {product.tags?.slice(0, 3).map((tag: string, i: number) => (
+                      <span key={i} className="text-[10px] font-black text-red-500 uppercase tracking-widest bg-red-500/5 px-2 py-1 rounded">#{tag}</span>
+                    ))}
                   </div>
+                  <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white mb-8 leading-[1.1] tracking-tighter uppercase italic">{product.title}</h1>
 
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-2 flex-wrap w-full">
-                    {/* Grouped Like & Bookmark */}
-                    <div className="flex items-center bg-[#2a2a2a] rounded-full flex-1">
-                      <button
-                        onClick={handleLikeToggle}
-                        className="flex-1 flex items-center justify-center gap-2 px-2 py-2.5 hover:bg-white/10 transition-all rounded-l-full sm:px-4"
-                      >
-                        {isLiked ? (
-                          <HeartIconSolid className="h-5 w-5 text-red-500 shrink-0" />
-                        ) : (
-                          <HeartIcon className="h-5 w-5 text-gray-300 shrink-0" />
-                        )}
-                        <span className="text-sm font-semibold text-gray-100 truncate">
-                          {product.likeCount || 0}
-                        </span>
-                      </button>
-                      <div className="w-[1px] h-6 bg-white/10" />
-                      <button
-                        onClick={() => setIsBookmarked(!isBookmarked)}
-                        className="flex-[0.5] sm:flex-1 flex items-center justify-center px-2 py-2.5 hover:bg-white/10 transition-all rounded-r-full sm:px-4"
-                      >
-                        {isBookmarked ? (
-                          <BookmarkIconSolid className="h-5 w-5 text-blue-500 shrink-0" />
-                        ) : (
-                          <BookmarkIcon className="h-5 w-5 text-gray-300 shrink-0" />
-                        )}
-                      </button>
-                    </div>
-
-                    <button
-                      onClick={() => setIsSaveModalOpen(true)}
-                      className="flex-1 flex items-center justify-center gap-2 px-2 sm:px-4 py-2.5 rounded-full bg-[#2a2a2a] hover:bg-white/10 transition-all text-gray-100 min-w-[3rem]"
-                    >
-                      <PlusCircleIcon className="h-5 w-5 shrink-0" />
-                      <span className="hidden sm:inline text-sm font-semibold truncate">Playlist</span>
-                    </button>
-
-                    <button
-                      onClick={handleShare}
-                      className="flex-1 flex items-center justify-center gap-2 px-2 sm:px-4 py-2.5 rounded-full bg-[#2a2a2a] hover:bg-white/10 transition-all text-gray-100 min-w-[3rem]"
-                    >
-                      <ShareIcon className="h-5 w-5 shrink-0" />
-                      <span className="hidden sm:inline text-sm font-semibold truncate">Share</span>
-                    </button>
-
-                    {product.fileUrl && (product.type?.toUpperCase() !== 'VIDEO' && product.type?.toUpperCase() !== 'VIDEOS') && (
-                      <button className="flex-1 flex items-center justify-center gap-2 px-2 sm:px-4 py-2.5 rounded-full bg-[#2a2a2a] hover:bg-white/10 transition-all text-gray-100 min-w-[3rem]">
-                        <ArrowDownTrayIcon className="h-5 w-5 shrink-0" />
-                        <span className="hidden sm:inline text-sm font-semibold truncate">Download</span>
-                      </button>
-                    )}
-
-                    {/* View in Reel Mode button - visible for all video products */}
-                    {(product.type?.toUpperCase() === 'VIDEO' || product.type?.toUpperCase() === 'VIDEOS') && (
-                      <a
-                        href={`/shots/${product.id}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex-1 flex items-center justify-center gap-2 px-2 sm:px-4 py-2.5 rounded-full bg-gradient-to-r from-red-600/20 to-rose-600/20 border border-red-500/30 hover:from-red-600/30 hover:to-rose-600/30 transition-all text-red-400 min-w-[3rem] font-semibold"
-                      >
-                        <FilmIcon className="h-5 w-5 shrink-0" />
-                        <span className="hidden sm:inline text-sm font-bold truncate">Reel Mode</span>
-                      </a>
-                    )}
-
-                    <div className="relative flex-1 min-w-[3rem]">
-                      <button
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setIsReporting(!isReporting); }}
-                        className={`w-full flex items-center justify-center gap-2 px-2 sm:px-4 py-2.5 rounded-full transition-all ${isReporting ? 'bg-amber-50 text-amber-600' : 'bg-[#2a2a2a] hover:bg-[#3f3f3f] text-gray-100'}`}
-                      >
-                        {isReporting ? <FlagIconSolid className="h-5 w-5 text-amber-500 shrink-0" /> : <FlagIcon className="h-5 w-5 shrink-0" />}
-                        <span className="hidden sm:inline text-sm font-semibold truncate">Report</span>
-                      </button>
-
-                      {isReporting && (
-                        <div className="absolute right-0 sm:right-auto sm:left-0 top-14 w-60 bg-[#1a1a1a] shadow-[0_10px_40px_-5px_rgba(0,0,0,0.2)] rounded-2xl border border-[#333] p-4 z-[100] animate-in fade-in slide-in-from-top-2">
-                          <p className="text-xs font-bold text-white mb-3 uppercase tracking-wider flex items-center gap-2">
-                            <FlagIcon className="w-4 h-4 text-amber-500" /> Report Content
-                          </p>
-                          <select
-                            value={reportReason}
-                            onChange={(e) => setReportReason(e.target.value)}
-                            className="w-full text-sm p-2.5 rounded-xl border border-[#333] mb-4 outline-none bg-[#141414] focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-white"
-                          >
-                            <option>Inappropriate content</option>
-                            <option>Pornography or Nudity</option>
-                            <option>Copyright violation</option>
-                            <option>Spam or misleading</option>
-                            <option>Other</option>
-                          </select>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => setIsReporting(false)}
-                              className="flex-1 bg-[#2a2a2a] hover:bg-[#3f3f3f] text-gray-300 text-sm font-bold py-2.5 rounded-xl transition-colors border border-[#333]"
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              onClick={submitReport}
-                              disabled={isSubmittingReport}
-                              className="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold py-2.5 rounded-xl disabled:opacity-50 transition-colors shadow-md shadow-amber-500/20"
-                            >
-                              {isSubmittingReport ? '...' : 'Submit'}
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Product Info */}
-                <div className="bg-[#141414] rounded-lg p-4 mb-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
-                    <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                      {product.tags && product.tags.length > 0 && (
-                        <div className="flex gap-2 flex-wrap">
-                          {product.tags.slice(0, 3).map((tag: string, idx: number) => (
-                            <span
-                              key={idx}
-                              className="px-2 sm:px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    {!isOwner && channel.subscriptionEnabled && (
-                      <button
-                        onClick={() => {
-                          if (!session?.user?.id) {
-                            router.push('/auth/signin');
-                            return;
-                          }
-                          setShowSubscriptionModal(true);
-                        }}
-                        disabled={hasActiveSubscription}
-                        className="px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {hasActiveSubscription ? 'Subscribed' : 'Subscribe Now'}
-                      </button>
-                    )}
-                    {!isOwner && (
-                      <button
-                        onClick={handleFollow}
-                        disabled={isFollowLoading}
-                        className={`px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isFollowing
-                          ? 'bg-transparent border border-gray-600 text-gray-300 hover:bg-white/5'
-                          : 'bg-white text-black hover:bg-gray-200'
-                          }`}
-                      >
-                        {isFollowLoading ? '...' : isFollowing ? 'Following' : 'Follow'}
-                      </button>
-                    )}
-                  </div>
-                  {product.description && (
-                    <div>
-                      {/* Desktop: always show full description */}
-                      <p className="hidden md:block text-sm sm:text-base text-gray-300 whitespace-pre-wrap">{product.description}</p>
-
-                      {/* Mobile: collapsible description */}
-                      <div className="md:hidden">
-                        <p
-                          className={`text-sm text-gray-300 whitespace-pre-wrap transition-all duration-300 ${descriptionExpanded ? '' : 'line-clamp-3'
-                            }`}
+                  {/* Channel Info & Actions */}
+                  <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-8 mb-12 pb-12 border-b border-[#1a1a1a]">
+                    <div className="flex items-center gap-5">
+                      {channel.profileImage || channel.user?.image ? (
+                        <div
+                          className="relative group cursor-pointer"
+                          onClick={() => router.push(`/channel/${params?.slug}`)}
                         >
-                          {product.description}
-                        </p>
-                        <button
-                          onClick={() => setDescriptionExpanded(!descriptionExpanded)}
-                          className="mt-2 flex items-center gap-1.5 text-xs font-bold text-gray-400 hover:text-white transition-colors"
-                        >
-                          {descriptionExpanded ? (
-                            <>
-                              <ChevronUpIcon className="w-4 h-4" />
-                              Show less
-                            </>
-                          ) : (
-                            <>
-                              <ChevronDownIcon className="w-4 h-4" />
-                              Show more
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Stats */}
-                <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-400 mb-6">
-                  <span>{product.viewCount || 0} views</span>
-                  <span>{new Date(product.createdAt).toLocaleDateString()}</span>
-                  <span>{product.type}</span>
-                </div>
-
-                {/* Ratings Section */}
-                <div className="mb-12">
-                  {/* Mobile Toggle Header */}
-                  <button
-                    onClick={() => setReviewsExpanded(!reviewsExpanded)}
-                    className="w-full flex md:hidden items-center justify-between p-4 bg-[#1a1a1a] rounded-2xl border border-[#333] mb-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-yellow-400/10 rounded-xl flex items-center justify-center">
-                        <StarIconSolid className="w-4 h-4 text-yellow-400" />
-                      </div>
-                      <div className="text-left">
-                        <span className="font-bold text-white text-sm">Ratings & Reviews</span>
-                        <p className="text-xs text-gray-400">{totalReviews} verified ratings</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {averageRating > 0 && (
-                        <span className="text-sm font-black text-white bg-[#2a2a2a] px-2.5 py-1 rounded-lg">{averageRating.toFixed(1)} ★</span>
-                      )}
-                      {reviewsExpanded ? (
-                        <ChevronUpIcon className="w-4 h-4 text-gray-400" />
-                      ) : (
-                        <ChevronDownIcon className="w-4 h-4 text-gray-400" />
-                      )}
-                    </div>
-                  </button>
-
-                  <div className={`${reviewsExpanded ? 'block' : 'hidden'} md:block`}>
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-[#1a1a1a] p-5 md:p-8 rounded-2xl md:rounded-[2rem] border border-[#333]/80">
-                      <div className="flex flex-col md:flex-row items-center gap-5 md:gap-8">
-                        {/* Rating Score */}
-                        <div className="flex items-center gap-4 md:flex-col md:items-start md:gap-2">
-                          <div className="flex items-baseline gap-1.5">
-                            <span className="text-4xl md:text-7xl font-black text-white tracking-tighter">
-                              {averageRating > 0 ? averageRating.toFixed(1) : '0.0'}
-                            </span>
-                            <span className="text-base md:text-xl text-gray-400 font-bold">/ 5</span>
-                          </div>
-                          <div className="flex flex-col gap-1.5">
-                            <div className="flex items-center gap-0.5">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <StarIconSolid
-                                  key={star}
-                                  className={`h-4 w-4 md:h-5 md:w-5 ${star <= Math.round(averageRating)
-                                    ? 'text-yellow-400'
-                                    : 'text-gray-600'
-                                    }`}
-                                />
-                              ))}
-                            </div>
-                            <div className="text-xs text-gray-400 font-medium bg-[#333]/60 px-2.5 py-0.5 rounded-full">{totalReviews} verified ratings</div>
-                          </div>
-                        </div>
-                        <div className="hidden md:block h-px w-full md:w-px md:h-24 bg-gradient-to-b from-transparent via-[#444] to-transparent" />
-                        <div className="hidden md:block text-left">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h2 className="text-2xl font-black text-white tracking-tight">Ratings & Reviews</h2>
-                            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-900/40 text-emerald-400 border border-emerald-700/50 text-[9px] font-extrabold uppercase tracking-widest shrink-0">
-                              <span className="relative flex h-1.5 w-1.5">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-                              </span>
-                              LIVE
-                            </span>
-                          </div>
-                          <p className="text-base text-gray-400 max-w-sm">Authentic feedback from real users to help you make the best decision.</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* User Rating Form */}
-                    {session?.user?.id && (
-                      <div className="bg-[#1a1a1a] rounded-[2rem] p-8 mb-8 border border-[#333] shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
-                        <div className="flex items-center gap-3 mb-6">
-                          <div className="p-2.5 bg-indigo-900/30 rounded-xl text-red-500">
-                            <StarIcon className="w-6 h-6" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-extrabold text-white">Rate this product</h3>
-                            <p className="text-sm text-gray-400 font-medium">Share your experience with the community</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-4 mb-6 p-4 bg-[#1a1a1a] shadow-none rounded-2xl border border-[#333] inline-block w-fit">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <button
-                              key={star}
-                              type="button"
-                              onClick={() => setUserRating(star)}
-                              className="group relative focus:outline-none transition-transform hover:scale-110 active:scale-95"
-                              aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
-                            >
-                              {star <= userRating ? (
-                                <StarIconSolid className="h-10 w-10 sm:h-12 sm:w-12 text-yellow-400 drop-shadow-md transition-all duration-300" />
-                              ) : (
-                                <StarIcon className="h-10 w-10 sm:h-12 sm:w-12 text-gray-300 group-hover:text-yellow-200 transition-all duration-300" />
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                        <div className="relative mb-6">
-                          <textarea
-                            value={reviewComment}
-                            onChange={(e) => setReviewComment(e.target.value)}
-                            placeholder="Tell us what you think about this content..."
-                            className="w-full px-5 py-4 bg-[#1a1a1a] shadow-none border border-[#333] rounded-2xl focus:ring-4 focus:ring-red-500/10 focus:border-red-500 text-sm sm:text-base text-white transition-all resize-none min-h-[120px]"
+                          <div className="absolute inset-0 rounded-full bg-red-600 opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
+                          <img
+                            src={channel.profileImage || channel.user?.image}
+                            alt={channel.user?.name || channel.name}
+                            className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full border border-[#222] object-cover transition-transform group-hover:scale-105"
                           />
                         </div>
-                        <button
-                          onClick={handleRatingSubmit}
-                          disabled={userRating === 0}
-                          className="px-8 py-3.5 bg-white text-black font-bold rounded-xl text-sm font-bold hover:bg-[#e50914] transition-all shadow-md hover:shadow-xl disabled:opacity-40 disabled:shadow-none translate-y-0 active:scale-95 flex items-center gap-2"
-                        >
-                          Submit Review
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                          </svg>
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Reviews List */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {reviews.length === 0 ? (
-                        <div className="col-span-full py-16 text-center bg-[#1a1a1a] shadow-none rounded-[2rem] border-2 border-dashed border-[#333]">
-                          <div className="w-16 h-16 bg-[#1a1a1a] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-[#333]">
-                            <StarIcon className="w-8 h-8 text-gray-300" />
-                          </div>
-                          <p className="text-base text-gray-400 font-bold mb-1">No reviews yet</p>
-                          <p className="text-sm text-gray-400">Be the first to share your thoughts!</p>
-                        </div>
                       ) : (
-                        reviews.slice(0, visibleReviewsCount).map((review: any) => (
-                          <div key={review.id} className="bg-[#1a1a1a] border border-[#333] rounded-[2rem] p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300 group">
-                            <div className="flex items-start justify-between mb-4">
-                              <div className="flex items-center gap-4">
-                                {review.user?.image ? (
-                                  <img
-                                    src={review.user.image}
-                                    alt={review.user.name || 'User'}
-                                    className="w-12 h-12 rounded-full ring-4 ring-gray-50 object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center border-2 border-white shadow-sm ring-4 ring-gray-50">
-                                    <span className="text-red-500 font-black text-sm">
-                                      {(review.user?.name || 'U')[0].toUpperCase()}
-                                    </span>
-                                  </div>
-                                )}
-                                <div>
-                                  <h4 className="font-bold text-white group-hover:text-red-500 transition-colors">
-                                    {review.user?.name || 'Anonymous'}
-                                  </h4>
-                                  <p className="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">
-                                    {new Date(review.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex items-center bg-gray-900 px-2.5 py-1 rounded-lg shadow-sm">
-                                <StarIconSolid className="h-3.5 w-3.5 text-yellow-500 mr-1.5" />
-                                <span className="text-xs font-bold text-white">{review.rating}.0</span>
-                              </div>
-                            </div>
-                            {review.comment && (
-                              <p className="text-sm text-gray-400 leading-relaxed bg-[#1a1a1a] shadow-none p-4 rounded-2xl border border-[#333]/50 line-clamp-4">"{review.comment}"</p>
-                            )}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                    {reviews.length > visibleReviewsCount && (
-                      <div className="mt-8 text-center">
-                        <button
-                          onClick={() => setVisibleReviewsCount(prev => prev + 4)}
-                          className="inline-flex items-center justify-center px-6 py-2.5 border border-[#333] shadow-sm text-sm font-bold rounded-xl text-gray-300 bg-[#1a1a1a] hover:bg-[#141414] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all active:scale-95"
+                        <div
+                          className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#111] border border-[#222] flex items-center justify-center cursor-pointer transition-transform hover:scale-105"
+                          onClick={() => router.push(`/channel/${params?.slug}`)}
                         >
-                          Show more reviews
+                          <span className="text-white font-black text-2xl uppercase">{(channel.name || 'C')[0]}</span>
+                        </div>
+                      )}
+                      <div>
+                        <h3
+                          className="font-black text-white text-xl sm:text-2xl cursor-pointer hover:text-red-500 transition-colors uppercase tracking-tight"
+                          onClick={() => router.push(`/channel/${params?.slug}`)}
+                        >
+                          {channel.name}
+                        </h3>
+                        <div className="flex items-center gap-3 mt-1.5">
+                           <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Verified Creator</span>
+                           <div className="w-1 h-1 rounded-full bg-gray-800" />
+                           <span className="text-[10px] font-black text-white uppercase tracking-widest">{formatNumber(channel.subscriberCount || 0)} Members</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                      {channel.subscriptionEnabled && !isOwner && (
+                        <button
+                          onClick={() => !hasActiveSubscription && setShowSubscriptionModal(true)}
+                          className={`px-8 py-4 rounded-xl text-xs font-black uppercase tracking-[0.2em] transition-all active:scale-95 ${hasActiveSubscription ? 'bg-[#111] text-gray-500 border border-[#222] cursor-default' : 'bg-white text-black hover:bg-gray-200 shadow-[0_0_40px_rgba(255,255,255,0.1)]'}`}
+                        >
+                          {hasActiveSubscription ? 'Membership Active' : 'Join Membership'}
+                        </button>
+                      )}
+                      
+                      <div className="flex items-center bg-[#0a0a0a] rounded-xl border border-[#222] overflow-hidden">
+                        <button onClick={handleLikeToggle} className="flex items-center gap-2.5 px-6 py-4 hover:bg-[#111] transition-all border-r border-[#1a1a1a]">
+                          {isLiked ? <HeartIconSolid className="h-5 w-5 text-red-600" /> : <HeartIcon className="h-5 w-5 text-gray-500" />}
+                          <span className="text-sm font-black text-white">{formatNumber(product.likeCount || 0)}</span>
+                        </button>
+                        <button onClick={() => setIsBookmarked(!isBookmarked)} className="px-6 py-4 hover:bg-[#111] transition-all">
+                          {isBookmarked ? <BookmarkIconSolid className="h-5 w-5 text-white" /> : <BookmarkIcon className="h-5 w-5 text-gray-500" />}
                         </button>
                       </div>
-                    )}
+
+                      <button onClick={() => setIsSaveModalOpen(true)} className="p-4 rounded-xl bg-[#0a0a0a] border border-[#222] hover:bg-[#111] transition-all text-white">
+                        <PlusCircleIcon className="h-5 w-5" />
+                      </button>
+
+                      <button onClick={handleShare} className="p-4 rounded-xl bg-[#0a0a0a] border border-[#222] hover:bg-[#111] transition-all text-white">
+                        <ShareIcon className="h-5 w-5" />
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                {/* Comments Section */}
-                <div className="mb-6">
-                  {/* Mobile Toggle Header */}
-                  <button
-                    onClick={() => setCommentsExpanded(!commentsExpanded)}
-                    className="w-full flex md:hidden items-center justify-between p-4 bg-[#1a1a1a] rounded-2xl border border-[#333] mb-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-red-500/10 rounded-xl flex items-center justify-center">
-                        <ChatBubbleLeftRightIcon className="h-4 w-4 text-red-400" />
-                      </div>
-                      <div className="text-left">
-                        <span className="font-bold text-white text-sm">Comments</span>
-                        <p className="text-xs text-gray-400">{comments.length} discussions</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {comments.length > 0 && (
-                        <span className="text-xs font-bold text-white bg-[#2a2a2a] px-2.5 py-1 rounded-lg">{comments.length}</span>
-                      )}
-                      {commentsExpanded ? (
-                        <ChevronUpIcon className="w-4 h-4 text-gray-400" />
-                      ) : (
-                        <ChevronDownIcon className="w-4 h-4 text-gray-400" />
-                      )}
-                    </div>
-                  </button>
-
-                  <div className={`${commentsExpanded ? 'block' : 'hidden'} md:block`}>
-                    {/* Comments Header */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-[#1a1a1a] p-5 md:p-8 rounded-2xl md:rounded-[2rem] border border-[#333]/80">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 md:p-4 bg-red-500/10 rounded-xl md:rounded-2xl text-red-400">
-                          <ChatBubbleLeftRightIcon className="h-5 w-5 md:h-8 md:w-8" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2.5 mb-1">
-                            <h2 className="text-lg md:text-2xl font-black text-white tracking-tight">
-                              Comments
-                            </h2>
-                            <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-900/40 text-emerald-400 border border-emerald-700/50 text-[9px] md:text-[10px] font-extrabold uppercase tracking-widest shrink-0">
-                              <span className="relative flex h-1.5 w-1.5">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-                              </span>
-                              LIVE
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-400">{comments.length} discussions happening live right now</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Comment Form */}
-                    <div className="mb-10">
-                      {session?.user?.id ? (
-                        <div className="bg-[#1a1a1a] rounded-[2rem] p-8 border border-[#333] shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
-                          <div className="flex gap-4 mb-6">
-                            {session.user.image ? (
-                              <img
-                                src={session.user.image}
-                                alt={session.user.name || 'You'}
-                                className="w-12 h-12 rounded-full ring-4 ring-gray-50 object-cover shrink-0"
-                              />
-                            ) : (
-                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center ring-4 ring-gray-50 shadow-sm shrink-0">
-                                <span className="text-gray-400 font-black text-sm">
-                                  {(session.user.name || 'Y')[0].toUpperCase()}
-                                </span>
-                              </div>
-                            )}
-                            <div className="flex-1">
-                              <textarea
-                                value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
-                                placeholder="Join the conversation..."
-                                className="w-full px-5 py-4 bg-[#1a1a1a] shadow-none border border-[#333] rounded-2xl focus:ring-4 focus:ring-red-500/10 focus:border-red-500 text-sm sm:text-base text-white transition-all resize-none min-h-[120px]"
-                              />
-                            </div>
-                          </div>
-                          <div className="flex justify-end">
-                            <button
-                              onClick={() => handleCommentSubmit()}
-                              disabled={!newComment.trim()}
-                              className="px-8 py-3.5 bg-white text-black font-bold rounded-xl text-sm font-bold hover:bg-[#e50914] transition-all shadow-md hover:shadow-xl disabled:opacity-40 disabled:shadow-none translate-y-0 active:scale-95 flex items-center gap-2"
+                  {/* Description & Metadata */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-16">
+                    <div className="lg:col-span-2">
+                       <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-4">The Story</h4>
+                       <div className="relative">
+                          <p className={`text-gray-400 text-lg leading-relaxed whitespace-pre-wrap ${!descriptionExpanded && 'line-clamp-[10]'} md:line-clamp-none`}>
+                            {product.description || 'No description provided by creator.'}
+                          </p>
+                          {product.description?.length > 300 && (
+                            <button 
+                              onClick={() => setDescriptionExpanded(!descriptionExpanded)}
+                              className="md:hidden mt-4 text-[10px] font-black text-white uppercase tracking-widest border-b border-white/20 pb-0.5"
                             >
-                              Post Comment
-                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                              </svg>
+                              {descriptionExpanded ? 'Show Less' : 'Read Full Story'}
+                            </button>
+                          )}
+                       </div>
+                    </div>
+                    <div>
+                        <div className="bg-[#050505] border border-[#1a1a1a] rounded-3xl p-8 space-y-6">
+                            <div className="flex items-center justify-between py-1">
+                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Type</span>
+                                <span className="text-[10px] font-black text-white uppercase tracking-widest">{product.type}</span>
+                            </div>
+                            <div className="flex items-center justify-between py-1 border-t border-[#111]">
+                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Released</span>
+                                <span className="text-[10px] font-black text-white uppercase tracking-widest">{new Date(product.createdAt).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</span>
+                            </div>
+                            <div className="flex items-center justify-between py-1 border-t border-[#111]">
+                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Engagement</span>
+                                <span className="text-[10px] font-black text-white uppercase tracking-widest">{formatNumber(product.viewCount || 0)} Plays</span>
+                            </div>
+                            <div className="pt-4">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <StarIconSolid className="w-4 h-4 text-yellow-500" />
+                                    <span className="text-xl font-black text-white">{averageRating.toFixed(1)}</span>
+                                    <span className="text-xs text-gray-500 font-bold">({totalReviews} reviews)</span>
+                                </div>
+                                <button
+                                    onClick={() => document.getElementById('reviews-section')?.scrollIntoView({ behavior: 'smooth' })}
+                                    className="w-full py-3.5 bg-red-600/10 text-red-500 border border-red-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600/20 transition-all"
+                                >
+                                    View authentic reviews
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+
+                  {/* Reviews & Comments Integrated Section */}
+                  <div id="reviews-section" className="space-y-16 py-16 border-t border-[#1a1a1a]">
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-20">
+                      
+                      {/* Left Side: Reviews */}
+                      <div className="space-y-10">
+                        <div className="flex items-center justify-between">
+                           <h2 className="text-2xl font-black text-white uppercase tracking-tighter italic">Authentic Reviews</h2>
+                           <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/5 px-3 py-1 rounded-full uppercase tracking-widest">Verified Source</span>
+                        </div>
+
+                        {session?.user?.id ? (
+                          <div className="bg-[#0a0a0a] border border-[#1a1a1a] p-8 rounded-3xl">
+                            <p className="text-xs font-black text-gray-500 uppercase tracking-widest mb-6 text-center">Your Rating</p>
+                            <div className="flex justify-center gap-3 mb-8">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <button 
+                                      key={star} 
+                                      onClick={() => setUserRating(star)} 
+                                      className="transition-transform active:scale-90"
+                                    >
+                                        <StarIconSolid className={`w-8 h-8 ${star <= userRating ? 'text-yellow-500' : 'text-gray-800 hover:text-gray-600'}`} />
+                                    </button>
+                                ))}
+                            </div>
+                            <textarea
+                                value={reviewComment}
+                                onChange={(e) => setReviewComment(e.target.value)}
+                                placeholder="Share your experience with the community..."
+                                className="w-full h-32 bg-black border border-[#222] rounded-2xl p-4 text-white placeholder-gray-700 outline-none focus:border-red-500/50 transition-all mb-4 text-sm resize-none"
+                            />
+                            <button
+                                onClick={handleRatingSubmit}
+                                className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-xs rounded-xl hover:bg-gray-200 transition-all"
+                            >
+                                Publish Review
                             </button>
                           </div>
-                        </div>
-                      ) : (
-                        <div className="bg-[#1a1a1a] rounded-[2rem] p-12 border-2 border-dashed border-[#333] text-center">
-                          <div className="w-16 h-16 bg-[#1a1a1a] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-[#333] text-red-500">
-                            <ChatBubbleLeftRightIcon className="w-8 h-8" />
+                        ) : (
+                          <div className="bg-[#0a0a0a] border border-dashed border-[#222] p-10 rounded-3xl text-center">
+                             <p className="text-sm text-gray-500 font-bold uppercase tracking-widest">Sign in to leave a review</p>
                           </div>
-                          <p className="text-base text-gray-400 font-bold mb-6">Sign in to share your thoughts with the community</p>
-                          <button
-                            onClick={() => router.push('/auth/signin')}
-                            className="px-8 py-3.5 bg-[#1a1a1a] border border-[#333] text-white rounded-xl text-sm font-bold hover:bg-[#141414] hover:border-gray-300 transition-all shadow-sm active:scale-95"
-                          >
-                            Sign In to Comment
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                        )}
 
-                    {/* Comments List */}
-                    <div className="space-y-6">
-                      {comments.length === 0 ? (
-                        <div className="py-16 text-center bg-[#1a1a1a] shadow-none rounded-[2rem] border-2 border-dashed border-[#333]">
-                          <p className="text-base text-gray-400 font-bold">No comments yet</p>
-                          <p className="text-sm text-gray-400">Start the conversation!</p>
-                        </div>
-                      ) : (
-                        comments.slice(0, visibleCommentsCount).map((comment: any) => (
-                          <div key={comment.id} className="group relative">
-                            <div className="flex gap-4 md:gap-6">
-                              <div className="flex flex-col items-center gap-3">
-                                {comment.user?.image ? (
-                                  <img
-                                    src={comment.user.image}
-                                    alt={comment.user.name || 'User'}
-                                    className="w-12 h-12 rounded-full ring-4 ring-gray-50 object-cover shadow-sm"
-                                  />
-                                ) : (
-                                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center ring-4 ring-gray-50 border-2 border-white shadow-sm font-black text-red-500 text-sm">
-                                    {(comment.user?.name || 'U')[0].toUpperCase()}
-                                  </div>
-                                )}
-                                <div className="w-px flex-1 bg-gradient-to-b from-gray-200 to-transparent group-last:hidden" />
-                              </div>
-                              <div className="flex-1 pb-4">
-                                {/* Main Comment Box */}
-                                <div className="bg-[#1a1a1a] rounded-[2rem] p-6 border border-[#333] shadow-[0_4px_20px_rgb(0,0,0,0.03)] transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] group-hover:border-indigo-100/50 relative">
-                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-                                    <h4 className="font-bold text-white text-base">
-                                      {comment.user?.name || 'Anonymous'}
-                                    </h4>
-                                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest bg-[#141414] px-2 py-1 rounded-md w-fit">
-                                      {new Date(comment.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                                    </span>
-                                  </div>
-                                  <p className="text-sm sm:text-base text-gray-400 leading-relaxed mb-6">{comment.content}</p>
-                                  {session?.user?.id && (
-                                    <button
-                                      onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                                      className="inline-flex items-center gap-1.5 text-xs font-bold text-red-500 hover:text-indigo-700 transition-colors"
-                                    >
-                                      <div className="w-5 h-5 rounded-full bg-indigo-900/30 flex items-center justify-center">
-                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                          <path fillRule="evenodd" d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 11-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                                        </svg>
-                                      </div>
-                                      {replyingTo === comment.id ? 'Cancel' : 'Reply'}
-                                    </button>
-                                  )}
+                        <div className="space-y-6">
+                            {reviews.slice(0, visibleReviewsCount).map((review: any) => (
+                                <div key={review.id} className="p-6 bg-[#050505] border border-[#111] rounded-2xl">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-[#111] border border-[#222] flex items-center justify-center font-black text-gray-500 text-xs uppercase">
+                                                {review.user?.image ? <img src={review.user.image} className="w-full h-full rounded-full object-cover" /> : review.user?.name?.[0] || 'U'}
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-black text-white uppercase tracking-tight">{review.user?.name || 'Anonymous'}</p>
+                                                <p className="text-[9px] font-bold text-gray-600 mt-0.5">{new Date(review.createdAt).toLocaleDateString()}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-0.5">
+                                            {[1, 2, 3, 4, 5].map((s) => (
+                                                <StarIconSolid key={s} className={`w-3 h-3 ${s <= review.rating ? 'text-yellow-500' : 'text-gray-900'}`} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <p className="text-sm text-gray-400 leading-relaxed">{review.comment}</p>
                                 </div>
-
-                                {/* Reply Form */}
-                                {replyingTo === comment.id && session?.user?.id && (
-                                  <div className="mt-6 bg-indigo-900/30/50 rounded-2xl p-6 border border-indigo-100/50 animate-in fade-in slide-in-from-top-2 duration-300">
-                                    <div className="flex gap-4 mb-4">
-                                      {session.user.image ? (
-                                        <img
-                                          src={session.user.image}
-                                          alt={session.user.name || 'You'}
-                                          className="w-10 h-10 rounded-full ring-4 ring-white object-cover shadow-sm shrink-0"
-                                        />
-                                      ) : (
-                                        <div className="w-10 h-10 rounded-full bg-[#1a1a1a] flex items-center justify-center shadow-sm font-black text-red-500 text-sm shrink-0 ring-4 ring-white">
-                                          {(session.user.name || 'Y')[0].toUpperCase()}
-                                        </div>
-                                      )}
-                                      <textarea
-                                        value={replyContent}
-                                        onChange={(e) => setReplyContent(e.target.value)}
-                                        placeholder="Write your response..."
-                                        className="flex-1 px-5 py-4 bg-[#1a1a1a] border border-[#333] rounded-2xl focus:ring-4 focus:ring-red-500/10 focus:border-red-500 text-sm text-white shadow-[0_2px_10px_rgb(0,0,0,0.02)] transition-all resize-none min-h-[100px]"
-                                      />
-                                    </div>
-                                    <div className="flex justify-end gap-3">
-                                      <button
-                                        onClick={() => {
-                                          setReplyingTo(null);
-                                          setReplyContent('');
-                                        }}
-                                        className="px-6 py-2.5 text-sm font-bold text-gray-400 hover:text-white bg-[#1a1a1a] hover:bg-[#141414] border border-[#333] rounded-xl transition-all shadow-sm"
-                                      >
-                                        Cancel
-                                      </button>
-                                      <button
-                                        onClick={() => handleCommentSubmit(comment.id)}
-                                        disabled={!replyContent.trim()}
-                                        className="px-6 py-2.5 bg-red-600 text-white rounded-xl text-sm font-bold hover:bg-red-700 transition-all shadow-md active:scale-95 disabled:opacity-40 disabled:shadow-none"
-                                      >
-                                        Post Reply
-                                      </button>
-                                    </div>
-                                  </div>
-                                )}
-
-                                {/* Replies List */}
-                                {comment.replies && comment.replies.length > 0 && (
-                                  <div className="mt-6 space-y-4 ml-2 border-l-2 border-[#333] pl-4 md:pl-6">
-                                    {comment.replies.map((reply: any) => (
-                                      <div key={reply.id} className="relative">
-                                        <div className="flex gap-3 md:gap-4">
-                                          {reply.user?.image ? (
-                                            <img
-                                              src={reply.user.image}
-                                              alt={reply.user.name || 'User'}
-                                              className="w-10 h-10 rounded-full ring-2 ring-gray-50 shadow-sm object-cover shrink-0"
-                                            />
-                                          ) : (
-                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center border-2 border-white shadow-sm font-black text-emerald-600 text-sm shrink-0 ring-2 ring-gray-50">
-                                              {(reply.user?.name || 'U')[0].toUpperCase()}
-                                            </div>
-                                          )}
-                                          <div className="flex-1 bg-[#222] rounded-[1.5rem] p-5 border border-[#333]/50 transition-all hover:border-indigo-100/50 hover:bg-[#1a1a1a] hover:shadow-sm">
-                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-                                              <span className="font-bold text-sm text-white">
-                                                {reply.user?.name || 'Anonymous'}
-                                              </span>
-                                              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-100/50 px-2 py-1 rounded-md w-fit">
-                                                {new Date(reply.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                                              </span>
-                                            </div>
-                                            <p className="text-sm text-gray-300 leading-relaxed">{reply.content}</p>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                    {comments.length > visibleCommentsCount && (
-                      <div className="mt-8 text-center">
-                        <button
-                          onClick={() => setVisibleCommentsCount(prev => prev + 5)}
-                          className="inline-flex items-center justify-center px-6 py-2.5 border border-[#333] shadow-sm text-sm font-bold rounded-xl text-gray-300 bg-[#1a1a1a] hover:bg-[#141414] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all active:scale-95"
-                        >
-                          Show more comments
-                        </button>
+                            ))}
+                            {reviews.length > visibleReviewsCount && (
+                                <button onClick={() => setVisibleReviewsCount(v => v + 4)} className="w-full py-4 text-[10px] font-black text-gray-500 uppercase tracking-widest hover:text-white transition-colors">Load more reviews ({reviews.length - visibleReviewsCount})</button>
+                            )}
+                        </div>
                       </div>
-                    )}
+
+                      {/* Right Side: Comments */}
+                      <div className="space-y-10">
+                         <div className="flex items-center justify-between">
+                           <h2 className="text-2xl font-black text-white uppercase tracking-tighter italic">Community Dialogue</h2>
+                           <span className="text-[10px] font-black text-gray-500 bg-[#0a0a0a] px-3 py-1 rounded-full uppercase tracking-widest border border-[#1a1a1a]">{comments.length} Thoughts</span>
+                        </div>
+
+                        <div className="relative group">
+                            <textarea
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                                placeholder="Add to the discussion..."
+                                className="w-full h-40 bg-[#0a0a0a] border border-[#1a1a1a] rounded-3xl p-6 text-white placeholder-gray-700 outline-none focus:border-red-500/30 focus:bg-black transition-all text-sm resize-none shadow-2xl"
+                            />
+                            <div className="absolute bottom-6 right-6">
+                                <button
+                                    onClick={() => handleCommentSubmit()}
+                                    className="px-6 py-2.5 bg-red-600 text-white font-black uppercase tracking-widest text-[10px] rounded-full hover:bg-red-700 transition-all active:scale-95 disabled:opacity-50"
+                                    disabled={!newComment.trim()}
+                                >
+                                    Send
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="space-y-8">
+                            {comments.slice(0, visibleCommentsCount).map((comment: any) => (
+                                <div key={comment.id} className="relative pl-4 border-l border-[#1a1a1a]">
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="w-8 h-8 rounded-full bg-[#0a0a0a] border border-[#1a1a1a] overflow-hidden flex items-center justify-center font-black text-[10px] text-gray-500">
+                                            {comment.user?.image ? <img src={comment.user.image} className="w-full h-full object-cover" /> : comment.user?.name?.[0] || 'U'}
+                                        </div>
+                                        <div>
+                                            <p className="text-[11px] font-black text-white uppercase tracking-tight">{comment.user?.name || 'Anonymous'}</p>
+                                            <p className="text-[9px] font-bold text-gray-600 uppercase tracking-widest">{new Date(comment.createdAt).toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                    <p className="text-sm text-gray-400 mb-4 leading-relaxed max-w-lg">{comment.content}</p>
+                                    <button
+                                        onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+                                        className="text-[10px] font-black text-red-500/70 hover:text-red-500 uppercase tracking-[0.2em] transition-colors"
+                                    >
+                                        Reply
+                                    </button>
+
+                                    {replyingTo === comment.id && (
+                                        <div className="mt-6 flex flex-col gap-3">
+                                            <textarea
+                                                value={replyContent}
+                                                onChange={(e) => setReplyContent(e.target.value)}
+                                                placeholder="Write your response..."
+                                                className="w-full h-24 bg-[#0a0a0a] border border-[#222] rounded-xl p-4 text-sm text-white outline-none focus:border-white/20"
+                                            />
+                                            <div className="flex gap-2">
+                                                <button onClick={() => handleCommentSubmit(comment.id)} className="px-4 py-2 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-lg">Reply</button>
+                                                <button onClick={() => setReplyingTo(null)} className="px-4 py-2 text-gray-500 text-[10px] font-black uppercase tracking-widest">Cancel</button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                            {comments.length > visibleCommentsCount && (
+                                <button onClick={() => setVisibleCommentsCount(v => v + 5)} className="w-full py-10 text-[10px] font-black text-gray-700 uppercase tracking-[0.4em] hover:text-red-500 transition-colors">Discover more perspectives</button>
+                            )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Sidebar - Related Products */}
-            <div className="w-full lg:w-96 lg:border-l border-[#333] bg-[#141414] px-4 sm:px-6 lg:px-8 py-4 sm:py-6 relative z-10">
+            {/* Sidebar - Related Content */}
+            <div className="w-full lg:w-96 lg:border-l border-[#1a1a1a] bg-black px-4 sm:px-6 lg:px-6 py-6 lg:py-10 relative z-10 no-scrollbar">
+              
+              {/* Product Shots Gallery - Premium Horizontal Scroll */}
+              {(() => {
+                const shots = relatedProducts.filter(p => p.isShots);
+                if (shots.length === 0) return null;
+                return (
+                  <div className="mb-10">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                        <div className="w-1 h-3 bg-red-600 rounded-full" />
+                        Exclusive Shots
+                      </h2>
+                    </div>
+                    <div className="flex lg:flex-wrap lg:grid lg:grid-cols-2 gap-3 overflow-x-auto pb-4 lg:pb-0 no-scrollbar">
+                      {shots.slice(0, 4).map((shot: any) => (
+                        <div 
+                          key={shot.id}
+                          onClick={() => router.push(`/channel/${channel.slug}/products/${shot.id}`)}
+                          className="flex-shrink-0 w-40 lg:w-full group cursor-pointer"
+                        >
+                          <div className="relative aspect-[9/16] lg:aspect-video rounded-xl overflow-hidden bg-[#0a0a0a] border border-[#1a1a1a] transition-all group-hover:border-red-500/50 group-hover:shadow-[0_0_20px_rgba(229,9,20,0.1)]">
+                            {shot.previewImage ? (
+                              <img src={shot.previewImage} alt={shot.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-800">
+                                <FilmIcon className="w-6 h-6" />
+                              </div>
+                            )}
+                            <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black to-transparent">
+                              <p className="text-[9px] font-black text-white truncate uppercase tracking-tight">{shot.title}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">More from {channel.name}</h2>
-                <div className="h-1 w-12 bg-indigo-900/300 rounded-full hidden lg:block"></div>
+                <h2 className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                  <div className="w-1 h-3 bg-white/20 rounded-full" />
+                  Continue Watching
+                </h2>
               </div>
 
               {relatedProducts.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-[#333] rounded-3xl">
-                  <div className="w-12 h-12 bg-[#141414] rounded-full flex items-center justify-center mb-3">
-                    <FolderIcon className="w-6 h-6 text-gray-300" />
-                  </div>
-                  <p className="text-sm font-bold text-gray-400">No other products available</p>
+                <div className="flex flex-col items-center justify-center py-12 px-4 border border-dashed border-[#222] rounded-2xl bg-[#050505]">
+                  <FolderIcon className="w-6 h-6 text-gray-700 mb-2" />
+                  <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">End of Collection</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 lg:grid-cols-1 gap-1 lg:gap-2">
-                  {relatedProducts.map((relatedProduct: any) => {
-                    // Check if user can access this related product
+                <div className="space-y-4">
+                  {relatedProducts.filter(p => !p.isShots).slice(0, 10).map((relatedProduct: any) => {
                     const canAccessRelated = isOwner || !relatedProduct.isSubscriberOnly || !channel?.subscriptionEnabled || hasActiveSubscription;
-
-                    const handleRelatedProductClick = () => {
-                      if (canAccessRelated) {
-                        router.push(`/channel/${params?.slug}/products/${relatedProduct.id}`);
-                      } else {
-                        // Show subscription modal if they don't have access
-                        setShowSubscriptionModal(true);
-                      }
-                    };
-
+                    
                     return (
                       <div
                         key={relatedProduct.id}
-                        onClick={handleRelatedProductClick}
-                        className={`group flex flex-col lg:flex-row gap-2 rounded-none transition-all duration-500 bg-transparent border-none ${canAccessRelated
-                          ? 'cursor-pointer hover:bg-[#1a1a1a] shadow-none hover:-translate-y-1 active:scale-95'
-                          : 'cursor-not-allowed opacity-75'
-                          }`}
+                        onClick={() => router.push(`/channel/${channel.slug}/products/${relatedProduct.id}`)}
+                        className={`group flex gap-3 rounded-xl transition-all duration-300 p-1.5 ${canAccessRelated ? 'cursor-pointer hover:bg-[#0a0a0a]' : 'cursor-not-allowed opacity-50'}`}
                       >
-                        {/* Thumbnail Container */}
-                        <div className="relative w-full lg:w-32 h-28 lg:h-20 flex-shrink-0 rounded-none overflow-hidden bg-[#141414] shadow-inner">
+                        <div className="relative w-28 h-18 sm:w-32 sm:h-20 flex-shrink-0 rounded-lg overflow-hidden bg-[#0a0a0a] border border-[#1a1a1a]">
                           {relatedProduct.previewImage ? (
-                            <img
-                              src={relatedProduct.previewImage}
-                              alt={relatedProduct.title}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                            />
+                            <img src={relatedProduct.previewImage} alt={relatedProduct.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-300">
+                            <div className="w-full h-full flex items-center justify-center text-gray-800">
                               {getContentIcon(relatedProduct.type)}
                             </div>
                           )}
-
-                          {/* Overlays */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                          {/* Play Icon for Videos */}
-                          {(relatedProduct.type === 'VIDEO' || relatedProduct.type === 'VIDEOS') && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="p-1.5 bg-[#1a1a1a]/20 backdrop-blur-md rounded-full border border-white/30 scale-90 group-hover:scale-100 transition-transform duration-300">
-                                <PlayIcon className="h-5 w-5 text-white shadow-sm" />
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Locked State */}
                           {!canAccessRelated && (
-                            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center">
-                              <div className="p-2 bg-[#1a1a1a]/20 rounded-full border border-white/40">
-                                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
+                              <div className="p-1.5 bg-black/40 rounded-full border border-white/10">
+                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
                               </div>
                             </div>
                           )}
-
-                          {/* Free Badge */}
-                          {relatedProduct.isFree && (
-                            <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-green-500 text-white text-[8px] font-black uppercase tracking-widest rounded-md shadow-sm">
-                              Free
-                            </div>
-                          )}
                         </div>
-
-                        {/* Content Container */}
-                        <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                          <div>
-                            <h3 className="text-xs lg:text-sm font-black text-white line-clamp-2 leading-tight lg:leading-snug group-hover:text-red-500 transition-colors duration-300">
-                              {relatedProduct.title}
-                            </h3>
-                            <div className="flex items-center gap-1.5 mt-1">
-                              <span className="text-[10px] font-bold text-gray-400 truncate max-w-[80px]">
-                                {channel.name}
-                              </span>
-                              <span className="w-1 h-1 rounded-full bg-gray-200"></span>
-                              <span className="text-[10px] font-bold text-gray-400">
-                                {formatNumber(relatedProduct.viewCount || 0)} views
-                              </span>
-                            </div>
+                        <div className="flex-1 min-w-0 py-1">
+                          <h3 className="text-xs font-black text-white line-clamp-2 leading-tight group-hover:text-red-500 transition-colors uppercase tracking-tight">
+                            {relatedProduct.title}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-2">
+                             <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{formatNumber(relatedProduct.viewCount || 0)} views</span>
                           </div>
-
-                          {/* Sub Only Badge */}
-                          {!canAccessRelated && relatedProduct.isSubscriberOnly && channel?.subscriptionEnabled && (
-                            <div className="mt-2 flex">
-                              <span className="text-[9px] font-black uppercase tracking-widest text-red-500 bg-indigo-900/30 px-2 py-1 rounded-lg border border-indigo-100">
-                                Sub Exclusive
-                              </span>
-                            </div>
-                          )}
                         </div>
                       </div>
                     );
@@ -1906,200 +1472,77 @@ export default function ProductClient() {
                 </div>
               )}
 
-              {/* You May Also Like - products from other channels */}
+              {/* Discover More: Other Channels */}
               {otherChannelProducts.length > 0 && (
-                <div className="mt-8 pt-6 border-t border-[#2a2a2a]">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                      <h2 className="text-base sm:text-lg font-black text-white tracking-tight">Explore More</h2>
-                    </div>
-                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-[#1a1a1a] border border-[#333] px-2 py-1 rounded-full">Other Channels</span>
-                  </div>
-                  <div className="grid grid-cols-2 lg:grid-cols-1 gap-1 lg:gap-2">
-                    {otherChannelProducts.map((p: any) => (
-                      <div
-                        key={p.id}
-                        onClick={() => router.push(`/channel/${p.channelSlug}/products/${p.id}`)}
-                        className="group flex flex-col lg:flex-row gap-2 rounded-xl p-1 transition-all duration-300 cursor-pointer hover:bg-[#1a1a1a] active:scale-95"
-                      >
-                        {/* Thumbnail */}
-                        <div className="relative w-full lg:w-32 h-28 lg:h-20 flex-shrink-0 rounded-none overflow-hidden bg-[#141414]">
-                          {p.previewImage ? (
-                            <img src={p.previewImage} alt={p.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-500">
-                              <VideoCameraIcon className="w-8 h-8" />
+                <div className="space-y-6 pt-12 border-t border-[#1a1a1a]">
+                   <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em]">Deep Discoveries</h2>
+                   <div className="grid grid-cols-1 gap-6">
+                      {otherChannelProducts.slice(0, 5).map((p: any) => (
+                         <div 
+                           key={p.id}
+                           onClick={() => router.push(`/channel/${p.channelSlug}/products/${p.id}`)}
+                           className="group cursor-pointer"
+                         >
+                            <div className="aspect-[16/10] bg-[#0a0a0a] border border-[#1a1a1a] rounded-3xl overflow-hidden relative mb-4">
+                               <img src={p.previewImage} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105" />
+                               <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black to-transparent">
+                                  <span className="text-[8px] font-black text-white/50 uppercase tracking-[0.3em] mb-2 block">{p.channelName}</span>
+                                  <h3 className="text-sm font-black text-white uppercase tracking-tighter italic">{p.title}</h3>
+                               </div>
                             </div>
-                          )}
-                          {(p.type === 'VIDEO' || p.type === 'VIDEOS') && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="p-1.5 bg-black/30 backdrop-blur-md rounded-full border border-white/20 scale-90 group-hover:scale-100 transition-transform">
-                                <PlayIcon className="h-5 w-5 text-white" />
-                              </div>
-                            </div>
-                          )}
-                          {p.isFree && (
-                            <div className="absolute top-1.5 left-1.5 px-1.5 py-0.5 bg-green-500 text-white text-[8px] font-black uppercase tracking-widest rounded-md">Free</div>
-                          )}
-                        </div>
-                        {/* Info */}
-                        <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                          <h3 className="text-xs lg:text-sm font-black text-white line-clamp-2 leading-tight group-hover:text-red-500 transition-colors">{p.title}</h3>
-                          <div className="flex items-center gap-1.5 mt-1">
-                            <span className="text-[10px] font-bold text-red-400 truncate max-w-[90px]">{p.channelName}</span>
-                            <span className="w-1 h-1 rounded-full bg-gray-600"></span>
-                            <span className="text-[10px] font-bold text-gray-500">{formatNumber(p.viewCount || 0)} views</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                         </div>
+                      ))}
+                   </div>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Sticky Mobile CTA for Non-Subscribers */}
-        {!hasActiveSubscription && channel?.subscriptionEnabled && !isOwner && (
-          <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#1a1a1a] border-t border-[#333] p-4 pb-safe md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.1)] animation-slide-up">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Unlock Full Access</p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-lg font-black text-white">
-                    {(() => {
-                      const priceValue = channel.subscriptionPrice;
-                      let price = 0;
-                      if (priceValue !== null && priceValue !== undefined) {
-                        if (typeof priceValue === 'string') {
-                          price = parseFloat(priceValue) || 0;
-                        } else if (typeof priceValue === 'object' && 'toNumber' in priceValue) {
-                          price = priceValue.toNumber();
-                        } else {
-                          price = Number(priceValue) || 0;
-                        }
-                      }
-                      return formatPrice(price, channel.subscriptionCurrency || 'INR');
-                    })()}
-                  </span>
-                  <span className="text-xs font-medium text-gray-400">/month</span>
+        {/* Global Modals - Consistent Premium Style */}
+        <AnimatePresence>
+          {showSubscriptionModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/95 backdrop-blur-3xl">
+              <div className="relative w-full max-w-lg bg-[#050505] border border-[#1a1a1a] rounded-[40px] p-12 text-center overflow-hidden shadow-[0_0_100px_rgba(255,255,255,0.02)]">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent opacity-50"></div>
+                
+                <button 
+                  onClick={() => setShowSubscriptionModal(false)}
+                  className="absolute top-8 right-8 text-gray-500 hover:text-white transition-colors"
+                >
+                  <XMarkIcon className="w-8 h-8" />
+                </button>
+
+                <div className="mb-10">
+                   <span className="text-[10px] font-black text-red-500 uppercase tracking-[0.5em] mb-4 block">Membership Access</span>
+                   <h2 className="text-4xl font-black text-white uppercase tracking-tighter italic mb-4">Support {channel.name}</h2>
+                   <p className="text-sm text-gray-500 font-bold max-w-xs mx-auto">Get full access to all premium content and support the creator directly.</p>
+                </div>
+
+                <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-3xl p-8 mb-10">
+                   <div className="flex items-baseline justify-center gap-2 mb-2">
+                      <span className="text-5xl font-black text-white tracking-tighter italic">
+                        {formatPrice(Number(channel.subscriptionPrice) || 0, channel.subscriptionCurrency || 'INR')}
+                      </span>
+                      <span className="text-xs font-black text-gray-600 uppercase tracking-widest">/ monthly</span>
+                   </div>
+                   <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Unlock 30 days of pure content</p>
+                </div>
+
+                <div className="space-y-4">
+                   <button 
+                     onClick={handleSubscribe}
+                     disabled={subscribing}
+                     className="w-full py-5 bg-white text-black font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-gray-200 transition-all active:scale-95 shadow-[0_20px_40px_rgba(255,255,255,0.05)]"
+                   >
+                     {subscribing ? 'Processing Transaction...' : 'Confirm Membership'}
+                   </button>
+                   <p className="text-[9px] font-black text-gray-700 uppercase tracking-widest italic">Encrypted Secure Checkout</p>
                 </div>
               </div>
-              <button
-                onClick={() => {
-                  if (!session?.user?.id) {
-                    router.push('/auth/signin');
-                    return;
-                  }
-                  setShowSubscriptionModal(true);
-                }}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-bold active:scale-95 transition-transform"
-              >
-                Subscribe Now
-              </button>
             </div>
-          </div>
-        )}
-
-        {/* Subscription Modal */}
-        {showSubscriptionModal && channel && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-            <div className="relative w-full max-w-md rounded-[24px] shadow-2xl bg-[#111111] overflow-hidden border border-[#333]">
-              {/* Premium Glow Effect */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-32 bg-gradient-to-b from-purple-600/20 to-transparent blur-3xl opacity-50 pointer-events-none"></div>
-
-              <div className="relative p-6 sm:p-8">
-                {/* Header */}
-                <div className="flex items-start justify-between mb-8">
-                  <div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight mb-1">Unlock Access</h2>
-                    <p className="text-sm text-gray-400 font-medium">Support {channel.name} & get exclusive content</p>
-                  </div>
-                  <button
-                    onClick={() => setShowSubscriptionModal(false)}
-                    className="p-2 -mr-2 -mt-2 rounded-full hover:bg-white/10 transition-colors text-gray-400 hover:text-white"
-                  >
-                    <XMarkIcon className="w-6 h-6" />
-                  </button>
-                </div>
-
-                <div className="mb-8">
-                  {/* Plan Card */}
-                  <div className="bg-gradient-to-br from-[#1a1a1a] to-[#111] border border-[#333] rounded-[20px] p-6 mb-6 relative overflow-hidden group hover:border-[#444] transition-all">
-                    <div className="absolute top-0 right-0 px-4 py-1.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-[10px] font-black uppercase tracking-widest rounded-bl-xl shadow-sm">
-                      Best Value
-                    </div>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="font-bold text-white flex items-center gap-2 text-lg">
-                        Monthly Access
-                      </span>
-                      <span className="text-3xl font-black text-white tracking-tighter">
-                        {(() => {
-                          const priceValue = channel.subscriptionPrice;
-                          let price = 0;
-                          if (priceValue !== null && priceValue !== undefined) {
-                            if (typeof priceValue === 'string') {
-                              price = parseFloat(priceValue) || 0;
-                            } else if (typeof priceValue === 'object' && 'toNumber' in priceValue) {
-                              price = priceValue.toNumber();
-                            } else {
-                              price = Number(priceValue) || 0;
-                            }
-                          }
-                          return formatPrice(price, channel.subscriptionCurrency || 'INR');
-                        })()}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-400 font-medium leading-relaxed">
-                      Get instant access to all premium videos, documents, and resources in this channel for 30 days.
-                    </p>
-                  </div>
-
-                  {/* Trust Signals */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-[#1a1a1a] border border-[#222]">
-                      <CheckCircleIcon className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                      <span className="text-xs font-semibold text-gray-300">Cancel anytime</span>
-                    </div>
-                    <div className="flex items-center gap-2.5 p-3.5 rounded-xl bg-[#1a1a1a] border border-[#222]">
-                      <div className="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">🔒</div>
-                      <span className="text-xs font-semibold text-gray-300">Secure payment</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowSubscriptionModal(false)}
-                    className="flex-1 px-4 py-4 bg-[#2a2a2a] hover:bg-[#333] text-white rounded-xl text-sm sm:text-base font-bold transition-all"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSubscribe}
-                    disabled={subscribing}
-                    className="flex-[2] px-4 py-4 bg-gradient-to-r from-purple-600 hover:from-purple-500 to-pink-600 hover:to-pink-500 text-white font-bold rounded-xl text-sm sm:text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
-                  >
-                    {subscribing ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Processing...</span>
-                      </>
-                    ) : (
-                      <span>Subscribe Now</span>
-                    )}
-                  </button>
-                </div>
-                <p className="text-center text-[11px] text-gray-500 mt-5 font-medium">
-                  By subscribing, you agree to our Terms of Service.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+          )}
+        </AnimatePresence>
 
         {/* Subscribers List Modal */}
         {showSubscribersList && channel && (
@@ -2110,12 +1553,10 @@ export default function ProductClient() {
             >
               <div className="sticky top-0 flex items-center justify-between p-6 border-b z-10 backdrop-blur-md bg-[#1a1a1a]/80" style={{ borderColor: `${textColor}10` }}>
                 <div>
-                  <h2 className="text-2xl font-black mb-1" style={{ color: textColor }}>
-                    Subscribers
-                  </h2>
-                  <p className="text-sm font-medium opacity-70" style={{ color: textColor }}>
-                    {subscribers.length} total • {subscribers.filter((sub: any) => sub.status === 'ACTIVE' && new Date(sub.endDate) > new Date()).length} active
-                  </p>
+                   <h2 className="text-2xl font-black mb-1" style={{ color: textColor }}>Subscribers</h2>
+                   <p className="text-sm font-medium opacity-70" style={{ color: textColor }}>
+                      {subscribers.length} total • {subscribers.filter((sub: any) => sub.status === 'ACTIVE' && new Date(sub.endDate) > new Date()).length} active
+                   </p>
                 </div>
                 <button
                   onClick={() => setShowSubscribersList(false)}
@@ -2132,9 +1573,7 @@ export default function ProductClient() {
                     <div className="inline-block p-6 rounded-full mb-4 bg-[#141414]" style={{ backgroundColor: `${primaryColor}10` }}>
                       <UserCircleIcon className="w-16 h-16" style={{ color: primaryColor }} />
                     </div>
-                    <p className="text-xl font-bold mb-2" style={{ color: textColor }}>
-                      No subscribers yet
-                    </p>
+                    <p className="text-xl font-bold mb-2" style={{ color: textColor }}>No subscribers yet</p>
                     <p className="text-sm opacity-60 max-w-sm mx-auto" style={{ color: textColor }}>
                       Share your channel on social media to start getting your first subscribers!
                     </p>
@@ -2145,42 +1584,25 @@ export default function ProductClient() {
                       <div
                         key={subscriber.id}
                         className="flex items-center gap-4 p-4 rounded-2xl border transition-colors hover:bg-[#141414]"
-                        style={{
-                          borderColor: `${textColor}10`,
-                        }}
+                        style={{ borderColor: `${textColor}10` }}
                       >
-                        {subscriber.user?.image ? (
-                          <img
-                            src={subscriber.user.image}
-                            alt={subscriber.user.name || 'Subscriber'}
-                            className="w-12 h-12 rounded-full object-cover ring-2 ring-white shadow-sm"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}>
-                            {(subscriber.user?.name || 'U')[0]?.toUpperCase()}
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-sm truncate" style={{ color: textColor }}>
-                            {subscriber.user?.name || subscriber.user?.email || 'Anonymous'}
-                          </p>
-                          <p className="text-xs opacity-60 truncate font-medium" style={{ color: textColor }}>
-                            {subscriber.user?.email}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <span
-                            className={`inline-flex px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${subscriber.status === 'ACTIVE' && new Date(subscriber.endDate) > new Date()
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-gray-100 text-gray-300'
-                              }`}
-                          >
-                            {subscriber.status === 'ACTIVE' && new Date(subscriber.endDate) > new Date() ? 'Active' : 'Expired'}
-                          </span>
-                          <p className="text-[10px] mt-1.5 opacity-60 font-medium uppercase tracking-wider" style={{ color: textColor }}>
-                            Ends {new Date(subscriber.endDate).toLocaleDateString()}
-                          </p>
-                        </div>
+                         {/* Subscriber Row Content */}
+                         {subscriber.user?.image ? (
+                           <img src={subscriber.user.image} className="w-12 h-12 rounded-full object-cover ring-2 ring-white" />
+                         ) : (
+                           <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg" style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}>
+                             {(subscriber.user?.name || 'U')[0]?.toUpperCase()}
+                           </div>
+                         )}
+                         <div className="flex-1 min-w-0">
+                           <p className="font-bold text-sm truncate" style={{ color: textColor }}>{subscriber.user?.name || subscriber.user?.email || 'Anonymous'}</p>
+                           <p className="text-xs opacity-60 truncate font-medium" style={{ color: textColor }}>{subscriber.user?.email}</p>
+                         </div>
+                         <div className="text-right">
+                           <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${subscriber.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'}`}>
+                             {subscriber.status}
+                           </span>
+                         </div>
                       </div>
                     ))}
                   </div>
@@ -2190,62 +1612,49 @@ export default function ProductClient() {
           </div>
         )}
 
-        {/* Success Modal */}
-        {showSuccessModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#e50914]/50 backdrop-blur-sm animate-in fade-in">
-            <div className="relative w-full max-w-sm rounded-3xl shadow-2xl bg-[#1a1a1a] p-8 text-center">
-              <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6">
-                <CheckCircleIcon className="w-12 h-12 text-emerald-500" />
-              </div>
-              <h3 className="text-2xl font-black text-white mb-2">Success!</h3>
-              <p className="text-gray-400 font-medium mb-8 leading-relaxed">{modalMessage}</p>
-              <button
-                onClick={() => setShowSuccessModal(false)}
-                className="w-full px-6 py-3.5 bg-white text-black font-bold rounded-xl font-bold hover:bg-[#e50914] transition-transform active:scale-95"
-              >
-                Okay, got it
-              </button>
+        {/* Feedback Modals */}
+        <AnimatePresence>
+          {showSuccessModal && (
+            <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
+               <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-3xl p-10 text-center max-w-sm w-full">
+                  <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                     <CheckCircleIcon className="w-8 h-8 text-emerald-500" />
+                  </div>
+                  <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2">Transaction Success</h3>
+                  <p className="text-sm text-gray-500 mb-8">{modalMessage}</p>
+                  <button onClick={() => setShowSuccessModal(false)} className="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl">Continue</button>
+               </div>
             </div>
-          </div>
-        )}
-
-        {/* Error Modal */}
-        {showErrorModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#e50914]/50 backdrop-blur-sm animate-in fade-in">
-            <div className="relative w-full max-w-sm rounded-3xl shadow-2xl bg-[#1a1a1a] p-8 text-center">
-              <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
-                <XCircleIcon className="w-12 h-12 text-red-500" />
-              </div>
-              <h3 className="text-2xl font-black text-white mb-2">Oops!</h3>
-              <p className="text-gray-400 font-medium mb-8 leading-relaxed">{modalMessage}</p>
-              <button
-                onClick={() => setShowErrorModal(false)}
-                className="w-full px-6 py-3.5 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-transform active:scale-95"
-              >
-                Try Again
-              </button>
+          )}
+          
+          {showErrorModal && (
+            <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
+               <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-3xl p-10 text-center max-w-sm w-full">
+                  <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                     <XCircleIcon className="w-8 h-8 text-red-500" />
+                  </div>
+                  <h3 className="text-xl font-black text-white uppercase tracking-tight mb-2">Action Failed</h3>
+                  <p className="text-sm text-gray-500 mb-8">{modalMessage}</p>
+                  <button onClick={() => setShowErrorModal(false)} className="w-full py-4 bg-[#111] text-white border border-[#222] font-black uppercase tracking-widest text-[10px] rounded-xl">Close</button>
+               </div>
             </div>
-          </div>
-        )}
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Save to Playlist Modal */}
-      {channel && product && (
-        <SaveToPlaylistModal
-          isOpen={isSaveModalOpen}
-          onClose={() => setIsSaveModalOpen(false)}
-          productId={product.id}
-        />
-      )}
-      {channel && product && (
-        <ShareModal
-          isOpen={isShareModalOpen}
-          onClose={() => setIsShareModalOpen(false)}
-          url={typeof window !== 'undefined' ? window.location.href : ''}
-          title={product.title}
-          description={product.description}
-        />
-      )}
+      <SaveToPlaylistModal
+        isOpen={isSaveModalOpen}
+        onClose={() => setIsSaveModalOpen(false)}
+        productId={product.id}
+      />
+      
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        url={typeof window !== 'undefined' ? window.location.href : ''}
+        title={product.title}
+        description={product.description}
+      />
     </MainLayout>
   );
 }

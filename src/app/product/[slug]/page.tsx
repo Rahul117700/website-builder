@@ -94,7 +94,7 @@ export default async function ProductDetailsPage({ params }: Props) {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 font-sans">
+        <div className="min-h-screen bg-black text-white font-sans">
             <Header />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
@@ -109,7 +109,7 @@ export default async function ProductDetailsPage({ params }: Props) {
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gray-900 text-gray-500">
+                                <div className="w-full h-full flex items-center justify-center bg-black text-gray-500">
                                     <PlayCircleIcon className="w-20 h-20" />
                                 </div>
                             )}
@@ -120,10 +120,10 @@ export default async function ProductDetailsPage({ params }: Props) {
                             )}
                         </div>
 
-                        <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
-                            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">{product.title}</h1>
+                        <div className="bg-black rounded-2xl p-6 md:p-8 shadow-sm border border-[#333]">
+                            <h1 className="text-2xl md:text-3xl font-bold text-white mb-4">{product.title}</h1>
 
-                            <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
+                            <div className="flex items-center gap-4 mb-6 pb-6 border-b border-[#333]">
                                 <a href={`/channel/${product.channel.slug}`} className="flex items-center gap-3 group">
                                     {product.channel.profileImage ? (
                                         <img src={product.channel.profileImage} alt={product.channel.name} className="w-10 h-10 rounded-full" />
@@ -133,23 +133,23 @@ export default async function ProductDetailsPage({ params }: Props) {
                                         </div>
                                     )}
                                     <div>
-                                        <p className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">{product.channel.name}</p>
-                                        <p className="text-sm text-gray-500">{product.channel.totalSubscribers} subscribers</p>
+                                        <p className="font-semibold text-white group-hover:text-indigo-400 transition-colors">{product.channel.name}</p>
+                                        <p className="text-sm text-gray-400">{product.channel.totalSubscribers} subscribers</p>
                                     </div>
                                 </a>
 
                                 <div className="ml-auto flex gap-2">
                                     <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors">
-                                        <HeartIcon className="w-6 h-6" />
+                                        <HeartIcon className="w-6 h-6 text-gray-400 hover:text-red-500" />
                                     </button>
                                     <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors">
-                                        <ShareIcon className="w-6 h-6" />
+                                        <ShareIcon className="w-6 h-6 text-gray-400 hover:text-white" />
                                     </button>
                                 </div>
                             </div>
 
-                            <div className="prose max-w-none text-gray-600">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-2">Description</h3>
+                            <div className="prose max-w-none text-gray-400">
+                                <h3 className="text-lg font-semibold text-white mb-2">Description</h3>
                                 <p className="whitespace-pre-wrap">{product.description || 'No description provided.'}</p>
                             </div>
                         </div>
@@ -158,9 +158,9 @@ export default async function ProductDetailsPage({ params }: Props) {
                     {/* Right Column: Key Info & Purchase */}
                     <div className="lg:col-span-1">
                         <div className="sticky top-24 space-y-6">
-                            <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-100">
+                            <div className="bg-black rounded-2xl p-6 shadow-md border border-[#333]">
                                 <div className="mb-6">
-                                    <span className="text-3xl font-bold text-gray-900">
+                                    <span className="text-3xl font-bold text-white">
                                         {product.isSubscriberOnly ? (
                                             <span className="text-indigo-600">Sub Only</span>
                                         ) : product.isFree || Number(product.price) === 0 ? (
@@ -178,22 +178,22 @@ export default async function ProductDetailsPage({ params }: Props) {
                                     Secure checkout powered by Razorpay. Instant access after purchase.
                                 </p>
 
-                                <div className="space-y-3 pt-6 border-t border-gray-100">
+                                <div className="space-y-3 pt-6 border-t border-[#333]">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">File Type</span>
-                                        <span className="font-medium text-gray-900 uppercase">{product.fileType || product.type || 'N/A'}</span>
+                                        <span className="font-medium text-white uppercase">{product.fileType || product.type || 'N/A'}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">File Size</span>
-                                        <span className="font-medium text-gray-900">{product.fileSize ? `${(product.fileSize / 1024 / 1024).toFixed(2)} MB` : 'Unknown'}</span>
+                                        <span className="font-medium text-white">{product.fileSize ? `${(product.fileSize / 1024 / 1024).toFixed(2)} MB` : 'Unknown'}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">Views</span>
-                                        <span className="font-medium text-gray-900">{product.viewCount}</span>
+                                        <span className="font-medium text-white">{product.viewCount}</span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-500">Published</span>
-                                        <span className="font-medium text-gray-900">{new Date(product.createdAt).toLocaleDateString()}</span>
+                                        <span className="font-medium text-white">{new Date(product.createdAt).toLocaleDateString()}</span>
                                     </div>
                                 </div>
                             </div>

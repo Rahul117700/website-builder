@@ -622,16 +622,16 @@ export default function ChannelEditorPage() {
   };
 
   return (
-    <MainLayout>
-      <div className="h-full flex flex-col bg-gray-50 overflow-hidden relative">
+    <MainLayout isDarkTheme={true}>
+      <div className="h-full flex flex-col bg-black overflow-hidden relative">
         {/* Sticky Editor Toolbar */}
-        <div className="bg-white border-b border-gray-200 px-3 sm:px-4 py-2 sm:py-3 shrink-0 relative sticky top-0 z-30 shadow-sm">
+        <div className="bg-black/80 backdrop-blur-md border-b border-white/10 px-3 sm:px-4 py-2 sm:py-3 shrink-0 relative sticky top-0 z-30 shadow-2xl">
           {/* Top Row - Title and Actions */}
           <div className="flex items-center justify-between gap-2 mb-2 sm:mb-0">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <h1 className="text-sm sm:text-lg font-bold text-gray-900 truncate">
+                  <h1 className="text-sm sm:text-lg font-bold text-white truncate">
                     {viewMode === 'editor' ? (channel ? channel.name || 'Untitled Channel' : 'Loading...') :
                       viewMode === 'analytics' ? 'Channel Analytics' :
                         viewMode === 'channels' ? 'My Channels' :
@@ -729,7 +729,7 @@ export default function ChannelEditorPage() {
                   />
                   {/* Modal - Centered Modal Style */}
                   <div
-                    className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden publishing-modal-container animate-in fade-in zoom-in duration-200"
+                    className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0a0a0a] rounded-2xl shadow-2xl border border-white/10 overflow-hidden publishing-modal-container animate-in fade-in zoom-in duration-200"
                     style={{
                       zIndex: 100000,
                       width: 'calc(100vw - 2rem)',
@@ -738,17 +738,17 @@ export default function ChannelEditorPage() {
                       display: 'flex',
                       flexDirection: 'column',
                       position: 'fixed',
-                      backgroundColor: 'white',
+                      backgroundColor: '#0a0a0a',
                       isolation: 'isolate'
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
                     {/* Publishing Options Header */}
-                    <div className="px-6 py-5 border-b border-gray-200 bg-white flex-shrink-0 relative z-10">
+                    <div className="px-6 py-5 border-b border-white/10 bg-[#0a0a0a] flex-shrink-0 relative z-10">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1 relative z-10">
-                          <h3 className="text-lg font-bold text-gray-900 break-words relative z-10">Channel Options</h3>
-                          <p className="text-sm text-gray-500 mt-1.5 break-words relative z-10">Manage your channel settings and visibility</p>
+                          <h3 className="text-lg font-bold text-white break-words relative z-10">Channel Options</h3>
+                          <p className="text-sm text-gray-400 mt-1.5 break-words relative z-10">Manage your channel settings and visibility</p>
                         </div>
                         <button
                           onClick={() => setShowPublishingModal(false)}
@@ -1023,11 +1023,11 @@ export default function ChannelEditorPage() {
                       setSaving(false);
                     }
                   }}
-                  className="px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 border border-white/10 rounded-lg text-xs sm:text-sm font-medium text-white bg-white/5 hover:bg-white/10 transition-colors focus:ring-2 focus:ring-white/20 focus:border-transparent"
                 >
-                  <option value="">Select Template</option>
+                  <option value="" className="bg-black">Select Template</option>
                   {templates.map((template) => (
-                    <option key={template.id} value={template.id}>
+                    <option key={template.id} value={template.id} className="bg-black">
                       {template.name}
                     </option>
                   ))}
@@ -1090,8 +1090,8 @@ export default function ChannelEditorPage() {
                     key={tab.id}
                     onClick={() => handleTabClick(tab.id)}
                     className={`group relative flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-sm font-bold transition-all whitespace-nowrap touch-manipulation active:scale-95 snap-start flex-shrink-0 ${activeTab === tab.id
-                      ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/40'
-                      : 'bg-slate-100 text-slate-700 active:bg-slate-200'
+                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/20'
+                      : 'bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 active:bg-white/15'
                       }`}
                     title={tab.title}
                     style={{ minWidth: 'max-content' }}
@@ -1123,16 +1123,16 @@ export default function ChannelEditorPage() {
                     className="fixed inset-0 z-30"
                     onClick={() => setShowStudioMenu(false)}
                   />
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
+                  <div className="absolute right-0 mt-2 w-56 bg-[#0a0a0a] rounded-xl shadow-2xl border border-white/10 z-50 overflow-hidden animate-in fade-in zoom-in duration-200 origin-top-right">
                     <div className="py-1">
                       <Link
                         href="/auth/dashboard"
-                        className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:bg-white/5 transition-colors"
                       >
-                        <div className="p-1.5 bg-violet-100 rounded-lg text-violet-600">
+                        <div className="p-1.5 bg-indigo-500/10 rounded-lg text-indigo-400">
                           <HomeIcon className="w-4 h-4" />
                         </div>
-                        <span className="font-medium">Go To my studio</span>
+                        <span className="font-medium text-white">Go To my studio</span>
                       </Link>
 
                       <div className="h-px bg-gray-100 my-1"></div>
@@ -1186,7 +1186,7 @@ export default function ChannelEditorPage() {
                           setViewMode('settings');
                           setShowStudioMenu(false);
                         }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
                       >
                         <Cog6ToothIcon className="w-4 h-4" />
                         My Profile
@@ -1200,13 +1200,13 @@ export default function ChannelEditorPage() {
         </div>
 
         {/* Content Wrapper */}
-        <div className="flex-1 flex overflow-hidden relative">
+        <div className="flex-1 flex overflow-hidden relative bg-black">
 
-          <main className="flex-1 bg-gray-100 overflow-auto relative safe-area-inset-bottom">
+          <main className="flex-1 bg-black overflow-auto relative safe-area-inset-bottom">
             {viewMode === 'editor' ? (
               <div className="h-full flex items-start justify-center p-2 sm:p-4">
                 <div
-                  className="bg-white rounded-lg sm:rounded-lg shadow-xl overflow-hidden transition-all duration-300 relative w-full"
+                  className="bg-transparent rounded-lg sm:rounded-lg overflow-hidden transition-all duration-300 relative w-full"
                   style={{
                     width: getPreviewWidth(),
                     maxWidth: '100%',
@@ -1252,9 +1252,9 @@ export default function ChannelEditorPage() {
               />
 
               {/* Edit Panel - Component */}
-              <div className="fixed inset-y-0 right-0 w-full sm:w-[450px] lg:static lg:w-[450px] lg:h-full bg-white shadow-2xl lg:shadow-none z-50 lg:z-auto transform transition-transform duration-300 ease-out overflow-hidden flex flex-col border-l border-gray-200 safe-area-inset">
+              <div className="fixed inset-y-0 right-0 w-full sm:w-[450px] lg:static lg:w-[450px] lg:h-full bg-[#0a0a0a] shadow-2xl lg:shadow-none z-50 lg:z-auto transform transition-transform duration-300 ease-out overflow-hidden flex flex-col border-l border-white/10 safe-area-inset">
                 {/* Panel Header - Mobile Optimized */}
-                <div className="relative bg-white border-b border-gray-200 safe-area-inset-top">
+                <div className="relative bg-[#0a0a0a] border-b border-white/10 safe-area-inset-top">
                   {/* Top Row - Title and Actions */}
                   <div className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
                     <div className="relative flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
@@ -1269,10 +1269,10 @@ export default function ChannelEditorPage() {
                         );
                       })()}
                       <div className="min-w-0 flex-1">
-                        <h2 className="text-base sm:text-lg font-bold text-gray-900 tracking-wide truncate">
+                        <h2 className="text-base sm:text-lg font-bold text-white tracking-wide truncate">
                           {tabs.find(t => t.id === activeTab)?.title || 'Edit'}
                         </h2>
-                        <p className="text-xs text-gray-500 mt-0.5 hidden sm:block">Customize your channel</p>
+                        <p className="text-xs text-gray-400 mt-0.5 hidden sm:block">Customize your channel</p>
                       </div>
                     </div>
                     <div className="relative flex items-center gap-2 sm:gap-3 flex-shrink-0">
@@ -1296,21 +1296,21 @@ export default function ChannelEditorPage() {
                       </button>
                       <button
                         onClick={() => setActiveTab(null)}
-                        className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-xl transition-all active:scale-95 touch-manipulation"
+                        className="p-1.5 sm:p-2 hover:bg-white/10 rounded-xl transition-all active:scale-95 touch-manipulation"
                         aria-label="Close"
                       >
-                        <XMarkIcon className="h-5 w-5 text-gray-700" />
+                        <XMarkIcon className="h-5 w-5 text-gray-400" />
                       </button>
                     </div>
                   </div>
 
                   {/* Completion Status Bar */}
-                  <div className="px-4 sm:px-6 pb-3 sm:pb-4 border-t border-gray-100">
+                  <div className="px-4 sm:px-6 pb-3 sm:pb-4 border-t border-white/10">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-bold text-gray-900 uppercase tracking-wide">Completion</span>
-                      <span className="text-base sm:text-lg font-bold text-purple-600">{completionData.percentage}%</span>
+                      <span className="text-xs font-bold text-white uppercase tracking-wide">Completion</span>
+                      <span className="text-base sm:text-lg font-bold text-purple-400">{completionData.percentage}%</span>
                     </div>
-                    <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="relative h-2 bg-white/10 rounded-full overflow-hidden">
                       <div
                         className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-600 to-pink-600 rounded-full transition-all duration-500"
                         style={{ width: `${completionData.percentage}%` }}
@@ -1331,7 +1331,7 @@ export default function ChannelEditorPage() {
                 </div>
 
                 {/* Panel Content - Mobile Optimized */}
-                <div className="flex-1 overflow-y-auto overflow-x-hidden bg-white custom-scrollbar-light">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden bg-black custom-scrollbar-dark">
                   <div className="p-4 sm:p-6">
                     {activeTab === 'basic' && (
                       <BasicInfoTab channel={channel} onUpdate={handleChannelUpdate} />
@@ -1379,7 +1379,7 @@ export default function ChannelEditorPage() {
             />
             {/* Success Modal */}
             <div
-              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-[10001] animate-in fade-in zoom-in duration-300"
+              className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0a0a0a] rounded-2xl shadow-2xl border border-white/10 overflow-hidden z-[10001] animate-in fade-in zoom-in duration-300"
               style={{
                 width: 'calc(100vw - 2rem)',
                 maxWidth: '32rem',
@@ -1394,23 +1394,27 @@ export default function ChannelEditorPage() {
                 </div>
 
                 {/* Success Message */}
-                <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                <h2 className="text-2xl font-bold text-white mb-3">
                   🎉 Your Channel is Live!
                 </h2>
-                <p className="text-gray-600 mb-6 text-lg">
-                  Your channel has been successfully published and is now live for everyone to see.
+                <p className="text-gray-400 mb-6 text-lg">
+                  Your channel is now ready to share with the world!
                 </p>
 
                 {/* Channel Link Display */}
                 {publishedChannelSlug && (
-                  <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                    <p className="text-xs font-semibold text-gray-700 mb-2 text-left">Your Channel Link:</p>
-                    <div className="flex items-center gap-2 bg-white rounded-md p-2 border border-gray-300">
-                      <LinkIcon className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                      <span className="text-sm text-gray-600 truncate flex-1 text-left">
-                        {typeof window !== 'undefined' ? `${window.location.origin}/channel/${publishedChannelSlug}` : `/channel/${publishedChannelSlug}`}
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-2 bg-white/5 rounded-xl p-3 border border-white/10 mb-8">
+                    <LinkIcon className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                    <span className="text-sm text-gray-400 truncate flex-1 text-left">
+                      {typeof window !== 'undefined' ? `${window.location.origin}/channel/${publishedChannelSlug}` : `/channel/${publishedChannelSlug}`}
+                    </span>
+                    <button
+                      onClick={copyChannelLink}
+                      className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-indigo-400"
+                      title="Copy Link"
+                    >
+                      <ClipboardDocumentIcon className="h-4 w-4" />
+                    </button>
                   </div>
                 )}
 
@@ -1419,35 +1423,30 @@ export default function ChannelEditorPage() {
                   <button
                     onClick={() => {
                       if (publishedChannelSlug) {
-                        router.push(`/channel/${publishedChannelSlug}`);
-                      } else {
-                        router.push('/auth/dashboard/channels');
+                        window.open(`/channel/${publishedChannelSlug}`, '_blank');
                       }
                     }}
-                    className="w-full px-6 py-3 bg-gradient-to-r from-gray-900 to-black text-white rounded-lg hover:from-gray-800 hover:to-gray-900 transition-all text-sm font-bold shadow-lg touch-manipulation active:scale-95 flex items-center justify-center gap-2"
+                    className="w-full px-6 py-4 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all flex items-center justify-center gap-2 shadow-xl active:scale-95"
                   >
                     <EyeIcon className="h-5 w-5" />
-                    Go to Channel
+                    Visit Channel
                   </button>
 
-                  {publishedChannelSlug && (
-                    <button
-                      onClick={copyChannelLink}
-                      className="w-full px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all text-sm font-semibold touch-manipulation active:scale-95 flex items-center justify-center gap-2"
-                    >
-                      <ClipboardDocumentIcon className="h-5 w-5" />
-                      Copy Channel Link
-                    </button>
-                  )}
-
+                  <button
+                    onClick={() => setShowPublishSuccessModal(false)}
+                    className="w-full px-6 py-4 bg-white/5 text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition-all active:scale-95"
+                  >
+                    Continue Editing
+                  </button>
+                  
                   <button
                     onClick={() => {
                       setShowPublishSuccessModal(false);
                       router.push('/auth/dashboard/channels');
                     }}
-                    className="w-full px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all text-sm font-medium touch-manipulation active:scale-95"
+                    className="w-full px-6 py-4 text-gray-500 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:text-white transition-all underline underline-offset-4"
                   >
-                    Back to Dashboard
+                    Back to my channels
                   </button>
                 </div>
               </div>

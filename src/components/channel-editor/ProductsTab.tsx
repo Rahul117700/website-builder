@@ -204,66 +204,65 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
           const remaining = maxProducts === -1 ? '∞' : Math.max(0, maxProducts - productCount);
 
           return (
-            <>
-              {/* Products Added */}
-              <div className="bg-[#1e1e1e] p-4 rounded-2xl border border-white/10 shadow-sm flex flex-col justify-between min-h-[100px] group hover:border-indigo-500/30 hover:shadow-md transition-all">
+            <>              {/* Products Added */}
+              <div className="bg-[#0a0a0a] p-4 rounded-3xl border border-white/10 shadow-sm flex flex-col justify-between min-h-[100px] group hover:border-white/20 transition-all">
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-lg bg-indigo-50 flex items-center justify-center">
-                    <ShoppingBagIcon className="w-3 h-3 text-indigo-600" />
+                  <div className="w-5 h-5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                    <ShoppingBagIcon className="w-3 h-3 text-indigo-400" />
                   </div>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Products</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Inventory Nodes</span>
                 </div>
                 <div className="flex items-end gap-1.5 mt-2">
-                  <span className="text-2xl font-black text-white leading-none">{productCount}</span>
-                  <span className="text-[10px] font-bold text-gray-400 mb-0.5 whitespace-nowrap">items added</span>
+                  <span className="text-3xl font-black text-white leading-none tracking-tighter">{productCount}</span>
+                  <span className="text-[10px] font-bold text-gray-500 mb-0.5 whitespace-nowrap uppercase tracking-widest">Assets</span>
                 </div>
               </div>
 
               {/* Storage Limit */}
-              <div className="bg-[#1e1e1e] p-4 rounded-2xl border border-white/10 shadow-sm flex flex-col justify-between min-h-[100px] group hover:border-blue-500/30 hover:shadow-md transition-all">
+              <div className="bg-[#0a0a0a] p-4 rounded-3xl border border-white/10 shadow-sm flex flex-col justify-between min-h-[100px] group hover:border-white/20 transition-all">
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-lg bg-blue-50 flex items-center justify-center">
-                    <CloudArrowUpIcon className="w-3 h-3 text-blue-600" />
+                  <div className="w-5 h-5 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                    <CloudArrowUpIcon className="w-3 h-3 text-blue-400" />
                   </div>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Total Limit</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">System Capacity</span>
                 </div>
                 <div className="flex items-end gap-1.5 mt-2">
-                  <span className="text-2xl font-black text-white leading-none">{maxProducts === -1 ? '∞' : maxProducts}</span>
-                  <span className="text-[10px] font-bold text-gray-400 mb-0.5 whitespace-nowrap">max slots</span>
+                  <span className="text-3xl font-black text-white leading-none tracking-tighter">{maxProducts === -1 ? '∞' : maxProducts}</span>
+                  <span className="text-[10px] font-bold text-gray-500 mb-0.5 whitespace-nowrap uppercase tracking-widest">Slots</span>
                 </div>
               </div>
 
               {/* Available Slots */}
-              <div className={`p-4 rounded-2xl border shadow-sm flex flex-col justify-between min-h-[100px] transition-all hover:shadow-md ${remaining === 0 ? 'bg-red-50/50 border-red-100' : 'bg-emerald-50/50 border-emerald-100'}`}>
+              <div className={`p-4 rounded-3xl border shadow-sm flex flex-col justify-between min-h-[100px] transition-all hover:shadow-md ${remaining === 0 ? 'bg-red-500/5 border-red-500/20' : 'bg-emerald-500/5 border-emerald-500/20'}`}>
                 <div className="flex items-center gap-2">
-                  <div className={`w-5 h-5 rounded-lg flex items-center justify-center ${remaining === 0 ? 'bg-red-100' : 'bg-emerald-100'}`}>
-                    <PlusIcon className={`w-3 h-3 ${remaining === 0 ? 'text-red-600' : 'text-emerald-600'}`} />
+                  <div className={`w-5 h-5 rounded-lg flex items-center justify-center ${remaining === 0 ? 'bg-red-500/10 border border-red-500/20' : 'bg-emerald-500/10 border border-emerald-500/20'}`}>
+                    <PlusIcon className={`w-3 h-3 ${remaining === 0 ? 'text-red-500' : 'text-emerald-500'}`} />
                   </div>
-                  <span className={`text-[9px] font-black uppercase tracking-widest ${remaining === 0 ? 'text-red-400' : 'text-emerald-500'}`}>Available</span>
+                  <span className={`text-[9px] font-black uppercase tracking-widest ${remaining === 0 ? 'text-red-500' : 'text-emerald-500'}`}>Protocol Status</span>
                 </div>
                 <div className="flex items-end gap-1.5 mt-2">
-                  <span className={`text-2xl font-black leading-none ${remaining === 0 ? 'text-red-600' : 'text-emerald-600'}`}>{remaining}</span>
-                  <span className={`text-[10px] font-bold mb-0.5 whitespace-nowrap ${remaining === 0 ? 'text-red-400' : 'text-emerald-500'}`}>slots free</span>
+                  <span className={`text-3xl font-black leading-none tracking-tighter ${remaining === 0 ? 'text-red-500' : 'text-emerald-500'}`}>{remaining}</span>
+                  <span className={`text-[10px] font-bold mb-0.5 whitespace-nowrap uppercase tracking-widest ${remaining === 0 ? 'text-red-500/70' : 'text-emerald-500/70'}`}>Available</span>
                 </div>
               </div>
 
               {/* Add New Button */}
               <button
                 onClick={handleOpenUploadModal}
-                className="group relative min-h-[100px] bg-gray-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between p-4 text-left border border-gray-800"
+                className="group relative min-h-[100px] bg-[#0a0a0a] rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between p-4 text-left border border-white/10"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="flex items-center justify-between w-full relative z-10">
-                  <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center group-hover:scale-110 transition-transform border border-white/10">
-                    <PlusIcon className="w-4 h-4 text-white" />
+                  <div className="w-8 h-8 rounded-2xl bg-white text-black flex items-center justify-center group-hover:scale-110 transition-all border border-white/20">
+                    <PlusIcon className="w-4 h-4" />
                   </div>
-                  <div className="px-1.5 py-0.5 rounded-md bg-white/5 border border-white/10 text-[7px] font-black text-white/40 uppercase tracking-widest">
-                    New
+                  <div className="px-2 py-1 rounded-full bg-white/5 border border-white/10 text-[7px] font-black text-white/60 uppercase tracking-widest">
+                    Authorized
                   </div>
                 </div>
                 <div className="relative z-10 mt-2">
-                  <span className="block text-sm font-black text-white leading-tight">Add Content</span>
-                  <span className="block text-[8px] font-medium text-white/50 uppercase tracking-wider mt-0.5 truncate">Grow your store</span>
+                  <span className="block text-sm font-black text-white leading-tight uppercase tracking-tight">Deploy Node</span>
+                  <span className="block text-[8px] font-bold text-gray-500 uppercase tracking-[0.2em] mt-0.5 truncate">Initialize Asset Upload</span>
                 </div>
               </button>
             </>
@@ -272,16 +271,16 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
       </div>
 
       {/* Search and Filters Bar */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-[#1e1e1e] p-3 rounded-2xl border border-white/10">
-        <div className="relative w-full sm:w-64">
+      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between bg-black/40 p-4 rounded-3xl border border-white/10 backdrop-blur-md">
+        <div className="relative w-full sm:w-80">
           <input
             type="text"
-            placeholder="Search your products..."
+            placeholder="Search Protocol Archive..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-white/10 border border-white/10 focus:ring-2 focus:ring-indigo-500 rounded-xl text-sm transition-all text-white placeholder-gray-500"
+            className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 focus:ring-1 focus:ring-white/20 focus:border-white/20 rounded-2xl text-xs font-bold transition-all text-white placeholder-gray-500 uppercase tracking-widest"
           />
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
@@ -303,165 +302,162 @@ export default function ProductsTab({ channel, onUpdate, subscriptionData, onSho
       </div>
 
       {/* Products Grid */}
-      {(() => {
-        const filteredProducts = products.filter(product => {
-          const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase());
-          const matchesType = filterType === 'ALL' || product.type === filterType;
-          return matchesSearch && matchesType;
-        });
-
-        if (products.length > 0 && filteredProducts.length === 0) {
-          return (
-            <div className="text-center py-20 bg-[#1e1e1e]/50 rounded-3xl border border-dashed border-white/10">
-              <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <ShoppingBagIcon className="w-6 h-6 text-gray-400" />
-              </div>
-              <h3 className="text-sm font-bold text-white">No matching products</h3>
-              <p className="text-xs text-gray-500 mt-1">Try adjusting your search or filter</p>
-              <button
-                onClick={() => { setSearchQuery(''); setFilterType('ALL'); }}
-                className="mt-4 text-xs font-bold text-indigo-600 hover:underline"
-              >
-                Clear all filters
-              </button>
-            </div>
-          );
-        }
-
-        return products.length > 0 ? (
-          <div className="grid grid-cols-2 gap-4 sm:gap-6">
-            {filteredProducts.map((product) => (
-
-              <div
-                key={product.id}
-                className="group relative bg-[#1e1e1e] rounded-3xl border border-white/10 overflow-hidden hover:shadow-xl hover:border-indigo-500/30 transition-all duration-500 flex flex-col"
-              >
-                {/* Image Preview Container */}
-                <div className="relative aspect-video w-full overflow-hidden bg-gray-50/50">
-                  {product.previewImage || product.thumbnailUrl ? (
-                    <img
-                      src={product.previewImage || product.thumbnailUrl}
-                      alt={product.title}
-                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                      onError={(e) => {
-                        const target = e.currentTarget;
-                        target.style.display = 'none';
-                        // Show placeholder icon container
-                        const parent = target.parentElement;
-                        if (parent) {
-                          const placeholder = parent.querySelector('.placeholder-icon');
-                          if (placeholder) placeholder.classList.remove('hidden');
-                        }
-                      }}
-                    />
-                  ) : null}
-
-                  {/* Placeholder Icon (Hidden if image loads) */}
-                  <div className={`placeholder-icon absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-50 to-indigo-50/30 ${product.previewImage || product.thumbnailUrl ? 'hidden' : ''}`}>
-                    <ShoppingBagIcon className="w-10 h-10 text-indigo-100" />
-                  </div>
-
-                  {/* Overlays & Badges */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                  <div className="absolute top-4 left-4 flex flex-col gap-2">
-                    <span className="px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-gray-900 text-[10px] font-black uppercase tracking-widest border border-white shadow-sm">
-                      {product.type === 'VIDEO' ? '🎥 Video' : '📄 Doc'}
-                    </span>
-                    {product.isSubscriberOnly && (
-                      <span className="px-3 py-1 rounded-full bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest border border-emerald-400/30 shadow-sm">
-                        ✨ Premium
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Quick Actions Bar */}
-                  <div className="absolute bottom-4 left-4 right-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                    <div className="flex gap-2 p-1.5 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/20 shadow-2xl">
-                      <button
-                        onClick={() => handleEdit(product)}
-                        className="flex-1 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center gap-2 text-xs font-bold hover:bg-white/30 transition-colors"
-                      >
-                        <PencilIcon className="w-4 h-4" />
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(product.id)}
-                        disabled={deleting === product.id}
-                        className="w-10 h-10 rounded-xl bg-red-500/90 text-white flex items-center justify-center hover:bg-red-600 transition-colors disabled:opacity-50"
-                      >
-                        {deleting === product.id ? (
-                          <ArrowPathIcon className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <TrashIcon className="w-4 h-4" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card Content */}
-                <div className="p-6 flex-1 flex flex-col">
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <h4 className="font-black text-white text-lg leading-tight line-clamp-2 group-hover:text-indigo-400 transition-colors">
-                        {product.title}
-                      </h4>
-                    </div>
-                    {product.description ? (
-                      <p className="text-sm text-gray-500 line-clamp-3 leading-relaxed font-medium mb-4">
-                        {product.description}
-                      </p>
-                    ) : (
-                      <div className="h-4 w-2/3 bg-gray-50 rounded-full mb-4 opacity-50" />
-                    )}
-                  </div>
-
-                  {/* Meta Information */}
-                  <div className="mt-auto pt-5 border-t border-white/10 flex items-center justify-between">
-                    <div className="flex -space-x-1 overflow-hidden">
-                      {product.tags && product.tags.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {product.tags.slice(0, 2).map((tag: string, i: number) => (
-                            <span key={i} className="text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50/50 px-2.5 py-1 rounded-lg border border-indigo-100/50">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">
-                          Uncategorized
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span className="text-[9px] font-black text-gray-300 uppercase tracking-tighter">Reference</span>
-                      <span className="text-[11px] font-bold text-gray-400 font-mono">
-                        #{product.id.substring(0, 6).toUpperCase()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <ShoppingBagIcon className="h-16 w-16 text-gray-500 mx-auto mb-4" />
+      <div className="mt-8">
+        {products.length === 0 ? (
+          <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">
+            <ShoppingBagIcon className="h-16 w-16 text-white/20 mx-auto mb-4" />
             <h3 className="text-lg font-bold text-white mb-2">Add Products</h3>
-            <p className="text-sm text-gray-400 mb-6">
-              Products will be displayed in a beautiful grid on your channel
+            <p className="text-sm text-gray-500 mb-6 max-w-xs mx-auto">
+              Products will be displayed in a beautiful grid on your channel once you upload them.
             </p>
             <button
               onClick={handleOpenUploadModal}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2 mx-auto"
+              className="px-8 py-3 bg-white text-black rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gray-200 transition-all flex items-center gap-2 mx-auto"
             >
-              <PlusIcon className="h-5 w-5" />
-              Add Your First Product
+              <PlusIcon className="h-4 w-4" />
+              Upload Asset
             </button>
           </div>
-        );
-      })()}
+        ) : (
+          (() => {
+            const filteredProducts = products.filter(product => {
+              const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase());
+              const matchesType = filterType === 'ALL' || product.type === filterType;
+              return matchesSearch && matchesType;
+            });
+
+            if (filteredProducts.length === 0) {
+              return (
+                <div className="text-center py-20 bg-white/5 rounded-3xl border border-white/10">
+                  <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <ShoppingBagIcon className="w-6 h-6 text-gray-500" />
+                  </div>
+                  <h3 className="text-sm font-bold text-white">No matching products found</h3>
+                  <p className="text-xs text-gray-500 mt-1">Try refining your search or filter parameters</p>
+                  <button
+                    onClick={() => { setSearchQuery(''); setFilterType('ALL'); }}
+                    className="mt-4 text-xs font-black text-indigo-400 hover:text-indigo-300 transition-colors uppercase tracking-widest px-4 py-2 bg-indigo-500/10 rounded-lg border border-indigo-500/20"
+                  >
+                    Reset Grid
+                  </button>
+                </div>
+              );
+            }
+
+            return (
+              <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                {filteredProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="group relative bg-[#0a0a0a] rounded-[2rem] border border-white/10 overflow-hidden hover:shadow-2xl hover:border-white/20 transition-all duration-500 flex flex-col"
+                  >
+                    {/* Image Preview Container */}
+                    <div className="relative aspect-video w-full overflow-hidden bg-white/5">
+                      {product.previewImage || product.thumbnailUrl ? (
+                        <img
+                          src={product.previewImage || product.thumbnailUrl}
+                          alt={product.title}
+                          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                              const placeholder = parent.querySelector('.placeholder-icon');
+                              if (placeholder) placeholder.classList.remove('hidden');
+                            }
+                          }}
+                        />
+                      ) : null}
+
+                      {/* Placeholder Icon */}
+                      <div className={`placeholder-icon absolute inset-0 flex items-center justify-center bg-white/5 ${product.previewImage || product.thumbnailUrl ? 'hidden' : ''}`}>
+                        <ShoppingBagIcon className="w-12 h-12 text-white/5" />
+                      </div>
+
+                      {/* Overlays & Status Badges */}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                      <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+                        <div className="px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest border border-white/10 shadow-xl flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                          {product.type === 'VIDEO' ? 'VIDEO NODE' : 'DOC ASSET'}
+                        </div>
+                        {product.isSubscriberOnly && (
+                          <div className="px-3 py-1.5 rounded-full bg-emerald-500/20 backdrop-blur-md text-emerald-400 text-[9px] font-black uppercase tracking-widest border border-emerald-500/30 shadow-xl">
+                            ✨ Access Restricted
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Operational Controls - Hover Interface */}
+                      <div className="absolute bottom-4 left-4 right-4 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                        <div className="flex gap-2 p-1 bg-black/40 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-2xl">
+                          <button
+                            onClick={() => handleEdit(product)}
+                            className="flex-1 h-12 rounded-xl bg-white text-black text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-all active:scale-95 flex items-center justify-center gap-2"
+                          >
+                            <PencilIcon className="w-4 h-4" />
+                            Modify
+                          </button>
+                          <button
+                            onClick={() => handleDelete(product.id)}
+                            disabled={deleting === product.id}
+                            className="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all active:scale-95 disabled:opacity-50"
+                          >
+                            {deleting === product.id ? (
+                              <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <TrashIcon className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Information Cluster */}
+                    <div className="p-6 flex-1 flex flex-col bg-gradient-to-b from-[#0a0a0a] to-black">
+                      <div className="flex-1">
+                        <h4 className="font-black text-white text-xl leading-[1.1] mb-2 group-hover:text-indigo-400 transition-colors uppercase tracking-tight">
+                          {product.title}
+                        </h4>
+                        {product.description && (
+                          <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed font-bold mb-4">
+                            {product.description}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Technical Metadata Bar */}
+                      <div className="mt-4 pt-5 border-t border-white/5 flex items-center justify-between gap-4">
+                        <div className="flex flex-wrap gap-2">
+                          {product.tags && product.tags.length > 0 ? (
+                            product.tags.slice(0, 2).map((tag: string, i: number) => (
+                              <span key={i} className="text-[9px] font-black uppercase tracking-widest text-indigo-400 bg-indigo-500/10 px-2.5 py-1.5 rounded-lg border border-indigo-500/20">
+                                {tag}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400 bg-white/5 px-2.5 py-1.5 rounded-lg border border-white/10">
+                              General Protocol
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest mb-0.5">Asset ID</p>
+                          <p className="text-[10px] font-bold text-gray-500 font-mono tracking-tighter">
+                            {product.id.substring(0, 8).toUpperCase()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })()
+        )}
+      </div>
 
 
       {/* Upload Modal */}

@@ -219,11 +219,11 @@ export default function SettingsView() {
     ];
 
     return (
-        <div className="w-full min-h-screen m-0 p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/20 overflow-y-auto">
+        <div className="w-full min-h-screen m-0 p-4 sm:p-6 lg:p-8 bg-black overflow-y-auto">
             {/* Decorative Background Elements */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-20 right-20 w-96 h-96 bg-gradient-to-br from-blue-200/20 to-purple-200/20 rounded-full blur-3xl"></div>
-                <div className="absolute bottom-20 left-20 w-96 h-96 bg-gradient-to-br from-indigo-200/20 to-pink-200/20 rounded-full blur-3xl"></div>
+                <div className="absolute top-20 right-20 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl"></div>
+                <div className="absolute bottom-20 left-20 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl"></div>
             </div>
 
             <div className="relative z-10 max-w-6xl mx-auto space-y-8">
@@ -235,15 +235,15 @@ export default function SettingsView() {
                     className="space-y-2"
                 >
                     <div className="flex items-center gap-3">
-                        <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg shadow-indigo-200/50">
+                        <div className="p-3 bg-white/5 border border-white/10 rounded-2xl shadow-lg">
                             <SparklesIcon className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
-                                Settings
+                            <h1 className="text-3xl lg:text-4xl font-black text-white tracking-tighter uppercase">
+                                System Settings
                             </h1>
-                            <p className="text-sm text-gray-500 font-medium mt-1">
-                                Manage your account preferences and configurations
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">
+                                Operational Parameters & Node Configuration
                             </p>
                         </div>
                     </div>
@@ -256,7 +256,7 @@ export default function SettingsView() {
                     transition={{ duration: 0.5, delay: 0.1 }}
                     className="relative"
                 >
-                    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide bg-white/60 backdrop-blur-xl p-2 rounded-3xl border border-white/60 shadow-lg shadow-gray-200/50">
+                    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide bg-white/5 backdrop-blur-xl p-2 rounded-3xl border border-white/10 shadow-lg shadow-black/50">
                         {tabs.map((tab, index) => (
                             <motion.button
                                 key={tab.id}
@@ -264,9 +264,9 @@ export default function SettingsView() {
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.3, delay: index * 0.05 }}
-                                className={`relative flex items-center gap-2 px-6 py-3.5 rounded-2xl text-sm font-bold transition-all whitespace-nowrap ${activeTab === tab.id
-                                    ? 'text-white shadow-lg shadow-indigo-200/50 scale-105'
-                                    : 'text-gray-600 hover:bg-white/80 hover:text-gray-900'
+                                className={`relative flex items-center gap-2 px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab.id
+                                    ? 'text-black scale-105'
+                                    : 'text-gray-500 hover:bg-white/5 hover:text-white'
                                     }`}
                             >
                                 <tab.icon className={`w-5 h-5 transition-transform ${activeTab === tab.id ? 'scale-110' : ''}`} />
@@ -274,7 +274,7 @@ export default function SettingsView() {
                                 {activeTab === tab.id && (
                                     <motion.div
                                         layoutId="activeTab"
-                                        className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl -z-10"
+                                        className="absolute inset-0 bg-white rounded-2xl -z-10"
                                         transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                                     />
                                 )}
@@ -294,9 +294,9 @@ export default function SettingsView() {
                         {/* Profile Settings */}
                         {activeTab === 'profile' && (
                             <div className="space-y-6">
-                                <div className="bg-white/80 backdrop-blur-xl p-8 lg:p-10 rounded-3xl border border-white/60 shadow-xl shadow-gray-200/50 relative overflow-hidden">
+                                <div className="bg-white/5 backdrop-blur-xl p-8 lg:p-10 rounded-3xl border border-white/10 shadow-xl shadow-black/50 relative overflow-hidden">
                                     {/* Decorative gradient */}
-                                    <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-indigo-100/40 to-purple-100/40 rounded-full -translate-y-1/2 translate-x-1/3 blur-2xl"></div>
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3 blur-2xl"></div>
 
                                     <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-start">
                                         {/* Avatar Section */}
@@ -312,11 +312,11 @@ export default function SettingsView() {
                                                 className="relative group/avatar cursor-pointer"
                                                 onClick={() => fileInputRef.current?.click()}
                                             >
-                                                <div className="w-40 h-40 rounded-3xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center text-5xl font-bold text-indigo-600 shadow-xl overflow-hidden ring-4 ring-white">
+                                                <div className="w-40 h-40 rounded-3xl bg-white/5 flex items-center justify-center text-5xl font-black text-white shadow-xl overflow-hidden ring-4 ring-white/10">
                                                     {uploadingImage ? (
                                                         <div className="flex flex-col items-center gap-2">
-                                                            <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                                                            <span className="text-xs font-bold text-indigo-600">{uploadProgress}%</span>
+                                                            <div className="w-10 h-10 border-4 border-white/10 border-t-white rounded-full animate-spin"></div>
+                                                            <span className="text-[10px] font-bold text-white">{uploadProgress}%</span>
                                                         </div>
                                                     ) : profileImage ? (
                                                         <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
@@ -337,12 +337,12 @@ export default function SettingsView() {
                                         {/* Form Section */}
                                         <div className="flex-1 w-full space-y-6">
                                             <div className="flex items-center justify-between">
-                                                <h3 className="text-2xl font-bold text-gray-900">Personal Information</h3>
+                                                <h3 className="text-xl font-black text-white uppercase tracking-widest">Identify Profile</h3>
                                                 <button
                                                     onClick={() => setIsEditing(!isEditing)}
                                                     className={`p-3 rounded-xl transition-all ${isEditing
-                                                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-200/50'
-                                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                                        ? 'bg-white text-black shadow-lg shadow-white/10'
+                                                        : 'bg-white/5 text-gray-500 hover:bg-white/10 hover:text-white'
                                                         }`}
                                                 >
                                                     <PencilIcon className="w-5 h-5" />
@@ -351,22 +351,22 @@ export default function SettingsView() {
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div className="space-y-2">
-                                                    <label className="text-sm font-semibold text-gray-700">Full Name</label>
+                                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Full Name</label>
                                                     <input
                                                         type="text"
                                                         disabled={!isEditing}
                                                         value={name}
                                                         onChange={(e) => setName(e.target.value)}
-                                                        className="w-full px-4 py-3.5 bg-gray-50 border-2 border-transparent focus:border-indigo-500 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:bg-white text-gray-900 font-medium transition-all disabled:text-gray-900 disabled:cursor-default"
+                                                        className="w-full px-4 py-3.5 bg-white/5 border-2 border-transparent focus:border-white/20 rounded-xl focus:ring-4 focus:ring-white/5 focus:bg-white/10 text-white font-bold transition-all disabled:opacity-50 disabled:cursor-default"
                                                     />
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <label className="text-sm font-semibold text-gray-700">Email Address</label>
+                                                    <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Email Address</label>
                                                     <input
                                                         type="email"
                                                         disabled={true}
                                                         value={email}
-                                                        className="w-full px-4 py-3.5 bg-gray-50 border-2 border-transparent rounded-xl text-gray-900 font-medium cursor-default"
+                                                        className="w-full px-4 py-3.5 bg-white/5 border-2 border-transparent rounded-xl text-white font-bold opacity-50 cursor-default"
                                                     />
                                                 </div>
                                             </div>
@@ -379,24 +379,24 @@ export default function SettingsView() {
                                                 >
                                                     <button
                                                         onClick={() => setIsEditing(false)}
-                                                        className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all"
+                                                        className="px-6 py-3 bg-white/5 text-gray-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"
                                                     >
                                                         Cancel
                                                     </button>
                                                     <button
                                                         onClick={handleUpdateProfile}
                                                         disabled={saving}
-                                                        className="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-semibold hover:shadow-xl hover:shadow-indigo-200/50 hover:-translate-y-0.5 transition-all disabled:opacity-70 flex items-center gap-2"
+                                                        className="px-8 py-3 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 hover:-translate-y-0.5 transition-all disabled:opacity-70 flex items-center gap-2"
                                                     >
                                                         {saving ? (
                                                             <>
-                                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
                                                                 <span>Saving...</span>
                                                             </>
                                                         ) : (
                                                             <>
                                                                 <CheckIcon className="w-5 h-5" />
-                                                                <span>Save Changes</span>
+                                                                <span>Update Node</span>
                                                             </>
                                                         )}
                                                     </button>
@@ -411,33 +411,33 @@ export default function SettingsView() {
                         {/* Payment Gateway Settings */}
                         {activeTab === 'payment' && (
                             <div className="space-y-6">
-                                <div className="bg-white/80 backdrop-blur-xl p-8 lg:p-10 rounded-3xl border border-white/60 shadow-xl shadow-gray-200/50">
-                                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+                                <div className="bg-white/5 backdrop-blur-xl p-8 lg:p-10 rounded-3xl border border-white/10 shadow-xl shadow-black/50">
+                                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-10">
                                         <div className="flex items-center gap-4">
-                                            <div className="p-4 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-lg shadow-emerald-200/50">
+                                            <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
                                                 <BanknotesIcon className="h-8 w-8 text-white" />
                                             </div>
                                             <div>
-                                                <h3 className="text-2xl font-bold text-gray-900">Razorpay Integration</h3>
-                                                <p className="text-sm text-gray-500 font-medium mt-1">Configure your payment gateway</p>
+                                                <h3 className="text-xl font-black text-white uppercase tracking-widest">Razorpay Matrix</h3>
+                                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Configure payment throughput</p>
                                             </div>
                                         </div>
-                                        <div className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 ${hasRazorpayConfig
-                                            ? 'bg-emerald-50 border-emerald-200'
-                                            : 'bg-gray-50 border-gray-200'
+                                        <div className={`flex items-center gap-2 px-6 py-2 rounded-full border-2 ${hasRazorpayConfig
+                                            ? 'bg-emerald-500/10 border-emerald-500/20'
+                                            : 'bg-white/5 border-white/10'
                                             }`}>
-                                            <div className={`w-2.5 h-2.5 rounded-full ${hasRazorpayConfig ? 'bg-emerald-500 animate-pulse' : 'bg-gray-300'}`}></div>
-                                            <span className={`text-xs font-bold ${hasRazorpayConfig ? 'text-emerald-700' : 'text-gray-500'}`}>
-                                                {hasRazorpayConfig ? 'Connected' : 'Not Configured'}
+                                            <div className={`w-2 h-2 rounded-full ${hasRazorpayConfig ? 'bg-emerald-500 animate-pulse' : 'bg-gray-500'}`}></div>
+                                            <span className={`text-[10px] font-black uppercase tracking-widest ${hasRazorpayConfig ? 'text-emerald-400' : 'text-gray-500'}`}>
+                                                {hasRazorpayConfig ? 'Protocol Active' : 'Offline'}
                                             </span>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-6">
+                                    <div className="space-y-8">
                                         <div className="space-y-2">
-                                            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                                            <label className="flex items-center gap-2 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                                                 API Key ID
-                                                <QuestionMarkCircleIcon className="h-4 w-4 text-gray-400 cursor-help" title="Found in Razorpay Dashboard > Settings > API Keys" />
+                                                <QuestionMarkCircleIcon className="h-4 w-4 text-gray-600 cursor-help" />
                                             </label>
                                             <div className="relative">
                                                 <input
@@ -445,7 +445,7 @@ export default function SettingsView() {
                                                     value={razorpayKeyId}
                                                     onChange={(e) => setRazorpayKeyId(e.target.value)}
                                                     placeholder="rzp_live_XXXXXXXXXXXX"
-                                                    className="w-full px-4 py-3.5 pr-12 bg-gray-50 border-2 border-transparent focus:border-indigo-500 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:bg-white text-gray-900 font-mono font-medium transition-all"
+                                                    className="w-full px-4 py-3.5 pr-12 bg-white/5 border-2 border-transparent focus:border-white/20 rounded-xl focus:ring-4 focus:ring-white/5 focus:bg-white/10 text-white font-mono font-bold transition-all"
                                                 />
                                                 {razorpayKeyId && (
                                                     <button
@@ -498,21 +498,21 @@ export default function SettingsView() {
                                         </div>
                                     </div>
 
-                                    <div className="mt-8 flex justify-end">
+                                    <div className="mt-10 flex justify-end">
                                         <button
                                             onClick={handleUpdatePaymentConfig}
                                             disabled={savingPayment}
-                                            className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-semibold hover:shadow-xl hover:shadow-emerald-200/50 hover:-translate-y-0.5 transition-all disabled:opacity-70 flex items-center gap-2"
+                                            className="px-10 py-5 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-200 hover:-translate-y-0.5 transition-all disabled:opacity-70 flex items-center gap-2"
                                         >
                                             {savingPayment ? (
                                                 <>
-                                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                                    <span>Saving Configuration...</span>
+                                                    <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                                                    <span>Initializing...</span>
                                                 </>
                                             ) : (
                                                 <>
                                                     <BoltIcon className="h-5 w-5" />
-                                                    <span>Save Configuration</span>
+                                                    <span>Authorize Protocol</span>
                                                 </>
                                             )}
                                         </button>
@@ -520,29 +520,29 @@ export default function SettingsView() {
                                 </div>
 
                                 {/* Help Documentation */}
-                                <div className="bg-white/80 backdrop-blur-xl p-8 rounded-3xl border border-white/60 shadow-xl shadow-gray-200/50">
+                                <div className="bg-white/5 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-xl shadow-black/50">
                                     <div className="flex items-center gap-3 mb-6">
-                                        <QuestionMarkCircleIcon className="h-6 w-6 text-indigo-600" />
-                                        <h4 className="text-xl font-bold text-gray-900">Quick Links</h4>
+                                        <QuestionMarkCircleIcon className="h-6 w-6 text-white" />
+                                        <h4 className="text-lg font-black text-white uppercase tracking-widest">Operational Support</h4>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <a
                                             href="https://dashboard.razorpay.com/app/keys"
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="p-5 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl flex items-center justify-between group hover:shadow-lg hover:-translate-y-1 transition-all border-2 border-transparent hover:border-indigo-200"
+                                            className="p-6 bg-white/5 rounded-2xl flex items-center justify-between group hover:bg-white/10 transition-all border border-white/10"
                                         >
-                                            <span className="font-semibold text-sm text-gray-700 group-hover:text-indigo-700">Get API Keys</span>
-                                            <ArrowTopRightOnSquareIcon className="h-5 w-5 text-indigo-400 group-hover:text-indigo-600" />
+                                            <span className="font-bold text-[10px] text-gray-400 uppercase tracking-widest group-hover:text-white transition-colors">Access API Keys</span>
+                                            <ArrowTopRightOnSquareIcon className="h-5 w-5 text-gray-600 group-hover:text-white transition-colors" />
                                         </a>
                                         <a
                                             href="https://razorpay.com/docs/payments/dashboard/account-settings/api-keys/"
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="p-5 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl flex items-center justify-between group hover:shadow-lg hover:-translate-y-1 transition-all border-2 border-transparent hover:border-emerald-200"
+                                            className="p-6 bg-white/5 rounded-2xl flex items-center justify-between group hover:bg-white/10 transition-all border border-white/10"
                                         >
-                                            <span className="font-semibold text-sm text-gray-700 group-hover:text-emerald-700">API Documentation</span>
-                                            <ArrowTopRightOnSquareIcon className="h-5 w-5 text-emerald-400 group-hover:text-emerald-600" />
+                                            <span className="font-bold text-[10px] text-gray-400 uppercase tracking-widest group-hover:text-white transition-colors">Matrix Reference</span>
+                                            <ArrowTopRightOnSquareIcon className="h-5 w-5 text-gray-600 group-hover:text-white transition-colors" />
                                         </a>
                                     </div>
                                 </div>
@@ -553,22 +553,22 @@ export default function SettingsView() {
                         {activeTab === 'security' && (
                             <div className="space-y-6">
                                 {/* Danger Zone */}
-                                <div className="bg-gradient-to-br from-red-50 to-rose-50 p-8 lg:p-10 rounded-3xl border-2 border-red-100 shadow-xl shadow-red-100/50">
+                                <div className="bg-red-500/5 p-8 lg:p-10 rounded-3xl border-2 border-red-500/10 shadow-xl shadow-red-900/10">
                                     <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                                         <div className="flex items-center gap-6">
-                                            <div className="h-16 w-16 bg-gradient-to-br from-red-500 to-rose-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-200/50">
-                                                <ExclamationTriangleIcon className="h-8 w-8 text-white" />
+                                            <div className="h-16 w-16 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center shadow-lg">
+                                                <ExclamationTriangleIcon className="h-8 w-8 text-red-500" />
                                             </div>
                                             <div className="text-center md:text-left">
-                                                <p className="text-xl font-bold text-gray-900">Delete Account</p>
-                                                <p className="text-gray-600 font-medium mt-1">Permanently remove your account and all data</p>
+                                                <p className="text-xl font-black text-white uppercase tracking-widest">Terminal Termination</p>
+                                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mt-2">Permanently purge all node data and credentials</p>
                                             </div>
                                         </div>
                                         <button
                                             onClick={() => setShowDeleteModal(true)}
-                                            className="px-8 py-4 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl font-semibold hover:shadow-xl hover:shadow-red-200/50 hover:-translate-y-0.5 transition-all whitespace-nowrap"
+                                            className="px-8 py-4 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all whitespace-nowrap"
                                         >
-                                            Delete Account
+                                            Erase Account
                                         </button>
                                     </div>
                                 </div>
@@ -588,39 +588,38 @@ export default function SettingsView() {
             {/* Delete Confirmation Modal */}
             <AnimatePresence>
                 {showDeleteModal && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setShowDeleteModal(false)}
-                            className="absolute inset-0 bg-gray-900/60 backdrop-blur-md"
-                        />
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="relative bg-white w-full max-w-lg rounded-3xl p-10 text-center shadow-2xl"
+                            className="relative bg-[#0a0a0a] w-full max-w-lg rounded-[2.5rem] p-10 text-center shadow-2xl border border-white/10 overflow-hidden"
                         >
-                            <div className="h-20 w-20 bg-gradient-to-br from-red-100 to-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-red-100">
-                                <ExclamationTriangleIcon className="h-10 w-10 text-red-600" />
+                            <div className="absolute top-0 right-0 p-10 opacity-5">
+                                <ExclamationTriangleIcon className="h-40 w-40 text-red-500" />
                             </div>
-                            <h3 className="text-3xl font-bold text-gray-900 mb-4">Delete Account?</h3>
-                            <p className="text-gray-600 font-medium leading-relaxed mb-8">
-                                This action is <span className="text-red-600 font-bold">permanent and cannot be undone</span>. All your data, including channels, products, and analytics will be permanently deleted.
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                <button
-                                    onClick={() => setShowDeleteModal(false)}
-                                    className="flex-1 py-4 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    className="flex-1 py-4 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-xl font-semibold hover:shadow-xl hover:shadow-red-200/50 transition-all"
-                                >
-                                    Confirm Delete
-                                </button>
+                            
+                            <div className="relative z-10">
+                                <div className="h-20 w-20 bg-red-500/10 border border-red-500/20 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl">
+                                    <ExclamationTriangleIcon className="h-10 w-10 text-red-500" />
+                                </div>
+                                <h3 className="text-3xl font-black text-white mb-4 tracking-tight uppercase">Purge Account?</h3>
+                                <p className="text-gray-400 font-medium leading-relaxed mb-10">
+                                    This operation is <span className="text-red-500 font-bold">permanent & irreversible</span>. All node data, including encrypted archives and historical records, will be scrubbed from the network.
+                                </p>
+                                <div className="flex flex-col gap-4">
+                                    <button
+                                        className="w-full py-5 bg-red-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-700 transition-all shadow-xl shadow-red-900/20 active:scale-95"
+                                    >
+                                        Confirm Termination
+                                    </button>
+                                    <button
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="w-full py-5 bg-white/5 text-gray-500 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:text-white transition-all shadow-sm"
+                                    >
+                                        Abort Request
+                                    </button>
+                                </div>
                             </div>
                         </motion.div>
                     </div>

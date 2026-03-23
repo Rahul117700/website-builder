@@ -726,8 +726,8 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
   // Extract colors with proper fallbacks - prioritize custom theme over default theme
   const primaryColor = customTheme.primary || theme?.colors?.primary || '#6366f1';
   const secondaryColor = customTheme.secondary || theme?.colors?.secondary || '#8b5cf6';
-  // For Minimal template, default to white background if not set
-  const backgroundColor = '#141414'; // Forced dark theme
+  // For Minimal template, default to black background if not set
+  const backgroundColor = '#000000'; // Forced pure black theme
   const defaultTextColor = '#ffffff'; // Simple constant since background is hardcoded to dark
   const textColor = '#ffffff'; // Forced dark theme text
   // Professional font stack - Inter, Roboto, system fonts
@@ -1127,10 +1127,10 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
     }
   };
 
-  // Creative Template - Uses white background with black text for visibility
+  // Creative Template - Uses black background
   const renderCreativeTemplate = () => {
     return (
-      <div className="min-h-screen bg-[#141414]">
+      <div className="min-h-screen bg-black text-white">
         {/* Hero Section */}
         <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#141414] via-[#1a1a1a] to-[#141414]">
           {/* Background */}
@@ -1481,9 +1481,14 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
     const averageRating = 4.5; // Mock rating - can be replaced with actual rating system
     const ratingCount = totalPurchases || 0;
 
+    // Get theme colors (enforced dark theme)
+    const primaryColor = (channel as any)?.template?.defaultTheme?.primaryColor || '#e50914';
+    const backgroundColor = '#000000';
+    const textColor = '#ffffff';
+
     // Get seller info - only from user profile, not channel upload
     const sellerImage = channel.user?.image;
-    const sellerName = channel.user?.name || 'Seller';
+    const sellerName = channel.user?.name || channel.name || 'Creator';
 
     // Mock recent buyers (would fetch from purchases in real implementation)
     const recentBuyers = [
@@ -4059,33 +4064,42 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
             )}
 
             {/* Newsletter / Lead Capture Section */}
-            <section className="py-24 relative overflow-hidden bg-[#e50914]">
-              <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black opacity-50" />
+            <section className="py-24 relative overflow-hidden bg-black border-y border-[#1a1a1a]">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#050505] to-black opacity-90" />
               <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
-                <h2 className="text-3xl md:text-4xl font-black text-white mb-4" style={{ fontFamily: headingFont }}>
+                <h2 className="text-3xl md:text-5xl font-black text-white mb-6 tracking-tight uppercase" style={{ fontFamily: headingFont }}>
                   Join the Community
                 </h2>
-                <p className="text-gray-400 mb-8 text-lg max-w-2xl mx-auto">
+                <p className="text-gray-400 mb-10 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
                   Get exclusive updates, new product announcements, and special offers directly to your inbox.
                 </p>
 
-                <form className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto" onSubmit={(e) => e.preventDefault()}>
+                <form className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto" onSubmit={(e) => e.preventDefault()}>
                   <input
                     type="email"
                     placeholder="Enter your email address"
-                    className="flex-1 px-6 py-4 rounded-xl bg-[#141414]/10 border border-white/20 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-[#141414]/20 transition-all"
+                    className="flex-1 px-8 py-5 rounded-2xl bg-[#0a0a0a] border border-[#222] text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:bg-[#0d0d0d] transition-all shadow-2xl"
                   />
                   <button
                     type="submit"
-                    className="px-8 py-4 rounded-xl font-bold text-white bg-primary hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 hover:scale-105 active:scale-95"
+                    className="px-10 py-5 rounded-2xl font-black text-white bg-primary hover:bg-primary/90 transition-all shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)] hover:scale-105 active:scale-95 uppercase tracking-widest text-sm"
                     style={{ backgroundColor: primaryColor }}
                   >
                     Subscribe
                   </button>
                 </form>
-                <p className="text-xs text-gray-400 mt-4">
-                  We respect your privacy. Unsubscribe at any time.
-                </p>
+                <div className="flex items-center justify-center gap-6 mt-10">
+                  <div className="flex -space-x-3 overflow-hidden">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="inline-block h-10 w-10 rounded-full ring-2 ring-black bg-[#111] overflow-hidden">
+                         <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-950 flex items-center justify-center text-[10px] font-bold text-gray-500">U{i}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">
+                    Join <span className="text-white">5,000+</span> members
+                  </p>
+                </div>
               </div>
             </section>
 
@@ -4215,7 +4229,7 @@ export default function TemplateRenderer({ channel, isEditing = false, onAddProd
   // Minimalist Shop - E-commerce focused with product grid
   const renderMinimalShopLayout = () => {
     return (
-      <div className="min-h-screen bg-[#1a1a1a]">
+      <div className="min-h-screen bg-black">
         {/* Shop Header */}
         <header className="sticky top-0 z-50 bg-[#141414] shadow-sm">
           <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
